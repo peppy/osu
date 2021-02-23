@@ -8,7 +8,6 @@ using osu.Framework.Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.UserInterface;
-using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Framework.Testing;
 using osu.Game.Beatmaps;
@@ -151,11 +150,11 @@ namespace osu.Game.Tests.Visual.Collections
                     }
                 );
             });
-            AddStep("add two collections with same name", () => manager.Collections.AddRange(new[]
+            AddStep("add two collections with same name", () =>
             {
-                new BeatmapCollection { Name = { Value = "1" } },
-                new BeatmapCollection { Name = { Value = "1" }, Beatmaps = { beatmapManager.GetAllUsableBeatmapSets().First().Beatmaps[0] } },
-            }));
+                manager.Add(new BeatmapCollection { Name = { Value = "1" } });
+                manager.Add(new BeatmapCollection { Name = { Value = "1" }, Beatmaps = { beatmapManager.GetAllUsableBeatmapSets().First().Beatmaps[0] } });
+            });
         }
 
         [Test]
@@ -221,11 +220,12 @@ namespace osu.Game.Tests.Visual.Collections
         [Test]
         public void TestCollectionRenamedExternal()
         {
-            AddStep("add two collections", () =>
-            {
-                manager.Add(new BeatmapCollection { Name = { Value = "1" } });
-                manager.Add(new BeatmapCollection { Name = { Value = "2" } });
-            });
+            // collections need to be added one at a time because these test rely on order of drawable items which are loaded asynchronously.
+            AddStep("add one collection", () => manager.Add(new BeatmapCollection { Name = { Value = "1" } }));
+            assertCollectionCount(1);
+
+            AddStep("add second collection", () => manager.Add(new BeatmapCollection { Name = { Value = "2" } }));
+            assertCollectionCount(2);
 
             AddStep("change first collection name", () => manager.Collections[0].Name.Value = "First");
 
@@ -235,12 +235,11 @@ namespace osu.Game.Tests.Visual.Collections
         [Test]
         public void TestCollectionRenamedOnTextChange()
         {
-            AddStep("add two collections", () =>
-            {
-                manager.Add(new BeatmapCollection { Name = { Value = "1" } });
-                manager.Add(new BeatmapCollection { Name = { Value = "2" } });
-            });
+            // collections need to be added one at a time because these test rely on order of drawable items which are loaded asynchronously.
+            AddStep("add one collection", () => manager.Add(new BeatmapCollection { Name = { Value = "1" } }));
+            assertCollectionCount(1);
 
+            AddStep("add second collection", () => manager.Add(new BeatmapCollection { Name = { Value = "2" } }));
             assertCollectionCount(2);
 
             AddStep("change first collection name", () => dialog.ChildrenOfType<TextBox>().First().Text = "First");
