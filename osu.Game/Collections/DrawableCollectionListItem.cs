@@ -129,7 +129,7 @@ namespace osu.Game.Collections
                     return;
 
                 // Add the new collection and disable our placeholder. If all text is removed, the placeholder should not show back again.
-                collectionManager?.Collections.Add(collection);
+                collectionManager?.Add(collection);
                 textBox.PlaceholderText = string.Empty;
 
                 // When this item changes from placeholder to non-placeholder (via changing containers), its textbox will lose focus, so it needs to be re-focused.
@@ -233,7 +233,7 @@ namespace osu.Game.Collections
                 return true;
             }
 
-            private void deleteCollection() => collectionManager?.Collections.Remove(collection);
+            private void deleteCollection() => collectionManager?.Remove(collection);
         }
     }
 }

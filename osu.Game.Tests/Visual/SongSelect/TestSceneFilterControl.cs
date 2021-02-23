@@ -54,7 +54,7 @@ namespace osu.Game.Tests.Visual.SongSelect
         [SetUp]
         public void SetUp() => Schedule(() =>
         {
-            collectionManager.Collections.Clear();
+            collectionManager.DeleteAll();
 
             Child = control = new FilterControl
             {
@@ -75,8 +75,8 @@ namespace osu.Game.Tests.Visual.SongSelect
         [Test]
         public void TestCollectionAddedToDropdown()
         {
-            AddStep("add collection", () => collectionManager.Collections.Add(new BeatmapCollection { Name = { Value = "1" } }));
-            AddStep("add collection", () => collectionManager.Collections.Add(new BeatmapCollection { Name = { Value = "2" } }));
+            AddStep("add collection", () => collectionManager.Add(new BeatmapCollection { Name = { Value = "1" } }));
+            AddStep("add collection", () => collectionManager.Add(new BeatmapCollection { Name = { Value = "2" } }));
             assertCollectionDropdownContains("1");
             assertCollectionDropdownContains("2");
         }
@@ -84,9 +84,9 @@ namespace osu.Game.Tests.Visual.SongSelect
         [Test]
         public void TestCollectionRemovedFromDropdown()
         {
-            AddStep("add collection", () => collectionManager.Collections.Add(new BeatmapCollection { Name = { Value = "1" } }));
-            AddStep("add collection", () => collectionManager.Collections.Add(new BeatmapCollection { Name = { Value = "2" } }));
-            AddStep("remove collection", () => collectionManager.Collections.RemoveAt(0));
+            AddStep("add collection", () => collectionManager.Add(new BeatmapCollection { Name = { Value = "1" } }));
+            AddStep("add collection", () => collectionManager.Add(new BeatmapCollection { Name = { Value = "2" } }));
+            AddStep("remove first collection", () => collectionManager.Remove(collectionManager.Collections[0]));
 
             assertCollectionDropdownContains("1", false);
             assertCollectionDropdownContains("2");
@@ -95,7 +95,7 @@ namespace osu.Game.Tests.Visual.SongSelect
         [Test]
         public void TestCollectionRenamed()
         {
-            AddStep("add collection", () => collectionManager.Collections.Add(new BeatmapCollection { Name = { Value = "1" } }));
+            AddStep("add collection", () => collectionManager.Add(new BeatmapCollection { Name = { Value = "1" } }));
             AddStep("select collection", () =>
             {
                 var dropdown = control.ChildrenOfType<CollectionFilterDropdown>().Single();
@@ -122,7 +122,7 @@ namespace osu.Game.Tests.Visual.SongSelect
         public void TestCollectionFilterHasAddButton()
         {
             addExpandHeaderStep();
-            AddStep("add collection", () => collectionManager.Collections.Add(new BeatmapCollection { Name = { Value = "1" } }));
+            AddStep("add collection", () => collectionManager.Add(new BeatmapCollection { Name = { Value = "1" } }));
             AddStep("hover collection", () => InputManager.MoveMouseTo(getAddOrRemoveButton(1)));
             AddAssert("collection has add button", () => getAddOrRemoveButton(1).IsPresent);
         }
@@ -132,7 +132,7 @@ namespace osu.Game.Tests.Visual.SongSelect
         {
             addExpandHeaderStep();
 
-            AddStep("add collection", () => collectionManager.Collections.Add(new BeatmapCollection { Name = { Value = "1" } }));
+            AddStep("add collection", () => collectionManager.Add(new BeatmapCollection { Name = { Value = "1" } }));
 
             AddStep("select available beatmap", () => Beatmap.Value = beatmapManager.GetWorkingBeatmap(beatmapManager.GetAllUsableBeatmapSets().First().Beatmaps[0]));
             AddAssert("button enabled", () => getAddOrRemoveButton(1).Enabled.Value);
@@ -148,7 +148,7 @@ namespace osu.Game.Tests.Visual.SongSelect
 
             AddStep("select available beatmap", () => Beatmap.Value = beatmapManager.GetWorkingBeatmap(beatmapManager.GetAllUsableBeatmapSets().First().Beatmaps[0]));
 
-            AddStep("add collection", () => collectionManager.Collections.Add(new BeatmapCollection { Name = { Value = "1" } }));
+            AddStep("add collection", () => collectionManager.Add(new BeatmapCollection { Name = { Value = "1" } }));
             AddAssert("button is plus", () => getAddOrRemoveButton(1).Icon.Equals(FontAwesome.Solid.PlusSquare));
 
             AddStep("add beatmap to collection", () => collectionManager.Collections[0].Beatmaps.Add(Beatmap.Value.BeatmapInfo));
@@ -165,7 +165,7 @@ namespace osu.Game.Tests.Visual.SongSelect
 
             AddStep("select available beatmap", () => Beatmap.Value = beatmapManager.GetWorkingBeatmap(beatmapManager.GetAllUsableBeatmapSets().First().Beatmaps[0]));
 
-            AddStep("add collection", () => collectionManager.Collections.Add(new BeatmapCollection { Name = { Value = "1" } }));
+            AddStep("add collection", () => collectionManager.Add(new BeatmapCollection { Name = { Value = "1" } }));
             AddAssert("button is plus", () => getAddOrRemoveButton(1).Icon.Equals(FontAwesome.Solid.PlusSquare));
 
             addClickAddOrRemoveButtonStep(1);
@@ -182,7 +182,7 @@ namespace osu.Game.Tests.Visual.SongSelect
         {
             addExpandHeaderStep();
 
-            AddStep("add collection", () => collectionManager.Collections.Add(new BeatmapCollection { Name = { Value = "1" } }));
+            AddStep("add collection", () => collectionManager.Add(new BeatmapCollection { Name = { Value = "1" } }));
             AddStep("select collection", () =>
             {
                 InputManager.MoveMouseTo(getCollectionDropdownItems().ElementAt(1));

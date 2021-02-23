@@ -38,7 +38,9 @@ namespace osu.Game.Collections
         private const string database_name = "collection.db";
         private const string database_backup_name = "collection.db.bak";
 
-        public readonly BindableList<BeatmapCollection> Collections = new BindableList<BeatmapCollection>();
+        public IBindableList<BeatmapCollection> Collections => collections;
+
+        private readonly BindableList<BeatmapCollection> collections = new BindableList<BeatmapCollection>();
 
         [Resolved]
         private BeatmapManager beatmaps { get; set; }
@@ -140,10 +142,10 @@ namespace osu.Game.Collections
 
             PostNotification?.Invoke(notification);
 
-            var collections = readCollections(stream, notification);
-            await importCollections(collections).ConfigureAwait(false);
+            var newCollections = readCollections(stream, notification);
+            await importCollections(newCollections).ConfigureAwait(false);
 
-            notification.CompletionText = $"Imported {collections.Count} collections";
+            notification.CompletionText = $"Imported {newCollections.Count} collections";
             notification.State = ProgressNotificationState.Completed;
         }
 
@@ -155,18 +157,7 @@ namespace osu.Game.Collections
             {
                 try
                 {
-                    foreach (var newCol in newCollections)
-                    {
-                        var existing = Collections.FirstOrDefault(c => c.Name.Value == newCol.Name.Value);
-                        if (existing == null)
-                            Collections.Add(existing = new BeatmapCollection { Name = { Value = newCol.Name.Value } });
-
-                        foreach (var newBeatmap in newCol.Beatmaps)
-                        {
-                            if (!existing.Beatmaps.Contains(newBeatmap))
-                                existing.Beatmaps.Add(newBeatmap);
-                        }
-                    }
+                    foreach (var newCol in newCollections) Add(newCol);
 
                     tcs.SetResult(true);
                 }
@@ -239,7 +230,7 @@ namespace osu.Game.Collections
 
         public void DeleteAll()
         {
-            Collections.Clear();
+            collections.Clear();
             PostNotification?.Invoke(new ProgressCompletionNotification { Text = "Deleted all collections!" });
         }
 
@@ -335,6 +326,35 @@ namespace osu.Game.Collections
         {
             base.Dispose(isDisposing);
             save();
+        }
+
+        /// <summary>
+        /// Add a new collection to the database. If a collection exists with the provided name, the new collection will be merged into the existing one (and not added).
+        /// </summary>
+        /// <param name="collection">The collection to import.</param>
+        public void Add(BeatmapCollection collection)
+        {
+            var existing = Collections.FirstOrDefault(c => c.Name.Value == collection.Name.Value);
+
+            if (existing != null)
+            {
+                foreach (var newBeatmap in collection.Beatmaps)
+                {
+                    if (!existing.Beatmaps.Contains(newBeatmap))
+                        existing.Beatmaps.Add(newBeatmap);
+                }
+            }
+            else
+                collections.Add(collection);
+        }
+
+        /// <summary>
+        /// Remove the specified collection from the database.
+        /// </summary>
+        /// <param name="collection">The collection to remove.</param>
+        public void Remove(BeatmapCollection collection)
+        {
+            collections.Remove(collection);
         }
     }
 }
