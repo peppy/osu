@@ -133,7 +133,19 @@ namespace osu.Game.Configuration
                         break;
 
                     case IBindable bindable:
-                        var dropdownType = typeof(SettingsEnumDropdown<>).MakeGenericType(bindable.GetType().GetGenericArguments()[0]);
+                        Type dropdownType = null;
+
+                        try
+                        {
+                            dropdownType = typeof(SettingsEnumDropdown<>).MakeGenericType(bindable.GetType().GetGenericArguments()[0]);
+                        }
+                        catch
+                        {
+                        }
+
+                        if (dropdownType == null)
+                            break;
+
                         var dropdown = (Drawable)Activator.CreateInstance(dropdownType);
 
                         dropdownType.GetProperty(nameof(SettingsDropdown<object>.LabelText))?.SetValue(dropdown, attr.Label);
@@ -144,6 +156,7 @@ namespace osu.Game.Configuration
 
                         break;
 
+                    // TODO: this is a wtf
                     default:
                         throw new InvalidOperationException($"{nameof(SettingSourceAttribute)} was attached to an unsupported type ({value})");
                 }

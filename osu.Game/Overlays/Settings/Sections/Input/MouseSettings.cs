@@ -56,7 +56,9 @@ namespace osu.Game.Overlays.Settings.Sections.Input
                 new SettingsCheckbox
                 {
                     LabelText = "Map absolute input to window",
+#pragma warning disable 618
                     Current = config.GetBindable<bool>(FrameworkSetting.MapAbsoluteInputToWindow)
+#pragma warning restore 618
                 },
                 confineMouseModeSetting = new SettingsEnumDropdown<OsuConfineMouseMode>
                 {

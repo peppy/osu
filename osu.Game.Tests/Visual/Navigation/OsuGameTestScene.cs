@@ -64,7 +64,9 @@ namespace osu.Game.Tests.Visual.Navigation
 
                 // see MouseSettings
                 var frameworkConfig = host.Dependencies.Get<FrameworkConfigManager>();
+#pragma warning disable 618
                 frameworkConfig.GetBindable<double>(FrameworkSetting.CursorSensitivity).Disabled = false;
+#pragma warning restore 618
 
                 CreateGame();
             });
