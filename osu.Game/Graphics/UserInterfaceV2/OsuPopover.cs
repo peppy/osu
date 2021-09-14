@@ -25,7 +25,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
 
             Body.Masking = true;
             Body.CornerRadius = 10;
-            Body.Margin = new MarginPadding(10);
+            Body.Margin = new MarginPadding(15);
             Body.EdgeEffect = new EdgeEffectParameters
             {
                 Type = EdgeEffectType.Shadow,
