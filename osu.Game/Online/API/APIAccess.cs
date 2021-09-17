@@ -136,13 +136,25 @@ namespace osu.Game.Online.API
                         // save the username at this point, if the user requested for it to be.
                         config.SetValue(OsuSetting.Username, config.Get<bool>(OsuSetting.SaveUsername) ? ProvidedUsername : string.Empty);
 
-                        if (!authentication.HasValidAccessToken && !authentication.AuthenticateWithLogin(ProvidedUsername, password))
+                        if (!authentication.HasValidAccessToken && !string.IsNullOrEmpty(ProvidedUsername) && !string.IsNullOrEmpty(password))
                         {
-                            //todo: this fails even on network-related issues. we should probably handle those differently.
-                            //NotificationOverlay.ShowMessage("Login failed!");
-                            log.Add(@"Login failed!");
-                            password = null;
-                            authentication.Clear();
+                            try
+                            {
+                                authentication.AuthenticateWithLogin(ProvidedUsername, password);
+                            }
+                            catch (Exception e) // TODO: specifically handle invalid credentials separate from network issues.
+                            {
+                                if (e.Message == "BadRequest")
+                                {
+                                }
+
+                                log.Add(@"Login failed!");
+                                log.Add(e.ToString());
+
+                                password = null;
+                                authentication.Clear();
+                            }
+
                             continue;
                         }
 

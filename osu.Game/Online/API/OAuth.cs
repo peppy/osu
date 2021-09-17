@@ -1,8 +1,10 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
 using System.Diagnostics;
 using System.Net.Http;
+using JetBrains.Annotations;
 using osu.Framework.Bindables;
 
 namespace osu.Game.Online.API
@@ -32,10 +34,10 @@ namespace osu.Game.Online.API
             this.endpoint = endpoint;
         }
 
-        internal bool AuthenticateWithLogin(string username, string password)
+        internal void AuthenticateWithLogin([NotNull] string username, [NotNull] string password)
         {
-            if (string.IsNullOrEmpty(username)) return false;
-            if (string.IsNullOrEmpty(password)) return false;
+            if (username == null) throw new ArgumentNullException(nameof(username));
+            if (password == null) throw new ArgumentNullException(nameof(password));
 
             using (var req = new AccessTokenRequestPassword(username, password)
             {
@@ -45,21 +47,12 @@ namespace osu.Game.Online.API
                 ClientSecret = clientSecret
             })
             {
-                try
-                {
-                    req.Perform();
-                }
-                catch
-                {
-                    return false;
-                }
-
+                req.Perform();
                 Token.Value = req.ResponseObject;
-                return true;
             }
         }
 
-        internal bool AuthenticateWithRefresh(string refresh)
+        internal void AuthenticateWithRefresh(string refresh)
         {
             try
             {
@@ -74,14 +67,12 @@ namespace osu.Game.Online.API
                     req.Perform();
 
                     Token.Value = req.ResponseObject;
-                    return true;
                 }
             }
             catch
             {
                 //todo: potentially only kill the refresh token on certain exception types.
                 Token.Value = null;
-                return false;
             }
         }
 
