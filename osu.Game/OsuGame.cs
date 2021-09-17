@@ -630,6 +630,8 @@ namespace osu.Game
             // todo: all archive managers should be able to be looped here.
             SkinManager.PostNotification = n => Notifications.Post(n);
 
+            API.PostNotification = n => Notifications.Post(n);
+
             BeatmapManager.PostNotification = n => Notifications.Post(n);
             BeatmapManager.PresentImport = items => PresentBeatmap(items.First());
 

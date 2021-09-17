@@ -3,8 +3,10 @@
 
 #nullable enable
 
+using System;
 using System.Threading.Tasks;
 using osu.Framework.Bindables;
+using osu.Game.Overlays.Notifications;
 using osu.Game.Users;
 
 namespace osu.Game.Online.API
@@ -40,9 +42,11 @@ namespace osu.Game.Online.API
         bool IsLoggedIn { get; }
 
         /// <summary>
-        /// The last username provided by the end-user.
-        /// May not be authenticated.
+        /// The last username/email provided by the user when initiating a login.
         /// </summary>
+        /// <remarks>
+        /// Login may not be complete even if this has a value.
+        /// </remarks>
         string ProvidedUsername { get; }
 
         /// <summary>
@@ -96,6 +100,11 @@ namespace osu.Game.Online.API
         /// Log out the current user.
         /// </summary>
         void Logout();
+
+        /// <summary>
+        /// Set an endpoint for notifications to be posted to.
+        /// </summary>
+        Action<Notification> PostNotification { set; }
 
         /// <summary>
         /// Constructs a new <see cref="IHubClientConnector"/>. May be null if not supported.

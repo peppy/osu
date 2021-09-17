@@ -17,6 +17,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Logging;
 using osu.Game.Configuration;
 using osu.Game.Online.API.Requests;
+using osu.Game.Overlays.Notifications;
 using osu.Game.Users;
 
 namespace osu.Game.Online.API
@@ -35,9 +36,8 @@ namespace osu.Game.Online.API
 
         public string WebsiteRootUrl { get; }
 
-        /// <summary>
-        /// The username/email provided by the user when initiating a login.
-        /// </summary>
+        public Action<Notification> PostNotification { protected get; set; }
+
         public string ProvidedUsername { get; private set; }
 
         private string password;
@@ -146,6 +146,10 @@ namespace osu.Game.Online.API
                             {
                                 if (e.Message == "BadRequest")
                                 {
+                                    PostNotification?.Invoke(new SimpleErrorNotification
+                                    {
+                                        Text = "Invalid username or password"
+                                    });
 
                                     password = null;
                                     authentication.Clear();

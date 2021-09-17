@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Game.Overlays.Notifications;
 using osu.Game.Users;
 
 namespace osu.Game.Online.API
@@ -17,6 +18,8 @@ namespace osu.Game.Online.API
             Username = @"Dummy",
             Id = 1001,
         });
+
+        public Action<Notification> PostNotification { get; set; }
 
         public BindableList<User> Friends { get; } = new BindableList<User>();
 
