@@ -146,13 +146,18 @@ namespace osu.Game.Online.API
                             {
                                 if (e.Message == "BadRequest")
                                 {
+
+                                    password = null;
+                                    authentication.Clear();
+                                }
+                                else
+                                {
+                                    failConnectionProcess();
+                                    Thread.Sleep(5000);
                                 }
 
                                 log.Add(@"Login failed!");
                                 log.Add(e.ToString());
-
-                                password = null;
-                                authentication.Clear();
                             }
 
                             continue;
