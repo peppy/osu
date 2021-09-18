@@ -12,7 +12,7 @@ on:
 env:
   DB_USER: root
   DB_HOST: 127.0.0.1
-  DB_PORT: 33306
+  DB_PORT: 3306
   CONCURRENCY: 4
   ALLOW_DOWNLOAD: 1
   SAVE_DOWNLOADED: 1
@@ -40,7 +40,7 @@ jobs:
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
         ports:
-          - 33306:3306
+          - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
