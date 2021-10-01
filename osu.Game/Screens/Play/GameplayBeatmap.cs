@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using osu.Framework.Bindables;
-using osu.Framework.Graphics;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Beatmaps.Timing;
@@ -12,7 +11,7 @@ using osu.Game.Rulesets.Objects;
 
 namespace osu.Game.Screens.Play
 {
-    public class GameplayBeatmap : Component, IBeatmap
+    public class GameplayBeatmap : IBeatmap
     {
         public readonly IBeatmap PlayableBeatmap;
 

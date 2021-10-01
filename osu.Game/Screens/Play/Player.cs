@@ -225,10 +225,9 @@ namespace osu.Game.Screens.Play
 
             InternalChild = GameplayClockContainer = CreateGameplayClockContainer(Beatmap.Value, DrawableRuleset.GameplayStartTime);
 
-            AddInternal(GameplayBeatmap = new GameplayBeatmap(playableBeatmap));
-            AddInternal(screenSuspension = new ScreenSuspensionHandler(GameplayClockContainer));
+            dependencies.CacheAs(GameplayBeatmap = new GameplayBeatmap(playableBeatmap));
 
-            dependencies.CacheAs(GameplayBeatmap);
+            AddInternal(screenSuspension = new ScreenSuspensionHandler(GameplayClockContainer));
 
             var rulesetSkinProvider = new RulesetSkinProvidingContainer(GameplayRuleset, playableBeatmap, Beatmap.Value.Skin);
 
