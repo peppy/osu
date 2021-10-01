@@ -11,45 +11,53 @@ using osu.Game.Rulesets.Objects;
 
 namespace osu.Game.Screens.Play
 {
+    /// <summary>
+    /// A beatmap generally made available by a <see cref="Player"/> instance, exposing the final state (post-conversion, post-mod-application) beatmap that is being used for gameplay.
+    /// </summary>
     public class GameplayBeatmap : IBeatmap
     {
-        public readonly IBeatmap PlayableBeatmap;
-
-        public GameplayBeatmap(IBeatmap playableBeatmap)
-        {
-            PlayableBeatmap = playableBeatmap;
-        }
-
-        public BeatmapInfo BeatmapInfo
-        {
-            get => PlayableBeatmap.BeatmapInfo;
-            set => PlayableBeatmap.BeatmapInfo = value;
-        }
-
-        public BeatmapMetadata Metadata => PlayableBeatmap.Metadata;
-
-        public ControlPointInfo ControlPointInfo
-        {
-            get => PlayableBeatmap.ControlPointInfo;
-            set => PlayableBeatmap.ControlPointInfo = value;
-        }
-
-        public List<BreakPeriod> Breaks => PlayableBeatmap.Breaks;
-
-        public double TotalBreakTime => PlayableBeatmap.TotalBreakTime;
-
-        public IReadOnlyList<HitObject> HitObjects => PlayableBeatmap.HitObjects;
-
-        public IEnumerable<BeatmapStatistic> GetStatistics() => PlayableBeatmap.GetStatistics();
-
-        public double GetMostCommonBeatLength() => PlayableBeatmap.GetMostCommonBeatLength();
-
-        public IBeatmap Clone() => PlayableBeatmap.Clone();
+        private readonly IBeatmap playableBeatmap;
 
         private readonly Bindable<JudgementResult> lastJudgementResult = new Bindable<JudgementResult>();
 
+        public GameplayBeatmap(IBeatmap playableBeatmap)
+        {
+            this.playableBeatmap = playableBeatmap;
+        }
+
+        /// <summary>
+        /// A bindable containing the last judgement result applied to any hit object.
+        /// </summary>
         public IBindable<JudgementResult> LastJudgementResult => lastJudgementResult;
 
+        /// <summary>
+        /// Applies the score change of a <see cref="JudgementResult"/> to this <see cref="GameplayBeatmap"/>.
+        /// </summary>
+        /// <param name="result">The <see cref="JudgementResult"/> to apply.</param>
         public void ApplyResult(JudgementResult result) => lastJudgementResult.Value = result;
+
+        #region Implementation of IBeatmap (delegated to playableBeatmap)
+
+        public BeatmapInfo BeatmapInfo
+        {
+            get => playableBeatmap.BeatmapInfo;
+            set => playableBeatmap.BeatmapInfo = value;
+        }
+
+        public ControlPointInfo ControlPointInfo
+        {
+            get => playableBeatmap.ControlPointInfo;
+            set => playableBeatmap.ControlPointInfo = value;
+        }
+
+        public BeatmapMetadata Metadata => playableBeatmap.Metadata;
+        public List<BreakPeriod> Breaks => playableBeatmap.Breaks;
+        public double TotalBreakTime => playableBeatmap.TotalBreakTime;
+        public IReadOnlyList<HitObject> HitObjects => playableBeatmap.HitObjects;
+        public IEnumerable<BeatmapStatistic> GetStatistics() => playableBeatmap.GetStatistics();
+        public double GetMostCommonBeatLength() => playableBeatmap.GetMostCommonBeatLength();
+        public IBeatmap Clone() => playableBeatmap.Clone();
+
+        #endregion
     }
 }

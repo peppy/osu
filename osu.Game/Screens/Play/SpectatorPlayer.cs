@@ -67,7 +67,7 @@ namespace osu.Game.Screens.Play
             foreach (var frame in bundle.Frames)
             {
                 IConvertibleReplayFrame convertibleFrame = GameplayRuleset.CreateConvertibleReplayFrame();
-                convertibleFrame.FromLegacy(frame, GameplayBeatmap.PlayableBeatmap);
+                convertibleFrame.FromLegacy(frame, GameplayBeatmap);
 
                 var convertedFrame = (ReplayFrame)convertibleFrame;
                 convertedFrame.Time = frame.Time;

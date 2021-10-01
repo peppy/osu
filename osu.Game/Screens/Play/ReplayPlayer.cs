@@ -41,7 +41,7 @@ namespace osu.Game.Screens.Play
             DrawableRuleset?.SetReplayScore(Score);
         }
 
-        protected override Score CreateScore() => createScore(GameplayBeatmap.PlayableBeatmap, Mods.Value);
+        protected override Score CreateScore() => createScore(GameplayBeatmap, Mods.Value);
 
         // Don't re-import replay scores as they're already present in the database.
         protected override Task ImportScore(Score score) => Task.CompletedTask;

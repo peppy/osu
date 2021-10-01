@@ -84,7 +84,7 @@ namespace osu.Game.Tests.Visual
 
             if (autoplayMod != null)
             {
-                DrawableRuleset?.SetReplayScore(autoplayMod.CreateReplayScore(GameplayBeatmap.PlayableBeatmap, Mods.Value));
+                DrawableRuleset?.SetReplayScore(autoplayMod.CreateReplayScore(GameplayBeatmap, Mods.Value));
                 return;
             }
 

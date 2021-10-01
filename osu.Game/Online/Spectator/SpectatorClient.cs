@@ -148,7 +148,7 @@ namespace osu.Game.Online.Spectator
             currentState.RulesetID = score.ScoreInfo.RulesetID;
             currentState.Mods = score.ScoreInfo.Mods.Select(m => new APIMod(m)).ToArray();
 
-            currentBeatmap = beatmap.PlayableBeatmap;
+            currentBeatmap = beatmap;
             currentScore = score;
 
             BeginPlayingInternal(currentState);
