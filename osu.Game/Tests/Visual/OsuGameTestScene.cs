@@ -109,7 +109,7 @@ namespace osu.Game.Tests.Visual
 
             public new BackButton BackButton => base.BackButton;
 
-            public new BeatmapManager BeatmapManager => base.BeatmapManager;
+            public new IBeatmapManager BeatmapManager => base.BeatmapManager;
 
             public new ScoreManager ScoreManager => base.ScoreManager;
 
