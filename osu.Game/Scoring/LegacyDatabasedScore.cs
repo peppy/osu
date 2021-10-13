@@ -12,7 +12,7 @@ namespace osu.Game.Scoring
 {
     public class LegacyDatabasedScore : Score
     {
-        public LegacyDatabasedScore(ScoreInfo score, RulesetStore rulesets, BeatmapManager beatmaps, IResourceStore<byte[]> store)
+        public LegacyDatabasedScore(ScoreInfo score, RulesetStore rulesets, IBeatmapManager beatmaps, IResourceStore<byte[]> store)
         {
             ScoreInfo = score;
 

@@ -8,6 +8,7 @@ using osu.Framework.Platform;
 using osu.Game.Database;
 using osu.Game.Online.API;
 using osu.Game.Rulesets;
+using osu.Game.Stores;
 
 namespace osu.Game.Beatmaps
 {
@@ -16,10 +17,14 @@ namespace osu.Game.Beatmaps
         [UsedImplicitly]
         private readonly RealmContextFactory realmFactory;
 
+        private readonly BeatmapImporter beatmapImporter;
+
         public RealmBeatmapManager(Storage storage, RealmContextFactory realmFactory, IDatabaseContextFactory contextFactory, RulesetStore rulesets, IAPIProvider api, [NotNull] AudioManager audioManager, IResourceStore<byte[]> resources, GameHost host = null, WorkingBeatmap defaultBeatmap = null, bool performOnlineLookups = false)
             : base(storage, contextFactory, rulesets, api, audioManager, resources, host, defaultBeatmap, performOnlineLookups)
         {
             this.realmFactory = realmFactory;
+
+            beatmapImporter = new BeatmapImporter(realmFactory, storage, performOnlineLookups);
         }
     }
 }

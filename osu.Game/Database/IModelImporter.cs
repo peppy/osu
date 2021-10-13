@@ -16,6 +16,16 @@ namespace osu.Game.Database
     public interface IModelImporter<TModel> : IPostNotifications, IPostImports<TModel>, ICanAcceptFiles
         where TModel : class
     {
+        /// <summary>
+        /// Import one or more <typeparamref name="TModel"/> items from filesystem <paramref name="paths"/>.
+        /// </summary>
+        /// <remarks>
+        /// This will be treated as a low priority import if more than one path is specified; use <see cref="ArchiveModelManager{TModel,TFileModel}.Import(osu.Game.Database.ImportTask[])"/> to always import at standard priority.
+        /// This will post notifications tracking progress.
+        /// </remarks>
+        /// <param name="paths">One or more archive locations on disk.</param>
+        new Task Import(params string[] paths);
+
         Task<IEnumerable<ILive<TModel>>> Import(ProgressNotification notification, params ImportTask[] tasks);
 
         /// <summary>
