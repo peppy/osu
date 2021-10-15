@@ -9,7 +9,7 @@ using osu.Game.Database;
 
 namespace osu.Game.Beatmaps
 {
-    public interface IBeatmapManager<TModel> : IModelDownloader<TModel>, IModelManager<TModel>, IModelFileManager<TModel, BeatmapSetFileInfo>, IWorkingBeatmapCache, IDisposable, IPostImports<TModel> where TModel : class
+    public interface IBeatmapManager<TModel> : IModelDownloader<TModel>, IModelManager<TModel>, IModelFileManager<TModel, BeatmapSetFileInfo>, IWorkingBeatmapCache, IDisposable where TModel : class
 
     {
         /// <summary>
