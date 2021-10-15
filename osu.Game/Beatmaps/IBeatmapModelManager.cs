@@ -5,7 +5,8 @@ using osu.Game.Database;
 
 namespace osu.Game.Beatmaps
 {
-    public interface IBeatmapModelManager : IModelManager<BeatmapSetInfo>
+    public interface IBeatmapModelManager<TModel> : IModelManager<TModel>
+        where TModel : class
     {
         /// <summary>
         /// Provide an online lookup queue component to handle populating online beatmap metadata.

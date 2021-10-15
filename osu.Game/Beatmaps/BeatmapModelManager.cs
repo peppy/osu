@@ -31,7 +31,7 @@ namespace osu.Game.Beatmaps
     /// Handles ef-core storage of beatmaps.
     /// </summary>
     [ExcludeFromDynamicCompile]
-    public class BeatmapModelManager : ArchiveModelManager<BeatmapSetInfo, BeatmapSetFileInfo>, IBeatmapModelManager
+    public class BeatmapModelManager : ArchiveModelManager<BeatmapSetInfo, BeatmapSetFileInfo>, IBeatmapModelManager<BeatmapSetInfo>
     {
         /// <summary>
         /// Fired when a single difficulty has been hidden.
