@@ -234,8 +234,10 @@ namespace osu.Game
 
             // the following realm components are not actively used yet, but initialised and kept up to date for initial testing.
             var realmRulesetStore = new RealmRulesetStore(realmFactory, Storage);
+            var realmBeatmapManager = new RealmBeatmapManager(Storage, realmFactory, realmRulesetStore, API, Audio, Resources, Host, defaultBeatmap, performOnlineLookups: true);
 
             dependencies.Cache(realmRulesetStore);
+            dependencies.Cache(realmBeatmapManager);
 
             // this should likely be moved to ArchiveModelManager when another case appears where it is necessary
             // to have inter-dependent model managers. this could be obtained with an IHasForeign<T> interface to
@@ -270,7 +272,7 @@ namespace osu.Game
             dependencies.Cache(SessionStatics = new SessionStatics());
             dependencies.Cache(new OsuColour());
 
-            RegisterImportHandler(BeatmapManager);
+            RegisterImportHandler(realmBeatmapManager);
             RegisterImportHandler(ScoreManager);
             RegisterImportHandler(SkinManager);
 
