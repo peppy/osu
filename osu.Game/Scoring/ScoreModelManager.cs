@@ -28,9 +28,9 @@ namespace osu.Game.Scoring
         protected override string ImportFromStablePath => Path.Combine("Data", "r");
 
         private readonly RulesetStore rulesets;
-        private readonly Func<IBeatmapManager> beatmaps;
+        private readonly Func<IBeatmapManager<BeatmapSetInfo>> beatmaps;
 
-        public ScoreModelManager(RulesetStore rulesets, Func<IBeatmapManager> beatmaps, Storage storage, IDatabaseContextFactory contextFactory, IIpcHost importHost = null)
+        public ScoreModelManager(RulesetStore rulesets, Func<IBeatmapManager<BeatmapSetInfo>> beatmaps, Storage storage, IDatabaseContextFactory contextFactory, IIpcHost importHost = null)
             : base(storage, contextFactory, new ScoreStore(contextFactory, storage), importHost)
         {
             this.rulesets = rulesets;
