@@ -170,7 +170,7 @@ namespace osu.Game.Tests.Online
 
             protected override BeatmapModelDownloader CreateBeatmapModelDownloader(IModelImporter<BeatmapSetInfo> manager, IAPIProvider api, GameHost host)
             {
-                return new TestBeatmapModelDownloader(manager, api, host);
+                return new TestBeatmapModelDownloader(importer, api, host);
             }
 
             internal class TestBeatmapModelDownloader : BeatmapModelDownloader

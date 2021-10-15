@@ -2,7 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.IO.Network;
-using osu.Game.Beatmaps;
+using osu.Game.Database;
 
 namespace osu.Game.Online.API.Requests
 {
