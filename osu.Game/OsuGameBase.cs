@@ -93,7 +93,7 @@ namespace osu.Game
 
         protected SessionStatics SessionStatics { get; private set; }
 
-        protected IBeatmapManager BeatmapManager { get; private set; }
+        protected IBeatmapManager<BeatmapSetInfo> BeatmapManager { get; private set; }
 
         protected ScoreManager ScoreManager { get; private set; }
 

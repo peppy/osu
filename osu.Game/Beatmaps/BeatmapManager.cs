@@ -29,7 +29,7 @@ namespace osu.Game.Beatmaps
     /// Handles general operations related to global beatmap management.
     /// </summary>
     [ExcludeFromDynamicCompile]
-    public class BeatmapManager : IBeatmapManager
+    public class BeatmapManager : IBeatmapManager<BeatmapSetInfo>
     {
         private readonly BeatmapModelManager beatmapModelManager;
         private readonly BeatmapModelDownloader beatmapModelDownloader;
