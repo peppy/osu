@@ -2,15 +2,16 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.IO.Network;
-using osu.Game.Beatmaps;
+using osu.Game.Database;
 
 namespace osu.Game.Online.API.Requests
 {
-    public class DownloadBeatmapSetRequest : ArchiveDownloadRequest<BeatmapSetInfo>
+    public class DownloadBeatmapSetRequest<TModel> : ArchiveDownloadRequest<TModel>
+        where TModel : class, IHasOnlineID<int>
     {
         private readonly bool noVideo;
 
-        public DownloadBeatmapSetRequest(BeatmapSetInfo set, bool noVideo)
+        public DownloadBeatmapSetRequest(TModel set, bool noVideo)
             : base(set)
         {
             this.noVideo = noVideo;
@@ -25,6 +26,6 @@ namespace osu.Game.Online.API.Requests
 
         protected override string FileExtension => ".osz";
 
-        protected override string Target => $@"beatmapsets/{Model.OnlineBeatmapSetID}/download{(noVideo ? "?noVideo=1" : "")}";
+        protected override string Target => $@"beatmapsets/{Model.OnlineID}/download{(noVideo ? "?noVideo=1" : "")}";
     }
 }
