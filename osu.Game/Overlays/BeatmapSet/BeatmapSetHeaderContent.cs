@@ -14,6 +14,7 @@ using osu.Game.Beatmaps.Drawables;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Models;
 using osu.Game.Online;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
@@ -297,7 +298,7 @@ namespace osu.Game.Overlays.BeatmapSet
                 case DownloadState.Downloading:
                 case DownloadState.Importing:
                     // temporary to avoid showing two buttons for maps with novideo. will be fixed in new beatmap overlay design.
-                    downloadButtonsContainer.Child = new HeaderDownloadButton(BeatmapSet.Value);
+                    downloadButtonsContainer.Child = new HeaderDownloadButton(new RealmBeatmapSet { OnlineID = BeatmapSet.Value.OnlineID });
                     break;
 
                 default:

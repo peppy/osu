@@ -72,8 +72,8 @@ namespace osu.Game.Beatmaps
 
         #region Implementation of IModelManager<RealmBeatmapSet>
 
-        public IBindable<WeakReference<RealmBeatmapSet>> ItemUpdated { get; set; }
-        public IBindable<WeakReference<RealmBeatmapSet>> ItemRemoved { get; set; }
+        public IBindable<WeakReference<RealmBeatmapSet>> ItemUpdated { get; } = new Bindable<WeakReference<RealmBeatmapSet>>();
+        public IBindable<WeakReference<RealmBeatmapSet>> ItemRemoved { get; } = new Bindable<WeakReference<RealmBeatmapSet>>();
 
         public Task ImportFromStableAsync(StableStorage stableStorage)
         {
@@ -116,9 +116,7 @@ namespace osu.Game.Beatmaps
         }
 
         public bool IsAvailableLocally(RealmBeatmapSet model)
-        {
-            throw new NotImplementedException();
-        }
+            => false; // TODO: implement
 
         #endregion
 
