@@ -48,5 +48,7 @@ namespace osu.Game.Beatmaps
         /// The maximum BPM of all beatmaps in this set.
         /// </summary>
         double MaxBPM { get; }
+
+        string Hash { get; }
     }
 }
