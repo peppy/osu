@@ -15,6 +15,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Utils;
 using osu.Framework.Threading;
 using osu.Game.Beatmaps;
+using osu.Game.Models;
 using osu.Game.Rulesets.Mods;
 
 namespace osu.Game.Overlays
@@ -25,9 +26,9 @@ namespace osu.Game.Overlays
     public class MusicController : CompositeDrawable
     {
         [Resolved]
-        private BeatmapManager beatmaps { get; set; }
+        private RealmBeatmapManager beatmaps { get; set; }
 
-        public IBindableList<BeatmapSetInfo> BeatmapSets
+        public IBindableList<RealmBeatmapSet> BeatmapSets
         {
             get
             {
@@ -43,7 +44,7 @@ namespace osu.Game.Overlays
         /// </summary>
         private const double restart_cutoff_point = 5000;
 
-        private readonly BindableList<BeatmapSetInfo> beatmapSets = new BindableList<BeatmapSetInfo>();
+        private readonly BindableList<RealmBeatmapSet> beatmapSets = new BindableList<RealmBeatmapSet>();
 
         /// <summary>
         /// Whether the user has requested the track to be paused. Use <see cref="IsPlaying"/> to determine whether the track is still playing.
@@ -65,8 +66,8 @@ namespace osu.Game.Overlays
         [NotNull]
         public DrawableTrack CurrentTrack { get; private set; } = new DrawableTrack(new TrackVirtual(1000));
 
-        private IBindable<WeakReference<BeatmapSetInfo>> managerUpdated;
-        private IBindable<WeakReference<BeatmapSetInfo>> managerRemoved;
+        private IBindable<WeakReference<RealmBeatmapSet>> managerUpdated;
+        private IBindable<WeakReference<RealmBeatmapSet>> managerRemoved;
 
         [BackgroundDependencyLoader]
         private void load()
@@ -90,11 +91,11 @@ namespace osu.Game.Overlays
         public void ReloadCurrentTrack() => changeTrack();
 
         /// <summary>
-        /// Change the position of a <see cref="BeatmapSetInfo"/> in the current playlist.
+        /// Change the position of a <see cref="RealmBeatmapSet"/> in the current playlist.
         /// </summary>
         /// <param name="beatmapSetInfo">The beatmap to move.</param>
         /// <param name="index">The new position.</param>
-        public void ChangeBeatmapSetPosition(BeatmapSetInfo beatmapSetInfo, int index)
+        public void ChangeBeatmapSetPosition(RealmBeatmapSet beatmapSetInfo, int index)
         {
             beatmapSets.Remove(beatmapSetInfo);
             beatmapSets.Insert(index, beatmapSetInfo);
@@ -110,7 +111,7 @@ namespace osu.Game.Overlays
         /// </summary>
         public bool TrackLoaded => CurrentTrack.TrackLoaded;
 
-        private void beatmapUpdated(ValueChangedEvent<WeakReference<BeatmapSetInfo>> weakSet)
+        private void beatmapUpdated(ValueChangedEvent<WeakReference<RealmBeatmapSet>> weakSet)
         {
             if (weakSet.NewValue.TryGetTarget(out var set))
             {
@@ -122,7 +123,7 @@ namespace osu.Game.Overlays
             }
         }
 
-        private void beatmapRemoved(ValueChangedEvent<WeakReference<BeatmapSetInfo>> weakSet)
+        private void beatmapRemoved(ValueChangedEvent<WeakReference<RealmBeatmapSet>> weakSet)
         {
             if (weakSet.NewValue.TryGetTarget(out var set))
             {
@@ -153,7 +154,7 @@ namespace osu.Game.Overlays
         {
             if (UserPauseRequested) return;
 
-            if (CurrentTrack.IsDummyDevice || beatmap.Value.BeatmapSetInfo.DeletePending)
+            if (CurrentTrack.IsDummyDevice || beatmap.Value.BeatmapInfo.DeletePending)
             {
                 if (beatmap.Disabled)
                     return;
@@ -248,7 +249,7 @@ namespace osu.Game.Overlays
 
             queuedDirection = TrackChangeDirection.Prev;
 
-            var playable = BeatmapSets.TakeWhile(i => i.ID != current.BeatmapSetInfo.ID).LastOrDefault() ?? BeatmapSets.LastOrDefault();
+            var playable = BeatmapSets.TakeWhile(i => i.ID != current.RealmBeatmapSet.ID).LastOrDefault() ?? BeatmapSets.LastOrDefault();
 
             if (playable != null)
             {
@@ -279,7 +280,7 @@ namespace osu.Game.Overlays
 
             queuedDirection = TrackChangeDirection.Next;
 
-            var playable = BeatmapSets.SkipWhile(i => i.ID != current.BeatmapSetInfo.ID).ElementAtOrDefault(1) ?? BeatmapSets.FirstOrDefault();
+            var playable = BeatmapSets.SkipWhile(i => i.ID != current.RealmBeatmapSet.ID).ElementAtOrDefault(1) ?? BeatmapSets.FirstOrDefault();
 
             if (playable != null)
             {
@@ -329,8 +330,8 @@ namespace osu.Game.Overlays
                 else
                 {
                     // figure out the best direction based on order in playlist.
-                    int last = BeatmapSets.TakeWhile(b => b.ID != current.BeatmapSetInfo?.ID).Count();
-                    int next = newWorking == null ? -1 : BeatmapSets.TakeWhile(b => b.ID != newWorking.BeatmapSetInfo?.ID).Count();
+                    var last = BeatmapSets.TakeWhile(b => b.ID != current.RealmBeatmapSet?.ID).Count();
+                    var next = newWorking == null ? -1 : BeatmapSets.TakeWhile(b => b.ID != newWorking.RealmBeatmapSet?.ID).Count();
 
                     direction = last > next ? TrackChangeDirection.Prev : TrackChangeDirection.Next;
                 }
