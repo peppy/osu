@@ -27,6 +27,7 @@ using osu.Game.Overlays.BeatmapSet;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Screens.Play.HUD;
+using osu.Game.Users;
 using osuTK;
 using osuTK.Graphics;
 
@@ -119,7 +120,7 @@ namespace osu.Game.Screens.OnlinePlay
             if (Item.Beatmap?.Value?.Metadata?.Author != null)
             {
                 authorText.AddText("mapped by ");
-                authorText.AddUserLink(Item.Beatmap.Value?.Metadata.Author);
+                authorText.AddUserLink(new User { Username = Item.Beatmap.Value?.Metadata.Author }); // TODO: wrong.
             }
 
             bool hasExplicitContent = (Item.Beatmap.Value.BeatmapSet as IBeatmapSetOnlineInfo)?.HasExplicitContent == true;
@@ -292,7 +293,7 @@ namespace osu.Game.Screens.OnlinePlay
             private const float width = 50;
 
             public PlaylistDownloadButton(PlaylistItem playlistItem)
-                : base(playlistItem.Beatmap.Value.BeatmapSet)
+                : base((BeatmapSetInfo)playlistItem.Beatmap.Value.BeatmapSet) // TODO: can't exist.
             {
                 this.playlistItem = playlistItem;
 

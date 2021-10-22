@@ -131,12 +131,11 @@ namespace osu.Game.Online.API.Requests.Responses
                 OnlineInfo = this
             };
 
-            beatmapSet.Beatmaps = Beatmaps.Select(b =>
+            beatmapSet.Beatmaps = Beatmaps.Select(b => new BeatmapInfo
             {
-                var beatmap = (IBeatmapInfo)b;
-                beatmap.BeatmapSet = beatmapSet;
-                beatmap.Metadata = beatmapSet.Metadata;
-                return beatmap;
+                BeatmapSet = beatmapSet,
+                Metadata = beatmapSet.Metadata,
+                OnlineBeatmapID = b.OnlineID,
             }).ToList();
 
             return beatmapSet;
