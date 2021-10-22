@@ -13,7 +13,7 @@ namespace osu.Game.Screens.OnlinePlay.Components
 {
     public class PlaylistItemBackground : Background
     {
-        public readonly BeatmapInfo? BeatmapInfo;
+        public readonly IBeatmapInfo? BeatmapInfo;
 
         public PlaylistItemBackground(PlaylistItem? playlistItem)
         {
@@ -26,8 +26,8 @@ namespace osu.Game.Screens.OnlinePlay.Components
             Texture? texture = null;
 
             // prefer online cover where available.
-            if (BeatmapInfo?.BeatmapSet?.OnlineInfo?.Covers.Cover != null)
-                texture = textures.Get(BeatmapInfo.BeatmapSet.OnlineInfo.Covers.Cover);
+            if (BeatmapInfo?.BeatmapSet is IBeatmapSetOnlineInfo online)
+                texture = textures.Get(online.Covers.Cover);
 
             Sprite.Texture = texture ?? beatmaps.DefaultBeatmap.Background;
         }

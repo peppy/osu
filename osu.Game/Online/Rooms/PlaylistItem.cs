@@ -31,7 +31,7 @@ namespace osu.Game.Online.Rooms
         public bool Expired { get; set; }
 
         [JsonIgnore]
-        public readonly Bindable<BeatmapInfo> Beatmap = new Bindable<BeatmapInfo>();
+        public readonly Bindable<IBeatmapInfo> Beatmap = new Bindable<IBeatmapInfo>();
 
         [JsonIgnore]
         public readonly Bindable<RulesetInfo> Ruleset = new Bindable<RulesetInfo>();
@@ -65,7 +65,7 @@ namespace osu.Game.Online.Rooms
 
         public PlaylistItem()
         {
-            Beatmap.BindValueChanged(beatmap => BeatmapID = beatmap.NewValue?.OnlineBeatmapID ?? 0);
+            Beatmap.BindValueChanged(beatmap => BeatmapID = beatmap.NewValue?.OnlineID ?? -1);
             Ruleset.BindValueChanged(ruleset => RulesetID = ruleset.NewValue?.ID ?? 0);
         }
 
