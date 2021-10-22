@@ -133,7 +133,7 @@ namespace osu.Game.Online.API.Requests.Responses
 
             beatmapSet.Beatmaps = Beatmaps.Select(b =>
             {
-                var beatmap = b.ToBeatmapInfo(rulesets);
+                var beatmap = (IBeatmapInfo)b;
                 beatmap.BeatmapSet = beatmapSet;
                 beatmap.Metadata = beatmapSet.Metadata;
                 return beatmap;
