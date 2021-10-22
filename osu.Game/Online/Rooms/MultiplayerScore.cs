@@ -7,6 +7,7 @@ using System.Linq;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using osu.Game.Beatmaps;
 using osu.Game.Online.API;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
@@ -70,7 +71,7 @@ namespace osu.Game.Online.Rooms
                 OnlineScoreID = ID,
                 TotalScore = TotalScore,
                 MaxCombo = MaxCombo,
-                BeatmapInfo = playlistItem.Beatmap.Value,
+                BeatmapInfo = (BeatmapInfo)playlistItem.Beatmap.Value, // TODO: cast can't exist.
                 BeatmapInfoID = playlistItem.BeatmapID,
                 Ruleset = playlistItem.Ruleset.Value,
                 RulesetID = playlistItem.RulesetID,

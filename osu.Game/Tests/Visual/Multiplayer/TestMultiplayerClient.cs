@@ -13,6 +13,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Game.Beatmaps;
 using osu.Game.Online.API;
+using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Multiplayer.MatchTypes.TeamVersus;
 using osu.Game.Online.Rooms;
@@ -265,7 +266,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
             return ((IMultiplayerClient)this).LoadRequested();
         }
 
-        protected override Task<IBeatmapSetInfo> GetOnlineBeatmapSet(int beatmapId, CancellationToken cancellationToken = default)
+        protected override Task<APIBeatmapSet> GetOnlineBeatmapSet(int beatmapId, CancellationToken cancellationToken = default)
         {
             Debug.Assert(Room != null);
 
@@ -276,7 +277,13 @@ namespace osu.Game.Tests.Visual.Multiplayer
             if (set == null)
                 throw new InvalidOperationException("Beatmap not found.");
 
-            return Task.FromResult(set);
+            // TODO: this is probably wrong.
+            var apiSet = new APIBeatmapSet
+            {
+                OnlineID = set.OnlineID,
+            };
+
+            return Task.FromResult(apiSet);
         }
 
         private async Task changeMatchType(MatchType type)
