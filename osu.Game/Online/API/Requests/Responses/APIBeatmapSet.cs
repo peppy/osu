@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
@@ -121,25 +120,7 @@ namespace osu.Game.Online.API.Requests.Responses
         [JsonProperty(@"beatmaps")]
         public IEnumerable<APIBeatmap> Beatmaps { get; set; } = Array.Empty<APIBeatmap>();
 
-        public virtual BeatmapSetInfo ToBeatmapSet(RulesetStore rulesets)
-        {
-            var beatmapSet = new BeatmapSetInfo
-            {
-                OnlineBeatmapSetID = OnlineID,
-                Metadata = metadata,
-                Status = Status,
-                OnlineInfo = this
-            };
-
-            beatmapSet.Beatmaps = Beatmaps.Select(b => new BeatmapInfo
-            {
-                BeatmapSet = beatmapSet,
-                Metadata = beatmapSet.Metadata,
-                OnlineBeatmapID = b.OnlineID,
-            }).ToList();
-
-            return beatmapSet;
-        }
+        public virtual IBeatmapSetInfo ToBeatmapSet(RulesetStore rulesets) => this;
 
         private BeatmapMetadata metadata => new BeatmapMetadata
         {
