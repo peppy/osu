@@ -148,9 +148,9 @@ namespace osu.Game.Online.Multiplayer
             return connection.InvokeAsync(nameof(IMultiplayerServer.StartMatch));
         }
 
-        protected override Task<BeatmapSetInfo> GetOnlineBeatmapSet(int beatmapId, CancellationToken cancellationToken = default)
+        protected override Task<IBeatmapSetInfo> GetOnlineBeatmapSet(int beatmapId, CancellationToken cancellationToken = default)
         {
-            var tcs = new TaskCompletionSource<BeatmapSetInfo>();
+            var tcs = new TaskCompletionSource<IBeatmapSetInfo>();
             var req = new GetBeatmapSetRequest(beatmapId, BeatmapSetLookupType.BeatmapId);
 
             req.Success += res =>

@@ -631,14 +631,15 @@ namespace osu.Game.Online.Multiplayer
             }), TaskContinuationOptions.OnlyOnRanToCompletion);
         }, cancellationToken);
 
-        private void updatePlaylist(MultiplayerRoomSettings settings, BeatmapSetInfo beatmapSet)
+        private void updatePlaylist(MultiplayerRoomSettings settings, IBeatmapSetInfo beatmapSet)
         {
             if (Room == null || !Room.Settings.Equals(settings))
                 return;
 
             Debug.Assert(APIRoom != null);
 
-            var beatmap = beatmapSet.Beatmaps.Single(b => b.OnlineBeatmapID == settings.BeatmapID);
+            var beatmap = beatmapSet.Beatmaps.Single(b => b.OnlineID == settings.BeatmapID);
+            // todo: fuck me
             beatmap.MD5Hash = settings.BeatmapChecksum;
 
             var ruleset = Rulesets.GetRuleset(settings.RulesetID).CreateInstance();
@@ -672,12 +673,12 @@ namespace osu.Game.Online.Multiplayer
         }
 
         /// <summary>
-        /// Retrieves a <see cref="BeatmapSetInfo"/> from an online source.
+        /// Retrieves a <see cref="IBeatmapSetInfo"/> from an online source.
         /// </summary>
         /// <param name="beatmapId">The beatmap set ID.</param>
         /// <param name="cancellationToken">A token to cancel the request.</param>
-        /// <returns>The <see cref="BeatmapSetInfo"/> retrieval task.</returns>
-        protected abstract Task<BeatmapSetInfo> GetOnlineBeatmapSet(int beatmapId, CancellationToken cancellationToken = default);
+        /// <returns>The <see cref="IBeatmapSetInfo"/> retrieval task.</returns>
+        protected abstract Task<IBeatmapSetInfo> GetOnlineBeatmapSet(int beatmapId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// For the provided user ID, update whether the user is included in <see cref="CurrentMatchPlayingUserIds"/>.

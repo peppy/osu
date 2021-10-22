@@ -81,7 +81,7 @@ namespace osu.Game.Online.API.Requests.Responses
 
         public double BPM { get; set; }
 
-        public virtual BeatmapInfo ToBeatmapInfo(RulesetStore rulesets)
+        public virtual IBeatmapInfo ToBeatmapInfo(RulesetStore rulesets)
         {
             var set = BeatmapSet?.ToBeatmapSet(rulesets);
 
@@ -97,6 +97,7 @@ namespace osu.Game.Online.API.Requests.Responses
                 Status = Status,
                 MD5Hash = Checksum,
                 BeatmapSet = set,
+                Metrics = metrics,
                 MaxCombo = MaxCombo,
                 BaseDifficulty = new BeatmapDifficulty
                 {

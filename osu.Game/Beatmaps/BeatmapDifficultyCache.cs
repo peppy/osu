@@ -53,7 +53,7 @@ namespace osu.Game.Beatmaps
         private BeatmapManager beatmapManager { get; set; }
 
         [Resolved]
-        private Bindable<RulesetInfo> currentRuleset { get; set; }
+        private Bindable<IRulesetInfo> currentRuleset { get; set; }
 
         [Resolved]
         private Bindable<IReadOnlyList<Mod>> currentMods { get; set; }
