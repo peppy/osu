@@ -26,8 +26,8 @@ namespace osu.Game.Overlays.BeatmapSet.Scores
     {
         private const int spacing = 15;
 
-        public readonly Bindable<BeatmapInfo> Beatmap = new Bindable<BeatmapInfo>();
-        private readonly Bindable<RulesetInfo> ruleset = new Bindable<RulesetInfo>();
+        public readonly Bindable<IBeatmapInfo> Beatmap = new Bindable<IBeatmapInfo>();
+        private readonly Bindable<IRulesetInfo> ruleset = new Bindable<IRulesetInfo>();
         private readonly Bindable<BeatmapLeaderboardScope> scope = new Bindable<BeatmapLeaderboardScope>(BeatmapLeaderboardScope.Global);
         private readonly IBindable<User> user = new Bindable<User>();
 
@@ -200,7 +200,7 @@ namespace osu.Game.Overlays.BeatmapSet.Scores
             user.BindValueChanged(onUserChanged, true);
         }
 
-        private void onBeatmapChanged(ValueChangedEvent<BeatmapInfo> beatmap)
+        private void onBeatmapChanged(ValueChangedEvent<IBeatmapInfo> beatmap)
         {
             var beatmapRuleset = beatmap.NewValue?.Ruleset;
 
@@ -232,7 +232,7 @@ namespace osu.Game.Overlays.BeatmapSet.Scores
 
             noScoresPlaceholder.Hide();
 
-            if (Beatmap.Value?.OnlineBeatmapID.HasValue != true || Beatmap.Value.Status <= BeatmapSetOnlineStatus.Pending)
+            if (Beatmap.Value == null || Beatmap.Value.OnlineID <= 0 || (Beatmap.Value?.BeatmapSet as IBeatmapSetOnlineInfo)?.Status <= BeatmapSetOnlineStatus.Pending)
             {
                 Scores = null;
                 Hide();

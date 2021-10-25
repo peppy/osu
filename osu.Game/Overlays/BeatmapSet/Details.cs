@@ -37,9 +37,9 @@ namespace osu.Game.Overlays.BeatmapSet
             }
         }
 
-        private BeatmapInfo beatmapInfo;
+        private IBeatmapInfo beatmapInfo;
 
-        public BeatmapInfo BeatmapInfo
+        public IBeatmapInfo BeatmapInfo
         {
             get => beatmapInfo;
             set

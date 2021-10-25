@@ -34,7 +34,7 @@ namespace osu.Game.Overlays.BeatmapSet
 
         public readonly DifficultiesContainer Difficulties;
 
-        public readonly Bindable<BeatmapInfo> Beatmap = new Bindable<BeatmapInfo>();
+        public readonly Bindable<IBeatmapInfo> Beatmap = new Bindable<IBeatmapInfo>();
         private BeatmapSetInfo beatmapSet;
 
         public BeatmapSetInfo BeatmapSet
@@ -185,9 +185,9 @@ namespace osu.Game.Overlays.BeatmapSet
             updateDifficultyButtons();
         }
 
-        private void showBeatmap(BeatmapInfo beatmapInfo)
+        private void showBeatmap(IBeatmapInfo beatmapInfo)
         {
-            version.Text = beatmapInfo?.Version;
+            version.Text = beatmapInfo?.DifficultyName;
         }
 
         private void updateDifficultyButtons()

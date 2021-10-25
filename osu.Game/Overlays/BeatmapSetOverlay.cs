@@ -9,6 +9,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Input.Events;
 using osu.Game.Beatmaps;
 using osu.Game.Online.API.Requests;
+using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays.BeatmapSet;
 using osu.Game.Overlays.BeatmapSet.Scores;
 using osu.Game.Overlays.Comments;
@@ -27,7 +28,7 @@ namespace osu.Game.Overlays
         [Resolved]
         private RulesetStore rulesets { get; set; }
 
-        private readonly Bindable<BeatmapSetInfo> beatmapSet = new Bindable<BeatmapSetInfo>();
+        private readonly Bindable<APIBeatmapSet> beatmapSet = new Bindable<APIBeatmapSet>();
 
         // receive input outside our bounds so we can trigger a close event on ourselves.
         public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => true;
@@ -89,8 +90,8 @@ namespace osu.Game.Overlays
             var req = new GetBeatmapSetRequest(beatmapId, BeatmapSetLookupType.BeatmapId);
             req.Success += res =>
             {
-                beatmapSet.Value = res.ToBeatmapSet(rulesets);
-                Header.HeaderContent.Picker.Beatmap.Value = Header.BeatmapSet.Value.Beatmaps.First(b => b.OnlineBeatmapID == beatmapId);
+                beatmapSet.Value = res;
+                Header.HeaderContent.Picker.Beatmap.Value = Header.BeatmapSet.Value.Beatmaps.First(b => b.OnlineID == beatmapId);
             };
             API.Queue(req);
 
@@ -102,7 +103,7 @@ namespace osu.Game.Overlays
             beatmapSet.Value = null;
 
             var req = new GetBeatmapSetRequest(beatmapSetId);
-            req.Success += res => beatmapSet.Value = res.ToBeatmapSet(rulesets);
+            req.Success += res => beatmapSet.Value = res;
             API.Queue(req);
 
             Show();
@@ -112,7 +113,7 @@ namespace osu.Game.Overlays
         /// Show an already fully-populated beatmap set.
         /// </summary>
         /// <param name="set">The set to show.</param>
-        public void ShowBeatmapSet(BeatmapSetInfo set)
+        public void ShowBeatmapSet(APIBeatmapSet set)
         {
             beatmapSet.Value = set;
             Show();

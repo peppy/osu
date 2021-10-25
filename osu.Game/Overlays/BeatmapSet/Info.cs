@@ -9,6 +9,7 @@ using osu.Framework.Graphics.Shapes;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Online.API.Requests.Responses;
 
 namespace osu.Game.Overlays.BeatmapSet
 {
@@ -22,7 +23,7 @@ namespace osu.Game.Overlays.BeatmapSet
         private readonly Box background;
         private readonly SuccessRate successRate;
 
-        public readonly Bindable<BeatmapSetInfo> BeatmapSet = new Bindable<BeatmapSetInfo>();
+        public readonly Bindable<APIBeatmapSet> BeatmapSet = new Bindable<APIBeatmapSet>();
 
         public BeatmapInfo BeatmapInfo
         {
@@ -115,11 +116,11 @@ namespace osu.Game.Overlays.BeatmapSet
 
             BeatmapSet.ValueChanged += b =>
             {
-                source.Text = b.NewValue?.Metadata.Source ?? string.Empty;
-                tags.Text = b.NewValue?.Metadata.Tags ?? string.Empty;
-                genre.Text = b.NewValue?.OnlineInfo?.Genre.Name ?? string.Empty;
-                language.Text = b.NewValue?.OnlineInfo?.Language.Name ?? string.Empty;
-                bool setHasLeaderboard = b.NewValue?.OnlineInfo?.Status > 0;
+                source.Text = b.NewValue?.Source ?? string.Empty;
+                tags.Text = b.NewValue?.Tags ?? string.Empty;
+                genre.Text = b.NewValue?.Genre.Name ?? string.Empty;
+                language.Text = b.NewValue?.Language.Name ?? string.Empty;
+                bool setHasLeaderboard = b.NewValue?.Status > 0;
                 successRate.Alpha = setHasLeaderboard ? 1 : 0;
                 notRankedPlaceholder.Alpha = setHasLeaderboard ? 0 : 1;
                 Height = setHasLeaderboard ? 270 : base_height;

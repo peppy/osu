@@ -20,7 +20,7 @@ namespace osu.Game.Overlays.BeatmapSet
     public class LeaderboardModSelector : CompositeDrawable
     {
         public readonly BindableList<IMod> SelectedMods = new BindableList<IMod>();
-        public readonly Bindable<RulesetInfo> Ruleset = new Bindable<RulesetInfo>();
+        public readonly Bindable<IRulesetInfo> Ruleset = new Bindable<IRulesetInfo>();
 
         private readonly FillFlowContainer<ModButton> modsContainer;
 
@@ -45,7 +45,7 @@ namespace osu.Game.Overlays.BeatmapSet
             Ruleset.BindValueChanged(onRulesetChanged, true);
         }
 
-        private void onRulesetChanged(ValueChangedEvent<RulesetInfo> ruleset)
+        private void onRulesetChanged(ValueChangedEvent<IRulesetInfo> ruleset)
         {
             SelectedMods.Clear();
             modsContainer.Clear();
@@ -54,6 +54,7 @@ namespace osu.Game.Overlays.BeatmapSet
                 return;
 
             modsContainer.Add(new ModButton(new ModNoMod()));
+            // todo: create instance broken
             modsContainer.AddRange(ruleset.NewValue.CreateInstance().AllMods.Where(m => m.UserPlayable).Select(m => new ModButton(m)));
 
             modsContainer.ForEach(button =>
