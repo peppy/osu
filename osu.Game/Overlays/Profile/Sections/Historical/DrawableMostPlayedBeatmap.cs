@@ -13,12 +13,8 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osuTK;
-using osu.Framework.Graphics.Cursor;
-using osu.Framework.Localisation;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Resources.Localisation.Web;
-using osu.Game.Users;
-using osuTK;
 
 namespace osu.Game.Overlays.Profile.Sections.Historical
 {

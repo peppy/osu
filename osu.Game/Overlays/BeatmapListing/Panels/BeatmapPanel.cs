@@ -30,7 +30,7 @@ namespace osu.Game.Overlays.BeatmapListing.Panels
 {
     public abstract class BeatmapPanel : OsuClickableContainer, IHasContextMenu
     {
-        public readonly BeatmapSetInfo SetInfo;
+        public readonly IBeatmapSetInfo SetInfo;
 
         private const double hover_transition_time = 400;
         private const int maximum_difficulty_icons = 10;
@@ -49,10 +49,10 @@ namespace osu.Game.Overlays.BeatmapListing.Panels
 
         protected Action ViewBeatmap;
 
-        protected BeatmapPanel(BeatmapSetInfo setInfo)
+        protected BeatmapPanel(IBeatmapSetInfo setInfo)
             : base(HoverSampleSet.Submit)
         {
-            Debug.Assert(setInfo.OnlineBeatmapSetID != null);
+            Debug.Assert(setInfo.OnlineID > 0);
 
             SetInfo = setInfo;
         }
@@ -95,8 +95,8 @@ namespace osu.Game.Overlays.BeatmapListing.Panels
 
             Action = ViewBeatmap = () =>
             {
-                Debug.Assert(SetInfo.OnlineBeatmapSetID != null);
-                beatmapSetOverlay?.FetchAndShowBeatmapSet(SetInfo.OnlineBeatmapSetID.Value);
+                Debug.Assert(SetInfo.OnlineID > 0);
+                beatmapSetOverlay?.FetchAndShowBeatmapSet(SetInfo.OnlineID);
             };
         }
 
@@ -146,10 +146,10 @@ namespace osu.Game.Overlays.BeatmapListing.Panels
         {
             var icons = new List<DifficultyIcon>();
 
-            if (SetInfo.Beatmaps.Count > maximum_difficulty_icons)
+            if (SetInfo.Beatmaps.Count() > maximum_difficulty_icons)
             {
                 foreach (var ruleset in SetInfo.Beatmaps.Select(b => b.Ruleset).Distinct())
-                    icons.Add(new GroupedDifficultyIcon(SetInfo.Beatmaps.FindAll(b => b.Ruleset.Equals(ruleset)), ruleset, this is ListBeatmapPanel ? Color4.White : colours.Gray5));
+                    icons.Add(new GroupedDifficultyIcon(SetInfo.Beatmaps.Where(b => b.Ruleset.Equals(ruleset)), ruleset, this is ListBeatmapPanel ? Color4.White : colours.Gray5));
             }
             else
             {

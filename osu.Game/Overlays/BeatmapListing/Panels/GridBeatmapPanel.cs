@@ -32,7 +32,7 @@ namespace osu.Game.Overlays.BeatmapListing.Panels
         protected override PlayButton PlayButton => playButton;
         protected override Box PreviewBar => progressBar;
 
-        public GridBeatmapPanel(BeatmapSetInfo beatmap)
+        public GridBeatmapPanel(IBeatmapSetInfo beatmap)
             : base(beatmap)
         {
             Width = 380;
