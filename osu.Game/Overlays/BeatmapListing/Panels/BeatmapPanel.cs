@@ -23,6 +23,7 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Online.API.Requests.Responses;
 using osuTK;
 using osuTK.Graphics;
 
@@ -30,7 +31,7 @@ namespace osu.Game.Overlays.BeatmapListing.Panels
 {
     public abstract class BeatmapPanel : OsuClickableContainer, IHasContextMenu
     {
-        public readonly IBeatmapSetInfo SetInfo;
+        public readonly APIBeatmapSet SetInfo;
 
         private const double hover_transition_time = 400;
         private const int maximum_difficulty_icons = 10;
@@ -49,7 +50,7 @@ namespace osu.Game.Overlays.BeatmapListing.Panels
 
         protected Action ViewBeatmap;
 
-        protected BeatmapPanel(IBeatmapSetInfo setInfo)
+        protected BeatmapPanel(APIBeatmapSet setInfo)
             : base(HoverSampleSet.Submit)
         {
             Debug.Assert(setInfo.OnlineID > 0);
@@ -153,7 +154,7 @@ namespace osu.Game.Overlays.BeatmapListing.Panels
             }
             else
             {
-                foreach (var b in SetInfo.Beatmaps.OrderBy(beatmap => beatmap.Ruleset.ID).ThenBy(beatmap => beatmap.StarDifficulty))
+                foreach (var b in SetInfo.Beatmaps.OrderBy(beatmap => beatmap.Ruleset.ID).ThenBy(beatmap => beatmap.StarRating))
                     icons.Add(new DifficultyIcon(b));
             }
 
