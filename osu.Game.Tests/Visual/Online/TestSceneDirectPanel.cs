@@ -66,7 +66,7 @@ namespace osu.Game.Tests.Visual.Online
                 },
             };
 
-            APIBeatmapSet getBeatmapSet() => CreateAPIBeatmap(Ruleset.Value).BeatmapSet;
+            APIBeatmapSet getBeatmapSet() => CreateAPIBeatmapSet(Ruleset.Value);
 
             APIBeatmapSet getUndownloadableBeatmapSet() => new APIBeatmapSet
             {
