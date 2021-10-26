@@ -38,9 +38,9 @@ namespace osu.Game.Overlays.BeatmapSet
             }
         }
 
-        private BeatmapInfo beatmapInfo;
+        private IBeatmapInfo beatmapInfo;
 
-        public BeatmapInfo BeatmapInfo
+        public IBeatmapInfo BeatmapInfo
         {
             get => beatmapInfo;
             set
@@ -68,8 +68,10 @@ namespace osu.Game.Overlays.BeatmapSet
                 length.TooltipText = BeatmapsetsStrings.ShowStatsTotalLength(TimeSpan.FromMilliseconds(beatmapInfo.Length).ToFormattedDuration());
                 length.Value = TimeSpan.FromMilliseconds(beatmapInfo.Length).ToFormattedDuration();
 
-                circleCount.Value = beatmapInfo.OnlineInfo.CircleCount.ToLocalisableString(@"N0");
-                sliderCount.Value = beatmapInfo.OnlineInfo.SliderCount.ToLocalisableString(@"N0");
+                var onlineInfo = beatmapInfo as IBeatmapOnlineInfo;
+
+                circleCount.Value = (onlineInfo?.CircleCount ?? 0).ToLocalisableString(@"N0");
+                sliderCount.Value = (onlineInfo?.SliderCount ?? 0).ToLocalisableString(@"N0");
             }
         }
 
