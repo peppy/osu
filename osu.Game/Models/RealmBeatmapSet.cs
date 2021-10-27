@@ -21,7 +21,7 @@ namespace osu.Game.Models
         public Guid ID { get; set; } = Guid.NewGuid();
 
         [Indexed]
-        public int OnlineID { get; set; } = -1;
+        public long OnlineID { get; set; } = -1;
 
         public DateTimeOffset DateAdded { get; set; }
 

@@ -14,6 +14,6 @@ namespace osu.Game.Database
         /// Generally we use -1 when specifying "missing" in code, but values of 0 are also considered missing as the online source
         /// is generally a MySQL autoincrement value, which can never be 0.
         /// </remarks>
-        int OnlineID { get; }
+        long OnlineID { get; }
     }
 }

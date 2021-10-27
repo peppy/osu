@@ -19,7 +19,7 @@ namespace osu.Game.Models
         public string ShortName { get; set; } = string.Empty;
 
         [Indexed]
-        public int OnlineID { get; set; } = -1;
+        public long OnlineID { get; set; } = -1;
 
         public string Name { get; set; } = string.Empty;
 

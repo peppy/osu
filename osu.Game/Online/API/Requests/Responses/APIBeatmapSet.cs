@@ -20,7 +20,7 @@ namespace osu.Game.Online.API.Requests.Responses
         public BeatmapSetOnlineCovers Covers { get; set; }
 
         [JsonProperty(@"id")]
-        public int OnlineID { get; set; }
+        public long OnlineID { get; set; }
 
         [JsonProperty(@"status")]
         public BeatmapSetOnlineStatus Status { get; set; }

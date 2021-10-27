@@ -15,10 +15,10 @@ namespace osu.Game.Online.Spectator
     public class SpectatorState : IEquatable<SpectatorState>
     {
         [Key(0)]
-        public int? BeatmapID { get; set; }
+        public long? BeatmapID { get; set; }
 
         [Key(1)]
-        public int? RulesetID { get; set; }
+        public long? RulesetID { get; set; }
 
         [NotNull]
         [Key(2)]

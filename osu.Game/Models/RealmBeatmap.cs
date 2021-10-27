@@ -45,7 +45,7 @@ namespace osu.Game.Models
         public int StatusInt { get; set; }
 
         [Indexed]
-        public int OnlineID { get; set; } = -1;
+        public long OnlineID { get; set; } = -1;
 
         public double Length { get; set; }
 

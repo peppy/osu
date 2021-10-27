@@ -271,5 +271,7 @@ namespace osu.Game.Scoring
 
             return ReferenceEquals(this, other);
         }
+
+        long IHasOnlineID.OnlineID => OnlineScoreID ?? -1;
     }
 }

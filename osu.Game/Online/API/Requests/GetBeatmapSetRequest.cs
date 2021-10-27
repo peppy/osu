@@ -7,10 +7,10 @@ namespace osu.Game.Online.API.Requests
 {
     public class GetBeatmapSetRequest : APIRequest<APIBeatmapSet>
     {
-        public readonly int ID;
+        public readonly long ID;
         public readonly BeatmapSetLookupType Type;
 
-        public GetBeatmapSetRequest(int id, BeatmapSetLookupType type = BeatmapSetLookupType.SetId)
+        public GetBeatmapSetRequest(long id, BeatmapSetLookupType type = BeatmapSetLookupType.SetId)
         {
             ID = id;
             Type = type;

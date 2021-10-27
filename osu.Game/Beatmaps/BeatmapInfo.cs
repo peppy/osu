@@ -23,10 +23,10 @@ namespace osu.Game.Beatmaps
 
         public int BeatmapVersion;
 
-        private int? onlineBeatmapID;
+        private long? onlineBeatmapID;
 
         [JsonProperty("id")]
-        public int? OnlineBeatmapID
+        public long? OnlineBeatmapID
         {
             get => onlineBeatmapID;
             set => onlineBeatmapID = value > 0 ? value : null;
@@ -176,7 +176,7 @@ namespace osu.Game.Beatmaps
 
         #region Implementation of IHasOnlineID
 
-        public int OnlineID => OnlineBeatmapID ?? -1;
+        public long OnlineID => OnlineBeatmapID ?? -1;
 
         #endregion
 

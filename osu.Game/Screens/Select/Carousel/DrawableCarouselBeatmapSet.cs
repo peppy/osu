@@ -25,7 +25,7 @@ namespace osu.Game.Screens.Select.Carousel
         public const float HEIGHT = MAX_HEIGHT;
 
         private Action<BeatmapSetInfo> restoreHiddenRequested;
-        private Action<int> viewDetails;
+        private Action<long> viewDetails;
 
         [Resolved(CanBeNull = true)]
         private DialogOverlay dialogOverlay { get; set; }

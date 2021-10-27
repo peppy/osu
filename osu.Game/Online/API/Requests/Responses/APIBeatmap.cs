@@ -13,10 +13,10 @@ namespace osu.Game.Online.API.Requests.Responses
     public class APIBeatmap : IBeatmapInfo, IBeatmapOnlineInfo
     {
         [JsonProperty(@"id")]
-        public int OnlineID { get; set; }
+        public long OnlineID { get; set; }
 
         [JsonProperty(@"beatmapset_id")]
-        public int OnlineBeatmapSetID { get; set; }
+        public long OnlineBeatmapSetID { get; set; }
 
         [JsonProperty(@"status")]
         public BeatmapSetOnlineStatus Status { get; set; }

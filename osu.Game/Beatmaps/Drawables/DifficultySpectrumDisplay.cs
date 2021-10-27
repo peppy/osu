@@ -85,11 +85,11 @@ namespace osu.Game.Beatmaps.Drawables
 
         private class RulesetDifficultyGroup : FillFlowContainer
         {
-            private readonly int rulesetId;
+            private readonly long rulesetId;
             private readonly IEnumerable<IBeatmapInfo> beatmapInfos;
             private readonly bool collapsed;
 
-            public RulesetDifficultyGroup(int rulesetId, IEnumerable<IBeatmapInfo> beatmapInfos, bool collapsed)
+            public RulesetDifficultyGroup(long rulesetId, IEnumerable<IBeatmapInfo> beatmapInfos, bool collapsed)
             {
                 this.rulesetId = rulesetId;
                 this.beatmapInfos = beatmapInfos;

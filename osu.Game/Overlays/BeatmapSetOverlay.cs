@@ -82,7 +82,7 @@ namespace osu.Game.Overlays
             return true;
         }
 
-        public void FetchAndShowBeatmap(int beatmapId)
+        public void FetchAndShowBeatmap(long beatmapId)
         {
             beatmapSet.Value = null;
 
@@ -97,7 +97,7 @@ namespace osu.Game.Overlays
             Show();
         }
 
-        public void FetchAndShowBeatmapSet(int beatmapSetId)
+        public void FetchAndShowBeatmapSet(long beatmapSetId)
         {
             beatmapSet.Value = null;
 
@@ -130,7 +130,7 @@ namespace osu.Game.Overlays
 
                 BeatmapSet.BindValueChanged(beatmapSet =>
                 {
-                    if (beatmapSet.NewValue?.OnlineBeatmapSetID is int onlineBeatmapSetID)
+                    if (beatmapSet.NewValue?.OnlineBeatmapSetID is long onlineBeatmapSetID)
                     {
                         Show();
                         comments.ShowComments(CommentableType.Beatmapset, onlineBeatmapSetID);

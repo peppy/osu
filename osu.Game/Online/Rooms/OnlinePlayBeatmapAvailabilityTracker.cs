@@ -59,7 +59,7 @@ namespace osu.Game.Online.Rooms
 
         protected override bool VerifyDatabasedModel(BeatmapSetInfo databasedSet)
         {
-            int beatmapId = SelectedItem.Value?.Beatmap.Value.OnlineID ?? -1;
+            long beatmapId = SelectedItem.Value?.Beatmap.Value.OnlineID ?? -1;
             string checksum = SelectedItem.Value?.Beatmap.Value.MD5Hash;
 
             var matchingBeatmap = databasedSet.Beatmaps.FirstOrDefault(b => b.OnlineBeatmapID == beatmapId && b.MD5Hash == checksum);
@@ -75,7 +75,7 @@ namespace osu.Game.Online.Rooms
 
         protected override bool IsModelAvailableLocally()
         {
-            int onlineId = SelectedItem.Value.Beatmap.Value.OnlineID;
+            long onlineId = SelectedItem.Value.Beatmap.Value.OnlineID;
             string checksum = SelectedItem.Value.Beatmap.Value.MD5Hash;
 
             var beatmap = Manager.QueryBeatmap(b => b.OnlineBeatmapID == onlineId && b.MD5Hash == checksum);
