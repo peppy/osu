@@ -19,7 +19,50 @@ using osu.Game.Utils;
 
 namespace osu.Game.Scoring
 {
-    public class ScoreInfo : IHasFiles<ScoreFileInfo>, IHasPrimaryKey, ISoftDelete, IEquatable<ScoreInfo>, IDeepCloneable<ScoreInfo>
+    public interface IScoreInfo : IHasOnlineID
+    {
+        int TotalScore { get; set; }
+
+        int MaxCombo { get; set; }
+
+        User User { get; set; }
+
+        long OnlineScoreID { get; set; }
+
+        bool Replay { get; set; }
+
+        DateTimeOffset Date { get; set; }
+
+        BeatmapInfo BeatmapInfo { get; set; }
+
+        double Accuracy { get; set; }
+
+        double? PP { get; set; }
+
+        BeatmapMetadata Metadata
+        {
+            set
+            {
+                // extract the set ID to its correct place.
+                BeatmapInfo.BeatmapSet = new BeatmapSetInfo { OnlineBeatmapSetID = value.ID };
+                value.ID = 0;
+
+                BeatmapInfo.Metadata = value;
+            }
+        }
+
+        Dictionary<string, int> Statistics { get; set; }
+
+        int OnlineRulesetID { get; set; }
+
+        string[] Mods { get; set; }
+
+        [(typeof(StringEnumConverter))]
+        public ScoreRank Rank { get; set; }
+
+    }
+
+    public class ScoreInfo : IScoreInfo, IHasFiles<ScoreFileInfo>, IHasPrimaryKey, ISoftDelete, IEquatable<ScoreInfo>, IDeepCloneable<ScoreInfo>
     {
         public int ID { get; set; }
 
@@ -54,7 +97,7 @@ namespace osu.Game.Scoring
         public bool Passed { get; set; } = true;
 
         [JsonIgnore]
-        public virtual RulesetInfo Ruleset { get; set; }
+        public RulesetInfo Ruleset { get; set; }
 
         private APIMod[] localAPIMods;
         private Mod[] mods;
