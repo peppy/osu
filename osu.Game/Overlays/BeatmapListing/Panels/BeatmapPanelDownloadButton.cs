@@ -32,9 +32,9 @@ namespace osu.Game.Overlays.BeatmapListing.Panels
 
         protected readonly Bindable<DownloadState> State = new Bindable<DownloadState>();
 
-        private readonly IBeatmapSetInfo beatmapSet;
+        private readonly APIBeatmapSet beatmapSet;
 
-        public BeatmapPanelDownloadButton(IBeatmapSetInfo beatmapSet)
+        public BeatmapPanelDownloadButton(APIBeatmapSet beatmapSet)
         {
             this.beatmapSet = beatmapSet;
 
@@ -101,7 +101,7 @@ namespace osu.Game.Overlays.BeatmapListing.Panels
                         break;
 
                     default:
-                        if ((beatmapSet as IBeatmapSetOnlineInfo)?.Availability.DownloadDisabled == true)
+                        if (beatmapSet.Availability.DownloadDisabled)
                         {
                             button.Enabled.Value = false;
                             button.TooltipText = "this beatmap is currently not available for download.";

@@ -41,14 +41,14 @@ namespace osu.Game.Tests.Visual.Online
         {
             AddUntilStep("ensure manager loaded", () => beatmaps != null);
             ensureSoleilyRemoved();
-            createButtonWithBeatmap(createSoleily());
+            createButtonWithBeatmap(createSampleBeatmapSet());
             AddAssert("button state not downloaded", () => downloadButton.DownloadState == DownloadState.NotDownloaded);
             AddStep("import soleily", () => beatmaps.Import(TestResources.GetQuickTestBeatmapForImport()));
 
             AddUntilStep("wait for beatmap import", () => beatmaps.GetAllUsableBeatmapSets().Any(b => b.OnlineBeatmapSetID == 241526));
             AddAssert("button state downloaded", () => downloadButton.DownloadState == DownloadState.LocallyAvailable);
 
-            createButtonWithBeatmap(createSoleily());
+            createButtonWithBeatmap(createSampleBeatmapSet());
             AddAssert("button state downloaded", () => downloadButton.DownloadState == DownloadState.LocallyAvailable);
             ensureSoleilyRemoved();
             AddAssert("button state not downloaded", () => downloadButton.DownloadState == DownloadState.NotDownloaded);
@@ -69,7 +69,9 @@ namespace osu.Game.Tests.Visual.Online
             AddAssert($"button {(enabled ? "enabled" : "disabled")}", () => downloadButton.DownloadEnabled == enabled);
         }
 
-        private void createButtonWithBeatmap(IBeatmapSetInfo beatmap)
+        private APIBeatmapSet createSampleBeatmapSet() => CreateAPIBeatmapSet(new OsuRuleset().RulesetInfo);
+
+        private void createButtonWithBeatmap(APIBeatmapSet beatmap)
         {
             AddStep("create button", () =>
             {
@@ -108,7 +110,7 @@ namespace osu.Game.Tests.Visual.Online
             };
         }
 
-        private IBeatmapSetInfo getDownloadableBeatmapSet()
+        private APIBeatmapSet getDownloadableBeatmapSet()
         {
             var apiBeatmapSet = CreateWorkingBeatmap(new OsuRuleset().RulesetInfo).BeatmapSetInfo.OnlineInfo;
 
@@ -118,7 +120,7 @@ namespace osu.Game.Tests.Visual.Online
             return apiBeatmapSet;
         }
 
-        private IBeatmapSetInfo getUndownloadableBeatmapSet()
+        private APIBeatmapSet getUndownloadableBeatmapSet()
         {
             var apiBeatmapSet = CreateWorkingBeatmap(new OsuRuleset().RulesetInfo).BeatmapSetInfo.OnlineInfo;
 
@@ -144,7 +146,7 @@ namespace osu.Game.Tests.Visual.Online
 
             public DownloadState DownloadState => State.Value;
 
-            public TestDownloadButton(IBeatmapSetInfo beatmapSet)
+            public TestDownloadButton(APIBeatmapSet beatmapSet)
                 : base(beatmapSet)
             {
             }

@@ -293,7 +293,7 @@ namespace osu.Game.Screens.OnlinePlay
             private const float width = 50;
 
             public PlaylistDownloadButton(PlaylistItem playlistItem)
-                : base((BeatmapSetInfo)playlistItem.Beatmap.Value.BeatmapSet) // TODO: can't exist.
+                : base(playlistItem.APIBeatmap.BeatmapSet) // TODO: no idea if this will work (is BeatmapSet populated?)
             {
                 this.playlistItem = playlistItem;
 

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
-using osu.Game.Rulesets;
 using osu.Game.Users;
 
 #nullable enable
@@ -119,8 +118,6 @@ namespace osu.Game.Online.API.Requests.Responses
 
         [JsonProperty(@"beatmaps")]
         public IEnumerable<APIBeatmap> Beatmaps { get; set; } = Array.Empty<APIBeatmap>();
-
-        public virtual IBeatmapSetInfo ToBeatmapSet(RulesetStore rulesets) => this;
 
         private BeatmapMetadata metadata => new BeatmapMetadata
         {
