@@ -221,7 +221,7 @@ namespace osu.Game.Overlays.BeatmapListing.Panels
                 });
             }
 
-            if (SetInfo)
+            if (SetInfo.TrackId != null)
             {
                 artistContainer.Add(new FeaturedArtistBeatmapPill
                 {

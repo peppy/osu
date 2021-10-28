@@ -7,7 +7,6 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input.Events;
-using osu.Game.Beatmaps;
 using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays.BeatmapSet;
@@ -121,7 +120,7 @@ namespace osu.Game.Overlays
 
         private class CommentsSection : BeatmapSetLayoutSection
         {
-            public readonly Bindable<BeatmapSetInfo> BeatmapSet = new Bindable<BeatmapSetInfo>();
+            public readonly Bindable<APIBeatmapSet> BeatmapSet = new Bindable<APIBeatmapSet>();
 
             public CommentsSection()
             {
@@ -131,10 +130,10 @@ namespace osu.Game.Overlays
 
                 BeatmapSet.BindValueChanged(beatmapSet =>
                 {
-                    if (beatmapSet.NewValue?.OnlineBeatmapSetID is int onlineBeatmapSetID)
+                    if (beatmapSet.NewValue?.OnlineID > 0)
                     {
                         Show();
-                        comments.ShowComments(CommentableType.Beatmapset, onlineBeatmapSetID);
+                        comments.ShowComments(CommentableType.Beatmapset, beatmapSet.NewValue.OnlineID);
                     }
                     else
                     {

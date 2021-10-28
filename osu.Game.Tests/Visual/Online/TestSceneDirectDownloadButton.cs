@@ -41,14 +41,14 @@ namespace osu.Game.Tests.Visual.Online
         {
             AddUntilStep("ensure manager loaded", () => beatmaps != null);
             ensureSoleilyRemoved();
-            createButtonWithBeatmap(createSoleily());
+            createButtonWithBeatmap(createSampleBeatmapSet());
             AddAssert("button state not downloaded", () => downloadButton.DownloadState == DownloadState.NotDownloaded);
             AddStep("import soleily", () => beatmaps.Import(TestResources.GetQuickTestBeatmapForImport()));
 
             AddUntilStep("wait for beatmap import", () => beatmaps.GetAllUsableBeatmapSets().Any(b => b.OnlineBeatmapSetID == 241526));
             AddAssert("button state downloaded", () => downloadButton.DownloadState == DownloadState.LocallyAvailable);
 
-            createButtonWithBeatmap(createSoleily());
+            createButtonWithBeatmap(createSampleBeatmapSet());
             AddAssert("button state downloaded", () => downloadButton.DownloadState == DownloadState.LocallyAvailable);
             ensureSoleilyRemoved();
             AddAssert("button state not downloaded", () => downloadButton.DownloadState == DownloadState.NotDownloaded);
@@ -69,24 +69,9 @@ namespace osu.Game.Tests.Visual.Online
             AddAssert($"button {(enabled ? "enabled" : "disabled")}", () => downloadButton.DownloadEnabled == enabled);
         }
 
-        private BeatmapSetInfo createSoleily()
-        {
-            return new BeatmapSetInfo
-            {
-                ID = 1,
-                OnlineBeatmapSetID = 241526,
-                OnlineInfo = new APIBeatmapSet
-                {
-                    Availability = new BeatmapSetOnlineAvailability
-                    {
-                        DownloadDisabled = false,
-                        ExternalLink = string.Empty,
-                    },
-                },
-            };
-        }
+        private APIBeatmapSet createSampleBeatmapSet() => CreateAPIBeatmapSet(new OsuRuleset().RulesetInfo);
 
-        private void createButtonWithBeatmap(BeatmapSetInfo beatmap)
+        private void createButtonWithBeatmap(APIBeatmapSet beatmap)
         {
             AddStep("create button", () =>
             {
@@ -112,26 +97,28 @@ namespace osu.Game.Tests.Visual.Online
             });
         }
 
-        private BeatmapSetInfo getDownloadableBeatmapSet()
+        private APIBeatmapSet getDownloadableBeatmapSet()
         {
-            var normal = CreateWorkingBeatmap(new OsuRuleset().RulesetInfo).BeatmapSetInfo;
-            normal.OnlineInfo.HasVideo = true;
-            normal.OnlineInfo.HasStoryboard = true;
+            var normal = createSampleBeatmapSet();
+
+            normal.HasVideo = true;
+            normal.HasStoryboard = true;
 
             return normal;
         }
 
-        private BeatmapSetInfo getUndownloadableBeatmapSet()
+        private APIBeatmapSet getUndownloadableBeatmapSet()
         {
-            var beatmap = CreateWorkingBeatmap(new OsuRuleset().RulesetInfo).BeatmapSetInfo;
-            beatmap.Metadata.Artist = "test";
-            beatmap.Metadata.Title = "undownloadable";
-            beatmap.Metadata.AuthorString = "test";
+            var beatmap = createSampleBeatmapSet();
 
-            beatmap.OnlineInfo.HasVideo = true;
-            beatmap.OnlineInfo.HasStoryboard = true;
+            beatmap.Artist = "test";
+            beatmap.Title = "undownloadable";
+            beatmap.AuthorString = "test";
 
-            beatmap.OnlineInfo.Availability = new BeatmapSetOnlineAvailability
+            beatmap.HasVideo = true;
+            beatmap.HasStoryboard = true;
+
+            beatmap.Availability = new BeatmapSetOnlineAvailability
             {
                 DownloadDisabled = true,
                 ExternalLink = "http://osu.ppy.sh",
@@ -146,7 +133,7 @@ namespace osu.Game.Tests.Visual.Online
 
             public DownloadState DownloadState => State.Value;
 
-            public TestDownloadButton(BeatmapSetInfo beatmapSet)
+            public TestDownloadButton(APIBeatmapSet beatmapSet)
                 : base(beatmapSet)
             {
             }

@@ -150,7 +150,7 @@ namespace osu.Game.Tests.Visual.Online
                 overlay.ShowBeatmapSet(set);
             });
 
-            AddAssert("shown beatmaps of current ruleset", () => overlay.Header.HeaderContent.Picker.Difficulties.All(b => b.BeatmapInfo.Ruleset.Equals(overlay.Header.RulesetSelector.Current.Value)));
+            AddAssert("shown beatmaps of current ruleset", () => overlay.Header.HeaderContent.Picker.Difficulties.All(b => b.Beatmap.Ruleset.OnlineID == overlay.Header.RulesetSelector.Current.Value.OnlineID));
             AddAssert("left-most beatmap selected", () => overlay.Header.HeaderContent.Picker.Difficulties.First().State == BeatmapPicker.DifficultySelectorState.Selected);
         }
 

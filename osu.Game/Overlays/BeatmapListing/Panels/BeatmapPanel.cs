@@ -164,7 +164,7 @@ namespace osu.Game.Overlays.BeatmapListing.Panels
         protected Drawable CreateBackground() => new UpdateableOnlineBeatmapSetCover
         {
             RelativeSizeAxes = Axes.Both,
-            OnlineInfo = SetInfo.OnlineInfo,
+            OnlineInfo = SetInfo,
         };
 
         public class Statistic : FillFlowContainer

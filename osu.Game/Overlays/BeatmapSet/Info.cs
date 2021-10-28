@@ -6,7 +6,6 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
-using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Online.API.Requests.Responses;
@@ -25,10 +24,10 @@ namespace osu.Game.Overlays.BeatmapSet
 
         public readonly Bindable<APIBeatmapSet> BeatmapSet = new Bindable<APIBeatmapSet>();
 
-        public BeatmapInfo BeatmapInfo
+        public APIBeatmap BeatmapInfo
         {
-            get => successRate.BeatmapInfo;
-            set => successRate.BeatmapInfo = value;
+            get => successRate.Beatmap;
+            set => successRate.Beatmap = value;
         }
 
         public Info()

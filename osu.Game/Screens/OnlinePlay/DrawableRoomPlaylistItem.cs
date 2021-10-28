@@ -294,7 +294,7 @@ namespace osu.Game.Screens.OnlinePlay
             public override bool IsPresent => true;
 
             public PlaylistDownloadButton(PlaylistItem playlistItem)
-                : base((BeatmapSetInfo)playlistItem.Beatmap.Value.BeatmapSet) // TODO: can't exist.
+                : base(playlistItem.APIBeatmap.BeatmapSet) // TODO: no idea if this will work (is BeatmapSet populated?)
             {
                 this.playlistItem = playlistItem;
                 Alpha = 0;

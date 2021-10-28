@@ -13,6 +13,7 @@ using osu.Game.Graphics.UserInterface;
 using osuTK.Graphics;
 using System;
 using System.Linq;
+using osu.Framework.Allocation;
 using osu.Framework.Extensions.IEnumerableExtensions;
 
 namespace osu.Game.Overlays.BeatmapSet
@@ -45,6 +46,9 @@ namespace osu.Game.Overlays.BeatmapSet
             Ruleset.BindValueChanged(onRulesetChanged, true);
         }
 
+        [Resolved]
+        private RulesetStore rulesets { get; set; }
+
         private void onRulesetChanged(ValueChangedEvent<IRulesetInfo> ruleset)
         {
             SelectedMods.Clear();
@@ -54,8 +58,7 @@ namespace osu.Game.Overlays.BeatmapSet
                 return;
 
             modsContainer.Add(new ModButton(new ModNoMod()));
-            // todo: create instance broken
-            modsContainer.AddRange(ruleset.NewValue.CreateInstance().AllMods.Where(m => m.UserPlayable).Select(m => new ModButton(m)));
+            modsContainer.AddRange(rulesets.GetRuleset(ruleset.NewValue.OnlineID).CreateInstance().AllMods.Where(m => m.UserPlayable).Select(m => new ModButton(m)));
 
             modsContainer.ForEach(button =>
             {

@@ -70,13 +70,8 @@ namespace osu.Game.Online.API.Requests.Responses
         [JsonConverter(typeof(StringEnumConverter))]
         public ScoreRank Rank { get; set; }
 
-        /// <summary>
-        /// Create a <see cref="ScoreInfo"/> from an API score instance.
-        /// </summary>
-        /// <param name="rulesets">A ruleset store, used to populate a ruleset instance in the returned score.</param>
-        /// <param name="beatmap">An optional beatmap, copied into the returned score (for cases where the API does not populate the beatmap).</param>
-        /// <returns></returns>
-        public ScoreInfo CreateScoreInfo(RulesetStore rulesets, BeatmapInfo beatmap = null)
+        // TODO: This function will eventually be going away.
+        public ScoreInfo CreateScoreInfo(RulesetStore rulesets, IBeatmapInfo beatmap = null)
         {
             var ruleset = rulesets.GetRuleset(OnlineRulesetID);
 
@@ -103,8 +98,9 @@ namespace osu.Game.Online.API.Requests.Responses
                 Mods = mods,
             };
 
-            if (beatmap != null)
-                scoreInfo.BeatmapInfo = beatmap;
+            // TODO: fix
+            // if (beatmap != null)
+            //     scoreInfo.BeatmapInfo = beatmap;
 
             if (Statistics != null)
             {

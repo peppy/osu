@@ -6,6 +6,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Beatmaps;
+using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays.BeatmapSet.Buttons;
 using osu.Game.Screens.Select.Details;
 using osuTK;
@@ -21,9 +22,9 @@ namespace osu.Game.Overlays.BeatmapSet
         private readonly AdvancedStats advanced;
         private readonly DetailBox ratingBox;
 
-        private BeatmapSetInfo beatmapSet;
+        private APIBeatmapSet beatmapSet;
 
-        public BeatmapSetInfo BeatmapSet
+        public APIBeatmapSet BeatmapSet
         {
             get => beatmapSet;
             set
@@ -53,7 +54,7 @@ namespace osu.Game.Overlays.BeatmapSet
         private void updateDisplay()
         {
             Ratings.Ratings = BeatmapSet?.Ratings;
-            ratingBox.Alpha = BeatmapSet?.OnlineInfo?.Status > 0 ? 1 : 0;
+            ratingBox.Alpha = BeatmapSet?.Status > 0 ? 1 : 0;
         }
 
         public Details()

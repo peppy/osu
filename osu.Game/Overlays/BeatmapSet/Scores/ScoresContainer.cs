@@ -1,24 +1,24 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using osu.Framework.Allocation;
-using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Shapes;
-using osuTK;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using osu.Game.Online.API.Requests.Responses;
+using osu.Framework.Allocation;
+using osu.Framework.Bindables;
+using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
 using osu.Game.Beatmaps;
+using osu.Game.Graphics.UserInterface;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests;
-using osu.Framework.Bindables;
-using osu.Game.Graphics.UserInterface;
+using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Rulesets;
 using osu.Game.Scoring;
 using osu.Game.Screens.Select.Leaderboards;
 using osu.Game.Users;
+using osuTK;
 
 namespace osu.Game.Overlays.BeatmapSet.Scores
 {
@@ -26,7 +26,7 @@ namespace osu.Game.Overlays.BeatmapSet.Scores
     {
         private const int spacing = 15;
 
-        public readonly Bindable<IBeatmapInfo> Beatmap = new Bindable<IBeatmapInfo>();
+        public readonly Bindable<APIBeatmap> Beatmap = new Bindable<APIBeatmap>();
         private readonly Bindable<IRulesetInfo> ruleset = new Bindable<IRulesetInfo>();
         private readonly Bindable<BeatmapLeaderboardScope> scope = new Bindable<BeatmapLeaderboardScope>(BeatmapLeaderboardScope.Global);
         private readonly IBindable<User> user = new Bindable<User>();
@@ -200,11 +200,11 @@ namespace osu.Game.Overlays.BeatmapSet.Scores
             user.BindValueChanged(onUserChanged, true);
         }
 
-        private void onBeatmapChanged(ValueChangedEvent<IBeatmapInfo> beatmap)
+        private void onBeatmapChanged(ValueChangedEvent<APIBeatmap> beatmap)
         {
             var beatmapRuleset = beatmap.NewValue?.Ruleset;
 
-            if (ruleset.Value?.Equals(beatmapRuleset) ?? false)
+            if (ruleset.Value?.OnlineID == beatmapRuleset?.OnlineID)
             {
                 modSelector.DeselectAll();
                 ruleset.TriggerChange();

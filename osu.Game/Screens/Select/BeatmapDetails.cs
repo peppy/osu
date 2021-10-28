@@ -56,8 +56,8 @@ namespace osu.Game.Screens.Select
 
                 beatmapInfo = value;
 
-                failTimes = beatmapInfo?.FailTimes;
-                ratings = beatmapInfo?.BeatmapSet.Ratings;
+                failTimes = beatmapInfo?.OnlineInfo?.FailTimes;
+                ratings = beatmapInfo?.BeatmapSet?.OnlineInfo?.Ratings;
 
                 Scheduler.AddOnce(updateStatistics);
             }
