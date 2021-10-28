@@ -2,14 +2,13 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
-using osu.Game.Beatmaps;
-using osu.Game.Rulesets;
-using osu.Game.Screens.Select.Leaderboards;
-using osu.Game.Online.API.Requests.Responses;
-using osu.Game.Rulesets.Mods;
-using System.Text;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Text;
+using osu.Game.Beatmaps;
+using osu.Game.Online.API.Requests.Responses;
+using osu.Game.Rulesets;
+using osu.Game.Rulesets.Mods;
+using osu.Game.Screens.Select.Leaderboards;
 
 namespace osu.Game.Online.API.Requests
 {
@@ -38,21 +37,15 @@ namespace osu.Game.Online.API.Requests
 
         private void onSuccess(APILegacyScores r)
         {
-            Debug.Assert(ruleset.ID != null, "ruleset.ID != null");
-
+            // The API doesn't return beatmaps per-score in this request as it would be redundant (all scores returned are associated with the same beatmap).
+            // Manually copy across for cases like results screen, which may read from it.
             foreach (APILegacyScoreInfo score in r.Scores)
-            {
                 score.BeatmapInfo = beatmapInfo;
-                score.OnlineRulesetID = ruleset.ID.Value;
-            }
 
             var userScore = r.UserScore;
 
             if (userScore != null)
-            {
                 userScore.Score.BeatmapInfo = beatmapInfo;
-                userScore.Score.OnlineRulesetID = ruleset.ID.Value;
-            }
         }
 
         protected override string Target => $@"beatmaps/{beatmapInfo.OnlineBeatmapID}/scores{createQueryParameters()}";
