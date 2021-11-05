@@ -10,6 +10,7 @@ using osu.Game.Beatmaps;
 using osu.Game.Configuration;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Models;
 using osu.Game.Online;
 using osu.Game.Online.API.Requests.Responses;
 
@@ -64,7 +65,7 @@ namespace osu.Game.Overlays.BeatmapListing.Panels
         }
 
         [BackgroundDependencyLoader(true)]
-        private void load(OsuGame game, BeatmapManager beatmaps, OsuConfigManager osuConfig)
+        private void load(OsuGame game, RealmBeatmapModelDownloader beatmapDownloader, OsuConfigManager osuConfig)
         {
             noVideoSetting = osuConfig.GetBindable<bool>(OsuSetting.PreferNoVideo);
 
@@ -86,7 +87,7 @@ namespace osu.Game.Overlays.BeatmapListing.Panels
                         break;
 
                     default:
-                        beatmaps.Download(beatmapSet, noVideoSetting.Value);
+                        beatmapDownloader.Download(new RealmBeatmapSet { OnlineID = beatmapSet.OnlineID }, noVideoSetting.Value);
                         break;
                 }
             };

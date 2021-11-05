@@ -20,5 +20,11 @@ namespace osu.Game.Beatmaps
             : base(beatmapImporter, api, host)
         {
         }
+
+        protected override ArchiveDownloadRequest<BeatmapSetInfo> CreateDownloadRequest(BeatmapSetInfo set, bool minimiseDownloadSize) =>
+            new DownloadBeatmapSetRequest<BeatmapSetInfo>(set, minimiseDownloadSize);
+
+        public override ArchiveDownloadRequest<BeatmapSetInfo> GetExistingDownload(BeatmapSetInfo model)
+            => CurrentDownloads.Find(r => r.Model.OnlineBeatmapSetID == model.OnlineBeatmapSetID);
     }
 }
