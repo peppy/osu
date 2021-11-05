@@ -13,8 +13,14 @@ namespace osu.Game.Database
     /// </summary>
     public interface IHasRealmFiles
     {
+        /// <summary>
+        /// A list of all files related to this model.
+        /// </summary>
         IList<RealmNamedFileUsage> Files { get; }
 
+        /// <summary>
+        /// A unique hash representing this model in its current state.
+        /// </summary>
         string Hash { get; set; }
     }
 }
