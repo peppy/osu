@@ -278,10 +278,8 @@ namespace osu.Game.Beatmaps
             return beatmapModelDownloader.Download(model, minimiseDownloadSize);
         }
 
-        public ArchiveDownloadRequest<IBeatmapSetInfo> GetExistingDownload(IBeatmapSetInfo model)
-        {
-            return beatmapModelDownloader.GetExistingDownload(model);
-        }
+        public ArchiveDownloadRequest<IBeatmapSetInfo> GetExistingDownload(IBeatmapSetInfo model) =>
+            beatmapModelDownloader.GetExistingDownload(model);
 
         #endregion
 
