@@ -232,10 +232,15 @@ namespace osu.Game
             dependencies.Cache(ScoreManager = new ScoreManager(RulesetStore, () => BeatmapManager, Storage, API, contextFactory, Scheduler, Host, () => difficultyCache, LocalConfig));
             dependencies.Cache(BeatmapManager = new BeatmapManager(Storage, contextFactory, RulesetStore, API, Audio, Resources, Host, defaultBeatmap, performOnlineLookups: true));
 
+            var onlineLookupQueue = new BeatmapOnlineLookupQueue(API, Storage);
+
             // the following realm components are not actively used yet, but initialised and kept up to date for initial testing.
             var realmRulesetStore = new RealmRulesetStore(realmFactory, Storage);
+            var realmBeatmapImporter = new BeatmapImporter(realmFactory, Storage, onlineLookupQueue);
+            var realmBeatmapDownloader = new RealmBeatmapModelDownloader(realmBeatmapImporter, API, Host);
 
             dependencies.Cache(realmRulesetStore);
+            dependencies.CacheAs<IModelDownloader<IBeatmapSetInfo>>(realmBeatmapDownloader);
 
             // this should likely be moved to ArchiveModelManager when another case appears where it is necessary
             // to have inter-dependent model managers. this could be obtained with an IHasForeign<T> interface to
@@ -271,6 +276,8 @@ namespace osu.Game
             dependencies.Cache(new OsuColour());
 
             RegisterImportHandler(BeatmapManager);
+            // Should replace the above line when we are ready to switch to realm as the primary import handler.
+            // RegisterImportHandler(realmBeatmapImporter);
             RegisterImportHandler(ScoreManager);
             RegisterImportHandler(SkinManager);
 
