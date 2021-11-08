@@ -28,7 +28,7 @@ namespace osu.Game.Beatmaps
     /// Handles general operations related to global beatmap management.
     /// </summary>
     [ExcludeFromDynamicCompile]
-    public class BeatmapManager : IModelDownloader<IBeatmapSetInfo>, IModelManager<BeatmapSetInfo>, IModelFileManager<BeatmapSetInfo, BeatmapSetFileInfo>, IModelImporter<BeatmapSetInfo>, IWorkingBeatmapCache, IDisposable
+    public class BeatmapManager : IModelManager<BeatmapSetInfo>, IModelFileManager<BeatmapSetInfo, BeatmapSetFileInfo>, IModelImporter<BeatmapSetInfo>, IWorkingBeatmapCache, IDisposable
     {
         private readonly BeatmapModelManager beatmapModelManager;
         private readonly BeatmapModelDownloader beatmapModelDownloader;
@@ -256,28 +256,6 @@ namespace osu.Game.Beatmaps
         {
             beatmapModelManager.Undelete(item);
         }
-
-        #endregion
-
-        #region Implementation of IModelDownloader<BeatmapSetInfo>
-
-        public event Action<ArchiveDownloadRequest<IBeatmapSetInfo>> DownloadBegan
-        {
-            add => beatmapModelDownloader.DownloadBegan += value;
-            remove => beatmapModelDownloader.DownloadBegan -= value;
-        }
-
-        public event Action<ArchiveDownloadRequest<IBeatmapSetInfo>> DownloadFailed
-        {
-            add => beatmapModelDownloader.DownloadFailed += value;
-            remove => beatmapModelDownloader.DownloadFailed -= value;
-        }
-
-        public bool Download(IBeatmapSetInfo model, bool minimiseDownloadSize = false) =>
-            beatmapModelDownloader.Download(model, minimiseDownloadSize);
-
-        public ArchiveDownloadRequest<IBeatmapSetInfo> GetExistingDownload(IBeatmapSetInfo model) =>
-            beatmapModelDownloader.GetExistingDownload(model);
 
         #endregion
 
