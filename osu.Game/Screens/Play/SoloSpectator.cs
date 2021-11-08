@@ -4,6 +4,7 @@
 using System.Diagnostics;
 using JetBrains.Annotations;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -13,6 +14,7 @@ using osu.Framework.Threading;
 using osu.Game.Audio;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
+using osu.Game.Database;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
@@ -49,9 +51,14 @@ namespace osu.Game.Screens.Play
         [Resolved]
         private BeatmapManager beatmaps { get; set; }
 
+        [Resolved]
+        private IModelDownloader<IBeatmapSetInfo> beatmapDownloader { get; set; }
+
         private Container beatmapPanelContainer;
         private TriangleButton watchButton;
         private SettingsCheckbox automaticDownload;
+
+        private Bindable<bool> preferNoVideo;
 
         /// <summary>
         /// The player's immediate online gameplay state.
@@ -156,6 +163,8 @@ namespace osu.Game.Screens.Play
                     }
                 }
             };
+
+            preferNoVideo = config.GetBindable<bool>(OsuSetting.PreferNoVideo);
         }
 
         protected override void LoadComplete()
@@ -244,7 +253,7 @@ namespace osu.Game.Screens.Play
             if (beatmaps.IsAvailableLocally(new BeatmapSetInfo { OnlineBeatmapSetID = beatmapSet.OnlineID }))
                 return;
 
-            beatmaps.Download(beatmapSet);
+            beatmapDownloader.Download(beatmapSet, preferNoVideo.Value);
         }
 
         public override bool OnExiting(IScreen next)
