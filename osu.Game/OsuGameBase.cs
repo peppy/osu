@@ -29,6 +29,7 @@ using osu.Game.Graphics.Cursor;
 using osu.Game.Input;
 using osu.Game.Input.Bindings;
 using osu.Game.IO;
+using osu.Game.Models;
 using osu.Game.Online;
 using osu.Game.Online.API;
 using osu.Game.Online.Chat;
@@ -244,6 +245,7 @@ namespace osu.Game
 
             dependencies.Cache(realmRulesetStore);
             dependencies.CacheAs<IModelDownloader<IBeatmapSetInfo>>(realmBeatmapDownloader);
+            dependencies.CacheAs<IModelImporter<RealmBeatmapSet>>(realmBeatmapImporter);
 
             // this should likely be moved to ArchiveModelManager when another case appears where it is necessary
             // to have inter-dependent model managers. this could be obtained with an IHasForeign<T> interface to
@@ -278,9 +280,7 @@ namespace osu.Game
             dependencies.Cache(SessionStatics = new SessionStatics());
             dependencies.Cache(new OsuColour());
 
-            RegisterImportHandler(BeatmapManager);
-            // Should replace the above line when we are ready to switch to realm as the primary import handler.
-            // RegisterImportHandler(realmBeatmapImporter);
+            RegisterImportHandler(realmBeatmapImporter);
             RegisterImportHandler(ScoreManager);
             RegisterImportHandler(SkinManager);
 
