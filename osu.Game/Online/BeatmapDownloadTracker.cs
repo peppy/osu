@@ -4,6 +4,7 @@
 using System;
 using osu.Framework.Allocation;
 using osu.Game.Beatmaps;
+using osu.Game.Database;
 using osu.Game.Online.API;
 
 #nullable enable
@@ -15,6 +16,9 @@ namespace osu.Game.Online
         [Resolved(CanBeNull = true)]
         protected BeatmapManager? Manager { get; private set; }
 
+        [Resolved(CanBeNull = true)]
+        private IModelDownloader<IBeatmapSetInfo>? beatmapDownloader { get; set; }
+
         private ArchiveDownloadRequest<IBeatmapSetInfo>? attachedRequest;
 
         public BeatmapDownloadTracker(IBeatmapSetInfo trackedItem)
@@ -25,7 +29,7 @@ namespace osu.Game.Online
         [BackgroundDependencyLoader(true)]
         private void load()
         {
-            if (Manager == null)
+            if (Manager == null || beatmapDownloader == null)
                 return;
 
             // Used to interact with manager classes that don't support interface types. Will eventually be replaced.
@@ -34,10 +38,10 @@ namespace osu.Game.Online
             if (Manager.IsAvailableLocally(beatmapSetInfo))
                 UpdateState(DownloadState.LocallyAvailable);
             else
-                attachDownload(Manager.GetExistingDownload(beatmapSetInfo));
+                attachDownload(beatmapDownloader.GetExistingDownload(beatmapSetInfo));
 
-            Manager.DownloadBegan += downloadBegan;
-            Manager.DownloadFailed += downloadFailed;
+            beatmapDownloader.DownloadBegan += downloadBegan;
+            beatmapDownloader.DownloadFailed += downloadFailed;
             Manager.ItemUpdated += itemUpdated;
             Manager.ItemRemoved += itemRemoved;
         }
@@ -115,10 +119,14 @@ namespace osu.Game.Online
             base.Dispose(isDisposing);
             attachDownload(null);
 
+            if (beatmapDownloader != null)
+            {
+                beatmapDownloader.DownloadBegan -= downloadBegan;
+                beatmapDownloader.DownloadFailed -= downloadFailed;
+            }
+
             if (Manager != null)
             {
-                Manager.DownloadBegan -= downloadBegan;
-                Manager.DownloadFailed -= downloadFailed;
                 Manager.ItemUpdated -= itemUpdated;
                 Manager.ItemRemoved -= itemRemoved;
             }
