@@ -244,17 +244,13 @@ namespace osu.Game
             dependencies.CacheAs<IModelDownloader<IBeatmapSetInfo>>(realmBeatmapDownloader);
             dependencies.CacheAs<IModelImporter<RealmBeatmapSet>>(realmBeatmapImporter);
 
-            // this should likely be moved to ArchiveModelManager when another case appears where it is necessary
-            // to have inter-dependent model managers. this could be obtained with an IHasForeign<T> interface to
-            // allow lookups to be done on the child (ScoreManager in this case) to perform the cascading delete.
-            List<ScoreInfo> getBeatmapScores(BeatmapSetInfo set)
-            {
-                var beatmapIds = BeatmapManager.QueryBeatmaps(b => b.BeatmapSetInfoID == set.ID).Select(b => b.ID).ToList();
-                return ScoreManager.QueryScores(s => beatmapIds.Contains(s.BeatmapInfo.ID)).ToList();
-            }
-
-            BeatmapManager.ItemRemoved += item => ScoreManager.Delete(getBeatmapScores(item), true);
-            BeatmapManager.ItemUpdated += item => ScoreManager.Undelete(getBeatmapScores(item), true);
+            // TODO: This is a bit of a hard one to handle... we can't start a subscription here because we are not on the update thread...
+            // But if we don't start a subscription this early in game start, a beatmap addition/removal will potentially not trigger these events.
+            // Arguably this shouldn't exist in the first place, and scores should be EmbeddedObjects hanging off a beatmap, but as scores haven't been realm'd yet
+            // that's up in the air.
+            //
+            // BeatmapManager.ItemRemoved += item => ScoreManager.Delete(getBeatmapScores(item), true);
+            // BeatmapManager.ItemUpdated += item => ScoreManager.Undelete(getBeatmapScores(item), true);
 
             dependencies.Cache(difficultyCache = new BeatmapDifficultyCache());
             AddInternal(difficultyCache);
