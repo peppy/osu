@@ -18,6 +18,22 @@ namespace osu.Game.Tests.Database
     public class RealmLiveTests : RealmTest
     {
         [Test]
+        public void TestDetachAndUse()
+        {
+            RunTestWithRealm((realmFactory, _) =>
+            {
+                RealmBeatmap realmBeatmap = realmFactory.CreateContext().Write(r => r.Add(
+                    new RealmBeatmap(CreateRuleset(), new RealmBeatmapDifficulty(), new RealmBeatmapMetadata())));
+
+                RealmLive<RealmBeatmap> realmLiveBeatmap = realmBeatmap.ToLive();
+
+                sampleMethod(realmLiveBeatmap.Detach());
+            });
+
+            static void sampleMethod(IBeatmapInfo beatmap) => Assert.AreEqual(0, beatmap.BPM);
+        }
+
+        [Test]
         public void TestLiveCastability()
         {
             RunTestWithRealm((realmFactory, _) =>

@@ -31,6 +31,8 @@ namespace osu.Game.Database
         /// <param name="perform">The action to perform.</param>
         void PerformWrite(Action<T> perform);
 
+        T Detach();
+
         /// <summary>
         /// Resolve the value of this instance on the current thread's context.
         /// </summary>

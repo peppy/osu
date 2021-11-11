@@ -29,6 +29,8 @@ namespace osu.Game.Database
             perform(Value);
         }
 
+        public T Detach() => Value; // WE ARE EF. ANYTHING GOES.
+
         public T Value { get; }
     }
 }
