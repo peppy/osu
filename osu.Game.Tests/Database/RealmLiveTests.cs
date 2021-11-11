@@ -18,6 +18,33 @@ namespace osu.Game.Tests.Database
     public class RealmLiveTests : RealmTest
     {
         [Test]
+        public void TestDetachAndUseSet()
+        {
+            RunTestWithRealm((realmFactory, _) =>
+            {
+                RealmBeatmapSet beatmapSet = realmFactory.CreateContext().Write(r => r.Add(
+                    new RealmBeatmapSet
+                    {
+                        Beatmaps =
+                        {
+                            new RealmBeatmap(CreateRuleset(), new RealmBeatmapDifficulty(), new RealmBeatmapMetadata
+                            {
+                                Artist = "test"
+                            })
+                        }
+                    }));
+
+                beatmapSet = beatmapSet.Detach();
+
+                string result = Task.Factory.StartNew(() => getArtist(beatmapSet), TaskCreationOptions.LongRunning).Result;
+
+                Assert.AreEqual("test", result);
+            });
+
+            static string getArtist(IBeatmapSetInfo beatmap) => beatmap.Beatmaps.First().Metadata.Artist;
+        }
+
+        [Test]
         public void TestDetachAndUse()
         {
             RunTestWithRealm((realmFactory, _) =>

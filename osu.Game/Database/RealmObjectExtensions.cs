@@ -18,8 +18,11 @@ namespace osu.Game.Database
             c.ShouldMapProperty = pi => pi.SetMethod != null && pi.SetMethod.IsPublic;
 
             c.CreateMap<RealmKeyBinding, RealmKeyBinding>();
-            c.CreateMap<RealmBeatmap, RealmBeatmap>();
-            c.CreateMap<RealmBeatmapSet, RealmBeatmapSet>();
+            c.CreateMap<RealmBeatmapMetadata, RealmBeatmapMetadata>();
+            c.CreateMap<RealmBeatmap, RealmBeatmap>()
+             .ForMember(s => s.Metadata, cc => cc.MapFrom(s => s.Metadata.Detach()));
+            c.CreateMap<RealmBeatmapSet, RealmBeatmapSet>()
+             .ForMember(s => s.Beatmaps, cc => cc.MapFrom(s => s.Beatmaps.Detach()));
             c.CreateMap<RealmRuleset, RealmRuleset>();
         }).CreateMapper();
 
