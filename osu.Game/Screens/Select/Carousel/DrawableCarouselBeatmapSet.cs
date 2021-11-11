@@ -15,6 +15,7 @@ using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Utils;
 using osu.Game.Beatmaps;
 using osu.Game.Collections;
+using osu.Game.Database;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Models;
 using osu.Game.Overlays;
@@ -42,7 +43,7 @@ namespace osu.Game.Screens.Select.Carousel
         [CanBeNull]
         private Container<DrawableCarouselItem> beatmapContainer;
 
-        private RealmBeatmapSet beatmapSet;
+        private ILive<RealmBeatmapSet> beatmapSet;
 
         [CanBeNull]
         private Task beatmapsLoadTask;
@@ -215,8 +216,8 @@ namespace osu.Game.Screens.Select.Carousel
                 if (Item.State.Value == CarouselItemState.NotSelected)
                     items.Add(new OsuMenuItem("Expand", MenuItemType.Highlighted, () => Item.State.Value = CarouselItemState.Selected));
 
-                if (beatmapSet.OnlineID > 0 && viewDetails != null)
-                    items.Add(new OsuMenuItem("Details...", MenuItemType.Standard, () => viewDetails(beatmapSet.OnlineID)));
+                if (beatmapSet.Value.OnlineID > 0 && viewDetails != null)
+                    items.Add(new OsuMenuItem("Details...", MenuItemType.Standard, () => viewDetails(beatmapSet.Value.OnlineID)));
 
                 if (collectionManager != null)
                 {
@@ -227,7 +228,7 @@ namespace osu.Game.Screens.Select.Carousel
                     items.Add(new OsuMenuItem("Collections") { Items = collectionItems });
                 }
 
-                if (beatmapSet.Beatmaps.Any(b => b.Hidden))
+                if (beatmapSet.Value.Beatmaps.Any(b => b.Hidden))
                     items.Add(new OsuMenuItem("Restore all hidden", MenuItemType.Standard, () => restoreHiddenRequested(new BeatmapSetInfo())));
 
                 if (dialogOverlay != null)

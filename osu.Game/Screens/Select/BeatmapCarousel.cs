@@ -51,14 +51,14 @@ namespace osu.Game.Screens.Select
         /// <summary>
         /// The currently selected beatmap.
         /// </summary>
-        public RealmBeatmap SelectedBeatmapInfo => selectedBeatmap?.BeatmapInfo;
+        public RealmBeatmap SelectedBeatmapInfo => selectedBeatmap?.BeatmapInfo.Value;
 
         private CarouselBeatmap selectedBeatmap => selectedBeatmapSet?.Beatmaps.FirstOrDefault(s => s.State.Value == CarouselItemState.Selected);
 
         /// <summary>
         /// The currently selected beatmap set.
         /// </summary>
-        public RealmBeatmapSet SelectedBeatmapSet => selectedBeatmapSet?.BeatmapSet;
+        public RealmBeatmapSet SelectedBeatmapSet => selectedBeatmapSet?.BeatmapSet.Value;
 
         /// <summary>
         /// A function to optionally decide on a recommended difficulty from a beatmap set.
@@ -105,7 +105,7 @@ namespace osu.Game.Screens.Select
         // todo: only used for testing, maybe remove.
         public IEnumerable<RealmBeatmapSet> BeatmapSets
         {
-            get => beatmapSets.Select(g => g.BeatmapSet);
+            get => beatmapSets.Select(g => g.BeatmapSet.Value);
             set => loadBeatmapSets(value);
         }
 
@@ -116,7 +116,7 @@ namespace osu.Game.Screens.Select
             newRoot.AddChildren(beatmapSets.Select(createCarouselSet).Where(g => g != null));
 
             root = newRoot;
-            if (selectedBeatmapSet != null && !beatmapSets.Contains(selectedBeatmapSet.BeatmapSet))
+            if (selectedBeatmapSet != null && !beatmapSets.Contains(selectedBeatmapSet.BeatmapSet.Value))
                 selectedBeatmapSet = null;
 
             Scroll.Clear(false);
@@ -718,12 +718,10 @@ namespace osu.Game.Screens.Select
 
         private CarouselBeatmapSet createCarouselSet(RealmBeatmapSet beatmapSet)
         {
-            beatmapSet = beatmapSet.Detach();
-
             if (beatmapSet.Beatmaps.All(b => b.Hidden))
                 return null;
 
-            var set = new CarouselBeatmapSet(beatmapSet)
+            var set = new CarouselBeatmapSet(beatmapSet.ToLive())
             {
                 GetRecommendedBeatmap = beatmaps => GetRecommendedBeatmap?.Invoke(beatmaps)
             };
