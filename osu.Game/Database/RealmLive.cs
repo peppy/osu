@@ -83,6 +83,8 @@ namespace osu.Game.Database
                 transaction.Commit();
             });
 
+        public T Detach() => Value.Detach();
+
         public T Value
         {
             get

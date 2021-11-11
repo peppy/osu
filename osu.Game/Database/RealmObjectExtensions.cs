@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using osu.Game.Input.Bindings;
+using osu.Game.Models;
 using Realms;
 
 namespace osu.Game.Database
@@ -17,6 +18,9 @@ namespace osu.Game.Database
             c.ShouldMapProperty = pi => pi.SetMethod != null && pi.SetMethod.IsPublic;
 
             c.CreateMap<RealmKeyBinding, RealmKeyBinding>();
+            c.CreateMap<RealmBeatmap, RealmBeatmap>();
+            c.CreateMap<RealmBeatmapSet, RealmBeatmapSet>();
+            c.CreateMap<RealmRuleset, RealmRuleset>();
         }).CreateMapper();
 
         /// <summary>
