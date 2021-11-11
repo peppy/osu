@@ -18,6 +18,7 @@ namespace osu.Game.Database
             c.ShouldMapProperty = pi => pi.SetMethod != null && pi.SetMethod.IsPublic;
 
             c.CreateMap<RealmKeyBinding, RealmKeyBinding>();
+            c.CreateMap<RealmBeatmapMetadata, RealmBeatmapMetadata>();
             c.CreateMap<RealmBeatmap, RealmBeatmap>();
             c.CreateMap<RealmBeatmapSet, RealmBeatmapSet>();
             c.CreateMap<RealmRuleset, RealmRuleset>();
