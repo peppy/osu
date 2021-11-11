@@ -7,6 +7,7 @@ using System.Linq;
 using JetBrains.Annotations;
 using osu.Game.Beatmaps;
 using osu.Game.Collections;
+using osu.Game.Models;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Filter;
 using osu.Game.Screens.Select.Filter;
@@ -18,7 +19,7 @@ namespace osu.Game.Screens.Select
         public GroupMode Group;
         public SortMode Sort;
 
-        public BeatmapSetInfo SelectedBeatmapSet;
+        public RealmBeatmapSet SelectedBeatmapSet;
 
         public OptionalRange<double> StarDifficulty;
         public OptionalRange<float> ApproachRate;

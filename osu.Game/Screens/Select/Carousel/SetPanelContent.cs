@@ -7,6 +7,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Localisation;
+using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Drawables;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
@@ -41,13 +42,13 @@ namespace osu.Game.Screens.Select.Carousel
                 {
                     new OsuSpriteText
                     {
-                        Text = new RomanisableString(beatmapSet.Metadata.TitleUnicode, beatmapSet.Metadata.Title),
+                        Text = new RomanisableString(beatmapSet.Metadata?.TitleUnicode, beatmapSet.Metadata?.Title),
                         Font = OsuFont.GetFont(weight: FontWeight.Bold, size: 22, italics: true),
                         Shadow = true,
                     },
                     new OsuSpriteText
                     {
-                        Text = new RomanisableString(beatmapSet.Metadata.ArtistUnicode, beatmapSet.Metadata.Artist),
+                        Text = new RomanisableString(beatmapSet.Metadata?.ArtistUnicode, beatmapSet.Metadata?.Artist),
                         Font = OsuFont.GetFont(weight: FontWeight.SemiBold, size: 17, italics: true),
                         Shadow = true,
                     },
@@ -66,7 +67,7 @@ namespace osu.Game.Screens.Select.Carousel
                                 Margin = new MarginPadding { Right = 5 },
                                 TextSize = 11,
                                 TextPadding = new MarginPadding { Horizontal = 8, Vertical = 2 },
-                                Status = beatmapSet.Status
+                                Status = BeatmapSetOnlineStatus.None // TODO: needs to come from........... somewhere. probably stored to realm.
                             },
                             new FillFlowContainer<DifficultyIcon>
                             {

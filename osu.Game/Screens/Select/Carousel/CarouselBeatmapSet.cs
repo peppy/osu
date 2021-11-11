@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Game.Beatmaps;
+using osu.Game.Models;
 using osu.Game.Screens.Select.Filter;
 
 namespace osu.Game.Screens.Select.Carousel
@@ -29,11 +30,11 @@ namespace osu.Game.Screens.Select.Carousel
 
         public IEnumerable<CarouselBeatmap> Beatmaps => InternalChildren.OfType<CarouselBeatmap>();
 
-        public BeatmapSetInfo BeatmapSet;
+        public RealmBeatmapSet BeatmapSet;
 
         public Func<IEnumerable<BeatmapInfo>, BeatmapInfo> GetRecommendedBeatmap;
 
-        public CarouselBeatmapSet(BeatmapSetInfo beatmapSet)
+        public CarouselBeatmapSet(RealmBeatmapSet beatmapSet)
         {
             BeatmapSet = beatmapSet ?? throw new ArgumentNullException(nameof(beatmapSet));
 
@@ -47,8 +48,9 @@ namespace osu.Game.Screens.Select.Carousel
         {
             if (LastSelected == null || LastSelected.Filtered.Value)
             {
-                if (GetRecommendedBeatmap?.Invoke(Children.OfType<CarouselBeatmap>().Where(b => !b.Filtered.Value).Select(b => b.BeatmapInfo)) is BeatmapInfo recommended)
-                    return Children.OfType<CarouselBeatmap>().First(b => b.BeatmapInfo == recommended);
+                // TODO: reimplement
+                // if (GetRecommendedBeatmap?.Invoke(Children.OfType<CarouselBeatmap>().Where(b => !b.Filtered.Value).Select(b => b.BeatmapInfo)) is BeatmapInfo recommended)
+                //     return Children.OfType<CarouselBeatmap>().First(b => b.BeatmapInfo == recommended);
             }
 
             return base.GetNextToSelect();
@@ -84,16 +86,16 @@ namespace osu.Game.Screens.Select.Carousel
                     return compareUsingAggregateMax(otherSet, b => b.Length);
 
                 case SortMode.Difficulty:
-                    return compareUsingAggregateMax(otherSet, b => b.StarDifficulty);
+                    return compareUsingAggregateMax(otherSet, b => b.StarRating);
             }
         }
 
         /// <summary>
         /// All beatmaps which are not filtered and valid for display.
         /// </summary>
-        protected IEnumerable<BeatmapInfo> ValidBeatmaps => Beatmaps.Where(b => !b.Filtered.Value || b.State.Value == CarouselItemState.Selected).Select(b => b.BeatmapInfo);
+        protected IEnumerable<RealmBeatmap> ValidBeatmaps => Beatmaps.Where(b => !b.Filtered.Value || b.State.Value == CarouselItemState.Selected).Select(b => b.BeatmapInfo);
 
-        private int compareUsingAggregateMax(CarouselBeatmapSet other, Func<BeatmapInfo, double> func)
+        private int compareUsingAggregateMax(CarouselBeatmapSet other, Func<RealmBeatmap, double> func)
         {
             bool ourBeatmaps = ValidBeatmaps.Any();
             bool otherBeatmaps = other.ValidBeatmaps.Any();
