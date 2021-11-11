@@ -16,6 +16,7 @@ using osu.Framework.Utils;
 using osu.Game.Beatmaps;
 using osu.Game.Collections;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Models;
 using osu.Game.Overlays;
 
 namespace osu.Game.Screens.Select.Carousel
@@ -41,7 +42,7 @@ namespace osu.Game.Screens.Select.Carousel
         [CanBeNull]
         private Container<DrawableCarouselItem> beatmapContainer;
 
-        private BeatmapSetInfo beatmapSet;
+        private RealmBeatmapSet beatmapSet;
 
         [CanBeNull]
         private Task beatmapsLoadTask;
@@ -105,7 +106,7 @@ namespace osu.Game.Screens.Select.Carousel
 
             Header.Children = new Drawable[]
             {
-                background = new DelayedLoadWrapper(() => new SetPanelBackground(manager.GetWorkingBeatmap(beatmapSet.Beatmaps.FirstOrDefault()))
+                background = new DelayedLoadWrapper(() => new SetPanelBackground
                 {
                     RelativeSizeAxes = Axes.Both,
                 }, 300)
@@ -214,8 +215,8 @@ namespace osu.Game.Screens.Select.Carousel
                 if (Item.State.Value == CarouselItemState.NotSelected)
                     items.Add(new OsuMenuItem("Expand", MenuItemType.Highlighted, () => Item.State.Value = CarouselItemState.Selected));
 
-                if (beatmapSet.OnlineID != null && viewDetails != null)
-                    items.Add(new OsuMenuItem("Details...", MenuItemType.Standard, () => viewDetails(beatmapSet.OnlineID.Value)));
+                if (beatmapSet.OnlineID > 0 && viewDetails != null)
+                    items.Add(new OsuMenuItem("Details...", MenuItemType.Standard, () => viewDetails(beatmapSet.OnlineID)));
 
                 if (collectionManager != null)
                 {
@@ -227,51 +228,20 @@ namespace osu.Game.Screens.Select.Carousel
                 }
 
                 if (beatmapSet.Beatmaps.Any(b => b.Hidden))
-                    items.Add(new OsuMenuItem("Restore all hidden", MenuItemType.Standard, () => restoreHiddenRequested(beatmapSet)));
+                    items.Add(new OsuMenuItem("Restore all hidden", MenuItemType.Standard, () => restoreHiddenRequested(new BeatmapSetInfo())));
 
                 if (dialogOverlay != null)
-                    items.Add(new OsuMenuItem("Delete...", MenuItemType.Destructive, () => dialogOverlay.Push(new BeatmapDeleteDialog(beatmapSet))));
+                    items.Add(new OsuMenuItem("Delete...", MenuItemType.Destructive, () => dialogOverlay.Push(new BeatmapDeleteDialog(new BeatmapSetInfo()))));
                 return items.ToArray();
             }
         }
 
         private MenuItem createCollectionMenuItem(BeatmapCollection collection)
         {
-            Debug.Assert(beatmapSet != null);
-
-            TernaryState state;
-
-            int countExisting = beatmapSet.Beatmaps.Count(b => collection.Beatmaps.Contains(b));
-
-            if (countExisting == beatmapSet.Beatmaps.Count)
-                state = TernaryState.True;
-            else if (countExisting > 0)
-                state = TernaryState.Indeterminate;
-            else
-                state = TernaryState.False;
-
+            // TODO: reimplement
             return new TernaryStateToggleMenuItem(collection.Name.Value, MenuItemType.Standard, s =>
             {
-                foreach (var b in beatmapSet.Beatmaps)
-                {
-                    switch (s)
-                    {
-                        case TernaryState.True:
-                            if (collection.Beatmaps.Contains(b))
-                                continue;
-
-                            collection.Beatmaps.Add(b);
-                            break;
-
-                        case TernaryState.False:
-                            collection.Beatmaps.Remove(b);
-                            break;
-                    }
-                }
-            })
-            {
-                State = { Value = state }
-            };
+            });
         }
     }
 }

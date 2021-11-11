@@ -50,14 +50,14 @@ namespace osu.Game.Screens.Select
         /// <summary>
         /// The currently selected beatmap.
         /// </summary>
-        public BeatmapInfo SelectedBeatmapInfo => selectedBeatmap?.BeatmapInfo;
+        public RealmBeatmap SelectedBeatmapInfo => selectedBeatmap?.BeatmapInfo;
 
         private CarouselBeatmap selectedBeatmap => selectedBeatmapSet?.Beatmaps.FirstOrDefault(s => s.State.Value == CarouselItemState.Selected);
 
         /// <summary>
         /// The currently selected beatmap set.
         /// </summary>
-        public BeatmapSetInfo SelectedBeatmapSet => selectedBeatmapSet?.BeatmapSet;
+        public RealmBeatmapSet SelectedBeatmapSet => selectedBeatmapSet?.BeatmapSet;
 
         /// <summary>
         /// A function to optionally decide on a recommended difficulty from a beatmap set.
@@ -76,6 +76,9 @@ namespace osu.Game.Screens.Select
 
         public override bool PropagatePositionalInputSubTree => AllowSelection;
         public override bool PropagateNonPositionalInputSubTree => AllowSelection;
+
+        private IDisposable setSubscription;
+        private IDisposable beatmapSubscription;
 
         private (int first, int last) displayedRange;
 
@@ -99,13 +102,13 @@ namespace osu.Game.Screens.Select
         private IEnumerable<CarouselBeatmapSet> beatmapSets => root.Children.OfType<CarouselBeatmapSet>();
 
         // todo: only used for testing, maybe remove.
-        public IEnumerable<BeatmapSetInfo> BeatmapSets
+        public IEnumerable<RealmBeatmapSet> BeatmapSets
         {
             get => beatmapSets.Select(g => g.BeatmapSet);
             set => loadBeatmapSets(value);
         }
 
-        private void loadBeatmapSets(IEnumerable<BeatmapSetInfo> beatmapSets)
+        private void loadBeatmapSets(IEnumerable<RealmBeatmapSet> beatmapSets)
         {
             CarouselRoot newRoot = new CarouselRoot(this);
 
@@ -186,36 +189,31 @@ namespace osu.Game.Screens.Select
         {
             base.LoadComplete();
 
-            realmFactory.Context.All<RealmBeatmapSet>().Where(s => !s.DeletePending).SubscribeForNotifications(beatmapSetsChanged);
-            realmFactory.Context.All<RealmBeatmap>().Where(b => !b.Hidden).SubscribeForNotifications(beatmapsChanged);
+            setSubscription = realmFactory.Context.All<RealmBeatmapSet>().Where(s => !s.DeletePending).SubscribeForNotifications(beatmapSetsChanged);
+            beatmapSubscription = realmFactory.Context.All<RealmBeatmap>().Where(b => !b.Hidden).SubscribeForNotifications(beatmapsChanged);
         }
 
-        private void beatmapRemoved(BeatmapSetInfo item) => RemoveBeatmapSet(item);
-        private void beatmapUpdated(BeatmapSetInfo item) => UpdateBeatmapSet(item);
-        private void beatmapRestored(BeatmapInfo b) => UpdateBeatmapSet(beatmaps.QueryBeatmapSet(s => s.ID == b.BeatmapSetInfoID));
-        private void beatmapHidden(BeatmapInfo b) => UpdateBeatmapSet(beatmaps.QueryBeatmapSet(s => s.ID == b.BeatmapSetInfoID));
-
-        private void beatmapSetsChanged(IRealmCollection<RealmBeatmapSet> sender, ChangeSet changes, Exception error)
+        private void beatmapSetsChanged(IRealmCollection<RealmBeatmapSet> beatmapSets, ChangeSet changes, Exception error)
         {
             if (changes == null)
             {
                 // initial load
-                loadBeatmapSets(sender);
+                loadBeatmapSets(beatmapSets);
                 return;
             }
 
             foreach (int i in changes.NewModifiedIndices)
-                UpdateBeatmapSet(sender[i]);
+                UpdateBeatmapSet(beatmapSets[i]);
 
             // moves also appear as deletes / inserts but aren't important to us.
             if (!changes.Moves.Any())
             {
                 foreach (int i in changes.InsertedIndices)
-                    UpdateBeatmapSet(sender[i]);
+                    UpdateBeatmapSet(beatmapSets[i]);
 
                 // TODO: This can not work, as we recently found out https://github.com/realm/realm-dotnet/discussions/2634#discussioncomment-1605595.
                 foreach (int i in changes.DeletedIndices)
-                    RemoveBeatmapSet(sender[i]);
+                    RemoveBeatmapSet(beatmapSets[i]);
             }
         }
 
@@ -233,7 +231,7 @@ namespace osu.Game.Screens.Select
 
         #endregion
 
-        public void RemoveBeatmapSet(BeatmapSetInfo beatmapSet) => Schedule(() =>
+        public void RemoveBeatmapSet(RealmBeatmapSet beatmapSet) => Schedule(() =>
         {
             var existingSet = beatmapSets.FirstOrDefault(b => b.BeatmapSet.ID == beatmapSet.ID);
 
@@ -244,9 +242,9 @@ namespace osu.Game.Screens.Select
             itemsCache.Invalidate();
         });
 
-        public void UpdateBeatmapSet(BeatmapSetInfo beatmapSet) => Schedule(() =>
+        public void UpdateBeatmapSet(RealmBeatmapSet beatmapSet) => Schedule(() =>
         {
-            int? previouslySelectedID = null;
+            Guid? previouslySelectedID = null;
             CarouselBeatmapSet existingSet = beatmapSets.FirstOrDefault(b => b.BeatmapSet.ID == beatmapSet.ID);
 
             // If the selected beatmap is about to be removed, store its ID so it can be re-selected if required
@@ -297,7 +295,10 @@ namespace osu.Game.Screens.Select
                 if (!bypassFilters && set.Filtered.Value)
                     continue;
 
-                var item = set.Beatmaps.FirstOrDefault(p => p.BeatmapInfo.Equals(beatmapInfo));
+                CarouselBeatmap item = null;
+
+                // todo: reimplement
+                // set.Beatmaps.FirstOrDefault(p => p.BeatmapInfo.Equals(beatmapInfo));
 
                 if (item == null)
                     // The beatmap that needs to be selected doesn't exist in this set
@@ -665,14 +666,12 @@ namespace osu.Game.Screens.Select
             return (firstIndex, lastIndex);
         }
 
-        private CarouselBeatmapSet createCarouselSet(BeatmapSetInfo beatmapSet)
+        private CarouselBeatmapSet createCarouselSet(RealmBeatmapSet beatmapSet)
         {
+            beatmapSet = beatmapSet.Detach();
+
             if (beatmapSet.Beatmaps.All(b => b.Hidden))
                 return null;
-
-            // todo: remove the need for this.
-            foreach (var b in beatmapSet.Beatmaps)
-                b.Metadata ??= beatmapSet.Metadata;
 
             var set = new CarouselBeatmapSet(beatmapSet)
             {
@@ -686,7 +685,8 @@ namespace osu.Game.Screens.Select
                     if (state.NewValue == CarouselItemState.Selected)
                     {
                         selectedBeatmapSet = set;
-                        SelectionChanged?.Invoke(c.BeatmapInfo);
+                        // TODO: reimplement
+                        // SelectionChanged?.Invoke(c.BeatmapInfo);
 
                         itemsCache.Invalidate();
                         ScrollToSelected();
@@ -926,14 +926,8 @@ namespace osu.Game.Screens.Select
         protected override void Dispose(bool isDisposing)
         {
             base.Dispose(isDisposing);
-
-            if (beatmaps != null)
-            {
-                beatmaps.ItemUpdated -= beatmapUpdated;
-                beatmaps.ItemRemoved -= beatmapRemoved;
-                beatmaps.BeatmapHidden -= beatmapHidden;
-                beatmaps.BeatmapRestored -= beatmapRestored;
-            }
+            setSubscription?.Dispose();
+            beatmapSubscription?.Dispose();
         }
     }
 }

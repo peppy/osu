@@ -4,6 +4,7 @@
 using System;
 using System.Linq;
 using osu.Game.Beatmaps;
+using osu.Game.Models;
 using osu.Game.Screens.Select.Filter;
 
 namespace osu.Game.Screens.Select.Carousel
@@ -12,9 +13,9 @@ namespace osu.Game.Screens.Select.Carousel
     {
         public override float TotalHeight => DrawableCarouselBeatmap.HEIGHT;
 
-        public readonly BeatmapInfo BeatmapInfo;
+        public readonly RealmBeatmap BeatmapInfo;
 
-        public CarouselBeatmap(BeatmapInfo beatmapInfo)
+        public CarouselBeatmap(RealmBeatmap beatmapInfo)
         {
             BeatmapInfo = beatmapInfo;
             State.Value = CarouselItemState.Collapsed;
@@ -28,8 +29,8 @@ namespace osu.Game.Screens.Select.Carousel
 
             bool match =
                 criteria.Ruleset == null ||
-                BeatmapInfo.RulesetID == criteria.Ruleset.ID ||
-                (BeatmapInfo.RulesetID == 0 && criteria.Ruleset.ID > 0 && criteria.AllowConvertedBeatmaps);
+                BeatmapInfo.Ruleset.OnlineID == criteria.Ruleset.ID ||
+                (BeatmapInfo.Ruleset.OnlineID == 0 && criteria.Ruleset.ID > 0 && criteria.AllowConvertedBeatmaps);
 
             if (BeatmapInfo.BeatmapSet?.Equals(criteria.SelectedBeatmapSet) == true)
             {
@@ -39,10 +40,10 @@ namespace osu.Game.Screens.Select.Carousel
             }
 
             match &= !criteria.StarDifficulty.HasFilter || criteria.StarDifficulty.IsInRange(BeatmapInfo.StarRating);
-            match &= !criteria.ApproachRate.HasFilter || criteria.ApproachRate.IsInRange(BeatmapInfo.BaseDifficulty.ApproachRate);
-            match &= !criteria.DrainRate.HasFilter || criteria.DrainRate.IsInRange(BeatmapInfo.BaseDifficulty.DrainRate);
-            match &= !criteria.CircleSize.HasFilter || criteria.CircleSize.IsInRange(BeatmapInfo.BaseDifficulty.CircleSize);
-            match &= !criteria.OverallDifficulty.HasFilter || criteria.OverallDifficulty.IsInRange(BeatmapInfo.BaseDifficulty.OverallDifficulty);
+            match &= !criteria.ApproachRate.HasFilter || criteria.ApproachRate.IsInRange(BeatmapInfo.Difficulty.ApproachRate);
+            match &= !criteria.DrainRate.HasFilter || criteria.DrainRate.IsInRange(BeatmapInfo.Difficulty.DrainRate);
+            match &= !criteria.CircleSize.HasFilter || criteria.CircleSize.IsInRange(BeatmapInfo.Difficulty.CircleSize);
+            match &= !criteria.OverallDifficulty.HasFilter || criteria.OverallDifficulty.IsInRange(BeatmapInfo.Difficulty.OverallDifficulty);
             match &= !criteria.Length.HasFilter || criteria.Length.IsInRange(BeatmapInfo.Length);
             match &= !criteria.BPM.HasFilter || criteria.BPM.IsInRange(BeatmapInfo.BPM);
 
@@ -71,11 +72,12 @@ namespace osu.Game.Screens.Select.Carousel
                 }
             }
 
-            if (match)
-                match &= criteria.Collection?.Beatmaps.Contains(BeatmapInfo) ?? true;
-
-            if (match && criteria.RulesetCriteria != null)
-                match &= criteria.RulesetCriteria.Matches(BeatmapInfo);
+            // TODO: reimplement.
+            // if (match)
+            //     match &= criteria.Collection?.Beatmaps.Contains(BeatmapInfo) ?? true;
+            //
+            // if (match && criteria.RulesetCriteria != null)
+            //     match &= criteria.RulesetCriteria.Matches(BeatmapInfo);
 
             Filtered.Value = !match;
         }
@@ -89,7 +91,7 @@ namespace osu.Game.Screens.Select.Carousel
             {
                 default:
                 case SortMode.Difficulty:
-                    int ruleset = BeatmapInfo.RulesetID.CompareTo(otherBeatmap.BeatmapInfo.RulesetID);
+                    int ruleset = BeatmapInfo.Ruleset.OnlineID.CompareTo(otherBeatmap.BeatmapInfo.Ruleset.OnlineID);
                     if (ruleset != 0) return ruleset;
 
                     return BeatmapInfo.StarRating.CompareTo(otherBeatmap.BeatmapInfo.StarRating);
