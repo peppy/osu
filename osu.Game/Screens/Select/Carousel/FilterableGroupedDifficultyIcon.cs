@@ -15,7 +15,7 @@ namespace osu.Game.Screens.Select.Carousel
     {
         public readonly List<CarouselBeatmap> Items;
 
-        public FilterableGroupedDifficultyIcon(List<CarouselBeatmap> items, RulesetInfo ruleset)
+        public FilterableGroupedDifficultyIcon(List<CarouselBeatmap> items, IRulesetInfo ruleset)
             : base(items.Select(i => i.BeatmapInfo).ToList(), ruleset, Color4.White)
         {
             Items = items;
