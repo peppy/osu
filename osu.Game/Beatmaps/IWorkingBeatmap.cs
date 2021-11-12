@@ -17,6 +17,12 @@ namespace osu.Game.Beatmaps
 {
     public interface IWorkingBeatmap
     {
+        IBeatmapInfo BeatmapInfo { get; }
+
+        IBeatmapSetInfo BeatmapSetInfo => BeatmapInfo.BeatmapSet;
+
+        IBeatmapMetadataInfo Metadata => BeatmapInfo.Metadata;
+
         /// <summary>
         /// Retrieves the <see cref="IBeatmap"/> which this <see cref="IWorkingBeatmap"/> represents.
         /// </summary>
