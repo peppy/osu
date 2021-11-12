@@ -12,7 +12,7 @@ namespace osu.Game.Tests.Visual.Gameplay
 {
     public class TestScenePlayerReferenceLeaking : TestSceneAllRulesetPlayers
     {
-        private readonly WeakList<WorkingBeatmap> workingWeakReferences = new WeakList<WorkingBeatmap>();
+        private readonly WeakList<IWorkingBeatmap> workingWeakReferences = new WeakList<IWorkingBeatmap>();
 
         private readonly WeakList<Player> playerWeakReferences = new WeakList<Player>();
 
@@ -43,7 +43,7 @@ namespace osu.Game.Tests.Visual.Gameplay
             });
         }
 
-        protected override WorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null)
+        protected override IWorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null)
         {
             var working = base.CreateWorkingBeatmap(beatmap, storyboard);
             workingWeakReferences.Add(working);

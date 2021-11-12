@@ -119,12 +119,12 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
             private readonly Bindable<RulesetInfo> ruleset = new Bindable<RulesetInfo>();
 
             [Cached]
-            private readonly Bindable<WorkingBeatmap> beatmap = new Bindable<WorkingBeatmap>();
+            private readonly Bindable<IWorkingBeatmap> beatmap = new Bindable<IWorkingBeatmap>();
 
             [Cached]
             private readonly Bindable<IReadOnlyList<Mod>> mods = new Bindable<IReadOnlyList<Mod>>();
 
-            public PlayerIsolationContainer(WorkingBeatmap beatmap, RulesetInfo ruleset, IReadOnlyList<Mod> mods)
+            public PlayerIsolationContainer(IWorkingBeatmap beatmap, RulesetInfo ruleset, IReadOnlyList<Mod> mods)
             {
                 this.beatmap.Value = beatmap;
                 this.ruleset.Value = ruleset;

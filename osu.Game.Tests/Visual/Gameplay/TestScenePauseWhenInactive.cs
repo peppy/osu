@@ -80,7 +80,7 @@ namespace osu.Game.Tests.Visual.Gameplay
             };
         }
 
-        protected override WorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null)
+        protected override IWorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null)
             => new TestWorkingBeatmap(beatmap, storyboard, Audio);
     }
 }

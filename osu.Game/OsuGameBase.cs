@@ -112,7 +112,7 @@ namespace osu.Game
 
         protected Storage Storage { get; set; }
 
-        protected Bindable<WorkingBeatmap> Beatmap { get; private set; } // cached via load() method
+        protected Bindable<IWorkingBeatmap> Beatmap { get; private set; } // cached via load() method
 
         [Cached]
         [Cached(typeof(IBindable<RulesetInfo>))]
@@ -281,9 +281,9 @@ namespace osu.Game
             // we may want to revisit this if users notice or complain about the difference (consider this a bit of a trial).
             Audio.Tracks.AddAdjustment(AdjustableProperty.Volume, globalTrackVolumeAdjust);
 
-            Beatmap = new NonNullableBindable<WorkingBeatmap>(defaultBeatmap);
+            Beatmap = new NonNullableBindable<IWorkingBeatmap>(defaultBeatmap);
 
-            dependencies.CacheAs<IBindable<WorkingBeatmap>>(Beatmap);
+            dependencies.CacheAs<IBindable<IWorkingBeatmap>>(Beatmap);
             dependencies.CacheAs(Beatmap);
 
             fileStore.Cleanup();

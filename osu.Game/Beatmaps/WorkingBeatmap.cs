@@ -177,7 +177,7 @@ namespace osu.Game.Beatmaps
         private CancellationTokenSource loadCancellation = new CancellationTokenSource();
 
         /// <summary>
-        /// Beings loading the contents of this <see cref="WorkingBeatmap"/> asynchronously.
+        /// Beings loading the contents of this <see cref="IWorkingBeatmap"/> asynchronously.
         /// </summary>
         public void BeginAsyncLoad()
         {
@@ -185,7 +185,7 @@ namespace osu.Game.Beatmaps
         }
 
         /// <summary>
-        /// Cancels the asynchronous loading of the contents of this <see cref="WorkingBeatmap"/>.
+        /// Cancels the asynchronous loading of the contents of this <see cref="IWorkingBeatmap"/>.
         /// </summary>
         public void CancelAsyncLoad()
         {

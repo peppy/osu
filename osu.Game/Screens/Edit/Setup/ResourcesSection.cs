@@ -27,7 +27,7 @@ namespace osu.Game.Screens.Edit.Setup
         private BeatmapManager beatmaps { get; set; }
 
         [Resolved]
-        private IBindable<WorkingBeatmap> working { get; set; }
+        private IBindable<IWorkingBeatmap> working { get; set; }
 
         [Resolved(canBeNull: true)]
         private Editor editor { get; set; }

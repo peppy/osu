@@ -12,7 +12,7 @@ namespace osu.Game.Screens
 {
     public class OsuScreenDependencies : DependencyContainer
     {
-        public Bindable<WorkingBeatmap> Beatmap { get; }
+        public Bindable<IWorkingBeatmap> Beatmap { get; }
 
         public Bindable<RulesetInfo> Ruleset { get; }
 
@@ -23,11 +23,11 @@ namespace osu.Game.Screens
         {
             if (requireLease)
             {
-                Beatmap = parent.Get<LeasedBindable<WorkingBeatmap>>()?.GetBoundCopy();
+                Beatmap = parent.Get<LeasedBindable<IWorkingBeatmap>>()?.GetBoundCopy();
 
                 if (Beatmap == null)
                 {
-                    Cache(Beatmap = parent.Get<Bindable<WorkingBeatmap>>().BeginLease(false));
+                    Cache(Beatmap = parent.Get<Bindable<IWorkingBeatmap>>().BeginLease(false));
                     CacheAs(Beatmap);
                 }
 
@@ -49,7 +49,7 @@ namespace osu.Game.Screens
             }
             else
             {
-                Beatmap = (parent.Get<LeasedBindable<WorkingBeatmap>>() ?? parent.Get<Bindable<WorkingBeatmap>>()).GetBoundCopy();
+                Beatmap = (parent.Get<LeasedBindable<IWorkingBeatmap>>() ?? parent.Get<Bindable<IWorkingBeatmap>>()).GetBoundCopy();
                 Ruleset = (parent.Get<LeasedBindable<RulesetInfo>>() ?? parent.Get<Bindable<RulesetInfo>>()).GetBoundCopy();
                 Mods = (parent.Get<LeasedBindable<IReadOnlyList<Mod>>>() ?? parent.Get<Bindable<IReadOnlyList<Mod>>>()).GetBoundCopy();
             }

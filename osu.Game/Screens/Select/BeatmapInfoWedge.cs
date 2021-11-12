@@ -86,9 +86,9 @@ namespace osu.Game.Screens.Select
             this.FadeOut(transition_duration * 2, Easing.In);
         }
 
-        private WorkingBeatmap beatmap;
+        private IWorkingBeatmap beatmap;
 
-        public WorkingBeatmap Beatmap
+        public IWorkingBeatmap Beatmap
         {
             get => beatmap;
             set
@@ -163,7 +163,7 @@ namespace osu.Game.Screens.Select
             private FillFlowContainer infoLabelContainer;
             private Container bpmLabelContainer;
 
-            private readonly WorkingBeatmap beatmap;
+            private readonly IWorkingBeatmap beatmap;
             private readonly RulesetInfo ruleset;
 
             [Resolved]
@@ -171,7 +171,7 @@ namespace osu.Game.Screens.Select
 
             private ModSettingChangeTracker settingChangeTracker;
 
-            public WedgeInfoText(WorkingBeatmap beatmap, RulesetInfo userRuleset)
+            public WedgeInfoText(IWorkingBeatmap beatmap, RulesetInfo userRuleset)
             {
                 this.beatmap = beatmap;
                 ruleset = userRuleset ?? beatmap.BeatmapInfo.Ruleset;

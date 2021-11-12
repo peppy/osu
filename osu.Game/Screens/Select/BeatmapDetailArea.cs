@@ -13,9 +13,9 @@ namespace osu.Game.Screens.Select
     {
         private const float details_padding = 10;
 
-        private WorkingBeatmap beatmap;
+        private IWorkingBeatmap beatmap;
 
-        public virtual WorkingBeatmap Beatmap
+        public virtual IWorkingBeatmap Beatmap
         {
             get => beatmap;
             set

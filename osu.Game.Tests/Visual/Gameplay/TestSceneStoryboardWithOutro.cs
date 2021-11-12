@@ -161,7 +161,7 @@ namespace osu.Game.Tests.Visual.Gameplay
             return beatmap;
         }
 
-        protected override WorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null)
+        protected override IWorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null)
         {
             return base.CreateWorkingBeatmap(beatmap, createStoryboard(currentStoryboardDuration));
         }

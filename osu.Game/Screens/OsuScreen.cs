@@ -86,7 +86,7 @@ namespace osu.Game.Screens
 
         public virtual bool? AllowTrackAdjustments => null;
 
-        public Bindable<WorkingBeatmap> Beatmap { get; private set; }
+        public Bindable<IWorkingBeatmap> Beatmap { get; private set; }
 
         public Bindable<RulesetInfo> Ruleset { get; private set; }
 

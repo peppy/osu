@@ -18,32 +18,32 @@ namespace osu.Game.Beatmaps
     public interface IWorkingBeatmap
     {
         /// <summary>
-        /// Retrieves the <see cref="IBeatmap"/> which this <see cref="WorkingBeatmap"/> represents.
+        /// Retrieves the <see cref="IBeatmap"/> which this <see cref="IWorkingBeatmap"/> represents.
         /// </summary>
         IBeatmap Beatmap { get; }
 
         /// <summary>
-        /// Retrieves the background for this <see cref="WorkingBeatmap"/>.
+        /// Retrieves the background for this <see cref="IWorkingBeatmap"/>.
         /// </summary>
         Texture Background { get; }
 
         /// <summary>
-        /// Retrieves the <see cref="Waveform"/> for the <see cref="Track"/> of this <see cref="WorkingBeatmap"/>.
+        /// Retrieves the <see cref="Waveform"/> for the <see cref="Track"/> of this <see cref="IWorkingBeatmap"/>.
         /// </summary>
         Waveform Waveform { get; }
 
         /// <summary>
-        /// Retrieves the <see cref="Storyboard"/> which this <see cref="WorkingBeatmap"/> provides.
+        /// Retrieves the <see cref="Storyboard"/> which this <see cref="IWorkingBeatmap"/> provides.
         /// </summary>
         Storyboard Storyboard { get; }
 
         /// <summary>
-        /// Retrieves the <see cref="Skin"/> which this <see cref="WorkingBeatmap"/> provides.
+        /// Retrieves the <see cref="Skin"/> which this <see cref="IWorkingBeatmap"/> provides.
         /// </summary>
         ISkin Skin { get; }
 
         /// <summary>
-        /// Retrieves the <see cref="Track"/> which this <see cref="WorkingBeatmap"/> has loaded.
+        /// Retrieves the <see cref="Track"/> which this <see cref="IWorkingBeatmap"/> has loaded.
         /// </summary>
         Track Track { get; }
 
@@ -67,7 +67,7 @@ namespace osu.Game.Beatmaps
         /// </summary>
         /// <remarks>
         /// In a standard game context, the loading of the track is managed solely by MusicController, which will
-        /// automatically load the track of the current global IBindable WorkingBeatmap.
+        /// automatically load the track of the current global IBindable IWorkingBeatmap.
         /// As such, this method should only be called in very special scenarios, such as external tests or apps which are
         /// outside of the game context.
         /// </remarks>

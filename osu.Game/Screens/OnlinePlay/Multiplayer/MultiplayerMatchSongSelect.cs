@@ -27,7 +27,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
         /// <param name="room">The room.</param>
         /// <param name="beatmap">An optional initial beatmap selection to perform.</param>
         /// <param name="ruleset">An optional initial ruleset selection to perform.</param>
-        public MultiplayerMatchSongSelect(Room room, WorkingBeatmap beatmap = null, RulesetInfo ruleset = null)
+        public MultiplayerMatchSongSelect(Room room, IWorkingBeatmap beatmap = null, RulesetInfo ruleset = null)
             : base(room)
         {
             if (beatmap != null || ruleset != null)

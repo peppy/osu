@@ -45,7 +45,7 @@ namespace osu.Game.Screens.Menu
 
         protected IBindable<bool> MenuMusic { get; private set; }
 
-        private WorkingBeatmap initialBeatmap;
+        private IWorkingBeatmap initialBeatmap;
 
         protected ITrack Track { get; private set; }
 
@@ -55,7 +55,7 @@ namespace osu.Game.Screens.Menu
 
         protected virtual string SeeyaSampleName => "Intro/seeya";
 
-        private LeasedBindable<WorkingBeatmap> beatmap;
+        private LeasedBindable<IWorkingBeatmap> beatmap;
 
         private OsuScreen nextScreen;
 

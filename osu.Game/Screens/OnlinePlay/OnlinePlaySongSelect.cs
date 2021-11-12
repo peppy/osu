@@ -44,7 +44,7 @@ namespace osu.Game.Screens.OnlinePlay
         private readonly FreeModSelectOverlay freeModSelectOverlay;
         private readonly Room room;
 
-        private WorkingBeatmap initialBeatmap;
+        private IWorkingBeatmap initialBeatmap;
         private RulesetInfo initialRuleset;
         private IReadOnlyList<Mod> initialMods;
         private bool itemSelected;

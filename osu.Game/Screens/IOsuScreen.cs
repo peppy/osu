@@ -54,7 +54,7 @@ namespace osu.Game.Screens
         /// </summary>
         float BackgroundParallaxAmount { get; }
 
-        Bindable<WorkingBeatmap> Beatmap { get; }
+        Bindable<IWorkingBeatmap> Beatmap { get; }
 
         Bindable<RulesetInfo> Ruleset { get; }
 

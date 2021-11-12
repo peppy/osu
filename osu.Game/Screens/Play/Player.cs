@@ -349,12 +349,12 @@ namespace osu.Game.Screens.Play
             IsBreakTime.BindValueChanged(onBreakTimeChanged, true);
         }
 
-        protected virtual GameplayClockContainer CreateGameplayClockContainer(WorkingBeatmap beatmap, double gameplayStart) => new MasterGameplayClockContainer(beatmap, gameplayStart);
+        protected virtual GameplayClockContainer CreateGameplayClockContainer(IWorkingBeatmap beatmap, double gameplayStart) => new MasterGameplayClockContainer(beatmap, gameplayStart);
 
         private Drawable createUnderlayComponents() =>
             DimmableStoryboard = new DimmableStoryboard(Beatmap.Value.Storyboard) { RelativeSizeAxes = Axes.Both };
 
-        private Drawable createGameplayComponents(WorkingBeatmap working, IBeatmap playableBeatmap) => new ScalingContainer(ScalingMode.Gameplay)
+        private Drawable createGameplayComponents(IWorkingBeatmap working, IBeatmap playableBeatmap) => new ScalingContainer(ScalingMode.Gameplay)
         {
             Children = new Drawable[]
             {
@@ -372,7 +372,7 @@ namespace osu.Game.Screens.Play
             }
         };
 
-        private Drawable createOverlayComponents(WorkingBeatmap working)
+        private Drawable createOverlayComponents(IWorkingBeatmap working)
         {
             var container = new Container
             {

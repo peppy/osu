@@ -28,7 +28,7 @@ namespace osu.Game.Rulesets.Mania.Difficulty
         private readonly bool isForCurrentRuleset;
         private readonly double originalOverallDifficulty;
 
-        public ManiaDifficultyCalculator(Ruleset ruleset, WorkingBeatmap beatmap)
+        public ManiaDifficultyCalculator(Ruleset ruleset, IWorkingBeatmap beatmap)
             : base(ruleset, beatmap)
         {
             isForCurrentRuleset = beatmap.BeatmapInfo.Ruleset.Equals(ruleset.RulesetInfo);

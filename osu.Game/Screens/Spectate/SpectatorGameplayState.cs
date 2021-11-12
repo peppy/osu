@@ -25,9 +25,9 @@ namespace osu.Game.Screens.Spectate
         /// <summary>
         /// The beatmap which the user is playing.
         /// </summary>
-        public readonly WorkingBeatmap Beatmap;
+        public readonly IWorkingBeatmap Beatmap;
 
-        public SpectatorGameplayState(Score score, Ruleset ruleset, WorkingBeatmap beatmap)
+        public SpectatorGameplayState(Score score, Ruleset ruleset, IWorkingBeatmap beatmap)
         {
             Score = score;
             Ruleset = ruleset;

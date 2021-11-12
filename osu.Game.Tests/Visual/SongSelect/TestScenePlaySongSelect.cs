@@ -40,7 +40,7 @@ namespace osu.Game.Tests.Visual.SongSelect
         private BeatmapManager manager;
         private RulesetStore rulesets;
         private MusicController music;
-        private WorkingBeatmap defaultBeatmap;
+        private IWorkingBeatmap defaultBeatmap;
         private TestSongSelect songSelect;
 
         [BackgroundDependencyLoader]
@@ -92,7 +92,7 @@ namespace osu.Game.Tests.Visual.SongSelect
 
             waitForInitialSelection();
 
-            WorkingBeatmap selected = null;
+            IWorkingBeatmap selected = null;
 
             AddStep("store selected beatmap", () => selected = Beatmap.Value);
 
@@ -115,7 +115,7 @@ namespace osu.Game.Tests.Visual.SongSelect
 
             waitForInitialSelection();
 
-            WorkingBeatmap selected = null;
+            IWorkingBeatmap selected = null;
 
             AddStep("store selected beatmap", () => selected = Beatmap.Value);
 
@@ -138,7 +138,7 @@ namespace osu.Game.Tests.Visual.SongSelect
 
             AddUntilStep("wait for initial selection", () => !Beatmap.IsDefault);
 
-            WorkingBeatmap selected = null;
+            IWorkingBeatmap selected = null;
 
             AddStep("store selected beatmap", () => selected = Beatmap.Value);
 
@@ -167,7 +167,7 @@ namespace osu.Game.Tests.Visual.SongSelect
 
             waitForInitialSelection();
 
-            WorkingBeatmap selected = null;
+            IWorkingBeatmap selected = null;
 
             AddStep("store selected beatmap", () => selected = Beatmap.Value);
 
@@ -692,7 +692,7 @@ namespace osu.Game.Tests.Visual.SongSelect
             AddStep("change convert setting", () => config.SetValue(OsuSetting.ShowConvertedBeatmaps, true));
 
             // ReSharper disable once AccessToModifiedClosure
-            void onChange(ValueChangedEvent<WorkingBeatmap> valueChangedEvent) => changeCount++;
+            void onChange(ValueChangedEvent<IWorkingBeatmap> valueChangedEvent) => changeCount++;
         }
 
         [Test]
@@ -959,8 +959,8 @@ namespace osu.Game.Tests.Visual.SongSelect
 
             public new FilterControl FilterControl => base.FilterControl;
 
-            public WorkingBeatmap CurrentBeatmap => Beatmap.Value;
-            public WorkingBeatmap CurrentBeatmapDetailsBeatmap => BeatmapDetails.Beatmap;
+            public IWorkingBeatmap CurrentBeatmap => Beatmap.Value;
+            public IWorkingBeatmap CurrentBeatmapDetailsBeatmap => BeatmapDetails.Beatmap;
             public new BeatmapCarousel Carousel => base.Carousel;
 
             public new void PresentScore(ScoreInfo score) => base.PresentScore(score);

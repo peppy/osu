@@ -290,7 +290,7 @@ namespace osu.Game.Screens.Menu
             return base.OnExiting(next);
         }
 
-        public void PresentBeatmap(WorkingBeatmap beatmap, RulesetInfo ruleset)
+        public void PresentBeatmap(IWorkingBeatmap beatmap, RulesetInfo ruleset)
         {
             Beatmap.Value = beatmap;
             Ruleset.Value = ruleset;

@@ -23,9 +23,9 @@ namespace osu.Game.Tests.Beatmaps
 
         protected ExposedPlayer TestPlayer;
 
-        private WorkingBeatmap testBeatmap;
+        private IWorkingBeatmap testBeatmap;
 
-        protected void PrepareBeatmap(Func<WorkingBeatmap> createBeatmap) => AddStep("prepare beatmap", () => testBeatmap = createBeatmap());
+        protected void PrepareBeatmap(Func<IWorkingBeatmap> createBeatmap) => AddStep("prepare beatmap", () => testBeatmap = createBeatmap());
 
         protected void ConfigureTest(bool useBeatmapSkin, bool useBeatmapColours, bool userHasCustomColours)
         {

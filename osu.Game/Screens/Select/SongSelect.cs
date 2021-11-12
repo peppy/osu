@@ -406,7 +406,7 @@ namespace osu.Game.Screens.Select
 
         private ScheduledDelegate selectionChangedDebounce;
 
-        private void workingBeatmapChanged(ValueChangedEvent<WorkingBeatmap> e)
+        private void workingBeatmapChanged(ValueChangedEvent<IWorkingBeatmap> e)
         {
             if (e.NewValue is DummyWorkingBeatmap || !this.IsCurrentScreen()) return;
 
@@ -489,7 +489,7 @@ namespace osu.Game.Screens.Select
                     Mods.Value = Array.Empty<Mod>();
 
                     // transferRulesetValue() may trigger a re-filter. If the current selection does not match the new ruleset, we want to switch away from it.
-                    // The default logic on WorkingBeatmap change is to switch to a matching ruleset (see workingBeatmapChanged()), but we don't want that here.
+                    // The default logic on IWorkingBeatmap change is to switch to a matching ruleset (see workingBeatmapChanged()), but we don't want that here.
                     // We perform an early selection attempt and clear out the beatmap selection to avoid a second ruleset change (revert).
                     if (beatmap != null && !Carousel.SelectBeatmap(beatmap, false))
                         beatmap = null;
@@ -664,7 +664,7 @@ namespace osu.Game.Screens.Select
             music.TrackChanged -= ensureTrackLooping;
         }
 
-        private void ensureTrackLooping(WorkingBeatmap beatmap, TrackChangeDirection changeDirection)
+        private void ensureTrackLooping(IWorkingBeatmap beatmap, TrackChangeDirection changeDirection)
             => beatmap.PrepareTrackForPreviewLooping();
 
         public override bool OnBackButton()
@@ -690,10 +690,10 @@ namespace osu.Game.Screens.Select
 
         /// <summary>
         /// Allow components in SongSelect to update their loaded beatmap details.
-        /// This is a debounced call (unlike directly binding to WorkingBeatmap.ValueChanged).
+        /// This is a debounced call (unlike directly binding to IWorkingBeatmap.ValueChanged).
         /// </summary>
         /// <param name="beatmap">The working beatmap.</param>
-        private void updateComponentFromBeatmap(WorkingBeatmap beatmap)
+        private void updateComponentFromBeatmap(IWorkingBeatmap beatmap)
         {
             ApplyToBackground(backgroundModeBeatmap =>
             {

@@ -162,7 +162,7 @@ namespace osu.Game.Tests.Visual.Playlists
         {
             public new Bindable<PlaylistItem> SelectedItem => base.SelectedItem;
 
-            public new Bindable<WorkingBeatmap> Beatmap => base.Beatmap;
+            public new Bindable<IWorkingBeatmap> Beatmap => base.Beatmap;
 
             public TestPlaylistsRoomSubScreen(Room room)
                 : base(room)

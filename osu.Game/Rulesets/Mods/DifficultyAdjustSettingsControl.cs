@@ -15,7 +15,7 @@ namespace osu.Game.Rulesets.Mods
     public class DifficultyAdjustSettingsControl : SettingsItem<float?>
     {
         [Resolved]
-        private IBindable<WorkingBeatmap> beatmap { get; set; }
+        private IBindable<IWorkingBeatmap> beatmap { get; set; }
 
         /// <summary>
         /// Used to track the display value on the setting slider.

@@ -58,7 +58,7 @@ namespace osu.Game.Tests.Beatmaps
 
         protected sealed override IBeatmap CreateBeatmap(RulesetInfo ruleset) => currentTestBeatmap;
 
-        protected sealed override WorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null)
+        protected sealed override IWorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null)
             => new TestWorkingBeatmap(beatmapInfo, beatmapSkinResourceStore, beatmap, storyboard, Clock, this);
 
         protected override TestPlayer CreatePlayer(Ruleset ruleset) => new TestPlayer(false);

@@ -6,11 +6,11 @@ namespace osu.Game.Beatmaps
     public interface IWorkingBeatmapCache
     {
         /// <summary>
-        /// Retrieve a <see cref="WorkingBeatmap"/> instance for the provided <see cref="BeatmapInfo"/>
+        /// Retrieve a <see cref="IWorkingBeatmap"/> instance for the provided <see cref="BeatmapInfo"/>
         /// </summary>
         /// <param name="beatmapInfo">The beatmap to lookup.</param>
-        /// <returns>A <see cref="WorkingBeatmap"/> instance correlating to the provided <see cref="BeatmapInfo"/>.</returns>
-        WorkingBeatmap GetWorkingBeatmap(BeatmapInfo beatmapInfo);
+        /// <returns>A <see cref="IWorkingBeatmap"/> instance correlating to the provided <see cref="BeatmapInfo"/>.</returns>
+        IWorkingBeatmap GetWorkingBeatmap(BeatmapInfo beatmapInfo);
 
         /// <summary>
         /// Invalidate a cache entry if it exists.

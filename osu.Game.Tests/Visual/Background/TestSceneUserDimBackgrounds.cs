@@ -432,7 +432,7 @@ namespace osu.Game.Tests.Visual.Background
 
             private TestDimmableBackground dimmable;
 
-            public FadeAccessibleBackground(WorkingBeatmap beatmap)
+            public FadeAccessibleBackground(IWorkingBeatmap beatmap)
                 : base(beatmap)
             {
             }

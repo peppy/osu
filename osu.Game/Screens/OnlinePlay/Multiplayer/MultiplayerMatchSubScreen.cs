@@ -399,7 +399,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
             }
         }
 
-        public void PresentBeatmap(WorkingBeatmap beatmap, RulesetInfo ruleset)
+        public void PresentBeatmap(IWorkingBeatmap beatmap, RulesetInfo ruleset)
         {
             if (!this.IsCurrentScreen())
                 return;

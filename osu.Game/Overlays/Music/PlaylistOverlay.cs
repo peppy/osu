@@ -25,7 +25,7 @@ namespace osu.Game.Overlays.Music
 
         private readonly BindableList<BeatmapSetInfo> beatmapSets = new BindableList<BeatmapSetInfo>();
 
-        private readonly Bindable<WorkingBeatmap> beatmap = new Bindable<WorkingBeatmap>();
+        private readonly Bindable<IWorkingBeatmap> beatmap = new Bindable<IWorkingBeatmap>();
 
         [Resolved]
         private BeatmapManager beatmaps { get; set; }
@@ -34,7 +34,7 @@ namespace osu.Game.Overlays.Music
         private Playlist list;
 
         [BackgroundDependencyLoader]
-        private void load(OsuColour colours, Bindable<WorkingBeatmap> beatmap)
+        private void load(OsuColour colours, Bindable<IWorkingBeatmap> beatmap)
         {
             this.beatmap.BindTo(beatmap);
 

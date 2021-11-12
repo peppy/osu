@@ -51,13 +51,13 @@ namespace osu.Game.Overlays
         public bool UserPauseRequested { get; private set; }
 
         /// <summary>
-        /// Fired when the global <see cref="WorkingBeatmap"/> has changed.
+        /// Fired when the global <see cref="IWorkingBeatmap"/> has changed.
         /// Includes direction information for display purposes.
         /// </summary>
-        public event Action<WorkingBeatmap, TrackChangeDirection> TrackChanged;
+        public event Action<IWorkingBeatmap, TrackChangeDirection> TrackChanged;
 
         [Resolved]
-        private IBindable<WorkingBeatmap> beatmap { get; set; }
+        private IBindable<IWorkingBeatmap> beatmap { get; set; }
 
         [Resolved]
         private IBindable<IReadOnlyList<Mod>> mods { get; set; }
@@ -80,7 +80,7 @@ namespace osu.Game.Overlays
         }
 
         /// <summary>
-        /// Forcefully reload the current <see cref="WorkingBeatmap"/>'s track from disk.
+        /// Forcefully reload the current <see cref="IWorkingBeatmap"/>'s track from disk.
         /// </summary>
         public void ReloadCurrentTrack() => changeTrack();
 
@@ -278,13 +278,13 @@ namespace osu.Game.Overlays
             Schedule(() => CurrentTrack.Restart());
         }
 
-        private WorkingBeatmap current;
+        private IWorkingBeatmap current;
 
         private TrackChangeDirection? queuedDirection;
 
-        private void beatmapChanged(ValueChangedEvent<WorkingBeatmap> beatmap) => changeBeatmap(beatmap.NewValue);
+        private void beatmapChanged(ValueChangedEvent<IWorkingBeatmap> beatmap) => changeBeatmap(beatmap.NewValue);
 
-        private void changeBeatmap(WorkingBeatmap newWorking)
+        private void changeBeatmap(IWorkingBeatmap newWorking)
         {
             // This method can potentially be triggered multiple times as it is eagerly fired in next() / prev() to ensure correct execution order
             // (changeBeatmap must be called before consumers receive the bindable changed event, which is not the case when the local beatmap bindable is updated directly).
@@ -336,7 +336,7 @@ namespace osu.Game.Overlays
 
             // this will be a noop if coming from the beatmapChanged event.
             // the exception is local operations like next/prev, where we want to complete loading the track before sending out a change.
-            if (beatmap.Value != current && beatmap is Bindable<WorkingBeatmap> working)
+            if (beatmap.Value != current && beatmap is Bindable<IWorkingBeatmap> working)
                 working.Value = current;
         }
 
@@ -370,7 +370,7 @@ namespace osu.Game.Overlays
             });
         }
 
-        private void onTrackCompleted(WorkingBeatmap workingBeatmap)
+        private void onTrackCompleted(IWorkingBeatmap workingBeatmap)
         {
             // the source of track completion is the audio thread, so the beatmap may have changed before firing.
             if (current != workingBeatmap)

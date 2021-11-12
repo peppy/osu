@@ -16,7 +16,7 @@ namespace osu.Game.Screens.Select
     {
         public readonly BeatmapLeaderboard Leaderboard;
 
-        public override WorkingBeatmap Beatmap
+        public override IWorkingBeatmap Beatmap
         {
             get => base.Beatmap;
             set

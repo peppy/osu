@@ -103,7 +103,7 @@ namespace osu.Game.Rulesets.Osu.Tests
 
         protected override TestPlayer CreatePlayer(Ruleset ruleset) => new SkinProvidingPlayer(testUserSkin);
 
-        protected override WorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null) => new CustomSkinWorkingBeatmap(beatmap, storyboard, Clock, audio, testBeatmapSkin);
+        protected override IWorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null) => new CustomSkinWorkingBeatmap(beatmap, storyboard, Clock, audio, testBeatmapSkin);
 
         public class CustomSkinWorkingBeatmap : ClockBackedTestWorkingBeatmap
         {

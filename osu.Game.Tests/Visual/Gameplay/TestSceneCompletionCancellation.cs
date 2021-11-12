@@ -89,7 +89,7 @@ namespace osu.Game.Tests.Visual.Gameplay
             AddAssert("no attempt to push ranking", () => !((FakeRankingPushPlayer)Player).ResultsCreated);
         }
 
-        protected override WorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null)
+        protected override IWorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null)
             => new ClockBackedTestWorkingBeatmap(beatmap, storyboard, new FramedClock(new ManualClock { Rate = 1 }), audio);
 
         protected override IBeatmap CreateBeatmap(RulesetInfo ruleset)

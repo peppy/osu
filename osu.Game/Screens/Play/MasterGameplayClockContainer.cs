@@ -17,7 +17,7 @@ using osu.Game.Configuration;
 namespace osu.Game.Screens.Play
 {
     /// <summary>
-    /// A <see cref="GameplayClockContainer"/> which uses a <see cref="WorkingBeatmap"/> as a source.
+    /// A <see cref="GameplayClockContainer"/> which uses a <see cref="IWorkingBeatmap"/> as a source.
     /// <para>
     /// This is the most complete <see cref="GameplayClockContainer"/> which takes into account all user and platform offsets,
     /// and provides implementations for user actions such as skipping or adjusting playback rates that may occur during gameplay.
@@ -47,7 +47,7 @@ namespace osu.Game.Screens.Play
 
         private readonly BindableDouble pauseFreqAdjust = new BindableDouble(1);
 
-        private readonly WorkingBeatmap beatmap;
+        private readonly IWorkingBeatmap beatmap;
         private readonly double gameplayStartTime;
         private readonly bool startAtGameplayStart;
         private readonly double firstHitObjectTime;
@@ -58,7 +58,7 @@ namespace osu.Game.Screens.Play
         private Bindable<double> userAudioOffset;
         private double startOffset;
 
-        public MasterGameplayClockContainer(WorkingBeatmap beatmap, double gameplayStartTime, bool startAtGameplayStart = false)
+        public MasterGameplayClockContainer(IWorkingBeatmap beatmap, double gameplayStartTime, bool startAtGameplayStart = false)
             : base(beatmap.Track)
         {
             this.beatmap = beatmap;

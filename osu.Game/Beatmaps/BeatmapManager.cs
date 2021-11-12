@@ -40,7 +40,7 @@ namespace osu.Game.Beatmaps
         private readonly WorkingBeatmapCache workingBeatmapCache;
         private readonly BeatmapOnlineLookupQueue onlineBeatmapLookupQueue;
 
-        public BeatmapManager(Storage storage, IDatabaseContextFactory contextFactory, RulesetStore rulesets, IAPIProvider api, [NotNull] AudioManager audioManager, IResourceStore<byte[]> gameResources, GameHost host = null, WorkingBeatmap defaultBeatmap = null, bool performOnlineLookups = false, AudioMixer mainTrackMixer = null)
+        public BeatmapManager(Storage storage, IDatabaseContextFactory contextFactory, RulesetStore rulesets, IAPIProvider api, [NotNull] AudioManager audioManager, IResourceStore<byte[]> gameResources, GameHost host = null, IWorkingBeatmap defaultBeatmap = null, bool performOnlineLookups = false, AudioMixer mainTrackMixer = null)
         {
             var userResources = new FileStore(contextFactory, storage).Store;
 
@@ -65,7 +65,7 @@ namespace osu.Game.Beatmaps
             return new BeatmapModelDownloader(modelManager, api, host);
         }
 
-        protected virtual WorkingBeatmapCache CreateWorkingBeatmapCache(AudioManager audioManager, IResourceStore<byte[]> resources, IResourceStore<byte[]> storage, WorkingBeatmap defaultBeatmap, GameHost host)
+        protected virtual WorkingBeatmapCache CreateWorkingBeatmapCache(AudioManager audioManager, IResourceStore<byte[]> resources, IResourceStore<byte[]> storage, IWorkingBeatmap defaultBeatmap, GameHost host)
         {
             return new WorkingBeatmapCache(BeatmapTrackStore, audioManager, resources, storage, defaultBeatmap, host);
         }
@@ -74,9 +74,9 @@ namespace osu.Game.Beatmaps
             new BeatmapModelManager(storage, contextFactory, rulesets, host);
 
         /// <summary>
-        /// Create a new <see cref="WorkingBeatmap"/>.
+        /// Create a new <see cref="IWorkingBeatmap"/>.
         /// </summary>
-        public WorkingBeatmap CreateNew(RulesetInfo ruleset, APIUser user)
+        public IWorkingBeatmap CreateNew(RulesetInfo ruleset, APIUser user)
         {
             var metadata = new BeatmapMetadata
             {
@@ -177,9 +177,9 @@ namespace osu.Game.Beatmaps
         public BeatmapInfo QueryBeatmap(Expression<Func<BeatmapInfo, bool>> query) => beatmapModelManager.QueryBeatmap(query);
 
         /// <summary>
-        /// A default representation of a WorkingBeatmap to use when no beatmap is available.
+        /// A default representation of a IWorkingBeatmap to use when no beatmap is available.
         /// </summary>
-        public WorkingBeatmap DefaultBeatmap => workingBeatmapCache.DefaultBeatmap;
+        public IWorkingBeatmap DefaultBeatmap => workingBeatmapCache.DefaultBeatmap;
 
         /// <summary>
         /// Fired when a notification should be presented to the user.
@@ -326,9 +326,9 @@ namespace osu.Game.Beatmaps
 
         #endregion
 
-        #region Implementation of IWorkingBeatmapCache
+        #region Implementation of WorkingBeatmapCache
 
-        public WorkingBeatmap GetWorkingBeatmap(BeatmapInfo importedBeatmap) => workingBeatmapCache.GetWorkingBeatmap(importedBeatmap);
+        public IWorkingBeatmap GetWorkingBeatmap(BeatmapInfo importedBeatmap) => workingBeatmapCache.GetWorkingBeatmap(importedBeatmap);
 
         void IWorkingBeatmapCache.Invalidate(BeatmapSetInfo beatmapSetInfo) => workingBeatmapCache.Invalidate(beatmapSetInfo);
         void IWorkingBeatmapCache.Invalidate(BeatmapInfo beatmapInfo) => workingBeatmapCache.Invalidate(beatmapInfo);

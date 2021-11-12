@@ -409,7 +409,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
         {
             checkPaused(userId, state);
 
-            // Todo: The following should work, but is broken because SpectatorScreen retrieves the WorkingBeatmap via the BeatmapManager, bypassing the test scene clock and running real-time.
+            // Todo: The following should work, but is broken because SpectatorScreen retrieves the IWorkingBeatmap via the BeatmapManager, bypassing the test scene clock and running real-time.
             // AddAssert($"{userId} is {(state ? "paused" : "playing")}", () => getPlayer(userId).ChildrenOfType<GameplayClockContainer>().First().GameplayClock.IsRunning != state);
         }
 

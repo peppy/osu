@@ -97,7 +97,7 @@ namespace osu.Game.Tests.Visual.Gameplay
             && Precision.AlmostEquals(info.Rotation, other.Rotation)
             && info.Children.SequenceEqual(other.Children, new FuncEqualityComparer<SkinnableInfo>(almostEqual));
 
-        protected override WorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null)
+        protected override IWorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null)
             => new CustomSkinWorkingBeatmap(beatmap, storyboard, Clock, Audio, currentBeatmapSkin);
 
         protected override Ruleset CreatePlayerRuleset() => new TestOsuRuleset();

@@ -47,7 +47,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
             waitingOnFrames.Value = DrawableRuleset.FrameStableClock.WaitingOnFrames.Value || Score.Replay.Frames.Count == 0;
         }
 
-        protected override GameplayClockContainer CreateGameplayClockContainer(WorkingBeatmap beatmap, double gameplayStart)
+        protected override GameplayClockContainer CreateGameplayClockContainer(IWorkingBeatmap beatmap, double gameplayStart)
             => new SpectatorGameplayClockContainer(spectatorPlayerClock);
 
         private class SpectatorGameplayClockContainer : GameplayClockContainer

@@ -41,7 +41,7 @@ namespace osu.Game.Tests.Visual
             Beatmap.BindValueChanged(beatmapChanged, true);
         }
 
-        private void beatmapChanged(ValueChangedEvent<WorkingBeatmap> e)
+        private void beatmapChanged(ValueChangedEvent<IWorkingBeatmap> e)
         {
             Clock.Beatmap = e.NewValue.Beatmap;
             Clock.ChangeSource(e.NewValue.Track);

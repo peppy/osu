@@ -31,7 +31,7 @@ using Realms;
 namespace osu.Game.Stores
 {
     /// <summary>
-    /// Handles the storage and retrieval of Beatmaps/WorkingBeatmaps.
+    /// Handles the storage and retrieval of Beatmaps/IWorkingBeatmaps.
     /// </summary>
     [ExcludeFromDynamicCompile]
     public class BeatmapImporter : RealmArchiveModelImporter<RealmBeatmapSet>, IDisposable
@@ -313,7 +313,7 @@ namespace osu.Game.Stores
         }
 
         /// <summary>
-        /// A dummy WorkingBeatmap for the purpose of retrieving a beatmap for star difficulty calculation.
+        /// A dummy IWorkingBeatmap for the purpose of retrieving a beatmap for star difficulty calculation.
         /// </summary>
         private class DummyConversionBeatmap : WorkingBeatmap
         {

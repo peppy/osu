@@ -40,7 +40,7 @@ namespace osu.Game.Rulesets.Osu.Tests
 
         protected override TestPlayer CreatePlayer(Ruleset ruleset) => new ScoreExposedPlayer();
 
-        protected override WorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null)
+        protected override IWorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null)
             => new ClockBackedTestWorkingBeatmap(beatmap, storyboard, new FramedClock(new ManualClock { Rate = 1 }), audioManager);
 
         private DrawableSpinner drawableSpinner;

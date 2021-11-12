@@ -75,7 +75,7 @@ namespace osu.Game.Tests.Visual.Gameplay
             Beatmap.BindValueChanged(beatmapChanged, true);
         }
 
-        private void beatmapChanged(ValueChangedEvent<WorkingBeatmap> e) => loadStoryboard(e.NewValue);
+        private void beatmapChanged(ValueChangedEvent<IWorkingBeatmap> e) => loadStoryboard(e.NewValue);
 
         private void restart()
         {
@@ -86,7 +86,7 @@ namespace osu.Game.Tests.Visual.Gameplay
             track.Start();
         }
 
-        private void loadStoryboard(WorkingBeatmap working)
+        private void loadStoryboard(IWorkingBeatmap working)
         {
             if (storyboard != null)
                 storyboardContainer.Remove(storyboard);

@@ -51,7 +51,7 @@ namespace osu.Game.Beatmaps
         /// <summary>
         /// The game working beatmap cache, used to invalidate entries on changes.
         /// </summary>
-        public IWorkingBeatmapCache WorkingBeatmapCache { private get; set; }
+        public WorkingBeatmapCache WorkingBeatmapCache { private get; set; }
 
         public override IEnumerable<string> HandledExtensions => new[] { ".osz" };
 
@@ -433,7 +433,7 @@ namespace osu.Game.Beatmaps
         }
 
         /// <summary>
-        /// A dummy WorkingBeatmap for the purpose of retrieving a beatmap for star difficulty calculation.
+        /// A dummy IWorkingBeatmap for the purpose of retrieving a beatmap for star difficulty calculation.
         /// </summary>
         private class DummyConversionBeatmap : WorkingBeatmap
         {

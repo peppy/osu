@@ -68,7 +68,7 @@ namespace osu.Game.Tests.Visual.Gameplay
         protected override Ruleset CreatePlayerRuleset() => new OsuRuleset();
         protected override TestPlayer CreatePlayer(Ruleset ruleset) => new TestPlayer(true, false);
 
-        protected override WorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null) =>
+        protected override IWorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null) =>
             new ClockBackedTestWorkingBeatmap(beatmap, storyboard ?? this.storyboard, Clock, Audio);
     }
 }

@@ -35,7 +35,7 @@ namespace osu.Game.Tests.Visual
     [ExcludeFromDynamicCompile]
     public abstract class OsuTestScene : TestScene
     {
-        protected Bindable<WorkingBeatmap> Beatmap { get; private set; }
+        protected Bindable<IWorkingBeatmap> Beatmap { get; private set; }
 
         protected Bindable<RulesetInfo> Ruleset;
 
@@ -235,10 +235,10 @@ namespace osu.Game.Tests.Visual
             };
         }
 
-        protected WorkingBeatmap CreateWorkingBeatmap(RulesetInfo ruleset) =>
+        protected IWorkingBeatmap CreateWorkingBeatmap(RulesetInfo ruleset) =>
             CreateWorkingBeatmap(CreateBeatmap(ruleset));
 
-        protected virtual WorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null) =>
+        protected virtual IWorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null) =>
             new ClockBackedTestWorkingBeatmap(beatmap, storyboard, Clock, Audio);
 
         [BackgroundDependencyLoader]

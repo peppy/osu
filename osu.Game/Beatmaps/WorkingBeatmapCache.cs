@@ -26,9 +26,9 @@ namespace osu.Game.Beatmaps
         private readonly WeakList<BeatmapManagerWorkingBeatmap> workingCache = new WeakList<BeatmapManagerWorkingBeatmap>();
 
         /// <summary>
-        /// A default representation of a WorkingBeatmap to use when no beatmap is available.
+        /// A default representation of a IWorkingBeatmap to use when no beatmap is available.
         /// </summary>
-        public readonly WorkingBeatmap DefaultBeatmap;
+        public readonly IWorkingBeatmap DefaultBeatmap;
 
         public BeatmapModelManager BeatmapManager { private get; set; }
 
@@ -41,7 +41,7 @@ namespace osu.Game.Beatmaps
         [CanBeNull]
         private readonly GameHost host;
 
-        public WorkingBeatmapCache(ITrackStore trackStore, AudioManager audioManager, IResourceStore<byte[]> resources, IResourceStore<byte[]> files, WorkingBeatmap defaultBeatmap = null, GameHost host = null)
+        public WorkingBeatmapCache(ITrackStore trackStore, AudioManager audioManager, IResourceStore<byte[]> resources, IResourceStore<byte[]> files, IWorkingBeatmap defaultBeatmap = null, GameHost host = null)
         {
             DefaultBeatmap = defaultBeatmap;
 
@@ -75,7 +75,7 @@ namespace osu.Game.Beatmaps
             }
         }
 
-        public virtual WorkingBeatmap GetWorkingBeatmap(BeatmapInfo beatmapInfo)
+        public virtual IWorkingBeatmap GetWorkingBeatmap(BeatmapInfo beatmapInfo)
         {
             // if there are no files, presume the full beatmap info has not yet been fetched from the database.
             if (beatmapInfo?.BeatmapSet?.Files.Count == 0)
@@ -99,7 +99,7 @@ namespace osu.Game.Beatmaps
                 workingCache.Add(working = new BeatmapManagerWorkingBeatmap(beatmapInfo, this));
 
                 // best effort; may be higher than expected.
-                GlobalStatistics.Get<int>(nameof(Beatmaps), $"Cached {nameof(WorkingBeatmap)}s").Value = workingCache.Count();
+                GlobalStatistics.Get<int>(nameof(Beatmaps), $"Cached {nameof(IWorkingBeatmap)}s").Value = workingCache.Count();
 
                 return working;
             }

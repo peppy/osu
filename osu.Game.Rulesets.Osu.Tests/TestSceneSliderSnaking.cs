@@ -42,7 +42,7 @@ namespace osu.Game.Rulesets.Osu.Tests
         private const double duration_of_span = 3605;
         private const double fade_in_modifier = -1200;
 
-        protected override WorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null)
+        protected override IWorkingBeatmap CreateWorkingBeatmap(IBeatmap beatmap, Storyboard storyboard = null)
             => new ClockBackedTestWorkingBeatmap(this.beatmap = beatmap, storyboard, new FramedClock(new ManualClock { Rate = 1 }), audioManager);
 
         [BackgroundDependencyLoader]
