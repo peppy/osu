@@ -74,8 +74,8 @@ namespace osu.Game.Tests.Visual.Navigation
             typeof(BeatmapManager),
             typeof(RulesetConfigCache),
             typeof(OsuColour),
-            typeof(IBindable<WorkingBeatmap>),
-            typeof(Bindable<WorkingBeatmap>),
+            typeof(IBindable<IWorkingBeatmap>),
+            typeof(Bindable<IWorkingBeatmap>),
             typeof(GlobalActionContainer),
             typeof(PreviewTrackManager),
         };

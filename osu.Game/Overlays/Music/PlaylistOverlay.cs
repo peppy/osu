@@ -80,10 +80,7 @@ namespace osu.Game.Overlays.Music
                 BeatmapInfo toSelect = list.FirstVisibleSet?.Beatmaps?.FirstOrDefault();
 
                 if (toSelect != null)
-                {
-                    beatmap.Value = beatmaps.GetWorkingBeatmap(toSelect);
-                    beatmap.Value.Track.Restart();
-                }
+                    selectBeatmap(toSelect);
             };
         }
 
@@ -114,13 +111,23 @@ namespace osu.Game.Overlays.Music
 
         private void itemSelected(BeatmapSetInfo set)
         {
-            if (set.ID == (beatmap.Value?.BeatmapSetInfo?.ID ?? -1))
+            var currentSet = beatmap.Value?.BeatmapSetInfo;
+
+            if (set.Equals(currentSet))
             {
                 beatmap.Value?.Track.Seek(0);
                 return;
             }
 
-            beatmap.Value = beatmaps.GetWorkingBeatmap(set.Beatmaps.First());
+            selectBeatmap(set.Beatmaps.First());
+        }
+
+        private void selectBeatmap(BeatmapInfo toSelect)
+        {
+            if (!(beatmaps.GetWorkingBeatmap(toSelect) is WorkingBeatmap workingBeatmap))
+                return;
+
+            beatmap.Value = workingBeatmap;
             beatmap.Value.Track.Restart();
         }
     }

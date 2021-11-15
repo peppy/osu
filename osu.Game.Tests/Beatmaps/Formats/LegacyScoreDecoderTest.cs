@@ -56,7 +56,7 @@ namespace osu.Game.Tests.Beatmaps.Formats
 
             protected override Ruleset GetRuleset(int rulesetId) => rulesets[rulesetId];
 
-            protected override WorkingBeatmap GetBeatmap(string md5Hash) => new TestWorkingBeatmap(new Beatmap
+            protected override IWorkingBeatmap GetBeatmap(string md5Hash) => new TestWorkingBeatmap(new Beatmap
             {
                 BeatmapInfo = new BeatmapInfo
                 {

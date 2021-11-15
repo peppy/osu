@@ -30,7 +30,7 @@ namespace osu.Game.Scoring.Legacy
                 Replay = new Replay()
             };
 
-            WorkingBeatmap workingBeatmap;
+            IWorkingBeatmap workingBeatmap;
 
             using (SerializationReader sr = new SerializationReader(stream))
             {
@@ -119,7 +119,7 @@ namespace osu.Game.Scoring.Legacy
 
             // before returning for database import, we must restore the database-sourced BeatmapInfo.
             // if not, the clone operation in GetPlayableBeatmap will cause a dereference and subsequent database exception.
-            score.ScoreInfo.BeatmapInfo = workingBeatmap.BeatmapInfo;
+            score.ScoreInfo.BeatmapInfo = (BeatmapInfo)workingBeatmap.BeatmapInfo;
 
             return score;
         }
@@ -291,11 +291,11 @@ namespace osu.Game.Scoring.Legacy
         protected abstract Ruleset GetRuleset(int rulesetId);
 
         /// <summary>
-        /// Retrieves the <see cref="WorkingBeatmap"/> corresponding to an MD5 hash.
+        /// Retrieves the <see cref="IWorkingBeatmap"/> corresponding to an MD5 hash.
         /// </summary>
         /// <param name="md5Hash">The MD5 hash.</param>
-        /// <returns>The <see cref="WorkingBeatmap"/>.</returns>
-        protected abstract WorkingBeatmap GetBeatmap(string md5Hash);
+        /// <returns>The <see cref="IWorkingBeatmap"/>.</returns>
+        protected abstract IWorkingBeatmap GetBeatmap(string md5Hash);
 
         public class BeatmapNotFoundException : Exception
         {
