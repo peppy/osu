@@ -26,8 +26,7 @@ namespace osu.Game.Screens.Edit.Setup
         [Resolved]
         private BeatmapManager beatmaps { get; set; }
 
-        [Resolved]
-        private IBindable<IWorkingBeatmap> working { get; set; }
+        private WorkingBeatmap workingBeatmap { get; set; }
 
         [Resolved(canBeNull: true)]
         private Editor editor { get; set; }
@@ -36,8 +35,10 @@ namespace osu.Game.Screens.Edit.Setup
         private SetupScreenHeader header { get; set; }
 
         [BackgroundDependencyLoader]
-        private void load()
+        private void load(IBindable<IWorkingBeatmap> workingBindable)
         {
+            workingBeatmap = (WorkingBeatmap)workingBindable.Value;
+
             Children = new Drawable[]
             {
                 backgroundTextBox = new FileChooserLabelledTextBox(".jpg", ".jpeg", ".png")
@@ -45,7 +46,7 @@ namespace osu.Game.Screens.Edit.Setup
                     Label = "Background",
                     FixedLabelWidth = LABEL_WIDTH,
                     PlaceholderText = "Click to select a background image",
-                    Current = { Value = working.Value.Metadata.BackgroundFile },
+                    Current = { Value = workingBeatmap.Metadata.BackgroundFile },
                     TabbableContentContainer = this
                 },
                 audioTrackTextBox = new FileChooserLabelledTextBox(".mp3", ".ogg")
@@ -53,7 +54,7 @@ namespace osu.Game.Screens.Edit.Setup
                     Label = "Audio Track",
                     FixedLabelWidth = LABEL_WIDTH,
                     PlaceholderText = "Click to select a track",
-                    Current = { Value = working.Value.Metadata.AudioFile },
+                    Current = { Value = workingBeatmap.Metadata.AudioFile },
                     TabbableContentContainer = this
                 },
             };
@@ -69,11 +70,11 @@ namespace osu.Game.Screens.Edit.Setup
             if (!info.Exists)
                 return false;
 
-            var set = working.Value.BeatmapSetInfo;
+            var set = workingBeatmap.BeatmapSetInfo;
 
             // remove the previous background for now.
             // in the future we probably want to check if this is being used elsewhere (other difficulties?)
-            var oldFile = set.Files.FirstOrDefault(f => f.Filename == working.Value.Metadata.BackgroundFile);
+            var oldFile = set.Files.FirstOrDefault(f => f.Filename == workingBeatmap.Metadata.BackgroundFile);
 
             using (var stream = info.OpenRead())
             {
@@ -83,7 +84,7 @@ namespace osu.Game.Screens.Edit.Setup
                     beatmaps.AddFile(set, stream, info.Name);
             }
 
-            working.Value.Metadata.BackgroundFile = info.Name;
+            workingBeatmap.Metadata.BackgroundFile = info.Name;
             header.Background.UpdateBackground();
 
             return true;
@@ -96,11 +97,11 @@ namespace osu.Game.Screens.Edit.Setup
             if (!info.Exists)
                 return false;
 
-            var set = working.Value.BeatmapSetInfo;
+            var set = workingBeatmap.BeatmapSetInfo;
 
             // remove the previous audio track for now.
             // in the future we probably want to check if this is being used elsewhere (other difficulties?)
-            var oldFile = set.Files.FirstOrDefault(f => f.Filename == working.Value.Metadata.AudioFile);
+            var oldFile = set.Files.FirstOrDefault(f => f.Filename == workingBeatmap.Metadata.AudioFile);
 
             using (var stream = info.OpenRead())
             {
@@ -110,7 +111,7 @@ namespace osu.Game.Screens.Edit.Setup
                     beatmaps.AddFile(set, stream, info.Name);
             }
 
-            working.Value.Metadata.AudioFile = info.Name;
+            workingBeatmap.Metadata.AudioFile = info.Name;
 
             music.ReloadCurrentTrack();
 

@@ -51,7 +51,7 @@ namespace osu.Game.Beatmaps
         /// <summary>
         /// The game working beatmap cache, used to invalidate entries on changes.
         /// </summary>
-        public WorkingBeatmapCache WorkingBeatmapCache { private get; set; }
+        public IWorkingBeatmapCache WorkingBeatmapCache { private get; set; }
 
         public override IEnumerable<string> HandledExtensions => new[] { ".osz" };
 

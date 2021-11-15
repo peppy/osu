@@ -25,7 +25,7 @@ namespace osu.Game.Overlays.Music
 
         private readonly BindableList<BeatmapSetInfo> beatmapSets = new BindableList<BeatmapSetInfo>();
 
-        private readonly Bindable<IWorkingBeatmap> beatmap = new Bindable<IWorkingBeatmap>();
+        private readonly Bindable<WorkingBeatmap> beatmap = new Bindable<WorkingBeatmap>();
 
         [Resolved]
         private BeatmapManager beatmaps { get; set; }
@@ -34,7 +34,7 @@ namespace osu.Game.Overlays.Music
         private Playlist list;
 
         [BackgroundDependencyLoader]
-        private void load(OsuColour colours, Bindable<IWorkingBeatmap> beatmap)
+        private void load(OsuColour colours, Bindable<WorkingBeatmap> beatmap)
         {
             this.beatmap.BindTo(beatmap);
 
@@ -80,10 +80,7 @@ namespace osu.Game.Overlays.Music
                 BeatmapInfo toSelect = list.FirstVisibleSet?.Beatmaps?.FirstOrDefault();
 
                 if (toSelect != null)
-                {
-                    beatmap.Value = beatmaps.GetWorkingBeatmap(toSelect);
-                    beatmap.Value.Track.Restart();
-                }
+                    selectBeatmap(toSelect);
             };
         }
 
@@ -114,13 +111,23 @@ namespace osu.Game.Overlays.Music
 
         private void itemSelected(BeatmapSetInfo set)
         {
-            if (set.ID == (beatmap.Value?.BeatmapSetInfo?.ID ?? -1))
+            var currentSet = beatmap.Value?.BeatmapSetInfo;
+
+            if (set.Equals(currentSet))
             {
                 beatmap.Value?.Track.Seek(0);
                 return;
             }
 
-            beatmap.Value = beatmaps.GetWorkingBeatmap(set.Beatmaps.First());
+            selectBeatmap(set.Beatmaps.First());
+        }
+
+        private void selectBeatmap(BeatmapInfo toSelect)
+        {
+            if (!(beatmaps.GetWorkingBeatmap(toSelect) is WorkingBeatmap workingBeatmap))
+                return;
+
+            beatmap.Value = workingBeatmap;
             beatmap.Value.Track.Restart();
         }
     }

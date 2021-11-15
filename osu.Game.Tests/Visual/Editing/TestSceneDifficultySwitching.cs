@@ -7,6 +7,7 @@ using NUnit.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Testing;
 using osu.Game.Beatmaps;
+using osu.Game.Extensions;
 using osu.Game.Overlays.Dialog;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Osu;
@@ -46,7 +47,7 @@ namespace osu.Game.Tests.Visual.Editing
         {
             BeatmapInfo targetDifficulty = null;
 
-            AddStep("set target difficulty", () => targetDifficulty = importedBeatmapSet.Beatmaps.Last(beatmap => !beatmap.Equals(Beatmap.Value.BeatmapInfo)));
+            AddStep("set target difficulty", () => targetDifficulty = importedBeatmapSet.Beatmaps.Last(beatmap => !beatmap.MatchesOnlineID(Beatmap.Value.BeatmapInfo)));
             switchToDifficulty(() => targetDifficulty);
             confirmEditingBeatmap(() => targetDifficulty);
 
@@ -61,7 +62,7 @@ namespace osu.Game.Tests.Visual.Editing
             BeatmapInfo targetDifficulty = null;
             AddStep("seek editor to 00:05:00", () => EditorClock.Seek(5000));
 
-            AddStep("set target difficulty", () => targetDifficulty = importedBeatmapSet.Beatmaps.Last(beatmap => !beatmap.Equals(Beatmap.Value.BeatmapInfo)));
+            AddStep("set target difficulty", () => targetDifficulty = importedBeatmapSet.Beatmaps.Last(beatmap => !beatmap.MatchesOnlineID(Beatmap.Value.BeatmapInfo)));
             switchToDifficulty(() => targetDifficulty);
             confirmEditingBeatmap(() => targetDifficulty);
             AddAssert("editor clock at 00:05:00", () => EditorClock.CurrentTime == 5000);
@@ -82,8 +83,8 @@ namespace osu.Game.Tests.Visual.Editing
             AddStep("set target difficulty", () =>
             {
                 targetDifficulty = sameRuleset
-                    ? importedBeatmapSet.Beatmaps.Last(beatmap => !beatmap.Equals(Beatmap.Value.BeatmapInfo) && beatmap.RulesetID == Beatmap.Value.BeatmapInfo.RulesetID)
-                    : importedBeatmapSet.Beatmaps.Last(beatmap => !beatmap.Equals(Beatmap.Value.BeatmapInfo) && beatmap.RulesetID != Beatmap.Value.BeatmapInfo.RulesetID);
+                    ? importedBeatmapSet.Beatmaps.Last(beatmap => !beatmap.MatchesOnlineID(Beatmap.Value.BeatmapInfo) && beatmap.Ruleset.MatchesOnlineID(Beatmap.Value.BeatmapInfo))
+                    : importedBeatmapSet.Beatmaps.Last(beatmap => !beatmap.MatchesOnlineID(Beatmap.Value.BeatmapInfo) && !beatmap.Ruleset.MatchesOnlineID(Beatmap.Value.BeatmapInfo));
             });
             switchToDifficulty(() => targetDifficulty);
             confirmEditingBeatmap(() => targetDifficulty);
@@ -116,7 +117,7 @@ namespace osu.Game.Tests.Visual.Editing
 
             AddStep("remove first hitobject", () => EditorBeatmap.RemoveAt(0));
 
-            AddStep("set target difficulty", () => targetDifficulty = importedBeatmapSet.Beatmaps.Last(beatmap => !beatmap.Equals(Beatmap.Value.BeatmapInfo)));
+            AddStep("set target difficulty", () => targetDifficulty = importedBeatmapSet.Beatmaps.Last(beatmap => !beatmap.MatchesOnlineID(Beatmap.Value.BeatmapInfo)));
             switchToDifficulty(() => targetDifficulty);
 
             AddUntilStep("prompt for save dialog shown", () =>
@@ -145,7 +146,7 @@ namespace osu.Game.Tests.Visual.Editing
 
             AddStep("remove first hitobject", () => EditorBeatmap.RemoveAt(0));
 
-            AddStep("set target difficulty", () => targetDifficulty = importedBeatmapSet.Beatmaps.Last(beatmap => !beatmap.Equals(Beatmap.Value.BeatmapInfo)));
+            AddStep("set target difficulty", () => targetDifficulty = importedBeatmapSet.Beatmaps.Last(beatmap => !beatmap.MatchesOnlineID(Beatmap.Value.BeatmapInfo)));
             switchToDifficulty(() => targetDifficulty);
 
             AddUntilStep("prompt for save dialog shown", () =>
@@ -170,7 +171,7 @@ namespace osu.Game.Tests.Visual.Editing
 
         private void confirmEditingBeatmap(Func<BeatmapInfo> targetDifficulty)
         {
-            AddUntilStep("current beatmap is correct", () => Beatmap.Value.BeatmapInfo.Equals(targetDifficulty.Invoke()));
+            AddUntilStep("current beatmap is correct", () => Beatmap.Value.BeatmapInfo.MatchesOnlineID(targetDifficulty.Invoke()));
             AddUntilStep("current screen is editor", () => Stack.CurrentScreen == Editor && Editor?.IsLoaded == true);
         }
     }

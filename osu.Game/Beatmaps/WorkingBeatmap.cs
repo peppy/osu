@@ -28,8 +28,10 @@ namespace osu.Game.Beatmaps
     {
         public readonly BeatmapInfo BeatmapInfo;
 
+        // ReSharper disable once FieldHidesInterfacePropertyWithDefaultImplementation
         public readonly BeatmapSetInfo BeatmapSetInfo;
 
+        // ReSharper disable once FieldHidesInterfacePropertyWithDefaultImplementation
         public readonly BeatmapMetadata Metadata;
 
         protected AudioManager AudioManager { get; }
@@ -81,13 +83,16 @@ namespace osu.Game.Beatmaps
         /// <returns>The applicable <see cref="IBeatmapConverter"/>.</returns>
         protected virtual IBeatmapConverter CreateBeatmapConverter(IBeatmap beatmap, Ruleset ruleset) => ruleset.CreateBeatmapConverter(beatmap);
 
-        public virtual IBeatmap GetPlayableBeatmap(RulesetInfo ruleset, IReadOnlyList<Mod> mods = null, TimeSpan? timeout = null)
+        public virtual IBeatmap GetPlayableBeatmap(IRulesetInfo ruleset, IReadOnlyList<Mod> mods = null, TimeSpan? timeout = null)
         {
             using (var cancellationSource = createCancellationTokenSource(timeout))
             {
                 mods ??= Array.Empty<Mod>();
 
                 var rulesetInstance = ruleset.CreateInstance();
+
+                if (rulesetInstance == null)
+                    throw new RulesetLoadException("Creating ruleset instance failed when attempting to create playable beatmap.");
 
                 IBeatmapConverter converter = CreateBeatmapConverter(Beatmap, rulesetInstance);
 
@@ -233,6 +238,8 @@ namespace osu.Game.Beatmaps
         public override string ToString() => BeatmapInfo.ToString();
 
         public virtual bool BeatmapLoaded => beatmapLoadTask?.IsCompleted ?? false;
+
+        IBeatmapInfo IWorkingBeatmap.BeatmapInfo => BeatmapInfo;
 
         public IBeatmap Beatmap
         {

@@ -119,7 +119,7 @@ namespace osu.Game.Scoring.Legacy
 
             // before returning for database import, we must restore the database-sourced BeatmapInfo.
             // if not, the clone operation in GetPlayableBeatmap will cause a dereference and subsequent database exception.
-            score.ScoreInfo.BeatmapInfo = workingBeatmap.BeatmapInfo;
+            score.ScoreInfo.BeatmapInfo = (BeatmapInfo)workingBeatmap.BeatmapInfo;
 
             return score;
         }

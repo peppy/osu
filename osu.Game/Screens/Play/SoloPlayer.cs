@@ -25,13 +25,15 @@ namespace osu.Game.Screens.Play
 
         protected override APIRequest<APIScoreToken> CreateTokenRequest()
         {
-            if (!(Beatmap.Value.BeatmapInfo.OnlineID is int beatmapId))
+            int onlineBeatmapID = Beatmap.Value.BeatmapInfo.OnlineID;
+
+            if (onlineBeatmapID <= 0)
                 return null;
 
             if (!(Ruleset.Value.ID is int rulesetId) || Ruleset.Value.ID > ILegacyRuleset.MAX_LEGACY_RULESET_ID)
                 return null;
 
-            return new CreateSoloScoreRequest(beatmapId, rulesetId, Game.VersionHash);
+            return new CreateSoloScoreRequest(onlineBeatmapID, rulesetId, Game.VersionHash);
         }
 
         protected override bool HandleTokenRetrievalFailure(Exception exception) => false;
