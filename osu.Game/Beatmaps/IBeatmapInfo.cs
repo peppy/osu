@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Game.Database;
+using osu.Game.Extensions;
 using osu.Game.Rulesets;
 
 #nullable enable
@@ -62,5 +63,13 @@ namespace osu.Game.Beatmaps
         /// The basic star rating for this beatmap (with no mods applied).
         /// </summary>
         double StarRating { get; }
+
+        bool AudioEquals(IBeatmapInfo? other) => other != null && BeatmapSet != null && other.BeatmapSet != null &&
+                                                 BeatmapSet.MatchesOnlineID(other.BeatmapSet) &&
+                                                 Metadata.AudioFile == other.Metadata.AudioFile;
+
+        bool BackgroundEquals(IBeatmapInfo? other) => other != null && BeatmapSet != null && other.BeatmapSet != null &&
+                                                      BeatmapSet.MatchesOnlineID(other.BeatmapSet) &&
+                                                      Metadata.BackgroundFile == other.Metadata.BackgroundFile;
     }
 }
