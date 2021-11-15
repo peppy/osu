@@ -113,6 +113,7 @@ namespace osu.Game
         protected Storage Storage { get; set; }
 
         protected Bindable<IWorkingBeatmap> Beatmap { get; private set; } // cached via load() method
+        private Bindable<WorkingBeatmap> typedBeatmap { get; set; } // cached via load() method
 
         [Cached]
         [Cached(typeof(IBindable<RulesetInfo>))]
@@ -285,6 +286,13 @@ namespace osu.Game
 
             dependencies.CacheAs<IBindable<IWorkingBeatmap>>(Beatmap);
             dependencies.CacheAs(Beatmap);
+
+            // this is kept around for EF use cases which eventually need to be removed or replaced.
+            typedBeatmap = new NonNullableBindable<WorkingBeatmap>(defaultBeatmap);
+            dependencies.CacheAs<IBindable<WorkingBeatmap>>(typedBeatmap);
+            dependencies.CacheAs(typedBeatmap);
+            typedBeatmap.BindValueChanged(b => Beatmap.Value = b.NewValue);
+            Beatmap.BindValueChanged(b => typedBeatmap.Value = b.NewValue as WorkingBeatmap);
 
             fileStore.Cleanup();
 
