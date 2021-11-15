@@ -12,7 +12,7 @@ namespace osu.Game.Graphics.Backgrounds
 {
     public class BeatmapBackgroundWithStoryboard : BeatmapBackground
     {
-        public BeatmapBackgroundWithStoryboard(WorkingBeatmap beatmap, string fallbackTextureName = "Backgrounds/bg1")
+        public BeatmapBackgroundWithStoryboard(IWorkingBeatmap beatmap, string fallbackTextureName = "Backgrounds/bg1")
             : base(beatmap, fallbackTextureName)
         {
         }

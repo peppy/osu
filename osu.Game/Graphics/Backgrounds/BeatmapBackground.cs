@@ -9,11 +9,11 @@ namespace osu.Game.Graphics.Backgrounds
 {
     public class BeatmapBackground : Background
     {
-        public readonly WorkingBeatmap Beatmap;
+        public readonly IWorkingBeatmap Beatmap;
 
         private readonly string fallbackTextureName;
 
-        public BeatmapBackground(WorkingBeatmap beatmap, string fallbackTextureName = @"Backgrounds/bg1")
+        public BeatmapBackground(IWorkingBeatmap beatmap, string fallbackTextureName = @"Backgrounds/bg1")
         {
             Beatmap = beatmap;
             this.fallbackTextureName = fallbackTextureName;

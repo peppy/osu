@@ -24,7 +24,7 @@ namespace osu.Game.Screens.Backgrounds
 
         protected Background Background;
 
-        private WorkingBeatmap beatmap;
+        private IWorkingBeatmap beatmap;
 
         /// <summary>
         /// Whether or not user-configured settings relating to brightness of elements should be ignored.
@@ -47,7 +47,7 @@ namespace osu.Game.Screens.Backgrounds
 
         protected virtual DimmableBackground CreateFadeContainer() => new DimmableBackground { RelativeSizeAxes = Axes.Both };
 
-        public BackgroundScreenBeatmap(WorkingBeatmap beatmap = null)
+        public BackgroundScreenBeatmap(IWorkingBeatmap beatmap = null)
         {
             Beatmap = beatmap;
 
@@ -70,7 +70,7 @@ namespace osu.Game.Screens.Backgrounds
 
         private CancellationTokenSource cancellationSource;
 
-        public WorkingBeatmap Beatmap
+        public IWorkingBeatmap Beatmap
         {
             get => beatmap;
             set
