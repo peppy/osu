@@ -29,7 +29,7 @@ namespace osu.Game.Screens.Backgrounds
         private readonly SeasonalBackgroundLoader seasonalBackgroundLoader = new SeasonalBackgroundLoader();
 
         [Resolved]
-        private IBindable<WorkingBeatmap> beatmap { get; set; }
+        private IBindable<IWorkingBeatmap> beatmap { get; set; }
 
         protected virtual bool AllowStoryboardBackground => true;
 
