@@ -28,10 +28,8 @@ namespace osu.Game.Beatmaps
     {
         public readonly BeatmapInfo BeatmapInfo;
 
-        // ReSharper disable once FieldHidesInterfacePropertyWithDefaultImplementation
         public readonly BeatmapSetInfo BeatmapSetInfo;
 
-        // ReSharper disable once FieldHidesInterfacePropertyWithDefaultImplementation
         public readonly BeatmapMetadata Metadata;
 
         protected AudioManager AudioManager { get; }
@@ -231,6 +229,8 @@ namespace osu.Game.Beatmaps
         public virtual bool BeatmapLoaded => beatmapLoadTask?.IsCompleted ?? false;
 
         IBeatmapInfo IWorkingBeatmap.BeatmapInfo => BeatmapInfo;
+        IBeatmapMetadataInfo IWorkingBeatmap.Metadata => Metadata;
+        IBeatmapSetInfo IWorkingBeatmap.BeatmapSetInfo => BeatmapSetInfo;
 
         public IBeatmap Beatmap
         {
