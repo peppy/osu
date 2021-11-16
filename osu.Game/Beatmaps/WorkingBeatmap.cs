@@ -27,7 +27,9 @@ namespace osu.Game.Beatmaps
     public abstract class WorkingBeatmap : IWorkingBeatmap
     {
         public readonly BeatmapInfo BeatmapInfo;
+
         public readonly BeatmapSetInfo BeatmapSetInfo;
+
         public readonly BeatmapMetadata Metadata;
 
         protected AudioManager AudioManager { get; }
