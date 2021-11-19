@@ -33,7 +33,7 @@ namespace osu.Game.Rulesets
         }
 
         [UsedImplicitly]
-        private RulesetInfo()
+        public RulesetInfo()
         {
         }
 
@@ -59,5 +59,13 @@ namespace osu.Game.Rulesets
             InstantiationInfo = InstantiationInfo,
             Available = Available
         };
+
+        #region Compatibility properties
+
+        public int ID => OnlineID;
+
+        public Ruleset? CreateInstance() => ((IRulesetInfo)this).CreateInstance();
+
+        #endregion
     }
 }
