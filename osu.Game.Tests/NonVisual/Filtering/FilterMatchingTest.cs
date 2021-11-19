@@ -14,7 +14,7 @@ namespace osu.Game.Tests.NonVisual.Filtering
     [TestFixture]
     public class FilterMatchingTest
     {
-        private BeatmapInfo getExampleBeatmap() => new BeatmapInfo
+        private IBeatmapInfo getExampleBeatmap() => new BeatmapInfo
         {
             Ruleset = new RulesetInfo { ID = 5 },
             StarRating = 4.0d,

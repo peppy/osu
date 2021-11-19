@@ -63,5 +63,10 @@ namespace osu.Game.Beatmaps
         /// The basic star rating for this beatmap (with no mods applied).
         /// </summary>
         double StarRating { get; }
+
+        /// <summary>
+        /// TODO TODO TODO TODO FUJCK FJJJJJJFFFFFFFFFFFFFF
+        /// </summary>
+        bool Hidden => false;
     }
 }

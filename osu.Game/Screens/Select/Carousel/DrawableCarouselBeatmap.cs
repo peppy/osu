@@ -23,7 +23,6 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.Backgrounds;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Models;
 using osu.Game.Overlays;
 using osuTK;
 using osuTK.Graphics;
@@ -41,7 +40,7 @@ namespace osu.Game.Screens.Select.Carousel
 
         private const float height = MAX_HEIGHT * 0.6f;
 
-        private readonly RealmBeatmap beatmapInfo;
+        private readonly IBeatmapInfo beatmapInfo;
 
         private Sprite background;
 

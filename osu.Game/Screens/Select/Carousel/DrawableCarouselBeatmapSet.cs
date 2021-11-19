@@ -16,7 +16,6 @@ using osu.Framework.Utils;
 using osu.Game.Beatmaps;
 using osu.Game.Collections;
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Models;
 using osu.Game.Overlays;
 
 namespace osu.Game.Screens.Select.Carousel
@@ -42,7 +41,7 @@ namespace osu.Game.Screens.Select.Carousel
         [CanBeNull]
         private Container<DrawableCarouselItem> beatmapContainer;
 
-        private RealmBeatmapSet beatmapSet;
+        private IBeatmapSetInfo beatmapSet;
 
         [CanBeNull]
         private Task beatmapsLoadTask;

@@ -4,6 +4,7 @@
 using System;
 using System.Linq;
 using osu.Game.Beatmaps;
+using osu.Game.Database;
 using osu.Game.Models;
 using osu.Game.Screens.Select.Filter;
 
@@ -13,10 +14,13 @@ namespace osu.Game.Screens.Select.Carousel
     {
         public override float TotalHeight => DrawableCarouselBeatmap.HEIGHT;
 
-        public readonly RealmBeatmap BeatmapInfo;
+        public readonly IBeatmapInfo BeatmapInfo;
 
-        public CarouselBeatmap(RealmBeatmap beatmapInfo)
+        public CarouselBeatmap(IBeatmapInfo beatmapInfo)
         {
+            if (beatmapInfo is RealmBeatmap realmBeatmap)
+                beatmapInfo = realmBeatmap.Detach();
+
             BeatmapInfo = beatmapInfo;
             State.Value = CarouselItemState.Collapsed;
         }
@@ -47,8 +51,8 @@ namespace osu.Game.Screens.Select.Carousel
             match &= !criteria.Length.HasFilter || criteria.Length.IsInRange(BeatmapInfo.Length);
             match &= !criteria.BPM.HasFilter || criteria.BPM.IsInRange(BeatmapInfo.BPM);
 
-            match &= !criteria.BeatDivisor.HasFilter || criteria.BeatDivisor.IsInRange(BeatmapInfo.BeatDivisor);
-            match &= !criteria.OnlineStatus.HasFilter || criteria.OnlineStatus.IsInRange(BeatmapInfo.Status);
+            // match &= !criteria.BeatDivisor.HasFilter || criteria.BeatDivisor.IsInRange(BeatmapInfo.BeatDivisor);
+            // match &= !criteria.OnlineStatus.HasFilter || criteria.OnlineStatus.IsInRange(BeatmapInfo.Status);
 
             match &= !criteria.Creator.HasFilter || criteria.Creator.Matches(BeatmapInfo.Metadata.Author.Username);
             match &= !criteria.Artist.HasFilter || criteria.Artist.Matches(BeatmapInfo.Metadata.Artist) ||

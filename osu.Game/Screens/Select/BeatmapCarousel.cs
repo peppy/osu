@@ -50,14 +50,14 @@ namespace osu.Game.Screens.Select
         /// <summary>
         /// The currently selected beatmap.
         /// </summary>
-        public RealmBeatmap SelectedBeatmapInfo => selectedBeatmap?.BeatmapInfo;
+        public IBeatmapInfo SelectedBeatmapInfo => selectedBeatmap?.BeatmapInfo;
 
         private CarouselBeatmap selectedBeatmap => selectedBeatmapSet?.Beatmaps.FirstOrDefault(s => s.State.Value == CarouselItemState.Selected);
 
         /// <summary>
         /// The currently selected beatmap set.
         /// </summary>
-        public RealmBeatmapSet SelectedBeatmapSet => selectedBeatmapSet?.BeatmapSet;
+        public IBeatmapSetInfo SelectedBeatmapSet => selectedBeatmapSet?.BeatmapSet;
 
         /// <summary>
         /// A function to optionally decide on a recommended difficulty from a beatmap set.
@@ -102,13 +102,13 @@ namespace osu.Game.Screens.Select
         private IEnumerable<CarouselBeatmapSet> beatmapSets => root.Children.OfType<CarouselBeatmapSet>();
 
         // todo: only used for testing, maybe remove.
-        public IEnumerable<RealmBeatmapSet> BeatmapSets
+        public IEnumerable<IBeatmapSetInfo> BeatmapSets
         {
             get => beatmapSets.Select(g => g.BeatmapSet);
             set => loadBeatmapSets(value);
         }
 
-        private void loadBeatmapSets(IEnumerable<RealmBeatmapSet> beatmapSets)
+        private void loadBeatmapSets(IEnumerable<IBeatmapSetInfo> beatmapSets)
         {
             CarouselRoot newRoot = new CarouselRoot(this);
 
@@ -233,7 +233,7 @@ namespace osu.Game.Screens.Select
 
         public void RemoveBeatmapSet(RealmBeatmapSet beatmapSet) => Schedule(() =>
         {
-            var existingSet = beatmapSets.FirstOrDefault(b => b.BeatmapSet.ID == beatmapSet.ID);
+            var existingSet = beatmapSets.FirstOrDefault(b => b.BeatmapSet.Equals(beatmapSet));
 
             if (existingSet == null)
                 return;
@@ -242,14 +242,14 @@ namespace osu.Game.Screens.Select
             itemsCache.Invalidate();
         });
 
-        public void UpdateBeatmapSet(RealmBeatmapSet beatmapSet) => Schedule(() =>
+        public void UpdateBeatmapSet(IBeatmapSetInfo beatmapSet) => Schedule(() =>
         {
-            Guid? previouslySelectedID = null;
-            CarouselBeatmapSet existingSet = beatmapSets.FirstOrDefault(b => b.BeatmapSet.ID == beatmapSet.ID);
+            IBeatmapInfo previouslySelected = null;
+            CarouselBeatmapSet existingSet = beatmapSets.FirstOrDefault(b => b.BeatmapSet.Equals(beatmapSet));
 
             // If the selected beatmap is about to be removed, store its ID so it can be re-selected if required
             if (existingSet?.State?.Value == CarouselItemState.Selected)
-                previouslySelectedID = selectedBeatmap?.BeatmapInfo.ID;
+                previouslySelected = selectedBeatmap?.BeatmapInfo;
 
             var newSet = createCarouselSet(beatmapSet);
 
@@ -269,8 +269,8 @@ namespace osu.Game.Screens.Select
             applyActiveCriteria(false, alwaysResetScrollPosition: false);
 
             // check if we can/need to maintain our current selection.
-            if (previouslySelectedID != null)
-                select((CarouselItem)newSet.Beatmaps.FirstOrDefault(b => b.BeatmapInfo.ID == previouslySelectedID) ?? newSet);
+            if (previouslySelected != null)
+                select((CarouselItem)newSet.Beatmaps.FirstOrDefault(b => b.BeatmapInfo.Equals(previouslySelected)) ?? newSet);
 
             itemsCache.Invalidate();
             Schedule(() => BeatmapSetsChanged?.Invoke());
@@ -282,7 +282,7 @@ namespace osu.Game.Screens.Select
         /// <param name="beatmapInfo">The beatmap to select.</param>
         /// <param name="bypassFilters">Whether to select the beatmap even if it is filtered (i.e., not visible on carousel).</param>
         /// <returns>True if a selection was made, False if it wasn't.</returns>
-        public bool SelectBeatmap(BeatmapInfo beatmapInfo, bool bypassFilters = true)
+        public bool SelectBeatmap(IBeatmapInfo beatmapInfo, bool bypassFilters = true)
         {
             // ensure that any pending events from BeatmapManager have been run before attempting a selection.
             Scheduler.Update();
@@ -666,10 +666,8 @@ namespace osu.Game.Screens.Select
             return (firstIndex, lastIndex);
         }
 
-        private CarouselBeatmapSet createCarouselSet(RealmBeatmapSet beatmapSet)
+        private CarouselBeatmapSet createCarouselSet(IBeatmapSetInfo beatmapSet)
         {
-            beatmapSet = beatmapSet.Detach();
-
             if (beatmapSet.Beatmaps.All(b => b.Hidden))
                 return null;
 
