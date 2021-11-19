@@ -18,6 +18,7 @@ using osu.Game.Extensions;
 using osu.Game.IO.Archives;
 using osu.Game.Models;
 using osu.Game.Overlays.Notifications;
+using osu.Game.Rulesets;
 using osu.Game.Stores;
 using osu.Game.Tests.Resources;
 using Realms;
@@ -41,25 +42,25 @@ namespace osu.Game.Tests.Database
                 using (var importer = new BeatmapImporter(realmFactory, storage))
                 using (new RealmRulesetStore(realmFactory, storage))
                 {
-                    ILive<RealmBeatmapSet>? imported;
+                    ILive<BeatmapSetInfo>? imported;
 
                     using (var reader = new ZipArchiveReader(TestResources.GetTestBeatmapStream()))
                         imported = await importer.Import(reader);
 
-                    Assert.AreEqual(1, realmFactory.Context.All<RealmBeatmapSet>().Count());
+                    Assert.AreEqual(1, realmFactory.Context.All<BeatmapSetInfo>().Count());
 
                     Assert.NotNull(imported);
                     Debug.Assert(imported != null);
 
                     imported.PerformWrite(s => s.DeletePending = true);
 
-                    Assert.AreEqual(1, realmFactory.Context.All<RealmBeatmapSet>().Count(s => s.DeletePending));
+                    Assert.AreEqual(1, realmFactory.Context.All<BeatmapSetInfo>().Count(s => s.DeletePending));
                 }
             });
 
             Logger.Log("Running with no work to purge pending deletions");
 
-            RunTestWithRealm((realmFactory, _) => { Assert.AreEqual(0, realmFactory.Context.All<RealmBeatmapSet>().Count()); });
+            RunTestWithRealm((realmFactory, _) => { Assert.AreEqual(0, realmFactory.Context.All<BeatmapSetInfo>().Count()); });
         }
 
         [Test]
@@ -116,7 +117,7 @@ namespace osu.Game.Tests.Database
 
                 string? tempPath = TestResources.GetTestBeatmapForImport();
 
-                ILive<RealmBeatmapSet>? importedSet;
+                ILive<BeatmapSetInfo>? importedSet;
 
                 using (var stream = File.OpenRead(tempPath))
                 {
@@ -130,7 +131,7 @@ namespace osu.Game.Tests.Database
                 Assert.IsTrue(File.Exists(tempPath), "Stream source file somehow went missing");
                 File.Delete(tempPath);
 
-                var imported = realmFactory.Context.All<RealmBeatmapSet>().First(beatmapSet => beatmapSet.ID == importedSet.ID);
+                var imported = realmFactory.Context.All<BeatmapSetInfo>().First(beatmapSet => beatmapSet.ID == importedSet.ID);
 
                 deleteBeatmapSet(imported, realmFactory.Context);
             });
@@ -527,7 +528,7 @@ namespace osu.Game.Tests.Database
                 using var importer = new BeatmapImporter(realmFactory, storage);
                 using var store = new RealmRulesetStore(realmFactory, storage);
 
-                var metadata = new RealmBeatmapMetadata
+                var metadata = new BeatmapMetadata
                 {
                     Artist = "SomeArtist",
                     Author =
@@ -536,18 +537,18 @@ namespace osu.Game.Tests.Database
                     }
                 };
 
-                var ruleset = realmFactory.Context.All<RealmRuleset>().First();
+                var ruleset = realmFactory.Context.All<RulesetInfo>().First();
 
-                var toImport = new RealmBeatmapSet
+                var toImport = new BeatmapSetInfo
                 {
                     OnlineID = 1,
                     Beatmaps =
                     {
-                        new RealmBeatmap(ruleset, new RealmBeatmapDifficulty(), metadata)
+                        new BeatmapInfo(ruleset, new BeatmapDifficulty(), metadata)
                         {
                             OnlineID = 2,
                         },
-                        new RealmBeatmap(ruleset, new RealmBeatmapDifficulty(), metadata)
+                        new BeatmapInfo(ruleset, new BeatmapDifficulty(), metadata)
                         {
                             OnlineID = 2,
                             Status = BeatmapOnlineStatus.Loved,
@@ -723,18 +724,18 @@ namespace osu.Game.Tests.Database
                 await importer.Import(temp);
 
                 // Update via the beatmap, not the beatmap info, to ensure correct linking
-                RealmBeatmapSet setToUpdate = realmFactory.Context.All<RealmBeatmapSet>().First();
+                BeatmapSetInfo setToUpdate = realmFactory.Context.All<BeatmapSetInfo>().First();
 
                 var beatmapToUpdate = setToUpdate.Beatmaps.First();
 
                 realmFactory.Context.Write(() => beatmapToUpdate.DifficultyName = "updated");
 
-                RealmBeatmap updatedInfo = realmFactory.Context.All<RealmBeatmap>().First(b => b.ID == beatmapToUpdate.ID);
+                BeatmapInfo updatedInfo = realmFactory.Context.All<BeatmapInfo>().First(b => b.ID == beatmapToUpdate.ID);
                 Assert.That(updatedInfo.DifficultyName, Is.EqualTo("updated"));
             });
         }
 
-        public static async Task<RealmBeatmapSet?> LoadQuickOszIntoOsu(BeatmapImporter importer, Realm realm)
+        public static async Task<BeatmapSetInfo?> LoadQuickOszIntoOsu(BeatmapImporter importer, Realm realm)
         {
             string? temp = TestResources.GetQuickTestBeatmapForImport();
 
@@ -746,10 +747,10 @@ namespace osu.Game.Tests.Database
 
             waitForOrAssert(() => !File.Exists(temp), "Temporary file still exists after standard import", 5000);
 
-            return realm.All<RealmBeatmapSet>().FirstOrDefault(beatmapSet => beatmapSet.ID == importedSet!.ID);
+            return realm.All<BeatmapSetInfo>().FirstOrDefault(beatmapSet => beatmapSet.ID == importedSet!.ID);
         }
 
-        public static async Task<RealmBeatmapSet> LoadOszIntoStore(BeatmapImporter importer, Realm realm, string? path = null, bool virtualTrack = false)
+        public static async Task<BeatmapSetInfo> LoadOszIntoStore(BeatmapImporter importer, Realm realm, string? path = null, bool virtualTrack = false)
         {
             string? temp = path ?? TestResources.GetTestBeatmapForImport(virtualTrack);
 
@@ -762,20 +763,20 @@ namespace osu.Game.Tests.Database
 
             waitForOrAssert(() => !File.Exists(temp), "Temporary file still exists after standard import", 5000);
 
-            return realm.All<RealmBeatmapSet>().First(beatmapSet => beatmapSet.ID == importedSet.ID);
+            return realm.All<BeatmapSetInfo>().First(beatmapSet => beatmapSet.ID == importedSet.ID);
         }
 
-        private void deleteBeatmapSet(RealmBeatmapSet imported, Realm realm)
+        private void deleteBeatmapSet(BeatmapSetInfo imported, Realm realm)
         {
             realm.Write(() => imported.DeletePending = true);
 
             checkBeatmapSetCount(realm, 0);
             checkBeatmapSetCount(realm, 1, true);
 
-            Assert.IsTrue(realm.All<RealmBeatmapSet>().First(_ => true).DeletePending);
+            Assert.IsTrue(realm.All<BeatmapSetInfo>().First(_ => true).DeletePending);
         }
 
-        private static Task createScoreForBeatmap(Realm realm, RealmBeatmap beatmap)
+        private static Task createScoreForBeatmap(Realm realm, BeatmapInfo beatmap)
         {
             // TODO: reimplement when we have score support in realm.
             // return ImportScoreTest.LoadScoreIntoOsu(osu, new ScoreInfo
@@ -791,8 +792,8 @@ namespace osu.Game.Tests.Database
         private static void checkBeatmapSetCount(Realm realm, int expected, bool includeDeletePending = false)
         {
             Assert.AreEqual(expected, includeDeletePending
-                ? realm.All<RealmBeatmapSet>().Count()
-                : realm.All<RealmBeatmapSet>().Count(s => !s.DeletePending));
+                ? realm.All<BeatmapSetInfo>().Count()
+                : realm.All<BeatmapSetInfo>().Count(s => !s.DeletePending));
         }
 
         private static string hashFile(string filename)
@@ -803,7 +804,7 @@ namespace osu.Game.Tests.Database
 
         private static void checkBeatmapCount(Realm realm, int expected)
         {
-            Assert.AreEqual(expected, realm.All<RealmBeatmap>().Where(_ => true).ToList().Count);
+            Assert.AreEqual(expected, realm.All<BeatmapInfo>().Where(_ => true).ToList().Count);
         }
 
         private static void checkSingleReferencedFileCount(Realm realm, int expected)
@@ -821,20 +822,20 @@ namespace osu.Game.Tests.Database
 
         private static void ensureLoaded(Realm realm, int timeout = 60000)
         {
-            IQueryable<RealmBeatmapSet>? resultSets = null;
+            IQueryable<BeatmapSetInfo>? resultSets = null;
 
-            waitForOrAssert(() => (resultSets = realm.All<RealmBeatmapSet>().Where(s => !s.DeletePending && s.OnlineID == 241526)).Any(),
+            waitForOrAssert(() => (resultSets = realm.All<BeatmapSetInfo>().Where(s => !s.DeletePending && s.OnlineID == 241526)).Any(),
                 @"BeatmapSet did not import to the database in allocated time.", timeout);
 
             // ensure we were stored to beatmap database backing...
             Assert.IsTrue(resultSets?.Count() == 1, $@"Incorrect result count found ({resultSets?.Count()} but should be 1).");
 
-            IEnumerable<RealmBeatmapSet> queryBeatmapSets() => realm.All<RealmBeatmapSet>().Where(s => !s.DeletePending && s.OnlineID == 241526);
+            IEnumerable<BeatmapSetInfo> queryBeatmapSets() => realm.All<BeatmapSetInfo>().Where(s => !s.DeletePending && s.OnlineID == 241526);
 
             var set = queryBeatmapSets().First();
 
             // ReSharper disable once PossibleUnintendedReferenceComparison
-            IEnumerable<RealmBeatmap> queryBeatmaps() => realm.All<RealmBeatmap>().Where(s => s.BeatmapSet != null && s.BeatmapSet == set);
+            IEnumerable<BeatmapInfo> queryBeatmaps() => realm.All<BeatmapInfo>().Where(s => s.BeatmapSet != null && s.BeatmapSet == set);
 
             waitForOrAssert(() => queryBeatmaps().Count() == 12, @"Beatmaps did not import to the database in allocated time", timeout);
             waitForOrAssert(() => queryBeatmapSets().Count() == 1, @"BeatmapSet did not import to the database in allocated time", timeout);
@@ -847,7 +848,7 @@ namespace osu.Game.Tests.Database
                     (countBeatmaps = queryBeatmaps().Count()),
                 $@"Incorrect database beatmap count post-import ({countBeatmaps} but should be {countBeatmapSetBeatmaps}).", timeout);
 
-            foreach (RealmBeatmap b in set.Beatmaps)
+            foreach (BeatmapInfo b in set.Beatmaps)
                 Assert.IsTrue(set.Beatmaps.Any(c => c.OnlineID == b.OnlineID));
             Assert.IsTrue(set.Beatmaps.Count > 0);
         }
