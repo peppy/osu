@@ -3,7 +3,7 @@
 
 using System.Linq;
 using NUnit.Framework;
-using osu.Game.Models;
+using osu.Game.Rulesets;
 using osu.Game.Stores;
 
 namespace osu.Game.Tests.Database
@@ -18,7 +18,7 @@ namespace osu.Game.Tests.Database
                 var rulesets = new RealmRulesetStore(realmFactory, storage);
 
                 Assert.AreEqual(4, rulesets.AvailableRulesets.Count());
-                Assert.AreEqual(4, realmFactory.Context.All<RealmRuleset>().Count());
+                Assert.AreEqual(4, realmFactory.Context.All<RulesetInfo>().Count());
             });
         }
 
@@ -34,7 +34,7 @@ namespace osu.Game.Tests.Database
                 Assert.AreEqual(4, rulesets2.AvailableRulesets.Count());
 
                 Assert.AreEqual(rulesets.AvailableRulesets.First(), rulesets2.AvailableRulesets.First());
-                Assert.AreEqual(4, realmFactory.Context.All<RealmRuleset>().Count());
+                Assert.AreEqual(4, realmFactory.Context.All<RulesetInfo>().Count());
             });
         }
 
@@ -45,9 +45,9 @@ namespace osu.Game.Tests.Database
             {
                 var rulesets = new RealmRulesetStore(realmFactory, storage);
 
-                Assert.IsTrue((rulesets.AvailableRulesets.First() as RealmRuleset)?.IsManaged == false);
-                Assert.IsTrue((rulesets.GetRuleset(0) as RealmRuleset)?.IsManaged == false);
-                Assert.IsTrue((rulesets.GetRuleset("mania") as RealmRuleset)?.IsManaged == false);
+                Assert.IsTrue((rulesets.AvailableRulesets.First() as RulesetInfo)?.IsManaged == false);
+                Assert.IsTrue((rulesets.GetRuleset(0) as RulesetInfo)?.IsManaged == false);
+                Assert.IsTrue((rulesets.GetRuleset("mania") as RulesetInfo)?.IsManaged == false);
             });
         }
     }
