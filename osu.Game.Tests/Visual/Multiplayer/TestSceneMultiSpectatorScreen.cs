@@ -47,7 +47,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
         private void load()
         {
             importedSet = ImportBeatmapTest.LoadOszIntoOsu(game, virtualTrack: true).Result;
-            importedBeatmap = importedSet.Beatmaps.First(b => b.RulesetID == 0);
+            importedBeatmap = importedSet.Beatmaps.First(b => b.Ruleset.OnlineID == 0);
             importedBeatmapId = importedBeatmap.OnlineID ?? -1;
         }
 

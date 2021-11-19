@@ -82,8 +82,8 @@ namespace osu.Game.Tests.Visual.Editing
             AddStep("set target difficulty", () =>
             {
                 targetDifficulty = sameRuleset
-                    ? importedBeatmapSet.Beatmaps.Last(beatmap => !beatmap.Equals(Beatmap.Value.BeatmapInfo) && beatmap.RulesetID == Beatmap.Value.BeatmapInfo.RulesetID)
-                    : importedBeatmapSet.Beatmaps.Last(beatmap => !beatmap.Equals(Beatmap.Value.BeatmapInfo) && beatmap.RulesetID != Beatmap.Value.BeatmapInfo.RulesetID);
+                    ? importedBeatmapSet.Beatmaps.Last(beatmap => !beatmap.Equals(Beatmap.Value.BeatmapInfo) && beatmap.Ruleset.OnlineID == Beatmap.Value.BeatmapInfo.Ruleset.OnlineID)
+                    : importedBeatmapSet.Beatmaps.Last(beatmap => !beatmap.Equals(Beatmap.Value.BeatmapInfo) && beatmap.Ruleset.OnlineID != Beatmap.Value.BeatmapInfo.Ruleset.OnlineID);
             });
             switchToDifficulty(() => targetDifficulty);
             confirmEditingBeatmap(() => targetDifficulty);

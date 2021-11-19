@@ -825,7 +825,7 @@ namespace osu.Game.Tests.Beatmaps.IO
 
                     // Update via the beatmap, not the beatmap info, to ensure correct linking
                     BeatmapSetInfo setToUpdate = manager.GetAllUsableBeatmapSets()[0];
-                    Beatmap beatmapToUpdate = (Beatmap)manager.GetWorkingBeatmap(setToUpdate.Beatmaps.First(b => b.RulesetID == 0)).Beatmap;
+                    Beatmap beatmapToUpdate = (Beatmap)manager.GetWorkingBeatmap(setToUpdate.Beatmaps.First(b => b.Ruleset.OnlineID == 0)).Beatmap;
                     beatmapToUpdate.BeatmapInfo.DifficultyName = "updated";
 
                     manager.Update(setToUpdate);
@@ -855,8 +855,8 @@ namespace osu.Game.Tests.Beatmaps.IO
 
                     BeatmapSetInfo setToUpdate = manager.GetAllUsableBeatmapSets()[0];
 
-                    var beatmapInfo = setToUpdate.Beatmaps.First(b => b.RulesetID == 0);
-                    Beatmap beatmapToUpdate = (Beatmap)manager.GetWorkingBeatmap(setToUpdate.Beatmaps.First(b => b.RulesetID == 0)).Beatmap;
+                    var beatmapInfo = setToUpdate.Beatmaps.First(b => b.Ruleset.OnlineID == 0);
+                    Beatmap beatmapToUpdate = (Beatmap)manager.GetWorkingBeatmap(setToUpdate.Beatmaps.First(b => b.Ruleset.OnlineID == 0)).Beatmap;
                     BeatmapSetFileInfo fileToUpdate = setToUpdate.Files.First(f => beatmapToUpdate.BeatmapInfo.Path.Contains(f.Filename));
 
                     string oldMd5Hash = beatmapToUpdate.BeatmapInfo.MD5Hash;
@@ -1080,13 +1080,13 @@ namespace osu.Game.Tests.Beatmaps.IO
             foreach (BeatmapInfo b in set.Beatmaps)
                 Assert.IsTrue(set.Beatmaps.Any(c => c.OnlineID == b.OnlineID));
             Assert.IsTrue(set.Beatmaps.Count > 0);
-            var beatmap = store.GetWorkingBeatmap(set.Beatmaps.First(b => b.RulesetID == 0))?.Beatmap;
+            var beatmap = store.GetWorkingBeatmap(set.Beatmaps.First(b => b.Ruleset.OnlineID == 0))?.Beatmap;
             Assert.IsTrue(beatmap?.HitObjects.Any() == true);
-            beatmap = store.GetWorkingBeatmap(set.Beatmaps.First(b => b.RulesetID == 1))?.Beatmap;
+            beatmap = store.GetWorkingBeatmap(set.Beatmaps.First(b => b.Ruleset.OnlineID == 1))?.Beatmap;
             Assert.IsTrue(beatmap?.HitObjects.Any() == true);
-            beatmap = store.GetWorkingBeatmap(set.Beatmaps.First(b => b.RulesetID == 2))?.Beatmap;
+            beatmap = store.GetWorkingBeatmap(set.Beatmaps.First(b => b.Ruleset.OnlineID == 2))?.Beatmap;
             Assert.IsTrue(beatmap?.HitObjects.Any() == true);
-            beatmap = store.GetWorkingBeatmap(set.Beatmaps.First(b => b.RulesetID == 3))?.Beatmap;
+            beatmap = store.GetWorkingBeatmap(set.Beatmaps.First(b => b.Ruleset.OnlineID == 3))?.Beatmap;
             Assert.IsTrue(beatmap?.HitObjects.Any() == true);
         }
 

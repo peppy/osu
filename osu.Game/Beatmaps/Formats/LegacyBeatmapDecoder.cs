@@ -24,6 +24,9 @@ namespace osu.Game.Beatmaps.Formats
         private LegacySampleBank defaultSampleBank;
         private int defaultSampleVolume = 100;
 
+        private int rulesetID;
+        private bool isOsuRuleset => rulesetID == 0;
+
         public static void Register()
         {
             AddDecoder<Beatmap>(@"osu file format v", m => new LegacyBeatmapDecoder(Parsing.ParseInt(m.Split('v').Last())));
@@ -141,9 +144,9 @@ namespace osu.Game.Beatmaps.Formats
                     break;
 
                 case @"Mode":
-                    beatmap.BeatmapInfo.RulesetID = Parsing.ParseInt(pair.Value);
+                    rulesetID = Parsing.ParseInt(pair.Value);
 
-                    switch (beatmap.BeatmapInfo.RulesetID)
+                    switch (rulesetID)
                     {
                         case 0:
                             parser = new Rulesets.Objects.Legacy.Osu.ConvertHitObjectParser(getOffsetTime(), FormatVersion);
@@ -393,7 +396,6 @@ namespace osu.Game.Beatmaps.Formats
                 OmitFirstBarLine = omitFirstBarSignature,
             };
 
-            bool isOsuRuleset = beatmap.BeatmapInfo.RulesetID == 0;
             // scrolling rulesets use effect points rather than difficulty points for scroll speed adjustments.
             if (!isOsuRuleset)
                 effectPoint.ScrollSpeed = speedMultiplier;

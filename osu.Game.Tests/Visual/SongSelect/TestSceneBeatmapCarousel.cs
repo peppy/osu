@@ -377,7 +377,6 @@ namespace osu.Game.Tests.Visual.SongSelect
                 rulesetBeatmapSet.Beatmaps.ForEach(b =>
                 {
                     b.Ruleset = taikoRuleset;
-                    b.RulesetID = 1;
                 });
 
                 sets.Add(rulesetBeatmapSet);
@@ -555,7 +554,6 @@ namespace osu.Game.Tests.Visual.SongSelect
                 for (int i = 0; i <= 2; i++)
                 {
                     testMixed.Beatmaps[i].Ruleset = rulesets.AvailableRulesets.ElementAt(i);
-                    testMixed.Beatmaps[i].RulesetID = i;
                 }
 
                 carousel.UpdateBeatmapSet(testMixed);
@@ -563,7 +561,7 @@ namespace osu.Game.Tests.Visual.SongSelect
             AddStep("filter to ruleset 0", () =>
                 carousel.Filter(new FilterCriteria { Ruleset = rulesets.AvailableRulesets.ElementAt(0) }, false));
             AddStep("select filtered map skipping filtered", () => carousel.SelectBeatmap(testMixed.Beatmaps[1], false));
-            AddAssert("unfiltered beatmap not selected", () => carousel.SelectedBeatmapInfo.RulesetID == 0);
+            AddAssert("unfiltered beatmap not selected", () => carousel.SelectedBeatmapInfo.Ruleset.OnlineID == 0);
 
             AddStep("remove mixed set", () =>
             {
@@ -577,7 +575,6 @@ namespace osu.Game.Tests.Visual.SongSelect
                 testSingle.Beatmaps.ForEach(b =>
                 {
                     b.Ruleset = rulesets.AvailableRulesets.ElementAt(1);
-                    b.RulesetID = b.Ruleset.ID ?? 1;
                 });
 
                 carousel.UpdateBeatmapSet(testSingle);
@@ -634,7 +631,6 @@ namespace osu.Game.Tests.Visual.SongSelect
                         int ruleset = i > 0 ? 1 : 0;
 
                         b.Ruleset = rulesets.GetRuleset(ruleset);
-                        b.RulesetID = ruleset;
                     }
 
                     manySets.Add(set);

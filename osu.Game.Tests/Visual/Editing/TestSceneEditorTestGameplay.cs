@@ -43,7 +43,7 @@ namespace osu.Game.Tests.Visual.Editing
 
         protected override void LoadEditor()
         {
-            Beatmap.Value = beatmaps.GetWorkingBeatmap(importedBeatmapSet.Beatmaps.First(b => b.RulesetID == 0));
+            Beatmap.Value = beatmaps.GetWorkingBeatmap(importedBeatmapSet.Beatmaps.First(b => b.Ruleset.OnlineID == 0));
             base.LoadEditor();
         }
 

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Threading;
 using osu.Game.Audio;
 using osu.Game.Beatmaps;
+using osu.Game.Extensions;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Rulesets.Mania.Beatmaps.Patterns;
@@ -40,7 +41,7 @@ namespace osu.Game.Rulesets.Mania.Beatmaps
         public ManiaBeatmapConverter(IBeatmap beatmap, Ruleset ruleset)
             : base(beatmap, ruleset)
         {
-            IsForCurrentRuleset = beatmap.BeatmapInfo.Ruleset.Equals(ruleset.RulesetInfo);
+            IsForCurrentRuleset = beatmap.BeatmapInfo.Ruleset.MatchesOnlineID(ruleset.RulesetInfo);
 
             double roundedCircleSize = Math.Round(beatmap.Difficulty.CircleSize);
             double roundedOverallDifficulty = Math.Round(beatmap.Difficulty.OverallDifficulty);

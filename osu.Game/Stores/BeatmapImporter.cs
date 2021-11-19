@@ -214,11 +214,11 @@ namespace osu.Game.Stores
                     var decodedInfo = decoded.BeatmapInfo;
                     var decodedDifficulty = decodedInfo.BaseDifficulty;
 
-                    var ruleset = realm.All<RealmRuleset>().FirstOrDefault(r => r.OnlineID == decodedInfo.RulesetID);
+                    var ruleset = realm.All<RealmRuleset>().FirstOrDefault(r => r.OnlineID == decodedInfo.Ruleset.OnlineID);
 
                     if (ruleset?.Available != true)
                     {
-                        Logger.Log($"Skipping import of {file.Filename} due to missing local ruleset {decodedInfo.RulesetID}.", LoggingTarget.Database);
+                        Logger.Log($"Skipping import of {file.Filename} due to missing local ruleset {decodedInfo.Ruleset.OnlineID}.", LoggingTarget.Database);
                         continue;
                     }
 

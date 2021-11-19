@@ -36,7 +36,7 @@ namespace osu.Game.Tests.Visual.Ranking
         {
             base.LoadComplete();
 
-            var beatmapInfo = beatmaps.QueryBeatmap(b => b.RulesetID == 0);
+            var beatmapInfo = beatmaps.QueryBeatmap(b => b.Ruleset.OnlineID == 0);
             if (beatmapInfo != null)
                 Beatmap.Value = beatmaps.GetWorkingBeatmap(beatmapInfo);
         }

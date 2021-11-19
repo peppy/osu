@@ -83,8 +83,6 @@ namespace osu.Game.Beatmaps
         public float StackLeniency { get; set; } = 0.7f;
         public bool SpecialStyle { get; set; }
 
-        public int RulesetID { get; set; }
-
         public RulesetInfo Ruleset { get; set; }
 
         public bool LetterboxInBreaks { get; set; }

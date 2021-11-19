@@ -403,7 +403,7 @@ namespace osu.Game.Beatmaps
                     beatmap.BeatmapInfo.Hash = hash;
                     beatmap.BeatmapInfo.MD5Hash = ms.ComputeMD5Hash();
 
-                    var ruleset = rulesets.GetRuleset(beatmap.BeatmapInfo.RulesetID);
+                    var ruleset = rulesets.GetRuleset(beatmap.BeatmapInfo.Ruleset.OnlineID);
                     beatmap.BeatmapInfo.Ruleset = ruleset;
 
                     // TODO: this should be done in a better place once we actually need to dynamically update it.
