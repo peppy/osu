@@ -17,7 +17,7 @@ namespace osu.Game.Beatmaps
 {
     [ExcludeFromDynamicCompile]
     [Serializable]
-    public class BeatmapInfo : IEquatable<BeatmapInfo>, IHasPrimaryKey, IBeatmapInfo
+    public class EFBeatmapInfo : IEquatable<EFBeatmapInfo>, IHasPrimaryKey, IBeatmapInfo
     {
         public int ID { get; set; }
 
@@ -39,14 +39,14 @@ namespace osu.Game.Beatmaps
         public BeatmapSetOnlineStatus Status { get; set; } = BeatmapSetOnlineStatus.None;
 
         [Required]
-        public BeatmapSetInfo BeatmapSet { get; set; }
+        public EFBeatmapSetInfo BeatmapSet { get; set; }
 
-        public BeatmapMetadata Metadata { get; set; }
+        public EFBeatmapMetadata Metadata { get; set; }
 
         [JsonIgnore]
         public int BaseDifficultyID { get; set; }
 
-        public BeatmapDifficulty BaseDifficulty { get; set; }
+        public EFBeatmapDifficulty BaseDifficulty { get; set; }
 
         [NotMapped]
         public APIBeatmap OnlineInfo { get; set; }
@@ -85,7 +85,7 @@ namespace osu.Game.Beatmaps
 
         public int RulesetID { get; set; }
 
-        public RulesetInfo Ruleset { get; set; }
+        public EFRulesetInfo Ruleset { get; set; }
 
         public bool LetterboxInBreaks { get; set; }
         public bool WidescreenStoryboard { get; set; }
@@ -152,7 +152,7 @@ namespace osu.Game.Beatmaps
 
         public override string ToString() => this.GetDisplayTitle();
 
-        public bool Equals(BeatmapInfo other)
+        public bool Equals(EFBeatmapInfo other)
         {
             if (ReferenceEquals(this, other)) return true;
             if (other == null) return false;
@@ -163,20 +163,20 @@ namespace osu.Game.Beatmaps
             return false;
         }
 
-        public bool Equals(IBeatmapInfo other) => other is BeatmapInfo b && Equals(b);
+        public bool Equals(IBeatmapInfo other) => other is EFBeatmapInfo b && Equals(b);
 
-        public bool AudioEquals(BeatmapInfo other) => other != null && BeatmapSet != null && other.BeatmapSet != null &&
-                                                      BeatmapSet.Hash == other.BeatmapSet.Hash &&
-                                                      (Metadata ?? BeatmapSet.Metadata).AudioFile == (other.Metadata ?? other.BeatmapSet.Metadata).AudioFile;
+        public bool AudioEquals(EFBeatmapInfo other) => other != null && BeatmapSet != null && other.BeatmapSet != null &&
+                                                        BeatmapSet.Hash == other.BeatmapSet.Hash &&
+                                                        (Metadata ?? BeatmapSet.Metadata).AudioFile == (other.Metadata ?? other.BeatmapSet.Metadata).AudioFile;
 
-        public bool BackgroundEquals(BeatmapInfo other) => other != null && BeatmapSet != null && other.BeatmapSet != null &&
-                                                           BeatmapSet.Hash == other.BeatmapSet.Hash &&
-                                                           (Metadata ?? BeatmapSet.Metadata).BackgroundFile == (other.Metadata ?? other.BeatmapSet.Metadata).BackgroundFile;
+        public bool BackgroundEquals(EFBeatmapInfo other) => other != null && BeatmapSet != null && other.BeatmapSet != null &&
+                                                             BeatmapSet.Hash == other.BeatmapSet.Hash &&
+                                                             (Metadata ?? BeatmapSet.Metadata).BackgroundFile == (other.Metadata ?? other.BeatmapSet.Metadata).BackgroundFile;
 
         /// <summary>
-        /// Returns a shallow-clone of this <see cref="BeatmapInfo"/>.
+        /// Returns a shallow-clone of this <see cref="EFBeatmapInfo"/>.
         /// </summary>
-        public BeatmapInfo Clone() => (BeatmapInfo)MemberwiseClone();
+        public EFBeatmapInfo Clone() => (EFBeatmapInfo)MemberwiseClone();
 
         #region Implementation of IHasOnlineID
 
@@ -187,7 +187,7 @@ namespace osu.Game.Beatmaps
         #region Implementation of IBeatmapInfo
 
         [JsonIgnore]
-        IBeatmapMetadataInfo IBeatmapInfo.Metadata => Metadata ?? BeatmapSet?.Metadata ?? new BeatmapMetadata();
+        IBeatmapMetadataInfo IBeatmapInfo.Metadata => Metadata ?? BeatmapSet?.Metadata ?? new EFBeatmapMetadata();
 
         [JsonIgnore]
         IBeatmapDifficultyInfo IBeatmapInfo.Difficulty => BaseDifficulty;

@@ -13,7 +13,7 @@ using osu.Game.Extensions;
 namespace osu.Game.Beatmaps
 {
     [ExcludeFromDynamicCompile]
-    public class BeatmapSetInfo : IHasPrimaryKey, IHasFiles<BeatmapSetFileInfo>, ISoftDelete, IEquatable<BeatmapSetInfo>, IBeatmapSetInfo
+    public class EFBeatmapSetInfo : IHasPrimaryKey, IHasFiles<BeatmapSetFileInfo>, ISoftDelete, IEquatable<EFBeatmapSetInfo>, IBeatmapSetInfo
     {
         public int ID { get; set; }
 
@@ -28,9 +28,9 @@ namespace osu.Game.Beatmaps
 
         public DateTimeOffset DateAdded { get; set; }
 
-        public BeatmapMetadata Metadata { get; set; }
+        public EFBeatmapMetadata Metadata { get; set; }
 
-        public List<BeatmapInfo> Beatmaps { get; set; }
+        public List<EFBeatmapInfo> Beatmaps { get; set; }
 
         public BeatmapSetOnlineStatus Status { get; set; } = BeatmapSetOnlineStatus.None;
 
@@ -68,7 +68,7 @@ namespace osu.Game.Beatmaps
 
         public bool Protected { get; set; }
 
-        public bool Equals(BeatmapSetInfo other)
+        public bool Equals(EFBeatmapSetInfo other)
         {
             if (ReferenceEquals(this, other)) return true;
             if (other == null) return false;
@@ -79,7 +79,7 @@ namespace osu.Game.Beatmaps
             return false;
         }
 
-        public bool Equals(IBeatmapSetInfo other) => other is BeatmapSetInfo b && Equals(b);
+        public bool Equals(IBeatmapSetInfo other) => other is EFBeatmapSetInfo b && Equals(b);
 
         #region Implementation of IHasOnlineID
 
