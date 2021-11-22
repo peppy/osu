@@ -105,7 +105,7 @@ namespace osu.Game.Beatmaps
             {
                 if (beatmapSet.OnlineID != null)
                 {
-                    beatmapSet.OnlineID = null;
+                    beatmapSet.OnlineID = -1;
                     LogForModel(beatmapSet, "Disassociating beatmap set ID due to loss of all beatmap IDs");
                 }
             }
@@ -126,9 +126,9 @@ namespace osu.Game.Beatmaps
                     Delete(existingSetWithSameOnlineID);
 
                     // in order to avoid a unique key constraint, immediately remove the online ID from the previous set.
-                    existingSetWithSameOnlineID.OnlineID = null;
+                    existingSetWithSameOnlineID.OnlineID = -1;
                     foreach (var b in existingSetWithSameOnlineID.Beatmaps)
-                        b.OnlineID = null;
+                        b.OnlineID = -1;
 
                     LogForModel(beatmapSet, $"Found existing beatmap set with same OnlineBeatmapSetID ({beatmapSet.OnlineID}). It has been deleted.");
                 }
@@ -163,7 +163,7 @@ namespace osu.Game.Beatmaps
                 }
             }
 
-            void resetIds() => beatmapSet.Beatmaps.ForEach(b => b.OnlineID = null);
+            void resetIds() => beatmapSet.Beatmaps.ForEach(b => b.OnlineID = -1);
         }
 
         /// <summary>
