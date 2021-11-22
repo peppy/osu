@@ -9,6 +9,7 @@ using System.Text;
 using NUnit.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Extensions;
+using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Utils;
@@ -374,11 +375,7 @@ namespace osu.Game.Tests.Visual.SongSelect
 
                 var rulesetBeatmapSet = createTestBeatmapSet(1);
                 var taikoRuleset = rulesets.AvailableRulesets.ElementAt(1);
-                rulesetBeatmapSet.Beatmaps.ForEach(b =>
-                {
-                    b.Ruleset = taikoRuleset;
-                    b.RulesetID = 1;
-                });
+                rulesetBeatmapSet.Beatmaps.ForEach(b => b.Ruleset = taikoRuleset);
 
                 sets.Add(rulesetBeatmapSet);
             });
