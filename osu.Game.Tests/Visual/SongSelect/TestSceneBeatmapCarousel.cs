@@ -400,9 +400,9 @@ namespace osu.Game.Tests.Visual.SongSelect
             loadBeatmaps();
 
             AddStep("Sort by author", () => carousel.Filter(new FilterCriteria { Sort = SortMode.Author }, false));
-            AddAssert("Check zzzzz is at bottom", () => carousel.BeatmapSets.Last().Metadata.Author.Username == "zzzzz");
+            AddAssert("Check zzzzz is at bottom", () => carousel.BeatmapSets.Last().Metadata?.Author.Username == "zzzzz");
             AddStep("Sort by artist", () => carousel.Filter(new FilterCriteria { Sort = SortMode.Artist }, false));
-            AddAssert($"Check #{set_count} is at bottom", () => carousel.BeatmapSets.Last().Metadata.Title.EndsWith($"#{set_count}!", StringComparison.Ordinal));
+            AddAssert($"Check #{set_count} is at bottom", () => carousel.BeatmapSets.Last().Metadata?.Title.EndsWith($"#{set_count}!", StringComparison.Ordinal) == true);
         }
 
         [Test]
