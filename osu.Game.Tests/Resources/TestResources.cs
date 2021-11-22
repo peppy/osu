@@ -126,7 +126,6 @@ namespace osu.Game.Tests.Resources
                         Length = length,
                         BPM = bpm,
                         Ruleset = rulesetInfo,
-                        RulesetID = rulesetInfo.ID ?? -1,
                         Metadata = metadata,
                         BaseDifficulty = new BeatmapDifficulty
                         {
