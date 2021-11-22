@@ -15,13 +15,13 @@ using osu.Framework.Timing;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Formats;
 using osu.Game.IO;
-using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Screens.Ranking;
 using osu.Game.Skinning;
 using osu.Game.Storyboards;
 using osu.Game.Tests.Visual;
+using FileInfo = osu.Game.IO.FileInfo;
 
 namespace osu.Game.Tests.Beatmaps
 {
@@ -39,10 +39,7 @@ namespace osu.Game.Tests.Beatmaps
         private readonly BeatmapInfo beatmapInfo = new BeatmapInfo
         {
             BeatmapSet = new BeatmapSetInfo(),
-            Metadata = new BeatmapMetadata
-            {
-                Author = APIUser.SYSTEM_USER
-            }
+            Metadata = new BeatmapMetadata(),
         };
 
         private readonly TestResourceStore userSkinResourceStore = new TestResourceStore();
@@ -96,7 +93,7 @@ namespace osu.Game.Tests.Beatmaps
                     new SkinFileInfo
                     {
                         Filename = userFile,
-                        FileInfo = new IO.FileInfo { Hash = userFile }
+                        FileInfo = new FileInfo { Hash = userFile }
                     }
                 };
 
@@ -105,7 +102,7 @@ namespace osu.Game.Tests.Beatmaps
                     new BeatmapSetFileInfo
                     {
                         Filename = beatmapFile,
-                        FileInfo = new IO.FileInfo { Hash = beatmapFile }
+                        FileInfo = new FileInfo { Hash = beatmapFile }
                     }
                 };
 
