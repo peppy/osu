@@ -45,12 +45,18 @@ namespace osu.Game.Tests.Visual.UserInterface
             {
                 beatmapSets.Add(new BeatmapSetInfo
                 {
-                    Metadata = new BeatmapMetadata
+                    Beatmaps =
                     {
-                        // Create random metadata, then we can check if sorting works based on these
-                        Artist = "Some Artist " + RNG.Next(0, 9),
-                        Title = $"Some Song {i + 1}",
-                        AuthorString = "Some Guy " + RNG.Next(0, 9),
+                        new BeatmapInfo
+                        {
+                            Metadata = new BeatmapMetadata
+                            {
+                                // Create random metadata, then we can check if sorting works based on these
+                                Artist = "Some Artist " + RNG.Next(0, 9),
+                                Title = $"Some Song {i + 1}",
+                                AuthorString = "Some Guy " + RNG.Next(0, 9),
+                            },
+                        }
                     },
                     DateAdded = DateTimeOffset.UtcNow,
                 });
@@ -77,7 +83,7 @@ namespace osu.Game.Tests.Visual.UserInterface
                 InputManager.MoveMouseTo(item.ScreenSpaceDrawQuad.Centre);
             });
 
-            AddAssert("song 1 is 5th", () => beatmapSets[4].Metadata.Title == "Some Song 1");
+            AddAssert("song 1 is 5th", () => beatmapSets[4].Metadata?.Title == "Some Song 1");
 
             AddStep("release handle", () => InputManager.ReleaseButton(MouseButton.Left));
         }

@@ -41,13 +41,13 @@ namespace osu.Game.Tests.Visual.Menus
                     new BeatmapInfo
                     {
                         BaseDifficulty = new BeatmapDifficulty(),
+                        Metadata = new BeatmapMetadata
+                        {
+                            Artist = $"a test map {importId++}",
+                            Title = "title",
+                        }
                     }
                 },
-                Metadata = new BeatmapMetadata
-                {
-                    Artist = $"a test map {importId++}",
-                    Title = "title",
-                }
             }).Wait(), 5);
 
             AddStep("import beatmap with track", () =>

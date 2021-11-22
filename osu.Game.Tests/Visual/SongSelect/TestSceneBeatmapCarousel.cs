@@ -414,8 +414,13 @@ namespace osu.Game.Tests.Visual.SongSelect
             {
                 // index + 1 because we are using OnlineID which should never be zero.
                 var set = createTestBeatmapSet(i + 1);
-                set.Metadata.Artist = "same artist";
-                set.Metadata.Title = "same title";
+
+                // only need to set the first as they are a shared reference.
+                var beatmap = set.Beatmaps.First();
+
+                beatmap.Metadata.Artist = "same artist";
+                beatmap.Metadata.Title = "same title";
+
                 sets.Add(set);
             }
 
