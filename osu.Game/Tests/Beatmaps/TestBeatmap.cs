@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -31,9 +32,11 @@ namespace osu.Game.Tests.Beatmaps
                 HitObjects = baseBeatmap.HitObjects;
 
             BeatmapInfo.Ruleset = ruleset;
-            BeatmapInfo.RulesetID = ruleset.ID ?? 0;
-            BeatmapInfo.BeatmapSet.Metadata = BeatmapInfo.Metadata;
-            BeatmapInfo.BeatmapSet.Beatmaps = { BeatmapInfo };
+            BeatmapInfo.Metadata = BeatmapInfo.Metadata;
+
+            Debug.Assert(BeatmapInfo.BeatmapSet != null);
+
+            BeatmapInfo.BeatmapSet.Beatmaps.Add(BeatmapInfo);
             BeatmapInfo.BeatmapSet.OnlineID = Interlocked.Increment(ref onlineSetID);
             BeatmapInfo.Length = 75000;
             BeatmapInfo.OnlineInfo = new APIBeatmap();
