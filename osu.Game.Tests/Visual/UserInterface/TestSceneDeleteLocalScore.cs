@@ -16,6 +16,7 @@ using osu.Game.Beatmaps;
 using osu.Game.Database;
 using osu.Game.Graphics.Cursor;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Models;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Leaderboards;
 using osu.Game.Overlays;
@@ -64,7 +65,7 @@ namespace osu.Game.Tests.Visual.UserInterface
                             {
                                 Title = "TestSong",
                                 Artist = "TestArtist",
-                                Author = new APIUser
+                                Author = new RealmUser
                                 {
                                     Username = "TestAuthor"
                                 },
