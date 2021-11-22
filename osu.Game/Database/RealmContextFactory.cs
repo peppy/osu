@@ -11,8 +11,10 @@ using osu.Framework.Input.Bindings;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Framework.Statistics;
+using osu.Game.Configuration;
 using osu.Game.Input.Bindings;
 using osu.Game.Models;
+using osu.Game.Rulesets;
 using Realms;
 
 #nullable enable
@@ -31,14 +33,18 @@ namespace osu.Game.Database
         /// </summary>
         public readonly string Filename;
 
+        private readonly RulesetStore? rulesets;
+
         /// <summary>
         /// Version history:
         /// 6    ~2021-10-18   First tracked version.
         /// 7    2021-10-18    Changed OnlineID fields to non-nullable to add indexing support.
         /// 8    2021-10-29    Rebind scroll adjust keys to not have control modifier.
         /// 9    2021-11-04    Converted BeatmapMetadata.Author from string to RealmUser.
+        /// 10   2021-11-22    Use ShortName instead of RulesetID for ruleset settings.
+        /// 11   2021-11-22    Use ShortName instead of RulesetID for ruleset key bindings.
         /// </summary>
-        private const int schema_version = 9;
+        private const int schema_version = 11;
 
         /// <summary>
         /// Lock object which is held during <see cref="BlockAllOperations"/> sections, blocking context creation during blocking periods.
@@ -72,9 +78,10 @@ namespace osu.Game.Database
             }
         }
 
-        public RealmContextFactory(Storage storage, string filename)
+        public RealmContextFactory(Storage storage, string filename, RulesetStore? rulesets = null)
         {
             this.storage = storage;
+            this.rulesets = rulesets;
 
             Filename = filename;
 
@@ -230,6 +237,55 @@ namespace osu.Game.Database
                         {
                             Username = username
                         };
+                    }
+
+                    break;
+
+                case 10:
+                    string rulesetSettingClassName = getMappedOrOriginalName(typeof(RealmRulesetSetting));
+
+                    var oldSettings = migration.OldRealm.DynamicApi.All(rulesetSettingClassName);
+                    var newSettings = migration.NewRealm.All<RealmRulesetSetting>().ToList();
+
+                    for (int i = 0; i < newSettings.Count; i++)
+                    {
+                        dynamic? oldItem = oldSettings.ElementAt(i);
+                        var newItem = newSettings.ElementAt(i);
+
+                        long rulesetId = oldItem.RulesetID;
+                        string? rulesetName = rulesets?.GetRuleset((int)rulesetId)?.ShortName;
+
+                        if (string.IsNullOrEmpty(rulesetName))
+                            migration.NewRealm.Remove(newItem);
+                        else
+                            newItem.RulesetName = rulesetName;
+                    }
+
+                    break;
+
+                case 11:
+
+                    string keyBindingClassName = getMappedOrOriginalName(typeof(RealmKeyBinding));
+
+                    var oldKeyBindings = migration.OldRealm.DynamicApi.All(keyBindingClassName);
+                    var newKeyBindings = migration.NewRealm.All<RealmKeyBinding>().ToList();
+
+                    for (int i = 0; i < newKeyBindings.Count; i++)
+                    {
+                        dynamic? oldItem = oldKeyBindings.ElementAt(i);
+                        var newItem = newKeyBindings.ElementAt(i);
+
+                        if (oldItem.RulesetID == null)
+                            continue;
+
+                        long rulesetId = oldItem.RulesetID;
+
+                        string? rulesetName = rulesets?.GetRuleset((int)rulesetId)?.ShortName;
+
+                        if (string.IsNullOrEmpty(rulesetName))
+                            migration.NewRealm.Remove(newItem);
+                        else
+                            newItem.RulesetName = rulesetName;
                     }
 
                     break;
