@@ -215,7 +215,7 @@ namespace osu.Game.Tests.Visual.Gameplay
             createPlayerTest(false, r =>
             {
                 var beatmap = createTestBeatmap(r);
-                beatmap.BeatmapInfo.OnlineID = null;
+                beatmap.BeatmapInfo.OnlineID = -1;
                 return beatmap;
             });
 
