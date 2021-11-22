@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using JetBrains.Annotations;
 using osu.Framework;
@@ -779,6 +780,8 @@ namespace osu.Game.Screens.Edit
             fileMenuItems.Add(new EditorMenuItemSpacer());
 
             var beatmapSet = beatmapManager.QueryBeatmapSet(bs => bs.ID == Beatmap.Value.BeatmapSetInfo.ID) ?? playableBeatmap.BeatmapInfo.BeatmapSet;
+
+            Debug.Assert(beatmapSet != null);
 
             var difficultyItems = new List<MenuItem>();
 
