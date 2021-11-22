@@ -31,7 +31,7 @@ namespace osu.Game.Rulesets
             var ruleset = (Ruleset)Activator.CreateInstance(Type.GetType(InstantiationInfo).AsNonNull());
 
             // overwrite the pre-populated RulesetInfo with a potentially database attached copy.
-            ruleset.RulesetInfo = this;
+            // ruleset.RulesetInfo = this;
 
             return ruleset;
         }

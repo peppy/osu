@@ -68,6 +68,10 @@ namespace osu.Game.Input
                 foreach (var ruleset in rulesets)
                 {
                     var instance = ruleset.CreateInstance();
+
+                    if (instance == null)
+                        continue;
+
                     foreach (int variant in instance.AvailableVariants)
                         insertDefaults(realm, existingBindings, instance.GetDefaultKeyBindings(variant), ruleset.ShortName, variant);
                 }

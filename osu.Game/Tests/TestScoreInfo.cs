@@ -25,10 +25,10 @@ namespace osu.Game.Tests
 
             BeatmapInfo = new TestBeatmap(ruleset).BeatmapInfo;
             Ruleset = ruleset;
-            RulesetID = ruleset.ID ?? 0;
+            RulesetID = ruleset.OnlineID;
 
             Mods = excessMods
-                ? ruleset.CreateInstance().CreateAllMods().ToArray()
+                ? ruleset.CreateInstance()?.CreateAllMods().ToArray()
                 : new Mod[] { new TestModHardRock(), new TestModDoubleTime() };
 
             TotalScore = 2845370;
