@@ -85,7 +85,7 @@ namespace osu.Game.Beatmaps
             var set = new BeatmapSetInfo
             {
                 Metadata = metadata,
-                Beatmaps = new List<BeatmapInfo>
+                Beatmaps =
                 {
                     new BeatmapInfo
                     {

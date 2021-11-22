@@ -899,7 +899,6 @@ namespace osu.Game.Tests.Visual.SongSelect
                     Title = $"test set #{id}!",
                     AuthorString = string.Concat(Enumerable.Repeat((char)('z' - Math.Min(25, id - 1)), 5))
                 },
-                Beatmaps = new List<BeatmapInfo>(),
             };
 
             for (int b = 1; b < 101; b++)
