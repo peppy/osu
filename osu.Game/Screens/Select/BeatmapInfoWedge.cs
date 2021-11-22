@@ -184,7 +184,7 @@ namespace osu.Game.Screens.Select
             private void load(OsuColour colours, LocalisationManager localisation, BeatmapDifficultyCache difficultyCache)
             {
                 var beatmapInfo = beatmap.BeatmapInfo;
-                var metadata = beatmapInfo.Metadata ?? beatmap.BeatmapSetInfo?.Metadata ?? new BeatmapMetadata();
+                var metadata = beatmapInfo.Metadata;
 
                 RelativeSizeAxes = Axes.Both;
 
