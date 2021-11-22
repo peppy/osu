@@ -1,6 +1,7 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Diagnostics;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -42,7 +43,11 @@ namespace osu.Game.Tournament.Tests.Components
 
         private void success(APIBeatmap beatmap)
         {
-            var mods = rulesets.GetRuleset(Ladder.Ruleset.Value.ID ?? 0).CreateInstance().AllMods;
+            var instance = rulesets.GetRuleset(Ladder.Ruleset.Value.OnlineID).CreateInstance();
+
+            Debug.Assert(instance != null);
+
+            var mods = instance.AllMods;
 
             foreach (var mod in mods)
             {
