@@ -1,30 +1,33 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
 using System.Collections.Generic;
 using osu.Framework.Extensions.ObjectExtensions;
+using osu.Framework.Testing;
 using osu.Game.Database;
 using osu.Game.Extensions;
 using osu.Game.IO;
+using osu.Game.Models;
+using Realms;
+
+#nullable enable
 
 namespace osu.Game.Skinning
 {
-    public class SkinInfo : IHasFiles<SkinFileInfo>, IEquatable<SkinInfo>, IHasPrimaryKey, ISoftDelete, IHasNamedFiles
+    [ExcludeFromDynamicCompile]
+    [MapTo("Skin")]
+    public class SkinInfo : RealmObject, IHasRealmFiles, IEquatable<SkinInfo>, IHasGuidPrimaryKey, ISoftDelete, IHasNamedFiles
     {
-        internal const int DEFAULT_SKIN = 0;
-        internal const int CLASSIC_SKIN = -1;
-        internal const int RANDOM_SKIN = -2;
-
-        public int ID { get; set; }
+        public Guid ID { get; set; }
 
         public string Name { get; set; } = string.Empty;
 
         public string Creator { get; set; } = string.Empty;
 
-        public string Hash { get; set; }
+        public string Hash { get; set; } = string.Empty;
 
-        public string InstantiationInfo { get; set; }
+        public string InstantiationInfo { get; set; } = string.Empty;
 
         public virtual Skin CreateInstance(IStorageResourceProvider resources)
         {
@@ -36,23 +39,28 @@ namespace osu.Game.Skinning
             return (Skin)Activator.CreateInstance(type, this, resources);
         }
 
-        public List<SkinFileInfo> Files { get; } = new List<SkinFileInfo>();
+        public IList<RealmNamedFileUsage> Files { get; } = null!;
 
         public bool DeletePending { get; set; }
 
         public static SkinInfo Default { get; } = new SkinInfo
         {
-            ID = DEFAULT_SKIN,
             Name = "osu! (triangles)",
             Creator = "team osu!",
             InstantiationInfo = typeof(DefaultSkin).GetInvariantInstantiationInfo()
         };
 
-        public bool Equals(SkinInfo other) => other != null && ID == other.ID;
+        public bool Equals(SkinInfo? other)
+        {
+            if (ReferenceEquals(this, other)) return true;
+            if (other == null) return false;
+
+            return ID == other.ID;
+        }
 
         public override string ToString()
         {
-            string author = Creator == null ? string.Empty : $"({Creator})";
+            string author = string.IsNullOrEmpty(Creator) ? string.Empty : $"({Creator})";
             return $"{Name} {author}".Trim();
         }
 
