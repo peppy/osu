@@ -7,10 +7,11 @@ using osu.Framework.Extensions.ObjectExtensions;
 using osu.Game.Database;
 using osu.Game.Extensions;
 using osu.Game.IO;
+using osu.Game.Models;
 
 namespace osu.Game.Skinning
 {
-    public class SkinInfo : IHasFiles<SkinFileInfo>, IEquatable<SkinInfo>, IHasPrimaryKey, ISoftDelete
+    public class SkinInfo : IHasRealmFiles, IEquatable<SkinInfo>, IHasPrimaryKey, ISoftDelete
     {
         internal const int DEFAULT_SKIN = 0;
         internal const int CLASSIC_SKIN = -1;
@@ -36,7 +37,7 @@ namespace osu.Game.Skinning
             return (Skin)Activator.CreateInstance(type, this, resources);
         }
 
-        public List<SkinFileInfo> Files { get; set; } = new List<SkinFileInfo>();
+        public IList<RealmNamedFileUsage> Files { get; set; } = new List<RealmNamedFileUsage>();
 
         public bool DeletePending { get; set; }
 
