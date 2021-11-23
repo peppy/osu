@@ -18,13 +18,15 @@ namespace osu.Game.Overlays.Settings.Sections.Input
 
         public override LocalisableString Header => ruleset.Name;
 
-        private readonly RulesetInfo ruleset;
+        private readonly IRulesetInfo ruleset;
 
-        public RulesetBindingsSection(RulesetInfo ruleset)
+        public RulesetBindingsSection(IRulesetInfo ruleset)
         {
             this.ruleset = ruleset;
 
             var r = ruleset.CreateInstance();
+
+            Debug.Assert(r != null);
 
             foreach (int variant in r.AvailableVariants)
                 Add(new VariantBindingsSubsection(ruleset, variant));

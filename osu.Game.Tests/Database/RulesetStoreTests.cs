@@ -4,7 +4,6 @@
 using System.Linq;
 using NUnit.Framework;
 using osu.Game.Rulesets;
-using osu.Game.Stores;
 
 namespace osu.Game.Tests.Database
 {
@@ -15,7 +14,7 @@ namespace osu.Game.Tests.Database
         {
             RunTestWithRealm((realmFactory, storage) =>
             {
-                var rulesets = new RealmRulesetStore(realmFactory, storage);
+                var rulesets = new RulesetStore(realmFactory, storage);
 
                 Assert.AreEqual(4, rulesets.AvailableRulesets.Count());
                 Assert.AreEqual(4, realmFactory.Context.All<RulesetInfo>().Count());
@@ -27,8 +26,8 @@ namespace osu.Game.Tests.Database
         {
             RunTestWithRealm((realmFactory, storage) =>
             {
-                var rulesets = new RealmRulesetStore(realmFactory, storage);
-                var rulesets2 = new RealmRulesetStore(realmFactory, storage);
+                var rulesets = new RulesetStore(realmFactory, storage);
+                var rulesets2 = new RulesetStore(realmFactory, storage);
 
                 Assert.AreEqual(4, rulesets.AvailableRulesets.Count());
                 Assert.AreEqual(4, rulesets2.AvailableRulesets.Count());
@@ -43,11 +42,11 @@ namespace osu.Game.Tests.Database
         {
             RunTestWithRealm((realmFactory, storage) =>
             {
-                var rulesets = new RealmRulesetStore(realmFactory, storage);
+                var rulesets = new RulesetStore(realmFactory, storage);
 
-                Assert.IsTrue((rulesets.AvailableRulesets.First() as RulesetInfo)?.IsManaged == false);
-                Assert.IsTrue((rulesets.GetRuleset(0) as RulesetInfo)?.IsManaged == false);
-                Assert.IsTrue((rulesets.GetRuleset("mania") as RulesetInfo)?.IsManaged == false);
+                Assert.IsTrue(rulesets.AvailableRulesets.First()?.IsManaged == false);
+                Assert.IsTrue(rulesets.GetRuleset(0)?.IsManaged == false);
+                Assert.IsTrue(rulesets.GetRuleset("mania")?.IsManaged == false);
             });
         }
     }

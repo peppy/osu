@@ -34,7 +34,7 @@ namespace osu.Game.Database
         /// </summary>
         public readonly string Filename;
 
-        private readonly RulesetStore? rulesets;
+        private readonly EFRulesetStore? rulesets;
 
         /// <summary>
         /// Version history:
@@ -79,7 +79,7 @@ namespace osu.Game.Database
             }
         }
 
-        public RealmContextFactory(Storage storage, string filename, RulesetStore? rulesets = null)
+        public RealmContextFactory(Storage storage, string filename, EFRulesetStore? rulesets = null)
         {
             this.storage = storage;
             this.rulesets = rulesets;
