@@ -33,7 +33,7 @@ namespace osu.Game.Scoring
         private readonly ScoreModelManager scoreModelManager;
         private readonly ScoreModelDownloader scoreModelDownloader;
 
-        public ScoreManager(RulesetStore rulesets, Func<BeatmapManager> beatmaps, Storage storage, IAPIProvider api, IDatabaseContextFactory contextFactory, Scheduler scheduler,
+        public ScoreManager(RulesetStore rulesets, Func<BeatmapManager> beatmaps, Storage storage, IAPIProvider api, RealmContextFactory contextFactory, Scheduler scheduler,
                             IIpcHost importHost = null, Func<BeatmapDifficultyCache> difficulties = null, OsuConfigManager configManager = null)
         {
             this.scheduler = scheduler;

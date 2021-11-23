@@ -49,7 +49,7 @@ namespace osu.Game.Tests.Visual
         private Lazy<Storage> localStorage;
         protected Storage LocalStorage => localStorage.Value;
 
-        private Lazy<DatabaseContextFactory> contextFactory;
+        private Lazy<RealmContextFactory> contextFactory;
 
         protected IResourceStore<byte[]> Resources;
 
@@ -66,7 +66,7 @@ namespace osu.Game.Tests.Visual
 
         private DummyAPIAccess dummyAPI;
 
-        protected DatabaseContextFactory ContextFactory => contextFactory.Value;
+        protected RealmContextFactory ContextFactory => contextFactory.Value;
 
         /// <summary>
         /// Whether this test scene requires real-world API access.
@@ -87,17 +87,15 @@ namespace osu.Game.Tests.Visual
 
             Resources = parent.Get<OsuGameBase>().Resources;
 
-            contextFactory = new Lazy<DatabaseContextFactory>(() =>
+            contextFactory = new Lazy<RealmContextFactory>(() =>
             {
-                var factory = new DatabaseContextFactory(LocalStorage);
-
                 // only reset the database if not using the host storage.
                 // if we reset the host storage, it will delete global key bindings.
                 if (isolatedHostStorage == null)
-                    factory.ResetDatabase();
+                    LocalStorage.Delete("client.realm");
 
-                using (var usage = factory.Get())
-                    usage.Migrate();
+                var factory = new RealmContextFactory(LocalStorage, "client");
+
                 return factory;
             });
 
@@ -263,8 +261,9 @@ namespace osu.Game.Tests.Visual
             if (MusicController?.TrackLoaded == true)
                 MusicController.Stop();
 
-            if (contextFactory?.IsValueCreated == true)
-                contextFactory.Value.ResetDatabase();
+            // TODO: what should we do here, if anything? should we use an in-memory realm in this instance?
+            // if (contextFactory?.IsValueCreated == true)
+            //     contextFactory.Value.ResetDatabase();
 
             RecycleLocalStorage(true);
         }
