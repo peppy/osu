@@ -33,7 +33,7 @@ namespace osu.Game.Overlays.Settings.Sections
         };
 
         private readonly Bindable<SkinInfo> dropdownBindable = new Bindable<SkinInfo> { Default = SkinInfo.Default };
-        private readonly Bindable<int> configBindable = new Bindable<int>();
+        private readonly Bindable<string> configBindable = new Bindable<string>();
 
         private static readonly SkinInfo random_skin_info = new SkinInfo
         {
@@ -47,7 +47,7 @@ namespace osu.Game.Overlays.Settings.Sections
         {
             get
             {
-                int index = skinItems.FindIndex(s => s.ID > 0);
+                int index = skinItems.FindIndex(s => s.ID == SkinInfo.CLASSIC_SKIN);
                 if (index < 0)
                     index = skinItems.Count;
 
@@ -84,25 +84,25 @@ namespace osu.Game.Overlays.Settings.Sections
             updateItems();
 
             // Todo: This should not be necessary when OsuConfigManager is databased
-            if (skinDropdown.Items.All(s => s.ID != configBindable.Value))
-                configBindable.Value = 0;
+            if (skinDropdown.Items.All(s => s.ID != new Guid(configBindable.Value)))
+                configBindable.Value = string.Empty;
 
             configBindable.BindValueChanged(id => Scheduler.AddOnce(updateSelectedSkinFromConfig), true);
             dropdownBindable.BindValueChanged(skin =>
             {
-                if (skin.NewValue == random_skin_info)
+                if (skin.NewValue.Equals(random_skin_info))
                 {
                     skins.SelectRandomSkin();
                     return;
                 }
 
-                configBindable.Value = skin.NewValue.ID;
+                configBindable.Value = skin.NewValue.ID.ToString();
             });
         }
 
         private void updateSelectedSkinFromConfig()
         {
-            int id = configBindable.Value;
+            Guid id = new Guid(configBindable.Value);
 
             var skin = skinDropdown.Items.FirstOrDefault(s => s.ID == id);
 
@@ -181,7 +181,7 @@ namespace osu.Game.Overlays.Settings.Sections
                 Action = export;
 
                 currentSkin = skins.CurrentSkin.GetBoundCopy();
-                currentSkin.BindValueChanged(skin => Enabled.Value = skin.NewValue.SkinInfo.ID > 0, true);
+                currentSkin.BindValueChanged(skin => Enabled.Value = skin.NewValue.SkinInfo.IsManaged, true);
             }
 
             private void export()

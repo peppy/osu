@@ -27,7 +27,7 @@ namespace osu.Game.Configuration
         {
             // UI/selection defaults
             SetDefault(OsuSetting.Ruleset, string.Empty);
-            SetDefault(OsuSetting.Skin, 0, -1, int.MaxValue);
+            SetDefault(OsuSetting.Skin, string.Empty);
 
             SetDefault(OsuSetting.BeatmapDetailTab, PlayBeatmapDetailArea.TabType.Details);
             SetDefault(OsuSetting.BeatmapDetailModsFilter, false);
@@ -210,9 +210,9 @@ namespace osu.Game.Configuration
                         value: scalingMode.GetLocalisableDescription()
                     )
                 ),
-                new TrackedSetting<int>(OsuSetting.Skin, skin =>
+                new TrackedSetting<string>(OsuSetting.Skin, skin =>
                 {
-                    string skinName = LookupSkinName(skin) ?? string.Empty;
+                    string skinName = LookupSkinName(new Guid(skin)) ?? string.Empty;
 
                     return new SettingDescription(
                         rawValue: skinName,
@@ -233,7 +233,7 @@ namespace osu.Game.Configuration
             };
         }
 
-        public Func<int, string> LookupSkinName { private get; set; }
+        public Func<Guid, string> LookupSkinName { private get; set; }
 
         public Func<GlobalAction, LocalisableString> LookupKeyBindings { get; set; }
     }

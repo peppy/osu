@@ -19,6 +19,10 @@ namespace osu.Game.Skinning
     [MapTo("Skin")]
     public class SkinInfo : RealmObject, IHasRealmFiles, IEquatable<SkinInfo>, IHasGuidPrimaryKey, ISoftDelete, IHasNamedFiles
     {
+        internal static readonly Guid DEFAULT_SKIN = new Guid("2991CFD8-2140-469A-BCB9-2EC23FBCE4AD");
+        internal static readonly Guid CLASSIC_SKIN = new Guid("81F02CD3-EEC6-4865-AC23-FAE26A386187");
+        internal static readonly Guid RANDOM_SKIN = new Guid("D39DFEFB-477C-4372-B1EA-2BCEA5FB8908");
+
         public Guid ID { get; set; }
 
         public string Name { get; set; } = string.Empty;
@@ -45,6 +49,7 @@ namespace osu.Game.Skinning
 
         public static SkinInfo Default { get; } = new SkinInfo
         {
+            ID = DEFAULT_SKIN,
             Name = "osu! (triangles)",
             Creator = "team osu!",
             InstantiationInfo = typeof(DefaultSkin).GetInvariantInstantiationInfo()
