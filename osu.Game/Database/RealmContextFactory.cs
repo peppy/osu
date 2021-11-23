@@ -15,7 +15,7 @@ using osu.Game.Configuration;
 using osu.Game.Beatmaps;
 using osu.Game.Input.Bindings;
 using osu.Game.Models;
-using osu.Game.Stores;
+using osu.Game.Rulesets;
 using Realms;
 
 #nullable enable
