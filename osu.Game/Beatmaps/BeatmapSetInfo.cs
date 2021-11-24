@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using JetBrains.Annotations;
-using Newtonsoft.Json;
 using osu.Framework.Testing;
 using osu.Game.Database;
 using osu.Game.Extensions;
@@ -36,8 +34,7 @@ namespace osu.Game.Beatmaps
 
         public BeatmapSetOnlineStatus Status { get; set; } = BeatmapSetOnlineStatus.None;
 
-        [NotNull]
-        public List<BeatmapSetFileInfo> Files { get; set; } = new List<BeatmapSetFileInfo>();
+        public List<BeatmapSetFileInfo> Files { get; } = new List<BeatmapSetFileInfo>();
 
         /// <summary>
         /// The maximum star difficulty of all beatmaps in this set.
