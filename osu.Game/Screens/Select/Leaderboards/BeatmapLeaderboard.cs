@@ -32,7 +32,7 @@ namespace osu.Game.Screens.Select.Leaderboards
             get => beatmapInfo;
             set
             {
-                if (beatmapInfo == value)
+                if (beatmapInfo.Equals(value))
                     return;
 
                 beatmapInfo = value;
@@ -151,7 +151,7 @@ namespace osu.Game.Screens.Select.Leaderboards
                 return null;
             }
 
-            if (BeatmapInfo.OnlineID == null || BeatmapInfo?.Status <= BeatmapOnlineStatus.Pending)
+            if (BeatmapInfo.OnlineID <= 0 || BeatmapInfo?.Status <= BeatmapOnlineStatus.Pending)
             {
                 PlaceholderState = PlaceholderState.Unavailable;
                 return null;

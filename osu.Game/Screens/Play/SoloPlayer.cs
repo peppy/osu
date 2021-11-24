@@ -26,10 +26,10 @@ namespace osu.Game.Screens.Play
 
         protected override APIRequest<APIScoreToken> CreateTokenRequest()
         {
-            int beatmapId = Beatmap.Value.BeatmapInfo.OnlineID ?? -1;
+            int beatmapId = Beatmap.Value.BeatmapInfo.OnlineID;
             int rulesetId = Ruleset.Value.OnlineID;
 
-            if (beatmapId <= 0)
+            if (!(beatmapId > 0))
                 return null;
 
             if (rulesetId < 0 || rulesetId > ILegacyRuleset.MAX_LEGACY_RULESET_ID)
