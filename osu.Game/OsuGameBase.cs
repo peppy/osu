@@ -224,8 +224,8 @@ namespace osu.Game
             dependencies.Cache(RulesetStore = new RulesetStore(realmFactory, Storage));
 
             // ordering is important here to ensure foreign keys rules are not broken in ModelStore.Cleanup()
-            dependencies.Cache(ScoreManager = new ScoreManager(RulesetStore, () => BeatmapManager, Storage, contextFactory, Scheduler, Host, () => difficultyCache, LocalConfig));
-            dependencies.Cache(BeatmapManager = new BeatmapManager(Storage, contextFactory, RulesetStore, API, Audio, Resources, Host, defaultBeatmap, performOnlineLookups: true));
+            dependencies.Cache(ScoreManager = new ScoreManager(RulesetStore, () => BeatmapManager, Storage, API, realmFactory, Scheduler, Host, () => difficultyCache, LocalConfig));
+            dependencies.Cache(BeatmapManager = new BeatmapManager(Storage, realmFactory, RulesetStore, API, Audio, Resources, Host, defaultBeatmap, performOnlineLookups: true));
 
             dependencies.Cache(BeatmapDownloader = new BeatmapModelDownloader(BeatmapManager, API));
             dependencies.Cache(ScoreDownloader = new ScoreModelDownloader(ScoreManager, API));
@@ -435,7 +435,9 @@ namespace osu.Game
 
         private void onRulesetChanged(ValueChangedEvent<RulesetInfo> r)
         {
-            if (r.NewValue?.Available != true)
+            Ruleset instance;
+
+            if (r.NewValue?.Available != true || (instance = r.NewValue.CreateInstance()) == null)
             {
                 // reject the change if the ruleset is not available.
                 Ruleset.Value = r.OldValue?.Available == true ? r.OldValue : RulesetStore.AvailableRulesets.First();
@@ -445,7 +447,9 @@ namespace osu.Game
             var dict = new Dictionary<ModType, IReadOnlyList<Mod>>();
 
             foreach (ModType type in Enum.GetValues(typeof(ModType)))
-                dict[type] = r.NewValue.CreateInstance().GetModsFor(type).ToList();
+            {
+                dict[type] = instance.GetModsFor(type).ToList();
+            }
 
             if (!SelectedMods.Disabled)
                 SelectedMods.Value = Array.Empty<Mod>();
@@ -486,7 +490,6 @@ namespace osu.Game
 
             contextFactory?.FlushConnections();
 
-            realmRulesetStore?.Dispose();
             realmFactory?.Dispose();
         }
     }

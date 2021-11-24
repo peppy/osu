@@ -12,7 +12,6 @@ using osu.Framework.Allocation;
 using osu.Framework.Extensions;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
-using osu.Game.IO;
 using osu.Game.Tests.Resources;
 
 namespace osu.Game.Tests.Beatmaps.IO

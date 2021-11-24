@@ -706,7 +706,9 @@ namespace osu.Game.Online.Multiplayer
             var apiBeatmap = await GetAPIBeatmap(item.BeatmapID).ConfigureAwait(false);
 
             var ruleset = Rulesets.GetRuleset(item.RulesetID);
-            var rulesetInstance = ruleset.CreateInstance();
+            var rulesetInstance = ruleset?.CreateInstance();
+
+            Debug.Assert(rulesetInstance != null);
 
             var playlistItem = new PlaylistItem
             {
