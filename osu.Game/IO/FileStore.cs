@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using osu.Framework.Extensions;
 using osu.Framework.IO.Stores;
 using osu.Framework.Logging;
@@ -22,7 +23,7 @@ namespace osu.Game.IO
 
         public new Storage Storage => base.Storage;
 
-        public FileStore(IDatabaseContextFactory contextFactory, Storage storage)
+        public FileStore(RealmContextFactory contextFactory, Storage storage)
             : base(contextFactory, storage.GetStorageForDirectory(@"files"))
         {
             Store = new StorageBackedResourceStore(Storage);

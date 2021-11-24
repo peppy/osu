@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ using osu.Framework.Timing;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Formats;
 using osu.Game.IO;
+using osu.Game.Models;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Screens.Ranking;
@@ -75,7 +77,11 @@ namespace osu.Game.Tests.Beatmaps
                         currentTestBeatmap = Decoder.GetDecoder<Beatmap>(reader).Decode(reader);
 
                     // populate ruleset for beatmap converters that require it to be present.
-                    currentTestBeatmap.BeatmapInfo.Ruleset = rulesetStore.GetRuleset(currentTestBeatmap.BeatmapInfo.RulesetID);
+                    var ruleset = rulesetStore.GetRuleset(currentTestBeatmap.BeatmapInfo.RulesetID);
+
+                    Debug.Assert(ruleset != null);
+
+                    currentTestBeatmap.BeatmapInfo.Ruleset = ruleset;
                 });
             });
 
@@ -88,18 +94,12 @@ namespace osu.Game.Tests.Beatmaps
             AddStep("setup skins", () =>
             {
                 userSkinInfo.Files.Clear();
-                userSkinInfo.Files.Add(new SkinFileInfo
-                {
-                    Filename = userFile,
-                    FileInfo = new IO.FileInfo { Hash = userFile }
-                });
+                userSkinInfo.Files.Add(new RealmNamedFileUsage(new RealmFile { Hash = userFile }, userFile));
+
+                Debug.Assert(beatmapInfo.BeatmapSet != null);
 
                 beatmapInfo.BeatmapSet.Files.Clear();
-                beatmapInfo.BeatmapSet.Files.Add(new BeatmapSetFileInfo
-                {
-                    Filename = beatmapFile,
-                    FileInfo = new IO.FileInfo { Hash = beatmapFile }
-                });
+                beatmapInfo.BeatmapSet.Files.Add(new RealmNamedFileUsage(new RealmFile { Hash = beatmapFile }, beatmapFile));
 
                 // Need to refresh the cached skin source to refresh the skin resource store.
                 dependencies.SkinSource = new SkinProvidingContainer(Skin = new LegacySkin(userSkinInfo, this));

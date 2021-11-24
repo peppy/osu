@@ -713,7 +713,9 @@ namespace osu.Game.Online.Multiplayer
             beatmap.Checksum = item.BeatmapChecksum;
 
             var ruleset = Rulesets.GetRuleset(item.RulesetID);
-            var rulesetInstance = ruleset.CreateInstance();
+            var rulesetInstance = ruleset?.CreateInstance();
+
+            Debug.Assert(rulesetInstance != null);
 
             var playlistItem = new PlaylistItem
             {
