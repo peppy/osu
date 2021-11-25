@@ -18,7 +18,7 @@ using osu.Game.Utils;
 
 namespace osu.Game.Scoring
 {
-    public class ScoreInfo : IScoreInfo, IHasFiles<ScoreFileInfo>, IHasPrimaryKey, ISoftDelete, IEquatable<ScoreInfo>, IDeepCloneable<ScoreInfo>
+    public class ScoreInfo : IScoreInfo, IHasFiles<ScoreFileInfo>, IHasPrimaryKey, ISoftDelete, IEquatable<ScoreInfo>, IDeepCloneable<ScoreInfo>, IHasNamedFiles
     {
         public int ID { get; set; }
 
@@ -257,5 +257,7 @@ namespace osu.Game.Scoring
         bool IScoreInfo.HasReplay => Files.Any();
 
         #endregion
+
+        IEnumerable<INamedFileUsage> IHasNamedFiles.Files => Files;
     }
 }
