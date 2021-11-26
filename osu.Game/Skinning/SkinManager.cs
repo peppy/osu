@@ -3,13 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using osu.Framework.Audio;
 using osu.Framework.Audio.Sample;
 using osu.Framework.Bindables;
@@ -161,28 +158,10 @@ namespace osu.Game.Skinning
 
         public void Save(Skin skin)
         {
-            skin.SkinInfo.PerformWrite(s =>
-            {
-                if (!s.IsManaged)
-                    throw new InvalidOperationException($"Attempting to save a skin which is not yet tracked. Call {nameof(EnsureMutableSkin)} first.");
+            if (!skin.SkinInfo.IsManaged)
+                throw new InvalidOperationException($"Attempting to save a skin which is not yet tracked. Call {nameof(EnsureMutableSkin)} first.");
 
-                foreach (var drawableInfo in skin.DrawableComponentInfo)
-                {
-                    string json = JsonConvert.SerializeObject(drawableInfo.Value, new JsonSerializerSettings { Formatting = Formatting.Indented });
-
-                    using (var streamContent = new MemoryStream(Encoding.UTF8.GetBytes(json)))
-                    {
-                        string filename = @$"{drawableInfo.Key}.json";
-
-                        var oldFile = s.Files.FirstOrDefault(f => f.Filename == filename);
-
-                        if (oldFile != null)
-                            skinModelManager.ReplaceFile(s, oldFile, streamContent);
-                        else
-                            skinModelManager.AddFile(s, streamContent, filename);
-                    }
-                }
-            });
+            skinModelManager.Save(skin);
         }
 
         /// <summary>

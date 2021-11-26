@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Game.Database;
@@ -46,7 +47,17 @@ namespace osu.Game.Skinning
 
         protected override bool HasCustomHashFunction => true;
 
-        protected override string ComputeHash(SkinInfo item, ArchiveReader? reader = null, Realm? realm = null)
+        protected override Task Populate(SkinInfo model, ArchiveReader? archive, Realm realm, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrEmpty(model.InstantiationInfo))
+                model.InstantiationInfo = createInstance(model).GetType().GetInvariantInstantiationInfo();
+
+            checkSkinIniMetadata(model, realm);
+
+            return Task.CompletedTask;
+        }
+
+        private void checkSkinIniMetadata(SkinInfo item, Realm? realm = null)
         {
             var instance = createInstance(item);
 
@@ -75,8 +86,6 @@ namespace osu.Game.Skinning
             // This is (weirdly) done inside ComputeHash to avoid adding a new method to handle this case. After switching to realm it can be moved into another place.
             if (skinIniSourcedName != item.Name)
                 updateSkinIniMetadata(item, realm);
-
-            return base.ComputeHash(item, reader, realm);
         }
 
         private void updateSkinIniMetadata(SkinInfo item, Realm? realm)
@@ -98,41 +107,46 @@ namespace osu.Game.Skinning
             {
                 // In the case a skin doesn't have a skin.ini yet, let's create one.
                 writeNewSkinIni();
-                return;
             }
-
-            using (Stream stream = new MemoryStream())
+            else
             {
-                using (var sw = new StreamWriter(stream, Encoding.UTF8, 1024, true))
+                using (Stream stream = new MemoryStream())
                 {
-                    using (var existingStream = Files.Storage.GetStream(existingFile.File.GetStoragePath()))
-                    using (var sr = new StreamReader(existingStream))
+                    using (var sw = new StreamWriter(stream, Encoding.UTF8, 1024, true))
                     {
-                        string? line;
-                        while ((line = sr.ReadLine()) != null)
+                        using (var existingStream = Files.Storage.GetStream(existingFile.File.GetStoragePath()))
+                        using (var sr = new StreamReader(existingStream))
+                        {
+                            string? line;
+                            while ((line = sr.ReadLine()) != null)
+                                sw.WriteLine(line);
+                        }
+
+                        sw.WriteLine();
+
+                        foreach (string line in newLines)
                             sw.WriteLine(line);
                     }
 
-                    sw.WriteLine();
+                    ReplaceFile(item, existingFile, stream, realm);
 
-                    foreach (string line in newLines)
-                        sw.WriteLine(line);
-                }
+                    // can be removed 20220502.
+                    if (!ensureIniWasUpdated(item))
+                    {
+                        Logger.Log($"Skin {item}'s skin.ini had issues and has been removed. Please report this and provide the problematic skin.", LoggingTarget.Database, LogLevel.Important);
 
-                ReplaceFile(item, existingFile, stream, realm);
+                        var existingIni = item.Files.SingleOrDefault(f => f.Filename.Equals(@"skin.ini", StringComparison.OrdinalIgnoreCase));
+                        if (existingIni != null)
+                            item.Files.Remove(existingIni);
 
-                // can be removed 20220502.
-                if (!ensureIniWasUpdated(item))
-                {
-                    Logger.Log($"Skin {item}'s skin.ini had issues and has been removed. Please report this and provide the problematic skin.", LoggingTarget.Database, LogLevel.Important);
-
-                    var existingIni = item.Files.SingleOrDefault(f => f.Filename.Equals(@"skin.ini", StringComparison.OrdinalIgnoreCase));
-                    if (existingIni != null)
-                        item.Files.Remove(existingIni);
-
-                    writeNewSkinIni();
+                        writeNewSkinIni();
+                    }
                 }
             }
+
+            // The hash is already populated at this point in import.
+            // As we have changed files, it needs to be recomputed.
+            item.Hash = ComputeHash(item);
 
             void writeNewSkinIni()
             {
@@ -147,6 +161,8 @@ namespace osu.Game.Skinning
                     AddFile(item, stream, @"skin.ini", realm);
                 }
             }
+
+            item.Hash = ComputeHash(item);
         }
 
         private bool ensureIniWasUpdated(SkinInfo item)
@@ -158,14 +174,6 @@ namespace osu.Game.Skinning
             var instance = createInstance(item);
 
             return instance.Configuration.SkinInfo.Name == item.Name;
-        }
-
-        protected override Task Populate(SkinInfo model, ArchiveReader? archive, Realm realm, CancellationToken cancellationToken = default)
-        {
-            if (string.IsNullOrEmpty(model.InstantiationInfo))
-                model.InstantiationInfo = createInstance(model).GetType().GetInvariantInstantiationInfo();
-
-            return Task.CompletedTask;
         }
 
         private void populateMissingHashes()
@@ -190,5 +198,30 @@ namespace osu.Game.Skinning
         }
 
         private Skin createInstance(SkinInfo item) => item.CreateInstance(skinResources);
+
+        public void Save(Skin skin)
+        {
+            skin.SkinInfo.PerformWrite(s =>
+            {
+                foreach (var drawableInfo in skin.DrawableComponentInfo)
+                {
+                    string json = JsonConvert.SerializeObject(drawableInfo.Value, new JsonSerializerSettings { Formatting = Formatting.Indented });
+
+                    using (var streamContent = new MemoryStream(Encoding.UTF8.GetBytes(json)))
+                    {
+                        string filename = @$"{drawableInfo.Key}.json";
+
+                        var oldFile = s.Files.FirstOrDefault(f => f.Filename == filename);
+
+                        if (oldFile != null)
+                            ReplaceFile(s, oldFile, streamContent, s.Realm);
+                        else
+                            AddFile(s, streamContent, filename, s.Realm);
+                    }
+                }
+
+                s.Hash = ComputeHash(s);
+            });
+        }
     }
 }
