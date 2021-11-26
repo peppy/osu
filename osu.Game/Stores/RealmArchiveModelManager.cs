@@ -6,11 +6,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using JetBrains.Annotations;
+using System.Threading;
+using System.Threading.Tasks;
 using osu.Framework.Platform;
 using osu.Game.Database;
+using osu.Game.IO.Archives;
 using osu.Game.Models;
+using osu.Game.Overlays.Notifications;
 using Realms;
+
+#nullable enable
 
 namespace osu.Game.Stores
 {
@@ -20,9 +25,12 @@ namespace osu.Game.Stores
     public abstract class RealmArchiveModelManager<TModel> : RealmArchiveModelImporter<TModel>, IModelManager<TModel>, IModelFileManager<TModel, RealmNamedFileUsage>
         where TModel : RealmObject, IHasRealmFiles, IHasGuidPrimaryKey, ISoftDelete
     {
+        public event Action<TModel>? ItemUpdated;
+        public event Action<TModel>? ItemRemoved;
+
         private readonly RealmFileStore realmFileStore;
 
-        protected RealmArchiveModelManager([NotNull] Storage storage, [NotNull] RealmContextFactory contextFactory)
+        protected RealmArchiveModelManager(Storage storage, RealmContextFactory contextFactory)
             : base(storage, contextFactory)
         {
             realmFileStore = new RealmFileStore(contextFactory, storage);
@@ -33,7 +41,7 @@ namespace osu.Game.Stores
         /// </summary>
         /// <param name="query">The query.</param>
         /// <returns>The first result for the provided query, or null if no results were found.</returns>
-        public ILive<TModel> Query(Expression<Func<TModel, bool>> query)
+        public ILive<TModel>? Query(Expression<Func<TModel, bool>> query)
         {
             using (var realm = ContextFactory.CreateContext())
                 return realm.All<TModel>().FirstOrDefault(query)?.ToLive();
@@ -66,39 +74,115 @@ namespace osu.Game.Stores
 
         public void AddFile(TModel item, Stream stream, string filename, Realm realm)
         {
-            var file = realmFileStore.Add(stream, realm ?? item.Realm);
+            var file = realmFileStore.Add(stream, realm);
             var namedUsage = new RealmNamedFileUsage(file, filename);
 
             item.Files.Add(namedUsage);
         }
 
-        public bool Delete(TModel skin)
+        public override async Task<ILive<TModel>?> Import(TModel item, ArchiveReader? archive = null, bool lowPriority = false, CancellationToken cancellationToken = default)
         {
-            return false;
+            var imported = await base.Import(item, archive, lowPriority, cancellationToken).ConfigureAwait(false);
+
+            if (imported != null)
+                ItemUpdated?.Invoke(imported.Value);
+
+            return imported;
         }
 
+        /// <summary>
+        /// Delete multiple items.
+        /// This will post notifications tracking progress.
+        /// </summary>
         public void Delete(List<TModel> items, bool silent = false)
         {
+            if (items.Count == 0) return;
+
+            var notification = new ProgressNotification
+            {
+                Progress = 0,
+                Text = $"Preparing to delete all {HumanisedModelName}s...",
+                CompletionText = $"Deleted all {HumanisedModelName}s!",
+                State = ProgressNotificationState.Active,
+            };
+
+            if (!silent)
+                PostNotification?.Invoke(notification);
+
+            int i = 0;
+
+            foreach (var b in items)
+            {
+                if (notification.State == ProgressNotificationState.Cancelled)
+                    // user requested abort
+                    return;
+
+                notification.Text = $"Deleting {HumanisedModelName}s ({++i} of {items.Count})";
+
+                Delete(b);
+
+                notification.Progress = (float)i / items.Count;
+            }
+
+            notification.State = ProgressNotificationState.Completed;
         }
 
+        /// <summary>
+        /// Restore multiple items that were previously deleted.
+        /// This will post notifications tracking progress.
+        /// </summary>
         public void Undelete(List<TModel> items, bool silent = false)
         {
+            if (!items.Any()) return;
+
+            var notification = new ProgressNotification
+            {
+                CompletionText = "Restored all deleted items!",
+                Progress = 0,
+                State = ProgressNotificationState.Active,
+            };
+
+            if (!silent)
+                PostNotification?.Invoke(notification);
+
+            int i = 0;
+
+            foreach (var item in items)
+            {
+                if (notification.State == ProgressNotificationState.Cancelled)
+                    // user requested abort
+                    return;
+
+                notification.Text = $"Restoring ({++i} of {items.Count})";
+
+                Undelete(item);
+
+                notification.Progress = (float)i / items.Count;
+            }
+
+            notification.State = ProgressNotificationState.Completed;
+        }
+
+        public bool Delete(TModel item)
+        {
+            if (item.DeletePending)
+                return false;
+
+            item.Realm.Write(r => item.DeletePending = true);
+            ItemRemoved?.Invoke(item);
+            return true;
         }
 
         public void Undelete(TModel item)
         {
-            // make compile LOL
-            ItemRemoved?.Invoke(null);
-            ItemUpdated?.Invoke(null);
+            if (!item.DeletePending)
+                return;
+
+            item.Realm.Write(r => item.DeletePending = true);
+            ItemUpdated?.Invoke(item);
         }
 
-        public bool IsAvailableLocally(TModel model)
-        {
-            return false;
-        }
-
-        public event Action<TModel> ItemUpdated;
-        public event Action<TModel> ItemRemoved;
+        public virtual bool IsAvailableLocally(TModel model) => false; // TODO: implement
 
         public void Update(TModel skin)
         {

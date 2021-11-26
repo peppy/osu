@@ -57,7 +57,7 @@ namespace osu.Game.Skinning
             return Task.CompletedTask;
         }
 
-        private void checkSkinIniMetadata(SkinInfo item, Realm? realm = null)
+        private void checkSkinIniMetadata(SkinInfo item, Realm realm)
         {
             var instance = createInstance(item);
 
@@ -88,7 +88,7 @@ namespace osu.Game.Skinning
                 updateSkinIniMetadata(item, realm);
         }
 
-        private void updateSkinIniMetadata(SkinInfo item, Realm? realm)
+        private void updateSkinIniMetadata(SkinInfo item, Realm realm)
         {
             string nameLine = @$"Name: {item.Name}";
             string authorLine = @$"Author: {item.Creator}";
