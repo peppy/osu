@@ -160,9 +160,9 @@ namespace osu.Game.Skinning
 
                     AddFile(item, stream, @"skin.ini", realm);
                 }
-            }
 
-            item.Hash = ComputeHash(item);
+                item.Hash = ComputeHash(item);
+            }
         }
 
         private bool ensureIniWasUpdated(SkinInfo item)

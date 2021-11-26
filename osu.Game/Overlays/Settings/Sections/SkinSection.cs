@@ -143,13 +143,17 @@ namespace osu.Game.Overlays.Settings.Sections
 
         private void sortUserSkins(List<ILive<SkinInfo>> skinsList)
         {
-            // Sort user skins separately from built-in skins
-            skinsList.Sort(firstNonDefaultSkinIndex, skinsList.Count - firstNonDefaultSkinIndex,
-                Comparer<ILive<SkinInfo>>.Create((a, b) =>
-                {
-                    // o_________________________o
-                    return a.PerformRead(ai => b.PerformRead(bi => string.Compare(ai.Name, bi.Name, StringComparison.OrdinalIgnoreCase)));
-                }));
+            try
+            {
+                // Sort user skins separately from built-in skins
+                skinsList.Sort(firstNonDefaultSkinIndex, skinsList.Count - firstNonDefaultSkinIndex,
+                    Comparer<ILive<SkinInfo>>.Create((a, b) =>
+                    {
+                        // o_________________________o
+                        return a.PerformRead(ai => b.PerformRead(bi => string.Compare(ai.Name, bi.Name, StringComparison.OrdinalIgnoreCase)));
+                    }));
+            }
+            catch { }
         }
 
         protected override void Dispose(bool isDisposing)

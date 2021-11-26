@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using osu.Framework.Platform;
@@ -34,23 +33,6 @@ namespace osu.Game.Stores
             : base(storage, contextFactory)
         {
             realmFileStore = new RealmFileStore(contextFactory, storage);
-        }
-
-        /// <summary>
-        /// Perform a lookup query on available models.
-        /// </summary>
-        /// <param name="query">The query.</param>
-        /// <returns>The first result for the provided query, or null if no results were found.</returns>
-        public ILive<TModel>? Query(Expression<Func<TModel, bool>> query)
-        {
-            using (var realm = ContextFactory.CreateContext())
-                return realm.All<TModel>().FirstOrDefault(query)?.ToLive();
-        }
-
-        public List<ILive<TModel>> QueryAll(Expression<Func<TModel, bool>> query)
-        {
-            using (var realm = ContextFactory.CreateContext())
-                return realm.All<TModel>().Where(query).ToLive();
         }
 
         public void DeleteFile(TModel item, RealmNamedFileUsage file) =>
@@ -84,8 +66,7 @@ namespace osu.Game.Stores
         {
             var imported = await base.Import(item, archive, lowPriority, cancellationToken).ConfigureAwait(false);
 
-            if (imported != null)
-                ItemUpdated?.Invoke(imported.Value);
+            imported?.PerformRead(i => ItemUpdated?.Invoke(i.Detach()));
 
             return imported;
         }
@@ -169,7 +150,7 @@ namespace osu.Game.Stores
                 return false;
 
             item.Realm.Write(r => item.DeletePending = true);
-            ItemRemoved?.Invoke(item);
+            ItemRemoved?.Invoke(item.Detach());
             return true;
         }
 
@@ -178,7 +159,7 @@ namespace osu.Game.Stores
             if (!item.DeletePending)
                 return;
 
-            item.Realm.Write(r => item.DeletePending = true);
+            item.Realm.Write(r => item.DeletePending = false);
             ItemUpdated?.Invoke(item);
         }
 

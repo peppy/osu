@@ -46,6 +46,7 @@ namespace osu.Game.Skinning
         public readonly Bindable<ILive<SkinInfo>> CurrentSkinInfo = new Bindable<ILive<SkinInfo>>(SkinInfo.Default.ToLive()) { Default = SkinInfo.Default.ToLive() };
 
         private readonly SkinModelManager skinModelManager;
+        private readonly RealmContextFactory contextFactory;
 
         private readonly IResourceStore<byte[]> userFiles;
 
@@ -61,6 +62,7 @@ namespace osu.Game.Skinning
 
         public SkinManager(Storage storage, RealmContextFactory contextFactory, GameHost host, IResourceStore<byte[]> resources, AudioManager audio, Scheduler scheduler)
         {
+            this.contextFactory = contextFactory;
             this.audio = audio;
             this.host = host;
             this.resources = resources;
@@ -94,35 +96,37 @@ namespace osu.Game.Skinning
         }
 
         /// <summary>
-        /// Returns a list of all usable <see cref="SkinInfo"/>s. Includes the special default skin plus all skins from <see cref="GetAllUserSkins"/>.
+        /// Returns a list of all usable <see cref="SkinInfo"/>s. Includes the non-databased default skins.
         /// </summary>
         /// <returns>A newly allocated list of available <see cref="SkinInfo"/>.</returns>
         public List<ILive<SkinInfo>> GetAllUsableSkins()
         {
-            var userSkins = GetAllUserSkins();
-            userSkins.Insert(0, DefaultSkin.SkinInfo);
-            userSkins.Insert(1, DefaultLegacySkin.SkinInfo);
-            return userSkins;
+            using (var context = contextFactory.CreateContext())
+            {
+                var userSkins = context.All<SkinInfo>().Where(s => !s.DeletePending).ToLive();
+                userSkins.Insert(0, DefaultSkin.SkinInfo);
+                userSkins.Insert(1, DefaultLegacySkin.SkinInfo);
+                return userSkins;
+            }
         }
-
-        /// <summary>
-        /// Returns a list of all usable <see cref="SkinInfo"/>s that have been loaded by the user.
-        /// </summary>
-        public List<ILive<SkinInfo>> GetAllUserSkins() => skinModelManager.QueryAll(s => !s.DeletePending).ToList();
 
         public void SelectRandomSkin()
         {
-            // choose from only user skins, removing the current selection to ensure a new one is chosen.
-            var randomChoices = skinModelManager.QueryAll(s => !s.DeletePending && s.ID != CurrentSkinInfo.Value.ID).ToArray();
-
-            if (randomChoices.Length == 0)
+            using (var context = contextFactory.CreateContext())
             {
-                CurrentSkinInfo.Value = SkinInfo.Default.ToLive();
-                return;
-            }
+                // choose from only user skins, removing the current selection to ensure a new one is chosen.
+                var randomChoices = context.All<SkinInfo>().Where(s => !s.DeletePending && s.ID != CurrentSkinInfo.Value.ID).ToArray();
 
-            var chosen = randomChoices.ElementAt(RNG.Next(0, randomChoices.Length));
-            CurrentSkinInfo.Value = skinModelManager.Query(i => i.ID == chosen.ID);
+                if (randomChoices.Length == 0)
+                {
+                    CurrentSkinInfo.Value = SkinInfo.Default.ToLive();
+                    return;
+                }
+
+                var chosen = randomChoices.ElementAt(RNG.Next(0, randomChoices.Length));
+
+                CurrentSkinInfo.Value = chosen.ToLive();
+            }
         }
 
         /// <summary>
@@ -169,7 +173,11 @@ namespace osu.Game.Skinning
         /// </summary>
         /// <param name="query">The query.</param>
         /// <returns>The first result for the provided query, or null if no results were found.</returns>
-        public ILive<SkinInfo> Query(Expression<Func<SkinInfo, bool>> query) => skinModelManager.Query(query);
+        public ILive<SkinInfo> Query(Expression<Func<SkinInfo, bool>> query)
+        {
+            using (var context = contextFactory.CreateContext())
+                return context.All<SkinInfo>().FirstOrDefault(query)?.ToLive();
+        }
 
         public event Action SourceChanged;
 
@@ -287,9 +295,13 @@ namespace osu.Game.Skinning
             remove => skinModelManager.ItemRemoved -= value;
         }
 
-        public void Delete(List<ILive<SkinInfo>> items, bool silent = false)
+        public void Delete(Expression<Func<SkinInfo, bool>> filter, bool silent = false)
         {
-            //skinModelManager.Delete(items, silent);
+            using (var context = contextFactory.CreateContext())
+            {
+                var items = context.All<SkinInfo>().Where(filter).ToList();
+                skinModelManager.Delete(items, silent);
+            }
         }
 
         #endregion
