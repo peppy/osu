@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using osu.Game.Input.Bindings;
+using osu.Game.Models;
+using osu.Game.Skinning;
 using Realms;
 
 namespace osu.Game.Database
@@ -14,9 +16,20 @@ namespace osu.Game.Database
         private static readonly IMapper mapper = new MapperConfiguration(c =>
         {
             c.ShouldMapField = fi => false;
-            c.ShouldMapProperty = pi => pi.SetMethod != null && pi.SetMethod.IsPublic;
+            c.ShouldMapProperty = pi =>
+            {
+                if (pi.Name == "Files")
+                    return true;
+
+                return pi.SetMethod != null && pi.SetMethod.IsPublic;
+            };
 
             c.CreateMap<RealmKeyBinding, RealmKeyBinding>();
+            c.CreateMap<SkinInfo, SkinInfo>();
+
+            c.CreateMap<List<RealmNamedFileUsage>, List<RealmNamedFileUsage>>();
+            c.CreateMap<RealmNamedFileUsage, RealmNamedFileUsage>();
+            c.CreateMap<RealmFile, RealmFile>();
         }).CreateMapper();
 
         /// <summary>
