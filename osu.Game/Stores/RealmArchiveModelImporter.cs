@@ -294,11 +294,11 @@ namespace osu.Game.Stores
         /// <remarks>
         ///  In the case of no matching files, a hash will be generated from the passed archive's <see cref="ArchiveReader.Name"/>.
         /// </remarks>
-        protected virtual string ComputeHash(TModel item, ArchiveReader? reader = null)
+        protected virtual string ComputeHash(TModel item, ArchiveReader? reader = null, Realm? realm = null)
         {
-            if (reader != null)
-                // fast hashing for cases where the item's files may not be populated.
-                return computeHashFast(reader);
+            // if (reader != null)
+            //     // fast hashing for cases where the item's files may not be populated.
+            //     return computeHashFast(reader);
 
             // for now, concatenate all hashable files in the set to create a unique hash.
             MemoryStream hashable = new MemoryStream();
@@ -374,7 +374,7 @@ namespace osu.Game.Stores
                             // TODO: look into rollback of file additions (or delayed commit).
                             item.Files.AddRange(createFileInfos(archive, Files, realm));
 
-                        item.Hash = ComputeHash(item, archive);
+                        item.Hash = ComputeHash(item, archive, realm);
 
                         // TODO: we may want to run this outside of the transaction.
                         await Populate(item, archive, realm, cancellationToken).ConfigureAwait(false);

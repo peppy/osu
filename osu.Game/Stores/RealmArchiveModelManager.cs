@@ -20,9 +20,12 @@ namespace osu.Game.Stores
     public abstract class RealmArchiveModelManager<TModel> : RealmArchiveModelImporter<TModel>, IModelManager<TModel>, IModelFileManager<TModel, RealmNamedFileUsage>
         where TModel : RealmObject, IHasRealmFiles, IHasGuidPrimaryKey, ISoftDelete
     {
+        private readonly RealmFileStore realmFileStore;
+
         protected RealmArchiveModelManager([NotNull] Storage storage, [NotNull] RealmContextFactory contextFactory)
             : base(storage, contextFactory)
         {
+            realmFileStore = new RealmFileStore(contextFactory, storage);
         }
 
         /// <summary>
@@ -42,16 +45,31 @@ namespace osu.Game.Stores
                 return realm.All<TModel>().Where(query).ToLive();
         }
 
-        public void DeleteFile(TModel item, RealmNamedFileUsage singleOrDefault)
+        public void DeleteFile(TModel item, RealmNamedFileUsage file) =>
+            item.Realm.Write(() => DeleteFile(item, file, item.Realm));
+
+        public void ReplaceFile(TModel item, RealmNamedFileUsage file, Stream contents)
+            => item.Realm.Write(() => ReplaceFile(item, file, contents, item.Realm));
+
+        public void AddFile(TModel item, Stream stream, string filename)
+            => item.Realm.Write(() => AddFile(item, stream, filename, item.Realm));
+
+        public void DeleteFile(TModel item, RealmNamedFileUsage file, Realm realm)
         {
+            item.Files.Remove(file);
         }
 
-        public void ReplaceFile(TModel model, RealmNamedFileUsage file, Stream contents, string filename = null)
+        public void ReplaceFile(TModel model, RealmNamedFileUsage file, Stream contents, Realm realm)
         {
+            file.File = realmFileStore.Add(contents, realm);
         }
 
-        public void AddFile(TModel item, Stream stream, string skinIni)
+        public void AddFile(TModel item, Stream stream, string filename, Realm realm)
         {
+            var file = realmFileStore.Add(stream, realm ?? item.Realm);
+            var namedUsage = new RealmNamedFileUsage(file, filename);
+
+            item.Files.Add(namedUsage);
         }
 
         public bool Delete(TModel skin)

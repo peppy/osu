@@ -46,12 +46,11 @@ namespace osu.Game.Skinning
 
         protected override bool HasCustomHashFunction => true;
 
-        protected override string ComputeHash(SkinInfo item, ArchiveReader? reader = null)
+        protected override string ComputeHash(SkinInfo item, ArchiveReader? reader = null, Realm? realm = null)
         {
             var instance = createInstance(item);
 
             // This function can be run on fresh import or save. The logic here ensures a skin.ini file is in a good state for both operations.
-
             // `Skin` will parse the skin.ini and populate `Skin.Configuration` during construction above.
             string skinIniSourcedName = instance.Configuration.SkinInfo.Name;
             string skinIniSourcedCreator = instance.Configuration.SkinInfo.Creator;
@@ -75,12 +74,12 @@ namespace osu.Game.Skinning
             // Regardless of whether this is an import or not, let's write the skin.ini if non-existing or non-matching.
             // This is (weirdly) done inside ComputeHash to avoid adding a new method to handle this case. After switching to realm it can be moved into another place.
             if (skinIniSourcedName != item.Name)
-                updateSkinIniMetadata(item);
+                updateSkinIniMetadata(item, realm);
 
-            return base.ComputeHash(item, reader);
+            return base.ComputeHash(item, reader, realm);
         }
 
-        private void updateSkinIniMetadata(SkinInfo item)
+        private void updateSkinIniMetadata(SkinInfo item, Realm? realm)
         {
             string nameLine = @$"Name: {item.Name}";
             string authorLine = @$"Author: {item.Creator}";
@@ -120,14 +119,17 @@ namespace osu.Game.Skinning
                         sw.WriteLine(line);
                 }
 
-                ReplaceFile(item, existingFile, stream);
+                ReplaceFile(item, existingFile, stream, realm);
 
                 // can be removed 20220502.
                 if (!ensureIniWasUpdated(item))
                 {
                     Logger.Log($"Skin {item}'s skin.ini had issues and has been removed. Please report this and provide the problematic skin.", LoggingTarget.Database, LogLevel.Important);
 
-                    DeleteFile(item, item.Files.SingleOrDefault(f => f.Filename.Equals(@"skin.ini", StringComparison.OrdinalIgnoreCase)));
+                    var existingIni = item.Files.SingleOrDefault(f => f.Filename.Equals(@"skin.ini", StringComparison.OrdinalIgnoreCase));
+                    if (existingIni != null)
+                        item.Files.Remove(existingIni);
+
                     writeNewSkinIni();
                 }
             }
@@ -142,7 +144,7 @@ namespace osu.Game.Skinning
                             sw.WriteLine(line);
                     }
 
-                    AddFile(item, stream, @"skin.ini");
+                    AddFile(item, stream, @"skin.ini", realm);
                 }
             }
         }
@@ -160,11 +162,8 @@ namespace osu.Game.Skinning
 
         protected override Task Populate(SkinInfo model, ArchiveReader? archive, Realm realm, CancellationToken cancellationToken = default)
         {
-            var instance = createInstance(model);
-
-            model.InstantiationInfo = instance.GetType().GetInvariantInstantiationInfo();
-            model.Name = instance.Configuration.SkinInfo.Name;
-            model.Creator = instance.Configuration.SkinInfo.Creator;
+            if (string.IsNullOrEmpty(model.InstantiationInfo))
+                model.InstantiationInfo = createInstance(model).GetType().GetInvariantInstantiationInfo();
 
             return Task.CompletedTask;
         }
