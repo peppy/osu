@@ -67,7 +67,7 @@ namespace osu.Game.Tests.Database
         {
             RunTestWithRealm((realmFactory, _) =>
             {
-                RealmLive<RealmBeatmap>? liveBeatmap = null;
+                ILive<RealmBeatmap>? liveBeatmap = null;
                 Task.Factory.StartNew(() =>
                 {
                     using (var threadContext = realmFactory.CreateContext())
@@ -114,7 +114,7 @@ namespace osu.Game.Tests.Database
         {
             RunTestWithRealm((realmFactory, _) =>
             {
-                RealmLive<RealmBeatmap>? liveBeatmap = null;
+                ILive<RealmBeatmap>? liveBeatmap = null;
                 Task.Factory.StartNew(() =>
                 {
                     using (var threadContext = realmFactory.CreateContext())
@@ -143,7 +143,7 @@ namespace osu.Game.Tests.Database
         {
             RunTestWithRealm((realmFactory, _) =>
             {
-                RealmLive<RealmBeatmap>? liveBeatmap = null;
+                ILive<RealmBeatmap>? liveBeatmap = null;
                 Task.Factory.StartNew(() =>
                 {
                     using (var threadContext = realmFactory.CreateContext())
@@ -169,7 +169,7 @@ namespace osu.Game.Tests.Database
         {
             RunTestWithRealm((realmFactory, _) =>
             {
-                RealmLive<RealmBeatmap>? liveBeatmap = null;
+                ILive<RealmBeatmap>? liveBeatmap = null;
                 Task.Factory.StartNew(() =>
                 {
                     using (var threadContext = realmFactory.CreateContext())
@@ -202,7 +202,7 @@ namespace osu.Game.Tests.Database
                 using (var updateThreadContext = realmFactory.CreateContext())
                 {
                     updateThreadContext.All<RealmBeatmap>().SubscribeForNotifications(gotChange);
-                    RealmLive<RealmBeatmap>? liveBeatmap = null;
+                    ILive<RealmBeatmap>? liveBeatmap = null;
 
                     Task.Factory.StartNew(() =>
                     {

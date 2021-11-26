@@ -14,15 +14,19 @@ using osu.Game.Database;
 using osu.Game.Extensions;
 using osu.Game.IO;
 using osu.Game.IO.Archives;
+using osu.Game.Stores;
+using Realms;
+
+#nullable enable
 
 namespace osu.Game.Skinning
 {
-    public class SkinModelManager : ArchiveModelManager<SkinInfo, SkinFileInfo>
+    public class SkinModelManager : RealmArchiveModelManager<SkinInfo>
     {
         private readonly IStorageResourceProvider skinResources;
 
-        public SkinModelManager(Storage storage, DatabaseContextFactory contextFactory, SkinStore skinStore, GameHost host, IStorageResourceProvider skinResources)
-            : base(storage, contextFactory, skinStore, host)
+        public SkinModelManager(Storage storage, RealmContextFactory contextFactory, GameHost host, IStorageResourceProvider skinResources)
+            : base(storage, contextFactory)
         {
             this.skinResources = skinResources;
 
@@ -42,7 +46,7 @@ namespace osu.Game.Skinning
 
         protected override bool HasCustomHashFunction => true;
 
-        protected override string ComputeHash(SkinInfo item)
+        protected override string ComputeHash(SkinInfo item, ArchiveReader? reader = null)
         {
             var instance = createInstance(item);
 
@@ -53,7 +57,7 @@ namespace osu.Game.Skinning
             string skinIniSourcedCreator = instance.Configuration.SkinInfo.Creator;
             string archiveName = item.Name.Replace(@".osk", string.Empty, StringComparison.OrdinalIgnoreCase);
 
-            bool isImport = item.ID == 0;
+            bool isImport = !item.IsManaged;
 
             if (isImport)
             {
@@ -73,7 +77,7 @@ namespace osu.Game.Skinning
             if (skinIniSourcedName != item.Name)
                 updateSkinIniMetadata(item);
 
-            return base.ComputeHash(item);
+            return base.ComputeHash(item, reader);
         }
 
         private void updateSkinIniMetadata(SkinInfo item)
@@ -102,10 +106,10 @@ namespace osu.Game.Skinning
             {
                 using (var sw = new StreamWriter(stream, Encoding.UTF8, 1024, true))
                 {
-                    using (var existingStream = Files.Storage.GetStream(existingFile.FileInfo.GetStoragePath()))
+                    using (var existingStream = Files.Storage.GetStream(existingFile.File.GetStoragePath()))
                     using (var sr = new StreamReader(existingStream))
                     {
-                        string line;
+                        string? line;
                         while ((line = sr.ReadLine()) != null)
                             sw.WriteLine(line);
                     }
@@ -154,12 +158,11 @@ namespace osu.Game.Skinning
             return instance.Configuration.SkinInfo.Name == item.Name;
         }
 
-        protected override Task Populate(SkinInfo model, ArchiveReader archive, CancellationToken cancellationToken = default)
+        protected override Task Populate(SkinInfo model, ArchiveReader? archive, Realm realm, CancellationToken cancellationToken = default)
         {
             var instance = createInstance(model);
 
-            model.InstantiationInfo ??= instance.GetType().GetInvariantInstantiationInfo();
-
+            model.InstantiationInfo = instance.GetType().GetInvariantInstantiationInfo();
             model.Name = instance.Configuration.SkinInfo.Name;
             model.Creator = instance.Configuration.SkinInfo.Creator;
 
@@ -168,18 +171,21 @@ namespace osu.Game.Skinning
 
         private void populateMissingHashes()
         {
-            var skinsWithoutHashes = ModelStore.ConsumableItems.Where(i => i.Hash == null).ToArray();
-
-            foreach (SkinInfo skin in skinsWithoutHashes)
+            using (var realm = ContextFactory.CreateContext())
             {
-                try
+                var skinsWithoutHashes = realm.All<SkinInfo>().Where(i => string.IsNullOrEmpty(i.Hash)).ToArray();
+
+                foreach (SkinInfo skin in skinsWithoutHashes)
                 {
-                    Update(skin);
-                }
-                catch (Exception e)
-                {
-                    Delete(skin);
-                    Logger.Error(e, $"Existing skin {skin} has been deleted during hash recomputation due to being invalid");
+                    try
+                    {
+                        Update(skin);
+                    }
+                    catch (Exception e)
+                    {
+                        Delete(skin);
+                        Logger.Error(e, $"Existing skin {skin} has been deleted during hash recomputation due to being invalid");
+                    }
                 }
             }
         }
