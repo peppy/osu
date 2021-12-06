@@ -156,8 +156,8 @@ namespace osu.Game.Screens.Play
 
             request.Success += s =>
             {
-                score.ScoreInfo.OnlineID = s.ID;
                 score.ScoreInfo.Position = s.Position;
+                score.ScoreInfo.OnlineID = s.ID;
 
                 scoreSubmissionSource.SetResult(true);
             };
