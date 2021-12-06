@@ -55,6 +55,14 @@ namespace osu.Game.Scoring
 
         public RealmBeatmap Beatmap { get; set; } = null!;
 
+        public BeatmapInfo BeatmapInfo
+        {
+            set
+            {
+                Beatmap = new RealmBeatmap(new RealmRuleset("osu"), new RealmBeatmapDifficulty(), new RealmBeatmapMetadata()); // .. todo
+            }
+        }
+
         public RealmRuleset Ruleset { get; set; } = null!;
 
         [Ignored]
