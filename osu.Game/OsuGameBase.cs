@@ -17,6 +17,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Performance;
 using osu.Framework.Graphics.Textures;
 using osu.Framework.Input;
+using osu.Framework.Input.Events;
 using osu.Framework.IO.Stores;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
@@ -42,6 +43,7 @@ using osu.Game.Scoring;
 using osu.Game.Skinning;
 using osu.Game.Stores;
 using osu.Game.Utils;
+using osuTK.Input;
 using RuntimeInfo = osu.Framework.RuntimeInfo;
 
 namespace osu.Game
@@ -327,6 +329,18 @@ namespace osu.Game
             dependencies.CacheAs(MusicController);
 
             Ruleset.BindValueChanged(onRulesetChanged);
+        }
+
+        protected override bool OnKeyDown(KeyDownEvent e)
+        {
+            switch (e.Key)
+            {
+                case Key.C:
+                    (((OnlineMultiplayerClient)multiplayerClient).Connector as HubClientConnector)?.ForceDisconnect();
+                    return true;
+            }
+
+            return base.OnKeyDown(e);
         }
 
         protected virtual void InitialiseFonts()

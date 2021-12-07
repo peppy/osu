@@ -92,7 +92,7 @@ namespace osu.Game.Online
                 {
                     // ensure any previous connection was disposed.
                     // this will also create a new cancellation token source.
-                    await disconnect(false).ConfigureAwait(false);
+                    // await disconnect(false).ConfigureAwait(false);
 
                     // this token will be valid for the scope of this connection.
                     // if cancelled, we can be sure that a disconnect or reconnect is handled elsewhere.
@@ -190,6 +190,18 @@ namespace osu.Game.Online
             if (!cancellationToken.IsCancellationRequested)
                 await Task.Run(connect, default).ConfigureAwait(false);
         }
+
+        HubConnection? lastConnection;
+
+        public void ForceDisconnect() => Task.Run(async () =>
+        {
+            // keep a reference to the last connection so it doesn't finalize.
+            lastConnection = CurrentConnection;
+
+            // test without disconnecting
+            //await disconnect(true).ConfigureAwait(false);
+            await connect().ConfigureAwait(false);
+        });
 
         private async Task disconnect(bool takeLock)
         {

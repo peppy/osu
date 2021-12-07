@@ -23,11 +23,11 @@ namespace osu.Game.Online.Multiplayer
     {
         private readonly string endpoint;
 
-        private IHubClientConnector? connector;
+        public IHubClientConnector? Connector;
 
         public override IBindable<bool> IsConnected { get; } = new BindableBool();
 
-        private HubConnection? connection => connector?.CurrentConnection;
+        private HubConnection? connection => Connector?.CurrentConnection;
 
         [Resolved]
         private BeatmapLookupCache beatmapLookupCache { get; set; } = null!;
@@ -42,11 +42,11 @@ namespace osu.Game.Online.Multiplayer
         {
             // Importantly, we are intentionally not using MessagePack here to correctly support derived class serialization.
             // More information on the limitations / reasoning can be found in osu-server-spectator's initialisation code.
-            connector = api.GetHubConnector(nameof(OnlineMultiplayerClient), endpoint);
+            Connector = api.GetHubConnector(nameof(OnlineMultiplayerClient), endpoint);
 
-            if (connector != null)
+            if (Connector != null)
             {
-                connector.ConfigureConnection = connection =>
+                Connector.ConfigureConnection = connection =>
                 {
                     // this is kind of SILLY
                     // https://github.com/dotnet/aspnetcore/issues/15198
@@ -70,7 +70,7 @@ namespace osu.Game.Online.Multiplayer
                     connection.On<MultiplayerPlaylistItem>(nameof(IMultiplayerClient.PlaylistItemChanged), ((IMultiplayerClient)this).PlaylistItemChanged);
                 };
 
-                IsConnected.BindTo(connector.IsConnected);
+                IsConnected.BindTo(Connector.IsConnected);
             }
         }
 
@@ -170,7 +170,7 @@ namespace osu.Game.Online.Multiplayer
         protected override void Dispose(bool isDisposing)
         {
             base.Dispose(isDisposing);
-            connector?.Dispose();
+            Connector?.Dispose();
         }
     }
 }
