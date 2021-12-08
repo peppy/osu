@@ -15,10 +15,11 @@ using osu.Game.Database;
 using osu.Game.IO.Archives;
 using osu.Game.Rulesets;
 using osu.Game.Scoring.Legacy;
+using osu.Game.Stores;
 
 namespace osu.Game.Scoring
 {
-    public class ScoreModelManager : ArchiveModelManager<ScoreInfo, ScoreFileInfo>
+    public class ScoreModelManager : RealmArchiveModelManager<ScoreInfo>
     {
         public override IEnumerable<string> HandledExtensions => new[] { ".osr" };
 
@@ -27,8 +28,8 @@ namespace osu.Game.Scoring
         private readonly RulesetStore rulesets;
         private readonly Func<BeatmapManager> beatmaps;
 
-        public ScoreModelManager(RulesetStore rulesets, Func<BeatmapManager> beatmaps, Storage storage, IDatabaseContextFactory contextFactory, IIpcHost importHost = null)
-            : base(storage, contextFactory, new ScoreStore(contextFactory, storage), importHost)
+        public ScoreModelManager(RulesetStore rulesets, Func<BeatmapManager> beatmaps, Storage storage, RealmContextFactory contextFactory)
+            : base(storage, contextFactory)
         {
             this.rulesets = rulesets;
             this.beatmaps = beatmaps;

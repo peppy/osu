@@ -11,6 +11,7 @@ using osu.Game.Beatmaps;
 using osu.Game.Database;
 using osu.Game.Models;
 using osu.Game.Online.API;
+using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
@@ -39,7 +40,18 @@ namespace osu.Game.Scoring
         [Indexed]
         public long OnlineID { get; set; } = -1;
 
-        public RealmUser User { get; set; } = null!;
+        [MapTo("User")]
+        public RealmUser RealmUser { get; set; } = null!;
+
+        public APIUser User
+        {
+            get => RealmUser;
+            set => RealmUser = new RealmUser
+            {
+                OnlineID = value.OnlineID,
+                Username = value.Username
+            };
+        }
 
         public long TotalScore { get; set; }
 
@@ -57,10 +69,8 @@ namespace osu.Game.Scoring
 
         public BeatmapInfo BeatmapInfo
         {
-            set
-            {
-                Beatmap = new RealmBeatmap(new RealmRuleset("osu"), new RealmBeatmapDifficulty(), new RealmBeatmapMetadata()); // .. todo
-            }
+            get => new BeatmapInfo();
+            set => Beatmap = new RealmBeatmap(new RealmRuleset("osu"), new RealmBeatmapDifficulty(), new RealmBeatmapMetadata()); // .. todo
         }
 
         public RealmRuleset Ruleset { get; set; } = null!;
@@ -101,6 +111,12 @@ namespace osu.Game.Scoring
 
         private Mod[]? mods;
 
+        public int BeatmapInfoID => BeatmapInfo.ID;
+
+        public int UserID => RealmUser.OnlineID;
+
+        public int RulesetID => Ruleset.OnlineID;
+
         [Ignored]
         public List<HitEvent> HitEvents { get; set; } = new List<HitEvent>();
 
@@ -116,11 +132,17 @@ namespace osu.Game.Scoring
         [Ignored]
         public bool Passed { get; set; } = true;
 
+        [Ignored]
+        public int Combo { get; set; }
+
         /// <summary>
         /// The position of this score, starting at 1.
         /// </summary>
         [Ignored]
         public int? Position { get; set; } // TODO: remove after all calls to `CreateScoreInfo` are gone.
+
+        [Ignored]
+        public double DisplayAccuracy { get; set; }
 
         /// <summary>
         /// Whether this <see cref="EFScoreInfo"/> represents a legacy (osu!stable) score.
