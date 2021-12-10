@@ -6,16 +6,17 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using Newtonsoft.Json;
+using osu.Framework.Localisation;
 using osu.Framework.Testing;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
 using osu.Game.Models;
 using osu.Game.Online.API;
-using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Users;
+using osu.Game.Utils;
 using Realms;
 
 #nullable enable
@@ -43,7 +44,7 @@ namespace osu.Game.Scoring
         [MapTo("User")]
         public RealmUser RealmUser { get; set; } = null!;
 
-        public APIUser User
+        public IUser User
         {
             get => RealmUser;
             set => RealmUser = new RealmUser
@@ -70,7 +71,8 @@ namespace osu.Game.Scoring
         public BeatmapInfo BeatmapInfo
         {
             get => new BeatmapInfo();
-            set => Beatmap = new RealmBeatmap(new RealmRuleset("osu"), new RealmBeatmapDifficulty(), new RealmBeatmapMetadata()); // .. todo
+            // .. todo
+            set => Beatmap = new RealmBeatmap(new RealmRuleset("osu", "osu!", "wangs", 0), new RealmBeatmapDifficulty(), new RealmBeatmapMetadata());
         }
 
         public RealmRuleset Ruleset { get; set; } = null!;
@@ -78,6 +80,8 @@ namespace osu.Game.Scoring
         [Ignored]
         public Dictionary<HitResult, int> Statistics
         {
+            // TODO: this is dangerous. a get operation may then modify the dictionary, which would be a fresh copy that is not persisted with the model.
+            // this is already the case in multiple locations.
             get
             {
                 if (string.IsNullOrEmpty(StatisticsJson))
@@ -142,7 +146,7 @@ namespace osu.Game.Scoring
         public int? Position { get; set; } // TODO: remove after all calls to `CreateScoreInfo` are gone.
 
         [Ignored]
-        public double DisplayAccuracy { get; set; }
+        public LocalisableString DisplayAccuracy => Accuracy.FormatAccuracy();
 
         /// <summary>
         /// Whether this <see cref="EFScoreInfo"/> represents a legacy (osu!stable) score.

@@ -4,10 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Game.Beatmaps;
@@ -16,6 +14,9 @@ using osu.Game.IO.Archives;
 using osu.Game.Rulesets;
 using osu.Game.Scoring.Legacy;
 using osu.Game.Stores;
+using Realms;
+
+#nullable enable
 
 namespace osu.Game.Scoring
 {
@@ -35,11 +36,8 @@ namespace osu.Game.Scoring
             this.beatmaps = beatmaps;
         }
 
-        protected override ScoreInfo CreateModel(ArchiveReader archive)
+        protected override ScoreInfo? CreateModel(ArchiveReader archive)
         {
-            if (archive == null)
-                return null;
-
             using (var stream = archive.GetStream(archive.Filenames.First(f => f.EndsWith(".osr", StringComparison.OrdinalIgnoreCase))))
             {
                 try
@@ -56,17 +54,7 @@ namespace osu.Game.Scoring
 
         public Score GetScore(ScoreInfo score) => new LegacyDatabasedScore(score, rulesets, beatmaps(), Files.Store);
 
-        public List<ScoreInfo> GetAllUsableScores() => ModelStore.ConsumableItems.Where(s => !s.DeletePending).ToList();
-
-        public IEnumerable<ScoreInfo> QueryScores(Expression<Func<ScoreInfo, bool>> query) => ModelStore.ConsumableItems.AsNoTracking().Where(query);
-
-        public ScoreInfo Query(Expression<Func<ScoreInfo, bool>> query) => ModelStore.ConsumableItems.AsNoTracking().FirstOrDefault(query);
-
-        protected override Task Populate(ScoreInfo model, ArchiveReader archive, CancellationToken cancellationToken = default)
+        protected override Task Populate(ScoreInfo model, ArchiveReader? archive, Realm realm, CancellationToken cancellationToken = default)
             => Task.CompletedTask;
-
-        protected override bool CheckLocalAvailability(ScoreInfo model, IQueryable<ScoreInfo> items)
-            => base.CheckLocalAvailability(model, items)
-               || (model.OnlineID > 0 && items.Any(i => i.OnlineID == model.OnlineID));
     }
 }

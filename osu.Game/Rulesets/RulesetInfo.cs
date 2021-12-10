@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 using osu.Framework.Testing;
+using osu.Game.Models;
 
 namespace osu.Game.Rulesets
 {
@@ -76,5 +77,7 @@ namespace osu.Game.Rulesets
         }
 
         #endregion
+
+        public static implicit operator RealmRuleset(RulesetInfo i) => new RealmRuleset(i.ShortName, i.Name, i.InstantiationInfo, i.OnlineID);
     }
 }
