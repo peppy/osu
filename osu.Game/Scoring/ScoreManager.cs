@@ -24,6 +24,7 @@ namespace osu.Game.Scoring
 {
     public class ScoreManager : IModelManager<ScoreInfo>, IModelImporter<ScoreInfo>
     {
+        private readonly RealmContextFactory contextFactory;
         private readonly Scheduler scheduler;
         private readonly Func<BeatmapDifficultyCache> difficulties;
         private readonly OsuConfigManager configManager;
@@ -32,6 +33,7 @@ namespace osu.Game.Scoring
         public ScoreManager(RealmRulesetStore rulesets, Func<BeatmapManager> beatmaps, Storage storage, RealmContextFactory contextFactory, Scheduler scheduler,
                             IIpcHost importHost = null, Func<BeatmapDifficultyCache> difficulties = null, OsuConfigManager configManager = null)
         {
+            this.contextFactory = contextFactory;
             this.scheduler = scheduler;
             this.difficulties = difficulties;
             this.configManager = configManager;
@@ -41,11 +43,16 @@ namespace osu.Game.Scoring
 
         public Score GetScore(ScoreInfo score) => scoreModelManager.GetScore(score);
 
-        public List<ScoreInfo> GetAllUsableScores() => scoreModelManager.GetAllUsableScores();
-
-        public IEnumerable<ScoreInfo> QueryScores(Expression<Func<ScoreInfo, bool>> query) => scoreModelManager.QueryScores(query);
-
-        public ScoreInfo Query(Expression<Func<ScoreInfo, bool>> query) => scoreModelManager.Query(query);
+        /// <summary>
+        /// Perform a lookup query on available <see cref="ScoreInfo"/>s.
+        /// </summary>
+        /// <param name="query">The query.</param>
+        /// <returns>The first result for the provided query, or null if no results were found.</returns>
+        public ILive<ScoreInfo> Query(Expression<Func<ScoreInfo, bool>> query)
+        {
+            using (var context = contextFactory.CreateContext())
+                return context.All<ScoreInfo>().FirstOrDefault(query)?.ToLive();
+        }
 
         /// <summary>
         /// Orders an array of <see cref="ScoreInfo"/>s by total score.
@@ -263,6 +270,20 @@ namespace osu.Game.Scoring
         public bool Delete(ScoreInfo item)
         {
             return scoreModelManager.Delete(item);
+        }
+
+        public void Delete([CanBeNull] Expression<Func<ScoreInfo, bool>> filter = null, bool silent = false)
+        {
+            using (var context = contextFactory.CreateContext())
+            {
+                var items = context.All<ScoreInfo>()
+                                   .Where(s => !s.DeletePending);
+
+                if (filter != null)
+                    items = items.Where(filter);
+
+                scoreModelManager.Delete(items.ToList(), silent);
+            }
         }
 
         public void Delete(List<ScoreInfo> items, bool silent = false)

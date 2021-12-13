@@ -41,6 +41,9 @@ namespace osu.Game.Tests.Visual.UserInterface
 
         private BeatmapInfo beatmapInfo;
 
+        [Resolved]
+        private RealmContextFactory realmFactory { get; set; }
+
         [Cached]
         private readonly DialogOverlay dialogOverlay;
 
@@ -110,8 +113,11 @@ namespace osu.Game.Tests.Visual.UserInterface
         [SetUp]
         public void Setup() => Schedule(() =>
         {
-            // Due to soft deletions, we can re-use deleted scores between test runs
-            scoreManager.Undelete(scoreManager.QueryScores(s => s.DeletePending).ToList());
+            using (var realm = realmFactory.CreateContext())
+            {
+                // Due to soft deletions, we can re-use deleted scores between test runs
+                scoreManager.Undelete(realm.All<ScoreInfo>().Where(s => s.DeletePending).ToList());
+            }
 
             leaderboard.Scores = null;
             leaderboard.FinishTransforms(true); // After setting scores, we may be waiting for transforms to expire drawables
