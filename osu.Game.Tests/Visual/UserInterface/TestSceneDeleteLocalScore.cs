@@ -21,6 +21,7 @@ using osu.Game.Overlays;
 using osu.Game.Rulesets;
 using osu.Game.Scoring;
 using osu.Game.Screens.Select.Leaderboards;
+using osu.Game.Stores;
 using osu.Game.Tests.Resources;
 using osuTK;
 using osuTK.Input;
@@ -83,7 +84,7 @@ namespace osu.Game.Tests.Visual.UserInterface
 
             dependencies.Cache(rulesetStore = new RulesetStore(ContextFactory));
             dependencies.Cache(beatmapManager = new BeatmapManager(LocalStorage, ContextFactory, rulesetStore, null, dependencies.Get<AudioManager>(), Resources, dependencies.Get<GameHost>(), Beatmap.Default));
-            dependencies.Cache(scoreManager = new ScoreManager(rulesetStore, () => beatmapManager, LocalStorage, ContextFactory, Scheduler));
+            dependencies.Cache(scoreManager = new ScoreManager(dependencies.Get<RealmRulesetStore>(), () => beatmapManager, LocalStorage, dependencies.Get<RealmContextFactory>(), Scheduler));
 
             beatmapInfo = beatmapManager.Import(new ImportTask(TestResources.GetQuickTestBeatmapForImport())).Result.Value.Beatmaps[0];
 
@@ -93,7 +94,6 @@ namespace osu.Game.Tests.Visual.UserInterface
                 {
                     OnlineID = i,
                     BeatmapInfo = beatmapInfo,
-                    BeatmapInfoID = beatmapInfo.ID,
                     Accuracy = RNG.NextDouble(),
                     TotalScore = RNG.Next(1, 1000000),
                     MaxCombo = RNG.Next(1, 1000),

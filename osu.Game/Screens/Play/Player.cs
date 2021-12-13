@@ -220,8 +220,6 @@ namespace osu.Game.Screens.Play
             // ensure the score is in a consistent state with the current player.
             Score.ScoreInfo.BeatmapInfo = Beatmap.Value.BeatmapInfo;
             Score.ScoreInfo.Ruleset = ruleset.RulesetInfo;
-            if (ruleset.RulesetInfo.ID != null)
-                Score.ScoreInfo.RulesetID = ruleset.RulesetInfo.ID.Value;
             Score.ScoreInfo.Mods = gameplayMods;
 
             dependencies.CacheAs(GameplayState = new GameplayState(playableBeatmap, ruleset, gameplayMods, Score));
@@ -1031,7 +1029,8 @@ namespace osu.Game.Screens.Play
             //
             // Until we better define the server-side logic behind this, let's not store the online ID to avoid potential unique constraint
             // conflicts across various systems (ie. solo and multiplayer).
-            long? onlineScoreId = score.ScoreInfo.OnlineID;
+            long onlineScoreId = score.ScoreInfo.OnlineID;
+
             score.ScoreInfo.OnlineID = -1;
 
             await scoreManager.Import(score.ScoreInfo, replayReader).ConfigureAwait(false);

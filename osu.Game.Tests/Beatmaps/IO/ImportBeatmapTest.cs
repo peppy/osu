@@ -1024,7 +1024,6 @@ namespace osu.Game.Tests.Beatmaps.IO
             {
                 OnlineID = 2,
                 BeatmapInfo = beatmapInfo,
-                BeatmapInfoID = beatmapInfo.ID
             }, new ImportScoreTest.TestArchiveReader());
         }
 
