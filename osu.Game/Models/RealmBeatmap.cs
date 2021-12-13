@@ -100,6 +100,9 @@ namespace osu.Game.Models
 
         public double TimelineZoom { get; set; }
 
+        [Ignored]
+        public int? MaxCombo { get; set; }
+
         #endregion
 
         public bool Equals(RealmBeatmap? other)
