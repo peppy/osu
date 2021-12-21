@@ -3,6 +3,7 @@
 
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
+using osu.Framework.Logging;
 using osu.Framework.Screens;
 using osu.Game.Online.API;
 using osu.Game.Online.Multiplayer;
@@ -63,12 +64,32 @@ namespace osu.Game.Tests.Visual
         private void load(IAPIProvider api, OsuGameBase game)
         {
             ((DummyAPIAccess)api).HandleRequest = request => multiplayerScreen.RequestsHandler.HandleRequest(request, api.LocalUser.Value, game);
+            Logger.Log($"{this} load");
+        }
+
+        protected override void LoadAsyncComplete()
+        {
+            base.LoadAsyncComplete();
+            Logger.Log($"{this} LoadAsyncComplete");
+        }
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+            Logger.Log($"{this} LoadComplete");
+        }
+
+        protected override void Dispose(bool isDisposing)
+        {
+            Logger.Log($"{this} Dispose");
+            base.Dispose(isDisposing);
         }
 
         public override bool OnBackButton() => (screenStack.CurrentScreen as OsuScreen)?.OnBackButton() ?? base.OnBackButton();
 
         public override bool OnExiting(IScreen next)
         {
+            Logger.Log($"{this} Exiting");
             if (screenStack.CurrentScreen == null)
                 return base.OnExiting(next);
 

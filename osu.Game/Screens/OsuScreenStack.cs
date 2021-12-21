@@ -3,6 +3,7 @@
 
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
+using osu.Framework.Logging;
 using osu.Framework.Screens;
 using osu.Game.Graphics.Containers;
 
@@ -43,6 +44,18 @@ namespace osu.Game.Screens
             ((OsuScreen)next).CreateLeasedDependencies((prev as OsuScreen)?.Dependencies ?? Dependencies);
 
             ScreenChanged(prev, next);
+        }
+
+        private int report = 0;
+
+        protected override void Update()
+        {
+            base.Update();
+
+            if (report++ % 1000 == 0)
+            {
+                Logger.Log($"{this} reporting in with {Scheduler.TotalTasksRun} tasks run, pending {Scheduler.HasPendingTasks}");
+            }
         }
 
         protected virtual void ScreenChanged(IScreen prev, IScreen next)
