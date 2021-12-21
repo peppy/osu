@@ -64,24 +64,24 @@ namespace osu.Game.Tests.Visual
         private void load(IAPIProvider api, OsuGameBase game)
         {
             ((DummyAPIAccess)api).HandleRequest = request => multiplayerScreen.RequestsHandler.HandleRequest(request, api.LocalUser.Value, game);
-            Logger.Log($"{this} load");
+            Logger.Log($"{this}{GetHashCode()} load");
         }
 
         protected override void LoadAsyncComplete()
         {
             base.LoadAsyncComplete();
-            Logger.Log($"{this} LoadAsyncComplete");
+            Logger.Log($"{this}{GetHashCode()} LoadAsyncComplete");
         }
 
         protected override void LoadComplete()
         {
             base.LoadComplete();
-            Logger.Log($"{this} LoadComplete");
+            Logger.Log($"{this}{GetHashCode()} LoadComplete");
         }
 
         protected override void Dispose(bool isDisposing)
         {
-            Logger.Log($"{this} Dispose");
+            Logger.Log($"{this}{GetHashCode()} Dispose");
             base.Dispose(isDisposing);
         }
 
