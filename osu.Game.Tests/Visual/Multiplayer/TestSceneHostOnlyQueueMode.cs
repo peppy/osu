@@ -18,13 +18,17 @@ namespace osu.Game.Tests.Visual.Multiplayer
     {
         protected override QueueMode Mode => QueueMode.HostOnly;
 
+        private const int repeat_count = 1000;
+
         [Test]
+        [Repeat(repeat_count)]
         public void TestFirstItemSelectedByDefault()
         {
             AddAssert("first item selected", () => Client.Room?.Settings.PlaylistItemId == Client.APIRoom?.Playlist[0].ID);
         }
 
         [Test]
+        [Repeat(repeat_count)]
         public void TestItemStillSelectedAfterChangeToSameBeatmap()
         {
             selectNewItem(() => InitialBeatmap);
@@ -33,6 +37,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
         }
 
         [Test]
+        [Repeat(repeat_count)]
         public void TestItemStillSelectedAfterChangeToOtherBeatmap()
         {
             selectNewItem(() => OtherBeatmap);
@@ -41,6 +46,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
         }
 
         [Test]
+        [Repeat(repeat_count)]
         public void TestNewItemCreatedAfterGameplayFinished()
         {
             RunGameplay();
@@ -52,6 +58,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
         }
 
         [Test]
+        [Repeat(repeat_count)]
         public void TestOnlyLastItemChangedAfterGameplayFinished()
         {
             RunGameplay();
@@ -66,6 +73,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
         }
 
         [Test]
+        [Repeat(repeat_count)]
         public void TestSettingsUpdatedWhenChangingQueueMode()
         {
             AddStep("change queue mode", () => Client.ChangeSettings(new MultiplayerRoomSettings
@@ -77,6 +85,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
         }
 
         [Test]
+        [Repeat(repeat_count)]
         public void TestAddItemsAsHost()
         {
             addItem(() => OtherBeatmap);
