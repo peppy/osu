@@ -79,8 +79,6 @@ namespace osu.Game.Screens.Ranking.Expanded
             statisticDisplays.AddRange(topStatistics);
             statisticDisplays.AddRange(bottomStatistics);
 
-            var starDifficulty = beatmapDifficultyCache.GetDifficultyAsync(beatmap, score.Ruleset, score.Mods).Result;
-
             AddInternal(new FillFlowContainer
             {
                 RelativeSizeAxes = Axes.Both,
@@ -223,26 +221,29 @@ namespace osu.Game.Screens.Ranking.Expanded
             if (score.Date != default)
                 AddInternal(new PlayedOnText(score.Date));
 
-            if (starDifficulty != null)
+            beatmapDifficultyCache.GetDifficultyAsync(beatmap, score.Ruleset, score.Mods).ContinueWith(starDifficulty => Schedule((() =>
             {
-                starAndModDisplay.Add(new StarRatingDisplay(starDifficulty.Value)
+                if (starDifficulty.Result != null)
                 {
-                    Anchor = Anchor.CentreLeft,
-                    Origin = Anchor.CentreLeft
-                });
-            }
+                    starAndModDisplay.Add(new StarRatingDisplay(starDifficulty.Result.Value)
+                    {
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft
+                    });
+                }
 
-            if (score.Mods.Any())
-            {
-                starAndModDisplay.Add(new ModDisplay
+                if (score.Mods.Any())
                 {
-                    Anchor = Anchor.CentreLeft,
-                    Origin = Anchor.CentreLeft,
-                    ExpansionMode = ExpansionMode.AlwaysExpanded,
-                    Scale = new Vector2(0.5f),
-                    Current = { Value = score.Mods }
-                });
-            }
+                    starAndModDisplay.Add(new ModDisplay
+                    {
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
+                        ExpansionMode = ExpansionMode.AlwaysExpanded,
+                        Scale = new Vector2(0.5f),
+                        Current = { Value = score.Mods }
+                    });
+                }
+            })));
         }
 
         protected override void LoadComplete()
