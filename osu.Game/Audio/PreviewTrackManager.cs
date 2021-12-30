@@ -30,7 +30,7 @@ namespace osu.Game.Audio
         [BackgroundDependencyLoader]
         private void load(AudioManager audioManager)
         {
-            trackStore = audioManager.GetTrackStore(new OnlineStore());
+            trackStore = audioManager.GetTrackStore(new ResourceStore<byte[]>());
         }
 
         /// <summary>
