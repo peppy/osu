@@ -23,6 +23,7 @@ namespace osu.Game.Tests.Visual.Beatmaps
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Blue);
 
         [Test]
+        [Ignore("temp disable")]
         public void TestThumbnailPreview()
         {
             BeatmapCardThumbnail thumbnail = null;
