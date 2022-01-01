@@ -41,6 +41,7 @@ namespace osu.Game.Screens.OnlinePlay.Lounge
             SelectedRoom = { BindTarget = SelectedRoom }
         };
 
+
         protected override UserActivity InitialActivity => new UserActivity.SearchingForLobby();
 
         protected Container<OsuButton> Buttons { get; } = new Container<OsuButton>
