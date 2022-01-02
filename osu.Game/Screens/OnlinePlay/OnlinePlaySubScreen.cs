@@ -52,6 +52,6 @@ namespace osu.Game.Screens.OnlinePlay
             this.FadeOut(DISAPPEAR_DURATION, Easing.OutQuint);
         }
 
-        public override string ToString() => Title;
+        public override string ToString() => $"{base.ToString()}({Title})";
     }
 }

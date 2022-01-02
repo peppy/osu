@@ -8,6 +8,7 @@ using System.Linq;
 using JetBrains.Annotations;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Development;
 using osu.Framework.Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -40,7 +41,6 @@ namespace osu.Game.Screens.OnlinePlay.Lounge
         {
             SelectedRoom = { BindTarget = SelectedRoom }
         };
-
 
         protected override UserActivity InitialActivity => new UserActivity.SearchingForLobby();
 
@@ -244,6 +244,9 @@ namespace osu.Game.Screens.OnlinePlay.Lounge
         public override void OnResuming(IScreen last)
         {
             base.OnResuming(last);
+
+            if (!ThreadSafety.IsUpdateThread)
+                throw new InvalidOperationException();
 
             Debug.Assert(selectionLease != null);
 
