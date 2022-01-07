@@ -31,7 +31,7 @@ namespace osu.Game.Storyboards.Drawables
         [BackgroundDependencyLoader(true)]
         private void load(IBindable<WorkingBeatmap> beatmap, TextureStore textureStore)
         {
-            string path = beatmap.Value.BeatmapSetInfo?.Files.FirstOrDefault(f => f.Filename.Equals(Video.Path, StringComparison.OrdinalIgnoreCase))?.File.GetStoragePath();
+            string path = beatmap.Value.BeatmapSetInfo?.Files.FirstOrDefault(f => f.Filename.Equals(Video.Path, StringComparison.OrdinalIgnoreCase))?.FileInfo.GetStoragePath();
 
             if (path == null)
                 return;
