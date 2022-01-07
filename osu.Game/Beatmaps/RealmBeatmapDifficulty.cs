@@ -2,12 +2,11 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Testing;
-using osu.Game.Beatmaps;
 using Realms;
 
 #nullable enable
 
-namespace osu.Game.Models
+namespace osu.Game.Beatmaps
 {
     [ExcludeFromDynamicCompile]
     [MapTo("BeatmapDifficulty")]

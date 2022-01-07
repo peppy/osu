@@ -11,7 +11,6 @@ using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Game.Database;
-using osu.Game.Models;
 using osu.Game.Rulesets;
 
 #nullable enable
@@ -29,9 +28,9 @@ namespace osu.Game.Stores
         /// <summary>
         /// All available rulesets.
         /// </summary>
-        public IEnumerable<RealmRuleset> AvailableRulesets => availableRulesets;
+        public IEnumerable<RealmRulesetInfo> AvailableRulesets => availableRulesets;
 
-        private readonly List<RealmRuleset> availableRulesets = new List<RealmRuleset>();
+        private readonly List<RealmRulesetInfo> availableRulesets = new List<RealmRulesetInfo>();
 
         public RealmRulesetStore(RealmContextFactory realmFactory, Storage? storage = null)
         {
@@ -64,14 +63,14 @@ namespace osu.Game.Stores
         /// </summary>
         /// <param name="id">The ruleset's internal ID.</param>
         /// <returns>A ruleset, if available, else null.</returns>
-        public RealmRuleset? GetRuleset(int id) => AvailableRulesets.FirstOrDefault(r => r.OnlineID == id);
+        public RealmRulesetInfo? GetRuleset(int id) => AvailableRulesets.FirstOrDefault(r => r.OnlineID == id);
 
         /// <summary>
         /// Retrieve a ruleset using a known short name.
         /// </summary>
         /// <param name="shortName">The ruleset's short name.</param>
         /// <returns>A ruleset, if available, else null.</returns>
-        public RealmRuleset? GetRuleset(string shortName) => AvailableRulesets.FirstOrDefault(r => r.ShortName == shortName);
+        public RealmRulesetInfo? GetRuleset(string shortName) => AvailableRulesets.FirstOrDefault(r => r.ShortName == shortName);
 
         private Assembly? resolveRulesetDependencyAssembly(object? sender, ResolveEventArgs args)
         {
@@ -106,7 +105,7 @@ namespace osu.Game.Stores
             {
                 context.Write(realm =>
                 {
-                    var rulesets = realm.All<RealmRuleset>();
+                    var rulesets = realm.All<RealmRulesetInfo>();
 
                     List<Ruleset> instances = loadedAssemblies.Values
                                                               .Select(r => Activator.CreateInstance(r) as Ruleset)
@@ -117,8 +116,8 @@ namespace osu.Game.Stores
                     // add all legacy rulesets first to ensure they have exclusive choice of primary key.
                     foreach (var r in instances.Where(r => r is ILegacyRuleset))
                     {
-                        if (realm.All<RealmRuleset>().FirstOrDefault(rr => rr.OnlineID == r.RulesetInfo.OnlineID) == null)
-                            realm.Add(new RealmRuleset(r.RulesetInfo.ShortName, r.RulesetInfo.Name, r.RulesetInfo.InstantiationInfo, r.RulesetInfo.OnlineID));
+                        if (realm.All<RealmRulesetInfo>().FirstOrDefault(rr => rr.OnlineID == r.RulesetInfo.OnlineID) == null)
+                            realm.Add(new RealmRulesetInfo(r.RulesetInfo.ShortName, r.RulesetInfo.Name, r.RulesetInfo.InstantiationInfo, r.RulesetInfo.OnlineID));
                     }
 
                     // add any other rulesets which have assemblies present but are not yet in the database.
@@ -136,11 +135,11 @@ namespace osu.Game.Stores
                                 existingSameShortName.InstantiationInfo = r.RulesetInfo.InstantiationInfo;
                             }
                             else
-                                realm.Add(new RealmRuleset(r.RulesetInfo.ShortName, r.RulesetInfo.Name, r.RulesetInfo.InstantiationInfo, r.RulesetInfo.OnlineID));
+                                realm.Add(new RealmRulesetInfo(r.RulesetInfo.ShortName, r.RulesetInfo.Name, r.RulesetInfo.InstantiationInfo, r.RulesetInfo.OnlineID));
                         }
                     }
 
-                    List<RealmRuleset> detachedRulesets = new List<RealmRuleset>();
+                    List<RealmRulesetInfo> detachedRulesets = new List<RealmRulesetInfo>();
 
                     // perform a consistency check and detach final rulesets from realm for cross-thread runtime usage.
                     foreach (var r in rulesets)

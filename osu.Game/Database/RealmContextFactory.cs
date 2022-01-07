@@ -11,9 +11,11 @@ using osu.Framework.Input.Bindings;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Framework.Statistics;
+using osu.Game.Beatmaps;
 using osu.Game.Configuration;
 using osu.Game.Input.Bindings;
 using osu.Game.Models;
+using osu.Game.Rulesets;
 using osu.Game.Skinning;
 using osu.Game.Stores;
 using Realms;
@@ -109,7 +111,7 @@ namespace osu.Game.Database
             using (var realm = CreateContext())
             using (var transaction = realm.BeginWrite())
             {
-                var pendingDeleteSets = realm.All<RealmBeatmapSet>().Where(s => s.DeletePending);
+                var pendingDeleteSets = realm.All<RealmBeatmapSetInfo>().Where(s => s.DeletePending);
 
                 foreach (var s in pendingDeleteSets)
                 {
@@ -206,9 +208,9 @@ namespace osu.Game.Database
             switch (targetVersion)
             {
                 case 7:
-                    convertOnlineIDs<RealmBeatmap>();
-                    convertOnlineIDs<RealmBeatmapSet>();
-                    convertOnlineIDs<RealmRuleset>();
+                    convertOnlineIDs<RealmBeatmapInfo>();
+                    convertOnlineIDs<RealmBeatmapSetInfo>();
+                    convertOnlineIDs<RealmRulesetInfo>();
 
                     void convertOnlineIDs<T>() where T : RealmObject
                     {

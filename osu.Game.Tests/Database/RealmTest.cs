@@ -9,9 +9,11 @@ using osu.Framework.Extensions;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Framework.Testing;
+using osu.Game.Beatmaps;
 using osu.Game.Database;
 using osu.Game.IO;
 using osu.Game.Models;
+using osu.Game.Rulesets;
 
 #nullable enable
 
@@ -74,7 +76,7 @@ namespace osu.Game.Tests.Database
             }
         }
 
-        protected static RealmBeatmapSet CreateBeatmapSet(RealmRuleset ruleset)
+        protected static RealmBeatmapSetInfo CreateBeatmapSet(RealmRulesetInfo ruleset)
         {
             RealmFile createRealmFile() => new RealmFile { Hash = Guid.NewGuid().ToString().ComputeSHA2Hash() };
 
@@ -84,14 +86,14 @@ namespace osu.Game.Tests.Database
                 Artist = "Kuba Oms"
             };
 
-            var beatmapSet = new RealmBeatmapSet
+            var beatmapSet = new RealmBeatmapSetInfo
             {
                 Beatmaps =
                 {
-                    new RealmBeatmap(ruleset, new RealmBeatmapDifficulty(), metadata) { DifficultyName = "Easy", },
-                    new RealmBeatmap(ruleset, new RealmBeatmapDifficulty(), metadata) { DifficultyName = "Normal", },
-                    new RealmBeatmap(ruleset, new RealmBeatmapDifficulty(), metadata) { DifficultyName = "Hard", },
-                    new RealmBeatmap(ruleset, new RealmBeatmapDifficulty(), metadata) { DifficultyName = "Insane", }
+                    new RealmBeatmapInfo(ruleset, new RealmBeatmapDifficulty(), metadata) { DifficultyName = "Easy", },
+                    new RealmBeatmapInfo(ruleset, new RealmBeatmapDifficulty(), metadata) { DifficultyName = "Normal", },
+                    new RealmBeatmapInfo(ruleset, new RealmBeatmapDifficulty(), metadata) { DifficultyName = "Hard", },
+                    new RealmBeatmapInfo(ruleset, new RealmBeatmapDifficulty(), metadata) { DifficultyName = "Insane", }
                 },
                 Files =
                 {
@@ -111,8 +113,8 @@ namespace osu.Game.Tests.Database
             return beatmapSet;
         }
 
-        protected static RealmRuleset CreateRuleset() =>
-            new RealmRuleset(0, "osu!", "osu", true);
+        protected static RealmRulesetInfo CreateRuleset() =>
+            new RealmRulesetInfo(0, "osu!", "osu", true);
 
         private class RealmTestGame : Framework.Game
         {

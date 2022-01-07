@@ -6,14 +6,14 @@ using System.Linq;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using osu.Framework.Testing;
-using osu.Game.Beatmaps;
 using osu.Game.Database;
+using osu.Game.Models;
 using osu.Game.Rulesets;
 using Realms;
 
 #nullable enable
 
-namespace osu.Game.Models
+namespace osu.Game.Beatmaps
 {
     /// <summary>
     /// A single beatmap difficulty.
@@ -21,20 +21,20 @@ namespace osu.Game.Models
     [ExcludeFromDynamicCompile]
     [Serializable]
     [MapTo("Beatmap")]
-    public class RealmBeatmap : RealmObject, IHasGuidPrimaryKey, IBeatmapInfo, IEquatable<RealmBeatmap>
+    public class RealmBeatmapInfo : RealmObject, IHasGuidPrimaryKey, IBeatmapInfo, IEquatable<RealmBeatmapInfo>
     {
         [PrimaryKey]
         public Guid ID { get; set; } = Guid.NewGuid();
 
         public string DifficultyName { get; set; } = string.Empty;
 
-        public RealmRuleset Ruleset { get; set; } = null!;
+        public RealmRulesetInfo Ruleset { get; set; } = null!;
 
         public RealmBeatmapDifficulty Difficulty { get; set; } = null!;
 
         public RealmBeatmapMetadata Metadata { get; set; } = null!;
 
-        public RealmBeatmapSet? BeatmapSet { get; set; }
+        public RealmBeatmapSetInfo? BeatmapSet { get; set; }
 
         [Ignored]
         public RealmNamedFileUsage? File => BeatmapSet?.Files.First(f => f.File.Hash == Hash);
@@ -64,7 +64,7 @@ namespace osu.Game.Models
         [JsonIgnore]
         public bool Hidden { get; set; }
 
-        public RealmBeatmap(RealmRuleset ruleset, RealmBeatmapDifficulty difficulty, RealmBeatmapMetadata metadata)
+        public RealmBeatmapInfo(RealmRulesetInfo ruleset, RealmBeatmapDifficulty difficulty, RealmBeatmapMetadata metadata)
         {
             Ruleset = ruleset;
             Difficulty = difficulty;
@@ -72,7 +72,7 @@ namespace osu.Game.Models
         }
 
         [UsedImplicitly]
-        private RealmBeatmap()
+        private RealmBeatmapInfo()
         {
         }
 
@@ -102,7 +102,7 @@ namespace osu.Game.Models
 
         #endregion
 
-        public bool Equals(RealmBeatmap? other)
+        public bool Equals(RealmBeatmapInfo? other)
         {
             if (ReferenceEquals(this, other)) return true;
             if (other == null) return false;
@@ -110,19 +110,19 @@ namespace osu.Game.Models
             return ID == other.ID;
         }
 
-        public bool Equals(IBeatmapInfo? other) => other is RealmBeatmap b && Equals(b);
+        public bool Equals(IBeatmapInfo? other) => other is RealmBeatmapInfo b && Equals(b);
 
-        public bool AudioEquals(RealmBeatmap? other) => other != null
-                                                        && BeatmapSet != null
-                                                        && other.BeatmapSet != null
-                                                        && BeatmapSet.Hash == other.BeatmapSet.Hash
-                                                        && Metadata.AudioFile == other.Metadata.AudioFile;
+        public bool AudioEquals(RealmBeatmapInfo? other) => other != null
+                                                            && BeatmapSet != null
+                                                            && other.BeatmapSet != null
+                                                            && BeatmapSet.Hash == other.BeatmapSet.Hash
+                                                            && Metadata.AudioFile == other.Metadata.AudioFile;
 
-        public bool BackgroundEquals(RealmBeatmap? other) => other != null
-                                                             && BeatmapSet != null
-                                                             && other.BeatmapSet != null
-                                                             && BeatmapSet.Hash == other.BeatmapSet.Hash
-                                                             && Metadata.BackgroundFile == other.Metadata.BackgroundFile;
+        public bool BackgroundEquals(RealmBeatmapInfo? other) => other != null
+                                                                 && BeatmapSet != null
+                                                                 && other.BeatmapSet != null
+                                                                 && BeatmapSet.Hash == other.BeatmapSet.Hash
+                                                                 && Metadata.BackgroundFile == other.Metadata.BackgroundFile;
 
         IBeatmapMetadataInfo IBeatmapInfo.Metadata => Metadata;
         IBeatmapSetInfo? IBeatmapInfo.BeatmapSet => BeatmapSet;
