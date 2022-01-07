@@ -6,7 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using osu.Framework.Development;
+using osu.Game.Beatmaps;
 using osu.Game.Input.Bindings;
+using osu.Game.Models;
+using osu.Game.Rulesets;
 using Realms;
 
 #nullable enable
@@ -18,9 +21,21 @@ namespace osu.Game.Database
         private static readonly IMapper mapper = new MapperConfiguration(c =>
         {
             c.ShouldMapField = fi => false;
-            c.ShouldMapProperty = pi => pi.SetMethod != null && pi.SetMethod.IsPublic;
+            c.ShouldMapProperty = pi =>
+            {
+                if (pi.SetMethod != null && pi.SetMethod.IsPublic)
+                    return true;
+
+                return false;
+            };
 
             c.CreateMap<RealmKeyBinding, RealmKeyBinding>();
+            c.CreateMap<RealmBeatmapMetadata, RealmBeatmapMetadata>();
+            c.CreateMap<RealmRulesetInfo, RealmRulesetInfo>();
+            c.CreateMap<RealmUser, RealmUser>();
+
+            c.CreateMap<RealmBeatmapInfo, RealmBeatmapInfo>().ForMember(s => s.Metadata, cc => cc.MapFrom(s => s.Metadata.Detach()));
+            c.CreateMap<RealmBeatmapSetInfo, RealmBeatmapSetInfo>().ForMember(s => s.Beatmaps, cc => cc.MapFrom(s => s.Beatmaps.Detach()));
         }).CreateMapper();
 
         /// <summary>
