@@ -19,7 +19,7 @@ using Realms;
 namespace osu.Game.Stores
 {
     /// <summary>
-    /// Class which adds all the missing pieces bridging the gap between <see cref="RealmArchiveModelImporter{TModel}"/> and <see cref="ArchiveModelManager{TModel,TFileModel}"/>.
+    /// Class which adds all the missing pieces bridging the gap between <see cref="RealmArchiveModelImporter{TModel}"/> and (legacy) ArchiveModelManager.
     /// </summary>
     public abstract class RealmArchiveModelManager<TModel> : RealmArchiveModelImporter<TModel>, IModelManager<TModel>, IModelFileManager<TModel, RealmNamedFileUsage>
         where TModel : RealmObject, IHasRealmFiles, IHasGuidPrimaryKey, ISoftDelete
@@ -187,6 +187,7 @@ namespace osu.Game.Stores
             item.Realm.Write(r => item.DeletePending = false);
         }
 
+        // TODO: delete or abstract
         public virtual bool IsAvailableLocally(TModel model) => false; // Not relevant for skins since they can't be downloaded yet.
 
         public void Update(TModel skin)
