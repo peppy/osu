@@ -137,6 +137,31 @@ namespace osu.Game.Tests.Database
         }
 
         [Test]
+        public void TestMetadataIsShared()
+        {
+            RunTestWithRealmAsync(async (realmFactory, storage) =>
+            {
+                using (var importer = new BeatmapModelManager(realmFactory, storage))
+                using (new RulesetStore(realmFactory, storage))
+                {
+                    ILive<BeatmapSetInfo>? imported;
+
+                    using (var reader = new ZipArchiveReader(TestResources.GetTestBeatmapStream()))
+                        imported = await importer.Import(reader);
+
+                    Assert.NotNull(imported);
+                    Debug.Assert(imported != null);
+
+                    Assert.AreEqual(1, realmFactory.Context.All<BeatmapSetInfo>().Count());
+                    Assert.AreEqual(12, realmFactory.Context.All<BeatmapInfo>().Count());
+                    Assert.AreEqual(4, realmFactory.Context.All<BeatmapMetadata>().Count());
+                    foreach (var metadata in realmFactory.Context.All<BeatmapMetadata>())
+                        Assert.Greater(metadata.BacklinksCount, 1);
+                }
+            });
+        }
+
+        [Test]
         public void TestImportBeatmapThenCleanup()
         {
             RunTestWithRealmAsync(async (realmFactory, storage) =>

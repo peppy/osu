@@ -142,7 +142,11 @@ namespace osu.Game.Database
                         foreach (var score in beatmap.Scores)
                             realm.Remove(score);
 
-                        realm.Remove(beatmap.Metadata);
+                        // Metadata may be shared by multiple beatmaps.
+                        // Realm updates immediately so it might become null during this iteration.
+                        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                        if (beatmap.Metadata != null)
+                            realm.Remove(beatmap.Metadata);
 
                         realm.Remove(beatmap);
                     }

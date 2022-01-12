@@ -200,6 +200,8 @@ namespace osu.Game.Stores
         {
             var beatmaps = new List<BeatmapInfo>();
 
+            var metadatas = new HashSet<IBeatmapMetadataInfo>();
+
             foreach (var file in files.Where(f => f.Filename.EndsWith(".osu", StringComparison.OrdinalIgnoreCase)))
             {
                 using (var memoryStream = new MemoryStream(Files.Store.Get(file.File.GetStoragePath()))) // we need a memory stream so we can seek
@@ -254,6 +256,12 @@ namespace osu.Game.Stores
                         AudioFile = decoded.Metadata.AudioFile,
                         BackgroundFile = decoded.Metadata.BackgroundFile,
                     };
+
+                    // Share metadata if they match perfectly.
+                    if (metadatas.FirstOrDefault(m => m.Equals(metadata)) is BeatmapMetadata existing)
+                        metadata = existing;
+                    else
+                        metadatas.Add(metadata);
 
                     var beatmap = new BeatmapInfo(ruleset, difficulty, metadata)
                     {
