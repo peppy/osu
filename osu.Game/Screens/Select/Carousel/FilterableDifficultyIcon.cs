@@ -5,6 +5,7 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Input.Events;
 using osu.Game.Beatmaps.Drawables;
+using osu.Game.Database;
 
 namespace osu.Game.Screens.Select.Carousel
 {
@@ -17,7 +18,7 @@ namespace osu.Game.Screens.Select.Carousel
         public readonly CarouselBeatmap Item;
 
         public FilterableDifficultyIcon(CarouselBeatmap item)
-            : base(item.BeatmapInfo, performBackgroundDifficultyLookup: false)
+            : base(item.BeatmapInfo.PerformRead(i => i.Detach()), performBackgroundDifficultyLookup: false)
         {
             filtered.BindTo(item.Filtered);
             filtered.ValueChanged += isFiltered => Schedule(() => this.FadeTo(isFiltered.NewValue ? 0.1f : 1, 100));

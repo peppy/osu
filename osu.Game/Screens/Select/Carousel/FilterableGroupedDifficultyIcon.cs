@@ -6,6 +6,7 @@ using System.Linq;
 using osu.Framework.Graphics;
 using osu.Framework.Input.Events;
 using osu.Game.Beatmaps.Drawables;
+using osu.Game.Database;
 using osu.Game.Rulesets;
 using osuTK.Graphics;
 
@@ -16,7 +17,7 @@ namespace osu.Game.Screens.Select.Carousel
         public readonly List<CarouselBeatmap> Items;
 
         public FilterableGroupedDifficultyIcon(List<CarouselBeatmap> items, RulesetInfo ruleset)
-            : base(items.Select(i => i.BeatmapInfo).ToList(), ruleset, Color4.White)
+            : base(items.Select(i => i.BeatmapInfo.PerformRead(b => b.Detach())).ToList(), ruleset, Color4.White)
         {
             Items = items;
 

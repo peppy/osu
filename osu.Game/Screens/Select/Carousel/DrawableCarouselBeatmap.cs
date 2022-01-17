@@ -17,8 +17,8 @@ using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
 using osu.Game.Beatmaps;
-using osu.Game.Beatmaps.Drawables;
 using osu.Game.Collections;
+using osu.Game.Database;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Backgrounds;
 using osu.Game.Graphics.Sprites;
@@ -40,7 +40,7 @@ namespace osu.Game.Screens.Select.Carousel
 
         private const float height = MAX_HEIGHT * 0.6f;
 
-        private readonly BeatmapInfo beatmapInfo;
+        private readonly ILive<BeatmapInfo> beatmapInfo;
 
         private Sprite background;
 
@@ -63,9 +63,6 @@ namespace osu.Game.Screens.Select.Carousel
         [Resolved(CanBeNull = true)]
         private ManageCollectionsDialog manageCollectionsDialog { get; set; }
 
-        private IBindable<StarDifficulty?> starDifficultyBindable;
-        private CancellationTokenSource starDifficultyCancellationSource;
-
         public DrawableCarouselBeatmap(CarouselBeatmap panel)
         {
             beatmapInfo = panel.BeatmapInfo;
@@ -73,106 +70,107 @@ namespace osu.Game.Screens.Select.Carousel
         }
 
         [BackgroundDependencyLoader(true)]
-        private void load(BeatmapManager manager, SongSelect songSelect)
-        {
-            Header.Height = height;
-
-            if (songSelect != null)
+        private void load(BeatmapManager manager, SongSelect songSelect) =>
+            beatmapInfo.PerformRead(b =>
             {
-                startRequested = b => songSelect.FinaliseSelection(b);
-                if (songSelect.AllowEditing)
-                    editRequested = songSelect.Edit;
-            }
+                Header.Height = height;
 
-            if (manager != null)
-                hideRequested = manager.Hide;
+                if (songSelect != null)
+                {
+                    startRequested = bb => songSelect.FinaliseSelection(bb);
+                    if (songSelect.AllowEditing)
+                        editRequested = songSelect.Edit;
+                }
 
-            Header.Children = new Drawable[]
-            {
-                background = new Box
+                if (manager != null)
+                    hideRequested = manager.Hide;
+
+                Header.Children = new Drawable[]
                 {
-                    RelativeSizeAxes = Axes.Both,
-                },
-                triangles = new Triangles
-                {
-                    TriangleScale = 2,
-                    RelativeSizeAxes = Axes.Both,
-                    ColourLight = Color4Extensions.FromHex(@"3a7285"),
-                    ColourDark = Color4Extensions.FromHex(@"123744")
-                },
-                new FillFlowContainer
-                {
-                    Padding = new MarginPadding(5),
-                    Direction = FillDirection.Horizontal,
-                    AutoSizeAxes = Axes.Both,
-                    Anchor = Anchor.CentreLeft,
-                    Origin = Anchor.CentreLeft,
-                    Children = new Drawable[]
+                    background = new Box
                     {
-                        new DifficultyIcon(beatmapInfo, shouldShowTooltip: false)
+                        RelativeSizeAxes = Axes.Both,
+                    },
+                    triangles = new Triangles
+                    {
+                        TriangleScale = 2,
+                        RelativeSizeAxes = Axes.Both,
+                        ColourLight = Color4Extensions.FromHex(@"3a7285"),
+                        ColourDark = Color4Extensions.FromHex(@"123744")
+                    },
+                    new FillFlowContainer
+                    {
+                        Padding = new MarginPadding(5),
+                        Direction = FillDirection.Horizontal,
+                        AutoSizeAxes = Axes.Both,
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
+                        Children = new Drawable[]
                         {
-                            Scale = new Vector2(1.8f),
-                        },
-                        new FillFlowContainer
-                        {
-                            Padding = new MarginPadding { Left = 5 },
-                            Direction = FillDirection.Vertical,
-                            AutoSizeAxes = Axes.Both,
-                            Children = new Drawable[]
+                            // new DifficultyIcon(beatmapInfo, shouldShowTooltip: false)
+                            // {
+                            //     Scale = new Vector2(1.8f),
+                            // },
+                            new FillFlowContainer
                             {
-                                new FillFlowContainer
+                                Padding = new MarginPadding { Left = 5 },
+                                Direction = FillDirection.Vertical,
+                                AutoSizeAxes = Axes.Both,
+                                Children = new Drawable[]
                                 {
-                                    Direction = FillDirection.Horizontal,
-                                    Spacing = new Vector2(4, 0),
-                                    AutoSizeAxes = Axes.Both,
-                                    Children = new[]
+                                    new FillFlowContainer
                                     {
-                                        new OsuSpriteText
+                                        Direction = FillDirection.Horizontal,
+                                        Spacing = new Vector2(4, 0),
+                                        AutoSizeAxes = Axes.Both,
+                                        Children = new[]
                                         {
-                                            Text = beatmapInfo.DifficultyName,
-                                            Font = OsuFont.GetFont(size: 20),
-                                            Anchor = Anchor.BottomLeft,
-                                            Origin = Anchor.BottomLeft
-                                        },
-                                        new OsuSpriteText
-                                        {
-                                            Text = "mapped by",
-                                            Anchor = Anchor.BottomLeft,
-                                            Origin = Anchor.BottomLeft
-                                        },
-                                        new OsuSpriteText
-                                        {
-                                            Text = $"{beatmapInfo.Metadata.Author.Username}",
-                                            Font = OsuFont.GetFont(italics: true),
-                                            Anchor = Anchor.BottomLeft,
-                                            Origin = Anchor.BottomLeft
-                                        },
-                                    }
-                                },
-                                new FillFlowContainer
-                                {
-                                    Direction = FillDirection.Horizontal,
-                                    Spacing = new Vector2(4, 0),
-                                    AutoSizeAxes = Axes.Both,
-                                    Children = new Drawable[]
+                                            new OsuSpriteText
+                                            {
+                                                Text = b.DifficultyName,
+                                                Font = OsuFont.GetFont(size: 20),
+                                                Anchor = Anchor.BottomLeft,
+                                                Origin = Anchor.BottomLeft
+                                            },
+                                            new OsuSpriteText
+                                            {
+                                                Text = "mapped by",
+                                                Anchor = Anchor.BottomLeft,
+                                                Origin = Anchor.BottomLeft
+                                            },
+                                            new OsuSpriteText
+                                            {
+                                                Text = $"{b.Metadata.Author.Username}",
+                                                Font = OsuFont.GetFont(italics: true),
+                                                Anchor = Anchor.BottomLeft,
+                                                Origin = Anchor.BottomLeft
+                                            },
+                                        }
+                                    },
+                                    new FillFlowContainer
                                     {
-                                        new TopLocalRank(beatmapInfo)
+                                        Direction = FillDirection.Horizontal,
+                                        Spacing = new Vector2(4, 0),
+                                        AutoSizeAxes = Axes.Both,
+                                        Children = new Drawable[]
                                         {
-                                            Scale = new Vector2(0.8f),
-                                            Size = new Vector2(40, 20)
-                                        },
-                                        starCounter = new StarCounter
-                                        {
-                                            Scale = new Vector2(0.8f),
+                                            new TopLocalRank(beatmapInfo)
+                                            {
+                                                Scale = new Vector2(0.8f),
+                                                Size = new Vector2(40, 20)
+                                            },
+                                            starCounter = new StarCounter
+                                            {
+                                                Scale = new Vector2(0.8f),
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                }
-            };
-        }
+                };
+            });
 
         protected override void Selected()
         {
@@ -200,7 +198,7 @@ namespace osu.Game.Screens.Select.Carousel
         protected override bool OnClick(ClickEvent e)
         {
             if (Item.State.Value == CarouselItemState.Selected)
-                startRequested?.Invoke(beatmapInfo);
+                startRequested?.Invoke(beatmapInfo.Value);
 
             return base.OnClick(e);
         }
@@ -210,25 +208,22 @@ namespace osu.Game.Screens.Select.Carousel
             if (Item.State.Value != CarouselItemState.Collapsed && Alpha == 0)
                 starCounter.ReplayAnimation();
 
-            starDifficultyCancellationSource?.Cancel();
-
             // Only compute difficulty when the item is visible.
             if (Item.State.Value != CarouselItemState.Collapsed)
             {
                 // We've potentially cancelled the computation above so a new bindable is required.
-                starDifficultyBindable = difficultyCache.GetBindableDifficulty(beatmapInfo, (starDifficultyCancellationSource = new CancellationTokenSource()).Token);
-                starDifficultyBindable.BindValueChanged(d =>
-                {
-                    starCounter.Current = (float)(d.NewValue?.Stars ?? 0);
-                }, true);
+                // starDifficultyBindable = difficultyCache.GetBindableDifficulty(beatmapInfo.Value, (starDifficultyCancellationSource = new CancellationTokenSource()).Token);
+                // starDifficultyBindable.BindValueChanged(d =>
+                // {
+                //     starCounter.Current = (float)(d.NewValue?.Stars ?? 0);
+                // }, true);
             }
 
             base.ApplyState();
         }
 
-        public MenuItem[] ContextMenuItems
-        {
-            get
+        public MenuItem[] ContextMenuItems =>
+            beatmapInfo.PerformRead(beatmapInfo =>
             {
                 List<MenuItem> items = new List<MenuItem>();
 
@@ -254,27 +249,25 @@ namespace osu.Game.Screens.Select.Carousel
                     items.Add(new OsuMenuItem("Hide", MenuItemType.Destructive, () => hideRequested(beatmapInfo)));
 
                 return items.ToArray();
-            }
-        }
 
-        private MenuItem createCollectionMenuItem(BeatmapCollection collection)
-        {
-            return new ToggleMenuItem(collection.Name.Value, MenuItemType.Standard, s =>
-            {
-                if (s)
-                    collection.Beatmaps.Add(beatmapInfo);
-                else
-                    collection.Beatmaps.Remove(beatmapInfo);
-            })
-            {
-                State = { Value = collection.Beatmaps.Contains(beatmapInfo) }
-            };
-        }
+                MenuItem createCollectionMenuItem(BeatmapCollection collection)
+                {
+                    return new ToggleMenuItem(collection.Name.Value, MenuItemType.Standard, s =>
+                    {
+                        if (s)
+                            collection.Beatmaps.Add(beatmapInfo);
+                        else
+                            collection.Beatmaps.Remove(beatmapInfo);
+                    })
+                    {
+                        State = { Value = collection.Beatmaps.Contains(beatmapInfo) }
+                    };
+                }
+            });
 
         protected override void Dispose(bool isDisposing)
         {
             base.Dispose(isDisposing);
-            starDifficultyCancellationSource?.Cancel();
         }
     }
 }

@@ -149,7 +149,7 @@ namespace osu.Game.Tests.Visual.SongSelect
             AddStep("select next and enter", () =>
             {
                 InputManager.MoveMouseTo(songSelect.Carousel.ChildrenOfType<DrawableCarouselBeatmap>()
-                                                   .First(b => !((CarouselBeatmap)b.Item).BeatmapInfo.Equals(songSelect.Carousel.SelectedBeatmapInfo)));
+                                                   .First(b => !((CarouselBeatmap)b.Item).BeatmapInfo.Value.Equals(songSelect.Carousel.SelectedBeatmapInfo)));
 
                 InputManager.Click(MouseButton.Left);
 
@@ -176,7 +176,7 @@ namespace osu.Game.Tests.Visual.SongSelect
             AddStep("select next and enter", () =>
             {
                 InputManager.MoveMouseTo(songSelect.Carousel.ChildrenOfType<DrawableCarouselBeatmap>()
-                                                   .First(b => !((CarouselBeatmap)b.Item).BeatmapInfo.Equals(songSelect.Carousel.SelectedBeatmapInfo)));
+                                                   .First(b => !((CarouselBeatmap)b.Item).BeatmapInfo.Value.Equals(songSelect.Carousel.SelectedBeatmapInfo)));
 
                 InputManager.PressButton(MouseButton.Left);
 
@@ -509,7 +509,7 @@ namespace osu.Game.Tests.Visual.SongSelect
 
                 // special case for converts checked here.
                 return selectedPanel.ChildrenOfType<FilterableDifficultyIcon>().All(i =>
-                    i.IsFiltered || i.Item.BeatmapInfo.Ruleset.OnlineID == targetRuleset || i.Item.BeatmapInfo.Ruleset.OnlineID == 0);
+                    i.IsFiltered || i.Item.BeatmapInfo.Value.Ruleset.OnlineID == targetRuleset || i.Item.BeatmapInfo.Value.Ruleset.OnlineID == 0);
             });
 
             AddUntilStep("carousel has correct", () => songSelect.Carousel.SelectedBeatmapInfo?.MatchesOnlineID(target) == true);
@@ -729,7 +729,7 @@ namespace osu.Game.Tests.Visual.SongSelect
             AddUntilStep("Find an icon for different ruleset", () =>
             {
                 difficultyIcon = set.ChildrenOfType<FilterableDifficultyIcon>()
-                                    .FirstOrDefault(icon => icon.Item.BeatmapInfo.Ruleset.OnlineID == 3);
+                                    .FirstOrDefault(icon => icon.Item.BeatmapInfo.Value.Ruleset.OnlineID == 3);
                 return difficultyIcon != null;
             });
 
@@ -780,7 +780,7 @@ namespace osu.Game.Tests.Visual.SongSelect
             AddUntilStep("Find group icon for different ruleset", () =>
             {
                 return (groupIcon = set.ChildrenOfType<FilterableGroupedDifficultyIcon>()
-                                       .FirstOrDefault(icon => icon.Items.First().BeatmapInfo.Ruleset.OnlineID == 3)) != null;
+                                       .FirstOrDefault(icon => icon.Items.First().BeatmapInfo.Value.Ruleset.OnlineID == 3)) != null;
             });
 
             AddAssert("Check ruleset is osu!", () => Ruleset.Value.OnlineID == 0);
@@ -794,7 +794,7 @@ namespace osu.Game.Tests.Visual.SongSelect
 
             AddUntilStep("Check ruleset changed to mania", () => Ruleset.Value.OnlineID == 3);
 
-            AddAssert("Check first item in group selected", () => Beatmap.Value.BeatmapInfo.MatchesOnlineID(groupIcon.Items.First().BeatmapInfo));
+            AddAssert("Check first item in group selected", () => Beatmap.Value.BeatmapInfo.MatchesOnlineID(groupIcon.Items.First().BeatmapInfo.Value));
         }
 
         [Test]
