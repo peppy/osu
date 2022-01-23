@@ -14,8 +14,10 @@ using osu.Framework.Testing;
 using osu.Game.Beatmaps.Formats;
 using osu.Game.Database;
 using osu.Game.Extensions;
+using osu.Game.Rulesets;
 using osu.Game.Skinning;
 using osu.Game.Stores;
+using Realms;
 
 #nullable enable
 
@@ -47,6 +49,9 @@ namespace osu.Game.Beatmaps
         /// <param name="beatmapContent">The <see cref="IBeatmap"/> content to write.</param>
         /// <param name="beatmapSkin">The beatmap <see cref="ISkin"/> content to write, null if to be omitted.</param>
         public virtual void Save(BeatmapInfo beatmapInfo, IBeatmap beatmapContent, ISkin? beatmapSkin = null)
+            => Realm.Write(r => save(r, beatmapInfo, beatmapContent, beatmapSkin));
+
+        private void save(Realm realm, BeatmapInfo beatmapInfo, IBeatmap beatmapContent, ISkin? beatmapSkin = null)
         {
             var setInfo = beatmapInfo.BeatmapSet;
 
@@ -79,10 +84,37 @@ namespace osu.Game.Beatmaps
                 beatmapInfo.Hash = stream.ComputeSHA2Hash();
 
                 AddFile(setInfo, stream, getFilename(beatmapInfo));
-                Update(setInfo);
+                update(realm, setInfo);
             }
 
             WorkingBeatmapCache?.Invalidate(beatmapInfo);
+        }
+
+        /// <summary>
+        /// Add a new difficulty to the beatmap set represented by the provided <see cref="BeatmapSetInfo"/>.
+        /// </summary>
+        public BeatmapInfo AddDifficultyToBeatmapSet(BeatmapSetInfo beatmapSetInfo, Beatmap beatmap)
+        {
+            return Realm.Run(realm =>
+            {
+                if (!beatmapSetInfo.IsManaged)
+                    beatmapSetInfo = realm.Find<BeatmapSetInfo>(beatmapSetInfo.ID);
+
+                var ruleset = beatmap.BeatmapInfo.Ruleset;
+                if (!ruleset.IsManaged)
+                    beatmap.BeatmapInfo.Ruleset = realm.Find<RulesetInfo>(ruleset.ShortName);
+
+                var beatmapInfo = beatmap.BeatmapInfo;
+
+                realm.Write(r =>
+                {
+                    r.Add(beatmapInfo);
+                    beatmapSetInfo.Beatmaps.Add(beatmapInfo);
+                    save(realm, beatmapInfo, beatmap);
+                });
+
+                return beatmapInfo;
+            });
         }
 
         private static string getFilename(BeatmapInfo beatmapInfo)
@@ -101,13 +133,10 @@ namespace osu.Game.Beatmaps
             return Realm.Run(realm => realm.All<BeatmapInfo>().FirstOrDefault(query)?.Detach());
         }
 
-        public void Update(BeatmapSetInfo item)
+        private static void update(Realm realm, BeatmapSetInfo item)
         {
-            Realm.Write(realm =>
-            {
-                var existing = realm.Find<BeatmapSetInfo>(item.ID);
-                item.CopyChangesToRealm(existing);
-            });
+            var existing = realm.Find<BeatmapSetInfo>(item.ID);
+            item.CopyChangesToRealm(existing);
         }
     }
 }

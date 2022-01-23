@@ -5,8 +5,10 @@ using System;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using osu.Framework.Testing;
+using osu.Game.Database;
 using osu.Game.Models;
 using osu.Game.Users;
+using osu.Game.Utils;
 using Realms;
 
 #nullable enable
@@ -16,7 +18,7 @@ namespace osu.Game.Beatmaps
     [ExcludeFromDynamicCompile]
     [Serializable]
     [MapTo("BeatmapMetadata")]
-    public class BeatmapMetadata : RealmObject, IBeatmapMetadataInfo
+    public class BeatmapMetadata : RealmObject, IBeatmapMetadataInfo, IDeepCloneable<BeatmapMetadata>
     {
         public string Title { get; set; } = string.Empty;
 
@@ -57,5 +59,7 @@ namespace osu.Game.Beatmaps
         IUser IBeatmapMetadataInfo.Author => Author;
 
         public override string ToString() => this.GetDisplayTitle();
+
+        public BeatmapMetadata DeepClone() => (BeatmapMetadata)this.Detach().MemberwiseClone();
     }
 }
