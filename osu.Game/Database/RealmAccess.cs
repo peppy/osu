@@ -271,7 +271,16 @@ namespace osu.Game.Database
 
             lock (realmLock)
             {
-                Func<Realm, IDisposable?> action = realm => query(realm).QueryAsyncWithNotifications(callback);
+                Func<Realm, IDisposable?> action = realm =>
+                {
+                    Logger.Log($"!!! Register for notifications");
+                    var dispose = query(realm).QueryAsyncWithNotifications(callback);
+                    return new InvokeOnDisposal(() =>
+                    {
+                        Logger.Log($"!!! Unsubscribe for notifications");
+                        dispose?.Dispose();
+                    });
+                };
 
                 // Store an action which is used when blocking to ensure consumers don't use results of a stale changeset firing.
                 notificationsResetMap.Add(action, () => callback(new EmptyRealmSet<T>(), null, null));

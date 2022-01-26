@@ -12,6 +12,7 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Audio;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Logging;
 using osu.Framework.Threading;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
@@ -86,6 +87,7 @@ namespace osu.Game.Overlays
         {
             if (changes == null)
             {
+                Logger.Log($"!!! New results {sender.Count}");
                 beatmapSets.Clear();
                 foreach (var s in sender)
                     beatmapSets.Add(s.Detach());
@@ -95,8 +97,12 @@ namespace osu.Game.Overlays
             foreach (int i in changes.InsertedIndices)
                 beatmapSets.Insert(i, sender[i].Detach());
 
+            Logger.Log($"!!! Remove {changes.DeletedIndices.Length}");
+
             foreach (int i in changes.DeletedIndices.OrderByDescending(i => i))
+            {
                 beatmapSets.RemoveAt(i);
+            }
         }
 
         /// <summary>
