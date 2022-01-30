@@ -75,8 +75,10 @@ namespace osu.Game.Beatmaps
 
                 stream.Seek(0, SeekOrigin.Begin);
 
+                var managedSetInfo = realm.Find<BeatmapSetInfo>(setInfo.ID);
+
                 // AddFile generally handles updating/replacing files, but this is a case where the filename may have also changed so let's delete for simplicity.
-                var existingFileInfo = setInfo.Files.SingleOrDefault(f => string.Equals(f.Filename, beatmapInfo.Path, StringComparison.OrdinalIgnoreCase));
+                var existingFileInfo = managedSetInfo.Files.SingleOrDefault(f => string.Equals(f.Filename, beatmapInfo.Path, StringComparison.OrdinalIgnoreCase));
                 string targetFilename = getFilename(beatmapInfo);
 
                 // ensure that two difficulties from the set don't point at the same beatmap file.
@@ -84,12 +86,12 @@ namespace osu.Game.Beatmaps
                     throw new InvalidOperationException($"{setInfo.GetDisplayString()} already has a difficulty with the name of '{beatmapInfo.DifficultyName}'.");
 
                 if (existingFileInfo != null)
-                    DeleteFile(setInfo, existingFileInfo);
+                    DeleteFile(managedSetInfo, existingFileInfo, realm);
 
                 beatmapInfo.MD5Hash = stream.ComputeMD5Hash();
                 beatmapInfo.Hash = stream.ComputeSHA2Hash();
 
-                AddFile(setInfo, stream, getFilename(beatmapInfo));
+                AddFile(managedSetInfo, stream, getFilename(beatmapInfo), realm);
                 update(realm, setInfo);
             }
 
@@ -101,26 +103,12 @@ namespace osu.Game.Beatmaps
         /// </summary>
         public BeatmapInfo AddDifficultyToBeatmapSet(BeatmapSetInfo beatmapSetInfo, Beatmap beatmap)
         {
-            return Realm.Run(realm =>
-            {
-                if (!beatmapSetInfo.IsManaged)
-                    beatmapSetInfo = realm.Find<BeatmapSetInfo>(beatmapSetInfo.ID);
+            var beatmapInfo = beatmap.BeatmapInfo;
+            beatmapSetInfo.Beatmaps.Add(beatmapInfo);
 
-                var ruleset = beatmap.BeatmapInfo.Ruleset;
-                if (!ruleset.IsManaged)
-                    beatmap.BeatmapInfo.Ruleset = realm.Find<RulesetInfo>(ruleset.ShortName);
+            Save(beatmapInfo, beatmap);
 
-                var beatmapInfo = beatmap.BeatmapInfo;
-
-                realm.Write(r =>
-                {
-                    r.Add(beatmapInfo);
-                    beatmapSetInfo.Beatmaps.Add(beatmapInfo);
-                    save(realm, beatmapInfo, beatmap);
-                });
-
-                return beatmapInfo;
-            });
+            return beatmapInfo.Detach();
         }
 
         private static string getFilename(BeatmapInfo beatmapInfo)
