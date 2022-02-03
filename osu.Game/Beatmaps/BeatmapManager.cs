@@ -122,11 +122,11 @@ namespace osu.Game.Beatmaps
 
             var newBeatmap = new Beatmap
             {
-                BeatmapInfo = new BeatmapInfo(rulesetInfo, new BeatmapDifficulty(), referenceBeatmap.Metadata.DeepClone())
+                BeatmapInfo = new BeatmapInfo(rulesetInfo, new BeatmapDifficulty(), referenceBeatmap.Metadata)
             };
 
             foreach (var timingPoint in referenceBeatmap.Beatmap.ControlPointInfo.TimingPoints)
-                newBeatmap.ControlPointInfo.Add(timingPoint.Time, timingPoint.DeepClone());
+                newBeatmap.ControlPointInfo.Add(timingPoint.Time, timingPoint);
 
             beatmapModelManager.AddDifficultyToBeatmapSet(beatmapSetInfo, newBeatmap);
 
