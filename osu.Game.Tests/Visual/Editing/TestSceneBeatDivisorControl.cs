@@ -33,16 +33,16 @@ namespace osu.Game.Tests.Visual.Editing
                 Size = new Vector2(90, 90)
             };
 
-            tickSliderBar = beatDivisorControl.ChildrenOfType<SliderBar<int>>().Single();
-            tickMarkerHead = tickSliderBar.ChildrenOfType<EquilateralTriangle>().Single();
+            tickSliderBar = beatDivisorControl.ChildrenOfType<SliderBar<int>>().SingleOrDefault();
+            tickMarkerHead = tickSliderBar.ChildrenOfType<EquilateralTriangle>().SingleOrDefault();
         });
 
         [Test]
         public void TestBindableBeatDivisor()
         {
-            AddRepeatStep("move previous", () => bindableBeatDivisor.Previous(), 4);
+            AddRepeatStep("move previous", () => bindableBeatDivisor.PreviousNormalDivisor(), 4);
             AddAssert("divisor is 4", () => bindableBeatDivisor.Value == 4);
-            AddRepeatStep("move next", () => bindableBeatDivisor.Next(), 3);
+            AddRepeatStep("move next", () => bindableBeatDivisor.NextNormalDivisor(), 3);
             AddAssert("divisor is 12", () => bindableBeatDivisor.Value == 12);
         }
 
