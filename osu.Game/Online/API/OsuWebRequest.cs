@@ -10,10 +10,12 @@ namespace osu.Game.Online.API
         public OsuWebRequest(string uri)
             : base(uri)
         {
+            AllowInsecureRequests = true;
         }
 
         public OsuWebRequest()
         {
+            AllowInsecureRequests = true;
         }
 
         protected override string UserAgent => "osu!";
