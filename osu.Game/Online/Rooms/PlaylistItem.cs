@@ -32,6 +32,12 @@ namespace osu.Game.Online.Rooms
         [JsonProperty("expired")]
         public bool Expired { get; set; }
 
+        /// <summary>
+        /// The number of play attempts the user can have on this item.
+        /// </summary>
+        [JsonProperty("max_attempts")]
+        public ushort? MaximumAttempts { get; set; }
+
         [JsonProperty("playlist_order")]
         public ushort? PlaylistOrder { get; set; }
 
