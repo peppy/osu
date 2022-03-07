@@ -59,8 +59,6 @@ namespace osu.Game.Screens.Play.PlayerSettings
 
         private IDisposable? beatmapOffsetSubscription;
 
-        private Task? realmWriteTask;
-
         public BeatmapOffsetControl()
         {
             RelativeSizeAxes = Axes.X;
@@ -97,6 +95,42 @@ namespace osu.Game.Screens.Play.PlayerSettings
 
             protected class CustomSliderBar : SliderBar
             {
+                private Task? realmWriteTask;
+
+                [Resolved]
+                private RealmAccess realm { get; set; } = null!;
+
+                [Resolved]
+                private IBindable<WorkingBeatmap> beatmap { get; set; } = null!;
+
+                protected override void OnUserChange(double value)
+                {
+                    base.OnUserChange(value);
+
+                    // ensure the previous write has completed. ignoring performance concerns, if we don't do this, the async writes could be out of sequence.
+                    if (realmWriteTask?.IsCompleted == false)
+                    {
+                        Scheduler.AddOnce(writeToRealm);
+                        return;
+                    }
+
+                    void writeToRealm()
+                    {
+                        realmWriteTask = realm.WriteAsync(r =>
+                        {
+                            var settings = r.Find<BeatmapInfo>(beatmap.Value.BeatmapInfo.ID)?.UserSettings;
+
+                            if (settings == null) // only the case for tests.
+                                return;
+
+                            if (settings.Offset == Current.Value)
+                                return;
+
+                            settings.Offset = Current.Value;
+                        });
+                    }
+                }
+
                 public override LocalisableString TooltipText =>
                     Current.Value == 0
                         ? new TranslatableString("_", @"{0} ms", base.TooltipText)
@@ -129,40 +163,15 @@ namespace osu.Game.Screens.Play.PlayerSettings
 
         private void currentChanged(ValueChangedEvent<double> offset)
         {
-            Scheduler.AddOnce(updateOffset);
+            // the last play graph is relative to the offset at the point of the last play, so we need to factor that out.
+            double adjustmentSinceLastPlay = lastPlayBeatmapOffset - Current.Value;
 
-            void updateOffset()
+            // Negative is applied here because the play graph is considering a hit offset, not track (as we currently use for clocks).
+            lastPlayGraph?.UpdateOffset(-adjustmentSinceLastPlay);
+
+            if (useAverageButton != null)
             {
-                // the last play graph is relative to the offset at the point of the last play, so we need to factor that out.
-                double adjustmentSinceLastPlay = lastPlayBeatmapOffset - Current.Value;
-
-                // Negative is applied here because the play graph is considering a hit offset, not track (as we currently use for clocks).
-                lastPlayGraph?.UpdateOffset(-adjustmentSinceLastPlay);
-
-                // ensure the previous write has completed. ignoring performance concerns, if we don't do this, the async writes could be out of sequence.
-                if (realmWriteTask?.IsCompleted == false)
-                {
-                    Scheduler.AddOnce(updateOffset);
-                    return;
-                }
-
-                if (useAverageButton != null)
-                {
-                    useAverageButton.Enabled.Value = !Precision.AlmostEquals(lastPlayAverage, adjustmentSinceLastPlay, Current.Precision / 2);
-                }
-
-                realmWriteTask = realm.WriteAsync(r =>
-                {
-                    var settings = r.Find<BeatmapInfo>(beatmap.Value.BeatmapInfo.ID)?.UserSettings;
-
-                    if (settings == null) // only the case for tests.
-                        return;
-
-                    if (settings.Offset == Current.Value)
-                        return;
-
-                    settings.Offset = Current.Value;
-                });
+                useAverageButton.Enabled.Value = !Precision.AlmostEquals(lastPlayAverage, adjustmentSinceLastPlay, Current.Precision / 2);
             }
         }
 
