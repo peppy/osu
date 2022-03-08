@@ -86,7 +86,6 @@ namespace osu.Game.Screens.Select
 
         protected Container LeftArea { get; private set; }
 
-        private BeatmapInfoWedge beatmapInfoWedge;
         private DialogOverlay dialogOverlay;
 
         [Resolved]
@@ -203,16 +202,6 @@ namespace osu.Game.Screens.Select
                                         Padding = new MarginPadding { Top = left_area_padding },
                                         Children = new Drawable[]
                                         {
-                                            beatmapInfoWedge = new BeatmapInfoWedge
-                                            {
-                                                Height = WEDGE_HEIGHT,
-                                                RelativeSizeAxes = Axes.X,
-                                                Margin = new MarginPadding
-                                                {
-                                                    Right = left_area_padding,
-                                                    Left = -BeatmapInfoWedge.BORDER_THICKNESS, // Hide the left border
-                                                },
-                                            },
                                             new Container
                                             {
                                                 RelativeSizeAxes = Axes.Both,
@@ -648,8 +637,6 @@ namespace osu.Game.Screens.Select
             if (base.OnExiting(next))
                 return true;
 
-            beatmapInfoWedge.Hide();
-
             this.FadeOut(100);
 
             FilterControl.Deactivate();
@@ -719,8 +706,6 @@ namespace osu.Game.Screens.Select
                 backgroundModeBeatmap.BlurAmount.Value = BACKGROUND_BLUR;
                 backgroundModeBeatmap.FadeColour(Color4.White, 250);
             });
-
-            beatmapInfoWedge.Beatmap = beatmap;
 
             BeatmapDetails.Beatmap = beatmap;
         }

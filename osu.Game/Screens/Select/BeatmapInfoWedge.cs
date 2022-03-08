@@ -29,17 +29,26 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.UI;
 using osu.Game.Graphics.Containers;
+using osu.Game.Skinning;
 
 namespace osu.Game.Screens.Select
 {
-    public class BeatmapInfoWedge : VisibilityContainer
+    public class BeatmapInfoWedge : VisibilityContainer, ISkinnableDrawable
     {
+        public bool UsesFixedAnchor { get; set; }
+
         public const float BORDER_THICKNESS = 2.5f;
         private const float shear_width = 36.75f;
 
         private const float transition_duration = 250;
 
         private static readonly Vector2 wedged_container_shear = new Vector2(shear_width / SongSelect.WEDGE_HEIGHT, 0);
+
+        [SettingSource("Show background", "Whether to show the beatmap background")]
+        public Bindable<bool> ShowBeatmapBackground { get; } = new BindableBool(true);
+
+        [SettingSource("Spin", "Should the fucking wedge spin")]
+        public Bindable<bool> Spin { get; } = new BindableBool();
 
         [Resolved]
         private IBindable<RulesetInfo> ruleset { get; set; }
@@ -54,6 +63,8 @@ namespace osu.Game.Screens.Select
             Masking = true;
             BorderColour = new Color4(221, 255, 255, 255);
             BorderThickness = BORDER_THICKNESS;
+            Size = new Vector2(SongSelect.WEDGE_HEIGHT * 2, SongSelect.WEDGE_HEIGHT);
+
             Alpha = 0;
             EdgeEffect = new EdgeEffectParameters
             {
@@ -70,12 +81,35 @@ namespace osu.Game.Screens.Select
             ruleset.BindValueChanged(_ => updateDisplay());
         }
 
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            ShowBeatmapBackground.BindValueChanged(_ => updateDisplay());
+            Spin.BindValueChanged(spin =>
+            {
+                if (spin.NewValue)
+                    this.Spin(1000, RotationDirection.Clockwise);
+                else
+                    ClearTransforms(targetMember: nameof(Rotation));
+            }, true);
+
+            bindableBeatmap?.BindValueChanged(b => Beatmap = b.NewValue, true);
+        }
+
+        [Resolved(canBeNull: true)]
+        private IBindable<WorkingBeatmap> bindableBeatmap { get; set; }
+
         private const double animation_duration = 800;
 
         protected override void PopIn()
         {
+            if (Spin.Value)
+                Spin.TriggerChange();
+            else
+                this.RotateTo(0, animation_duration, Easing.OutQuint);
+
             this.MoveToX(0, animation_duration, Easing.OutQuint);
-            this.RotateTo(0, animation_duration, Easing.OutQuint);
             this.FadeIn(transition_duration);
         }
 
@@ -133,7 +167,7 @@ namespace osu.Game.Screens.Select
                     Depth = DisplayedContent?.Depth + 1 ?? 0,
                     Children = new Drawable[]
                     {
-                        new BeatmapInfoWedgeBackground(beatmap),
+                        ShowBeatmapBackground.Value ? new BeatmapInfoWedgeBackground(beatmap) : Drawable.Empty(),
                         Info = new WedgeInfoText(beatmap, ruleset.Value),
                     }
                 }, loaded =>
