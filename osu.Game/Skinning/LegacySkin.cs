@@ -21,6 +21,7 @@ using osu.Game.Rulesets.Scoring;
 using osu.Game.Screens.Play;
 using osu.Game.Screens.Play.HUD;
 using osu.Game.Screens.Play.HUD.HitErrorMeters;
+using osu.Game.Screens.Select;
 using osuTK.Graphics;
 
 namespace osu.Game.Skinning
@@ -355,6 +356,20 @@ namespace osu.Game.Skinning
                 case SkinnableTargetComponent target:
                     switch (target.Target)
                     {
+                        case SkinnableTarget.SongSelect:
+                            var songSelectComponents = new SkinnableTargetComponentsContainer(container =>
+                            {
+                                // do stuff when we need to.
+                            })
+                            {
+                                Children = new Drawable[]
+                                {
+                                    new BeatmapInfoWedge()
+                                }
+                            };
+
+                            return songSelectComponents;
+
                         case SkinnableTarget.MainHUDComponents:
                             var skinnableTargetWrapper = new SkinnableTargetComponentsContainer(container =>
                             {
