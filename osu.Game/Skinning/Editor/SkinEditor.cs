@@ -252,8 +252,15 @@ namespace osu.Game.Skinning.Editor
         {
             settingsSidebar.Clear();
 
-            foreach (var component in SelectedComponents.OfType<Drawable>())
-                settingsSidebar.Add(new SkinSettingsToolbox(component));
+            if (SelectedComponents.Any())
+            {
+                foreach (var component in SelectedComponents.OfType<Drawable>())
+                    settingsSidebar.Add(new SkinSettingsToolbox(component));
+            }
+            else
+            {
+                settingsSidebar.Add(new SkinSettingsToolbox(targetScreen));
+            }
         }
 
         private IEnumerable<ISkinnableTarget> availableTargets => targetScreen.ChildrenOfType<ISkinnableTarget>();
