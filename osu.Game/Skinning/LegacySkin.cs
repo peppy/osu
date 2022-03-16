@@ -50,9 +50,11 @@ namespace osu.Game.Skinning
 
         private readonly Dictionary<int, LegacyManiaSkinConfiguration> maniaConfigurations = new Dictionary<int, LegacyManiaSkinConfiguration>();
 
+        private readonly IResourceStore<byte[]> storage;
+
         [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
         public LegacySkin(SkinInfo skin, IStorageResourceProvider resources)
-            : this(skin, new LegacyDatabasedSkinResourceStore(skin, resources.Files), resources, "skin.ini")
+            : this(skin, new LegacyDatabasedSkinResourceStore(skin, resources.Files, resources.RealmAccess), resources, "skin.ini")
         {
         }
 
@@ -78,6 +80,8 @@ namespace osu.Game.Skinning
         protected LegacySkin(SkinInfo skin, [CanBeNull] IResourceStore<byte[]> storage, [CanBeNull] IStorageResourceProvider resources, [CanBeNull] Stream configurationStream)
             : base(skin, resources, configurationStream)
         {
+            this.storage = storage;
+
             if (storage != null)
             {
                 var samples = resources?.AudioManager?.GetSampleStore(storage);
@@ -572,6 +576,8 @@ namespace osu.Game.Skinning
             base.Dispose(isDisposing);
             Textures?.Dispose();
             Samples?.Dispose();
+
+            storage?.Dispose();
         }
     }
 }

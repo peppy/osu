@@ -84,9 +84,16 @@ namespace osu.Game.Screens.Play.HUD
         /// <returns>The new instance.</returns>
         public Drawable CreateInstance()
         {
-            Drawable d = (Drawable)Activator.CreateInstance(Type);
-            d.ApplySkinnableInfo(this);
-            return d;
+            try
+            {
+                Drawable d = (Drawable)Activator.CreateInstance(Type);
+                d.ApplySkinnableInfo(this);
+                return d;
+            }
+            catch
+            {
+                return Drawable.Empty();
+            }
         }
     }
 }
