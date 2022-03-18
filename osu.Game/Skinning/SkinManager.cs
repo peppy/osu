@@ -131,7 +131,15 @@ namespace osu.Game.Skinning
         /// </summary>
         /// <param name="skinInfo">The skin to lookup.</param>
         /// <returns>A <see cref="Skin"/> instance correlating to the provided <see cref="SkinInfo"/>.</returns>
-        public Skin GetSkin(SkinInfo skinInfo) => skinInfo.CreateInstance(this);
+        public Skin GetSkin(SkinInfo skinInfo)
+        {
+            // We must use the existing instances of the default implementations as they use a different constructor path
+            // to provide access to fallback resources.
+            if (skinInfo.ID == SkinInfo.CLASSIC_SKIN) return DefaultLegacySkin;
+            if (skinInfo.ID == SkinInfo.DEFAULT_SKIN) return DefaultSkin;
+
+            return skinInfo.CreateInstance(this);
+        }
 
         /// <summary>
         /// Ensure that the current skin is in a state it can accept user modifications.
