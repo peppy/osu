@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Generic;
+using System.IO;
 using JetBrains.Annotations;
 using osu.Framework.IO.Stores;
 using osu.Game.Extensions;
@@ -21,21 +22,17 @@ namespace osu.Game.Skinning
             InstantiationInfo = typeof(DefaultLegacySkin).GetInvariantInstantiationInfo()
         };
 
+        /// <summary>
+        /// Construct a default legacy skin which uses default resources provided by the game.
+        /// </summary>
         public DefaultLegacySkin(IStorageResourceProvider resources)
-            : this(CreateInfo(), resources)
+            : base(CreateInfo(), new NamespacedResourceStore<byte[]>(resources.Resources, "Skins/Legacy"), resources, (Stream)null)
         {
         }
 
         [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
         public DefaultLegacySkin(SkinInfo skin, IStorageResourceProvider resources)
-            : base(
-                skin,
-                new NamespacedResourceStore<byte[]>(resources.Resources, "Skins/Legacy"),
-                resources,
-                // A default legacy skin may still have a skin.ini if it is modified by the user.
-                // We must specify the stream directly as we are redirecting storage to the osu-resources location for other files.
-                new LegacyDatabasedSkinResourceStore(skin, resources.Files).GetStream("skin.ini")
-            )
+            : base(skin, new LegacyDatabasedSkinResourceStore(skin, resources.Files), resources, "skin.ini")
         {
             Configuration.CustomColours["SliderBall"] = new Color4(2, 170, 255, 255);
             Configuration.CustomComboColours = new List<Color4>

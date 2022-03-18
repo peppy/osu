@@ -208,7 +208,7 @@ namespace osu.Game.Skinning
             {
                 yield return CurrentSkin.Value;
 
-                if (CurrentSkin.Value is LegacySkin && CurrentSkin.Value != DefaultLegacySkin)
+                if (CurrentSkin.Value is LegacySkin)
                     yield return DefaultLegacySkin;
 
                 if (CurrentSkin.Value != DefaultSkin)
