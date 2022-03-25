@@ -282,6 +282,7 @@ namespace osu.Game.Skinning.Editor
             else
             {
                 settingsSidebar.Add(new SkinSettingsToolbox(targetScreen));
+                settingsSidebar.Add(new TextureReplacementToolbox(targetScreen));
             }
         }
 
@@ -344,6 +345,9 @@ namespace osu.Game.Skinning.Editor
 
         public Task Import(params string[] paths)
         {
+            if (!IsHovered)
+                return Task.CompletedTask;
+
             Schedule(() =>
             {
                 var file = new FileInfo(paths.First());
