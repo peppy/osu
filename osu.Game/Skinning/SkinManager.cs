@@ -113,6 +113,13 @@ namespace osu.Game.Skinning
             };
         }
 
+        // TODO: temporary (what isn't though?)
+        public void TriggerSkinChanged()
+        {
+            // Full reload is required to clear out `TextureStore`'s internal cache.
+            CurrentSkin.Value = CurrentSkinInfo.Value.PerformRead(GetSkin);
+        }
+
         public void SelectRandomSkin()
         {
             realm.Run(r =>

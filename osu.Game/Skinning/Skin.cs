@@ -46,9 +46,17 @@ namespace osu.Game.Skinning
 
         public abstract ISample? GetSample(ISampleInfo sampleInfo);
 
+        public IEnumerable<string> TextureLookupsToDate => textureLookups.ToArray();
+
+        private readonly HashSet<string> textureLookups = new HashSet<string>();
+
         public Texture? GetTexture(string componentName) => GetTexture(componentName, default, default);
 
-        public abstract Texture? GetTexture(string componentName, WrapMode wrapModeS, WrapMode wrapModeT);
+        public virtual Texture? GetTexture(string componentName, WrapMode wrapModeS, WrapMode wrapModeT)
+        {
+            textureLookups.Add(componentName);
+            return Textures?.Get(componentName, wrapModeS, wrapModeT);
+        }
 
         public abstract IBindable<TValue>? GetConfig<TLookup, TValue>(TLookup lookup)
             where TLookup : notnull

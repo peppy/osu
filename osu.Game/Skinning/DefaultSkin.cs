@@ -7,7 +7,6 @@ using JetBrains.Annotations;
 using osu.Framework.Audio.Sample;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.OpenGL.Textures;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.Textures;
 using osu.Game.Audio;
@@ -26,7 +25,7 @@ namespace osu.Game.Skinning
     {
         public static SkinInfo CreateInfo() => new SkinInfo
         {
-            ID = osu.Game.Skinning.SkinInfo.DEFAULT_SKIN,
+            ID = Skinning.SkinInfo.DEFAULT_SKIN,
             Name = "osu! (triangles)",
             Creator = "team osu!",
             Protected = true,
@@ -46,8 +45,6 @@ namespace osu.Game.Skinning
         {
             this.resources = resources;
         }
-
-        public override Texture GetTexture(string componentName, WrapMode wrapModeS, WrapMode wrapModeT) => Textures?.Get(componentName, wrapModeS, wrapModeT);
 
         public override ISample GetSample(ISampleInfo sampleInfo)
         {

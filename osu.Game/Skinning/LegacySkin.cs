@@ -435,6 +435,9 @@ namespace osu.Game.Skinning
 
         public override Texture? GetTexture(string componentName, WrapMode wrapModeS, WrapMode wrapModeT)
         {
+            if (base.GetTexture(componentName, wrapModeS, wrapModeT) is Texture t)
+                return t;
+
             foreach (string name in getFallbackNames(componentName))
             {
                 // some component names (especially user-controlled ones, like `HitX` in mania)
