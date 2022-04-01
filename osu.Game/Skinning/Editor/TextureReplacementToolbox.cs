@@ -58,6 +58,9 @@ namespace osu.Game.Skinning.Editor
             [Resolved(canBeNull: true)]
             private OsuGame game { get; set; }
 
+            [Resolved]
+            private SkinEditorOverlay skinEditor { get; set; }
+
             private readonly Box box;
 
             [Resolved]
@@ -120,6 +123,9 @@ namespace osu.Game.Skinning.Editor
                             skins.AddFile(skinInfo, contents, AssetName);
                     });
 
+                    // save is required for now, as we are triggering a global skin refresh,
+                    // which will nuke any ongoing changes.
+                    skinEditor.Save();
                     skins.TriggerSkinChanged();
                 });
                 return Task.CompletedTask;

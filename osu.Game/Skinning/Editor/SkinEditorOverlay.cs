@@ -79,6 +79,8 @@ namespace osu.Game.Skinning.Editor
             });
         }
 
+        public void Save() => skinEditor?.Save();
+
         protected override void PopOut() => skinEditor?.Hide();
 
         private void updateComponentVisibility()
