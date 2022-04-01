@@ -12,7 +12,9 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
 using osu.Game.Database;
+using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Overlays;
 using osu.Game.Screens.Edit.Components;
 using osuTK;
 using osuTK.Graphics;
@@ -51,7 +53,7 @@ namespace osu.Game.Skinning.Editor
             }
         }
 
-        public class TextureDropArea : CompositeDrawable, ICanAcceptFiles
+        public class TextureDropArea : ToolboxButton, ICanAcceptFiles
         {
             public readonly string AssetName;
 
@@ -61,34 +63,36 @@ namespace osu.Game.Skinning.Editor
             [Resolved]
             private SkinEditorOverlay skinEditor { get; set; }
 
-            private readonly Box box;
-
             [Resolved]
             private SkinManager skins { get; set; }
 
             public TextureDropArea(string assetName)
             {
                 AssetName = assetName;
+            }
 
-                RelativeSizeAxes = Axes.X;
-                Size = new Vector2(1, 200);
-                CornerRadius = 5;
-
-                InternalChildren = new Drawable[]
+            [BackgroundDependencyLoader]
+            private void load(OverlayColourProvider colourProvider)
+            {
+                AddRange(new Drawable[]
                 {
-                    box = new Box
+                    new SkinnableSprite(AssetName, ConfineMode.ScaleToFit),
+                    new Box
                     {
-                        Colour = Color4.Black,
-                        RelativeSizeAxes = Axes.Both,
+                        Colour = colourProvider.Background2,
+                        RelativeSizeAxes = Axes.X,
+                        Height = OsuFont.DEFAULT_FONT_SIZE,
+                        Alpha = 0.8f,
+                        Anchor = Anchor.BottomCentre,
+                        Origin = Anchor.BottomCentre,
                     },
                     new OsuSpriteText
                     {
-                        Text = assetName,
-                        Anchor = Anchor.Centre,
-                        Origin = Anchor.Centre,
+                        Text = AssetName,
+                        Anchor = Anchor.BottomCentre,
+                        Origin = Anchor.BottomCentre,
                     },
-                    new SkinnableSprite(assetName, ConfineMode.ScaleToFit)
-                };
+                });
             }
 
             protected override void LoadComplete()
@@ -112,7 +116,7 @@ namespace osu.Game.Skinning.Editor
 
                 Schedule(() =>
                 {
-                    box.FlashColour(Color4.SkyBlue, 500);
+                    Background.FlashColour(Color4.SkyBlue, 500);
 
                     var file = new FileInfo(paths.First());
 

@@ -11,7 +11,6 @@ using osu.Framework.Input.Events;
 using osu.Framework.Logging;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
-using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
 using osu.Game.Screens.Edit.Components;
 using osuTK;
@@ -86,7 +85,7 @@ namespace osu.Game.Skinning.Editor
             }
         }
 
-        private class ToolboxComponentButton : OsuButton
+        private class ToolboxComponentButton : ToolboxButton
         {
             protected override bool ShouldBeConsideredForInput(Drawable child) => false;
 
@@ -99,18 +98,12 @@ namespace osu.Game.Skinning.Editor
 
             private Container innerContainer;
 
-            private const float contracted_size = 60;
             private const float expanded_size = 120;
 
             public ToolboxComponentButton(Drawable component, CompositeDrawable dependencySource)
             {
                 this.component = component;
                 this.dependencySource = dependencySource;
-
-                Enabled.Value = true;
-
-                RelativeSizeAxes = Axes.X;
-                Height = contracted_size;
             }
 
             protected override bool OnHover(HoverEvent e)
@@ -122,7 +115,7 @@ namespace osu.Game.Skinning.Editor
             protected override void OnHoverLost(HoverLostEvent e)
             {
                 base.OnHoverLost(e);
-                this.ResizeHeightTo(contracted_size, 500, Easing.OutQuint);
+                this.ResizeHeightTo(DEFAULT_SIZE, 500, Easing.OutQuint);
             }
 
             [BackgroundDependencyLoader]
