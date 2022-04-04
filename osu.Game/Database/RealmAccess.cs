@@ -61,8 +61,9 @@ namespace osu.Game.Database
         /// 12   2021-11-24    Add Status to RealmBeatmapSet.
         /// 13   2022-01-13    Final migration of beatmaps and scores to realm (multiple new storage fields).
         /// 14   2022-03-01    Added BeatmapUserSettings to BeatmapInfo.
+        /// 15   2022-04-04    Change RealmNamedFileUsage to top-level realm object.
         /// </summary>
-        private const int schema_version = 14;
+        private const int schema_version = 15;
 
         /// <summary>
         /// Lock object which is held during <see cref="BlockAllOperations"/> sections, blocking realm retrieval during blocking periods.
@@ -177,6 +178,9 @@ namespace osu.Game.Database
             }
             catch (Exception e)
             {
+                if (Debugger.IsAttached)
+                    throw;
+
                 // See https://github.com/realm/realm-core/blob/master/src%2Frealm%2Fobject-store%2Fobject_store.cpp#L1016-L1022
                 // This is the best way we can detect a schema version downgrade.
                 if (e.Message.StartsWith(@"Provided schema version", StringComparison.Ordinal))

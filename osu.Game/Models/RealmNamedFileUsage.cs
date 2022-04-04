@@ -12,7 +12,7 @@ using Realms;
 namespace osu.Game.Models
 {
     [ExcludeFromDynamicCompile]
-    public class RealmNamedFileUsage : EmbeddedObject, INamedFile, INamedFileUsage
+    public class RealmNamedFileUsage : RealmObject, INamedFile, INamedFileUsage
     {
         public RealmFile File { get; set; } = null!;
 
