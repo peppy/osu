@@ -11,6 +11,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.Textures;
 using osu.Game.Configuration;
+using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Overlays.Settings;
 using osuTK;
@@ -120,7 +121,7 @@ namespace osu.Game.Skinning
         {
             public SpriteNotFound(string lookup)
             {
-                AutoSizeAxes = Axes.Both;
+                Size = new Vector2(50, 50 + OsuFont.DEFAULT_FONT_SIZE);
 
                 InternalChildren = new Drawable[]
                 {
