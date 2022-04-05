@@ -124,7 +124,12 @@ namespace osu.Game.Skinning.Editor
                     skins.CurrentSkin.Value.SkinInfo.PerformWrite(skinInfo =>
                     {
                         using (var contents = file.OpenRead())
-                            skins.AddFile(skinInfo, contents, AssetName);
+                        {
+                            // TODO: we need to check if an existing file exists with any valid file extension.
+                            // we don't want to import the same asset name with a different extension and potentially have the old one keep precedence.
+
+                            skins.AddFile(skinInfo, contents, $"{AssetName}{file.Extension}");
+                        }
                     });
 
                     // save is required for now, as we are triggering a global skin refresh,
