@@ -22,7 +22,9 @@ namespace osu.Game.Tests.Visual.Multiplayer
 {
     public class TestSceneMultiplayerGameplayLeaderboardTeams : MultiplayerTestScene
     {
-        private static IEnumerable<int> users => Enumerable.Range(0, 16);
+        private const int user_count = 16;
+
+        private static IEnumerable<int> users => Enumerable.Range(0, user_count);
 
         public new TestSceneMultiplayerGameplayLeaderboard.TestMultiplayerSpectatorClient SpectatorClient =>
             (TestSceneMultiplayerGameplayLeaderboard.TestMultiplayerSpectatorClient)OnlinePlayDependencies?.SpectatorClient;
@@ -46,9 +48,35 @@ namespace osu.Game.Tests.Visual.Multiplayer
 
         public override void SetUpSteps()
         {
+            var multiplayerUsers = new List<MultiplayerRoomUser>();
+
             base.SetUpSteps();
 
             AddStep("set local user", () => ((DummyAPIAccess)API).LocalUser.Value = UserLookupCache.GetUserAsync(1).GetResultSafely());
+
+            AddStep("setup room", () =>
+            {
+                foreach (int user in users)
+                {
+                    SpectatorClient.SendStartPlay(user, Beatmap.Value.BeatmapInfo.OnlineID);
+                    var roomUser = OnlinePlayDependencies.MultiplayerClient.AddUser(new APIUser { Id = user }, true);
+
+                    multiplayerUsers.Add(roomUser);
+                }
+            });
+
+            AddStep("set correct teams", () =>
+            {
+                foreach (var user in multiplayerUsers)
+                {
+                    user.MatchState = new TeamVersusUserState
+                    {
+                        TeamID = RNG.Next(0, 2)
+                    };
+                }
+            });
+
+            AddUntilStep("wait for populated", () => OnlinePlayDependencies.MultiplayerClient.Room?.Users.Count == user_count + 1);
 
             AddStep("create leaderboard", () =>
             {
@@ -58,20 +86,6 @@ namespace osu.Game.Tests.Visual.Multiplayer
                 Beatmap.Value = CreateWorkingBeatmap(Ruleset.Value);
 
                 var playableBeatmap = Beatmap.Value.GetPlayableBeatmap(Ruleset.Value);
-                var multiplayerUsers = new List<MultiplayerRoomUser>();
-
-                foreach (int user in users)
-                {
-                    SpectatorClient.SendStartPlay(user, Beatmap.Value.BeatmapInfo.OnlineID);
-                    var roomUser = OnlinePlayDependencies.MultiplayerClient.AddUser(new APIUser { Id = user }, true);
-
-                    roomUser.MatchState = new TeamVersusUserState
-                    {
-                        TeamID = RNG.Next(0, 2)
-                    };
-
-                    multiplayerUsers.Add(roomUser);
-                }
 
                 Children = new Drawable[]
                 {
