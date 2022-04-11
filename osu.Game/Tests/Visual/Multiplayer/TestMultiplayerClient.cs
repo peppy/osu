@@ -552,7 +552,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
             updateCurrentItem(Room);
         }
 
-        public void FinishCurrentItem() => Schedule(() =>
+        public void FinishCurrentItem() => MainTaskChain.Add(() =>
         {
             Debug.Assert(Room != null);
             Debug.Assert(APIRoom != null);

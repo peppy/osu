@@ -139,6 +139,11 @@ namespace osu.Game.Online.Multiplayer
 
         protected Room? APIRoom { get; private set; }
 
+        /// <summary>
+        /// A task chain that ensures that all incoming mutation operations are run in the correct order alongside join/leave requests (which may be triggered from other threads).
+        /// </summary>
+        protected readonly TaskChain MainTaskChain = new TaskChain();
+
         [BackgroundDependencyLoader]
         private void load()
         {
@@ -153,7 +158,6 @@ namespace osu.Game.Online.Multiplayer
             }));
         }
 
-        private readonly TaskChain joinOrLeaveTaskChain = new TaskChain();
         private CancellationTokenSource? joinCancellationSource;
 
         /// <summary>
@@ -168,7 +172,7 @@ namespace osu.Game.Online.Multiplayer
 
             var cancellationSource = joinCancellationSource = new CancellationTokenSource();
 
-            await joinOrLeaveTaskChain.Add(async () =>
+            await MainTaskChain.Add(async () =>
             {
                 Debug.Assert(room.RoomID.Value != null);
 
@@ -239,7 +243,7 @@ namespace osu.Game.Online.Multiplayer
                 RoomUpdated?.Invoke();
             });
 
-            return joinOrLeaveTaskChain.Add(async () =>
+            return MainTaskChain.Add(async () =>
             {
                 await scheduledReset.ConfigureAwait(false);
                 await LeaveRoomInternal().ConfigureAwait(false);
@@ -360,7 +364,7 @@ namespace osu.Game.Online.Multiplayer
 
         Task IMultiplayerClient.RoomStateChanged(MultiplayerRoomState state)
         {
-            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
+            return MainTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
@@ -390,7 +394,7 @@ namespace osu.Game.Online.Multiplayer
 
         async Task IMultiplayerClient.UserJoined(MultiplayerRoomUser user)
         {
-            await joinOrLeaveTaskChain.Add(async () =>
+            await MainTaskChain.Add(async () =>
             {
                 await PopulateUser(user).ConfigureAwait(false);
 
@@ -441,7 +445,7 @@ namespace osu.Game.Online.Multiplayer
 
         private Task handleUserLeft(MultiplayerRoomUser user, Action<MultiplayerRoomUser>? callback)
         {
-            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
+            return MainTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
@@ -460,7 +464,7 @@ namespace osu.Game.Online.Multiplayer
 
         Task IMultiplayerClient.HostChanged(int userId)
         {
-            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
+            return MainTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
@@ -484,7 +488,7 @@ namespace osu.Game.Online.Multiplayer
 
         Task IMultiplayerClient.UserStateChanged(int userId, MultiplayerUserState state)
         {
-            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
+            return MainTaskChain.Add(() => Scheduler.Add(() =>
             {
                 var user = Room?.Users.SingleOrDefault(u => u.UserID == userId);
 
@@ -501,7 +505,7 @@ namespace osu.Game.Online.Multiplayer
 
         Task IMultiplayerClient.MatchUserStateChanged(int userId, MatchUserState state)
         {
-            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
+            return MainTaskChain.Add(() => Scheduler.Add(() =>
             {
                 var user = Room?.Users.SingleOrDefault(u => u.UserID == userId);
 
@@ -516,7 +520,7 @@ namespace osu.Game.Online.Multiplayer
 
         Task IMultiplayerClient.MatchRoomStateChanged(MatchRoomState state)
         {
-            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
+            return MainTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
@@ -528,7 +532,7 @@ namespace osu.Game.Online.Multiplayer
 
         public Task MatchEvent(MatchServerEvent e)
         {
-            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
+            return MainTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
@@ -546,7 +550,7 @@ namespace osu.Game.Online.Multiplayer
 
         Task IMultiplayerClient.UserBeatmapAvailabilityChanged(int userId, BeatmapAvailability beatmapAvailability)
         {
-            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
+            return MainTaskChain.Add(() => Scheduler.Add(() =>
             {
                 var user = Room?.Users.SingleOrDefault(u => u.UserID == userId);
 
@@ -562,7 +566,7 @@ namespace osu.Game.Online.Multiplayer
 
         public Task UserModsChanged(int userId, IEnumerable<APIMod> mods)
         {
-            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
+            return MainTaskChain.Add(() => Scheduler.Add(() =>
             {
                 var user = Room?.Users.SingleOrDefault(u => u.UserID == userId);
 
@@ -578,7 +582,7 @@ namespace osu.Game.Online.Multiplayer
 
         Task IMultiplayerClient.LoadRequested()
         {
-            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
+            return MainTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
@@ -589,7 +593,7 @@ namespace osu.Game.Online.Multiplayer
 
         Task IMultiplayerClient.MatchStarted()
         {
-            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
+            return MainTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
@@ -600,7 +604,7 @@ namespace osu.Game.Online.Multiplayer
 
         Task IMultiplayerClient.ResultsReady()
         {
-            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
+            return MainTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
@@ -611,7 +615,7 @@ namespace osu.Game.Online.Multiplayer
 
         public Task PlaylistItemAdded(MultiplayerPlaylistItem item)
         {
-            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
+            return MainTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
@@ -628,7 +632,7 @@ namespace osu.Game.Online.Multiplayer
 
         public Task PlaylistItemRemoved(long playlistItemId)
         {
-            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
+            return MainTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
@@ -647,7 +651,7 @@ namespace osu.Game.Online.Multiplayer
 
         public Task PlaylistItemChanged(MultiplayerPlaylistItem item)
         {
-            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
+            return MainTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
