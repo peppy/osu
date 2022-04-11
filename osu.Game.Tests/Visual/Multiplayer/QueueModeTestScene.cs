@@ -101,6 +101,9 @@ namespace osu.Game.Tests.Visual.Multiplayer
             ClickButtonWhenEnabled<MultiplayerReadyButton>();
 
             AddUntilStep("wait for player", () => multiplayerComponents.CurrentScreen is Player player && player.IsLoaded);
+
+            AddUntilStep("wait for room to be in gameplay", () => MultiplayerClient.Room?.State == MultiplayerRoomState.Playing);
+
             AddStep("exit player", () => multiplayerComponents.MultiplayerScreen.MakeCurrent());
         }
     }
