@@ -495,17 +495,20 @@ namespace osu.Game.Tests.Visual.Multiplayer
 
             AddUntilStep("wait for song select", () => this.ChildrenOfType<MultiplayerMatchSongSelect>().FirstOrDefault()?.BeatmapSetsLoaded == true);
 
-            AddAssert("Mods match current item", () => SelectedMods.Value.Select(m => m.Acronym).SequenceEqual(multiplayerClient.Room.AsNonNull().Playlist.First().RequiredMods.Select(m => m.Acronym)));
+            AddAssert("Mods match current item",
+                () => SelectedMods.Value.Select(m => m.Acronym).SequenceEqual(multiplayerClient.Room.AsNonNull().Playlist.First().RequiredMods.Select(m => m.Acronym)));
 
             AddStep("Switch required mods", () => ((MultiplayerMatchSongSelect)multiplayerComponents.MultiplayerScreen.CurrentSubScreen).Mods.Value = new Mod[] { new OsuModDoubleTime() });
 
-            AddAssert("Mods don't match current item", () => !SelectedMods.Value.Select(m => m.Acronym).SequenceEqual(multiplayerClient.Room.AsNonNull().Playlist.First().RequiredMods.Select(m => m.Acronym)));
+            AddAssert("Mods don't match current item",
+                () => !SelectedMods.Value.Select(m => m.Acronym).SequenceEqual(multiplayerClient.Room.AsNonNull().Playlist.First().RequiredMods.Select(m => m.Acronym)));
 
             AddStep("start match externally", () => multiplayerClient.StartMatch().WaitSafely());
 
             AddUntilStep("play started", () => multiplayerComponents.CurrentScreen is Player);
 
-            AddAssert("Mods match current item", () => SelectedMods.Value.Select(m => m.Acronym).SequenceEqual(multiplayerClient.Room.AsNonNull().Playlist.First().RequiredMods.Select(m => m.Acronym)));
+            AddAssert("Mods match current item",
+                () => SelectedMods.Value.Select(m => m.Acronym).SequenceEqual(multiplayerClient.Room.AsNonNull().Playlist.First().RequiredMods.Select(m => m.Acronym)));
         }
 
         [Test]
@@ -881,11 +884,8 @@ namespace osu.Game.Tests.Visual.Multiplayer
 
             void runGameplay()
             {
-                AddStep("start match by other user", () =>
-                {
-                    multiplayerClient.ChangeUserState(1234, MultiplayerUserState.Ready);
-                    multiplayerClient.StartMatch().WaitSafely();
-                });
+                AddStep("set other user ready", () => multiplayerClient.ChangeUserState(1234, MultiplayerUserState.Ready));
+                AddStep("start match", () => multiplayerClient.StartMatch().WaitSafely());
 
                 AddUntilStep("wait for loading", () => multiplayerClient.Room?.State == MultiplayerRoomState.WaitingForLoad);
                 AddStep("set player loaded", () => multiplayerClient.ChangeUserState(1234, MultiplayerUserState.Loaded));
