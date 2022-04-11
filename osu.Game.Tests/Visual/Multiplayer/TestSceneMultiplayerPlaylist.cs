@@ -100,19 +100,19 @@ namespace osu.Game.Tests.Visual.Multiplayer
             addItemStep();
             addItemStep();
 
-            AddStep("finish current item", () => MultiplayerClient.FinishCurrentItem().WaitSafely());
+            AddStep("finish current item", () => MultiplayerClient.FinishCurrentItem());
 
             assertItemInHistoryListStep(1, 0);
             assertItemInQueueListStep(2, 0);
             assertItemInQueueListStep(3, 1);
 
-            AddStep("finish current item", () => MultiplayerClient.FinishCurrentItem().WaitSafely());
+            AddStep("finish current item", () => MultiplayerClient.FinishCurrentItem());
 
             assertItemInHistoryListStep(2, 0);
             assertItemInHistoryListStep(1, 1);
             assertItemInQueueListStep(3, 0);
 
-            AddStep("finish current item", () => MultiplayerClient.FinishCurrentItem().WaitSafely());
+            AddStep("finish current item", () => MultiplayerClient.FinishCurrentItem());
 
             assertItemInHistoryListStep(3, 0);
             assertItemInHistoryListStep(2, 1);
@@ -123,7 +123,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
         public void TestListsClearedWhenRoomLeft()
         {
             addItemStep();
-            AddStep("finish current item", () => MultiplayerClient.FinishCurrentItem().WaitSafely());
+            AddStep("finish current item", () => MultiplayerClient.FinishCurrentItem());
 
             AddStep("leave room", () => RoomManager.PartRoom());
             AddUntilStep("wait for room part", () => !RoomJoined);
@@ -143,7 +143,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
             addItemStep();
             assertQueueTabCount(3);
 
-            AddStep("finish current item", () => MultiplayerClient.FinishCurrentItem().WaitSafely());
+            AddStep("finish current item", () => MultiplayerClient.FinishCurrentItem());
             assertQueueTabCount(2);
 
             AddStep("leave room", () => RoomManager.PartRoom());
@@ -217,7 +217,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
             {
                 Expired = expired,
                 PlayedAt = DateTimeOffset.Now
-            })).WaitSafely();
+            }));
         });
 
         /// <summary>

@@ -806,7 +806,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
                 new PlaylistItem(beatmaps.GetWorkingBeatmap(importedSet.Beatmaps.First(b => b.Ruleset.OnlineID == 0)).BeatmapInfo)
                 {
                     RulesetID = new OsuRuleset().RulesetInfo.OnlineID,
-                })).WaitSafely());
+                })));
 
             AddUntilStep("item arrived in playlist", () => multiplayerClient.Room?.Playlist.Count == 2);
 
@@ -837,11 +837,11 @@ namespace osu.Game.Tests.Visual.Multiplayer
                 new PlaylistItem(beatmaps.GetWorkingBeatmap(importedSet.Beatmaps.First(b => b.Ruleset.OnlineID == 0)).BeatmapInfo)
                 {
                     RulesetID = new OsuRuleset().RulesetInfo.OnlineID,
-                })).WaitSafely());
+                })));
 
             AddUntilStep("item arrived in playlist", () => multiplayerClient.Room?.Playlist.Count == 2);
 
-            AddStep("delete item as other user", () => multiplayerClient.RemoveUserPlaylistItem(1234, 2).WaitSafely());
+            AddStep("delete item as other user", () => multiplayerClient.RemoveUserPlaylistItem(1234, 2));
             AddUntilStep("item removed from playlist", () => multiplayerClient.Room?.Playlist.Count == 1);
 
             AddStep("exit gameplay as initial user", () => multiplayerComponents.MultiplayerScreen.MakeCurrent());

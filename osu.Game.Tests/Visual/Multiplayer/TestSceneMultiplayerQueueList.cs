@@ -106,7 +106,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
             assertDeleteButtonVisibility(0, false);
             assertDeleteButtonVisibility(1, true);
 
-            AddStep("finish current item", () => MultiplayerClient.FinishCurrentItem().WaitSafely());
+            AddStep("finish current item", () => MultiplayerClient.FinishCurrentItem());
             AddUntilStep("wait for next item to be selected", () => MultiplayerClient.Room?.Settings.PlaylistItemId == 2);
             AddUntilStep("wait for two items in playlist", () => playlist.ChildrenOfType<DrawableRoomPlaylistItem>().Count() == 2);
 
@@ -122,7 +122,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
             {
                 MultiplayerPlaylistItem item = new MultiplayerPlaylistItem(new PlaylistItem(importedBeatmap));
 
-                MultiplayerClient.AddUserPlaylistItem(userId(), item).WaitSafely();
+                MultiplayerClient.AddUserPlaylistItem(userId(), item);
 
                 itemId = item.ID;
             });
