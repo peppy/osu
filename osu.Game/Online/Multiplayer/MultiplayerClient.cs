@@ -360,7 +360,7 @@ namespace osu.Game.Online.Multiplayer
 
         Task IMultiplayerClient.RoomStateChanged(MultiplayerRoomState state)
         {
-            Scheduler.Add(() =>
+            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
@@ -385,30 +385,31 @@ namespace osu.Game.Online.Multiplayer
                 }
 
                 RoomUpdated?.Invoke();
-            }, false);
-
-            return Task.CompletedTask;
+            }, false));
         }
 
         async Task IMultiplayerClient.UserJoined(MultiplayerRoomUser user)
         {
-            await PopulateUser(user).ConfigureAwait(false);
-
-            Scheduler.Add(() =>
+            await joinOrLeaveTaskChain.Add(async () =>
             {
-                if (Room == null)
-                    return;
+                await PopulateUser(user).ConfigureAwait(false);
 
-                // for sanity, ensure that there can be no duplicate users in the room user list.
-                if (Room.Users.Any(existing => existing.UserID == user.UserID))
-                    return;
+                Scheduler.Add(() =>
+                {
+                    if (Room == null)
+                        return;
 
-                Room.Users.Add(user);
+                    // for sanity, ensure that there can be no duplicate users in the room user list.
+                    if (Room.Users.Any(existing => existing.UserID == user.UserID))
+                        return;
 
-                addUserToAPIRoom(user);
+                    Room.Users.Add(user);
 
-                UserJoined?.Invoke(user);
-                RoomUpdated?.Invoke();
+                    addUserToAPIRoom(user);
+
+                    UserJoined?.Invoke(user);
+                    RoomUpdated?.Invoke();
+                });
             });
         }
 
@@ -440,7 +441,7 @@ namespace osu.Game.Online.Multiplayer
 
         private Task handleUserLeft(MultiplayerRoomUser user, Action<MultiplayerRoomUser>? callback)
         {
-            Scheduler.Add(() =>
+            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
@@ -454,14 +455,12 @@ namespace osu.Game.Online.Multiplayer
 
                 callback?.Invoke(user);
                 RoomUpdated?.Invoke();
-            }, false);
-
-            return Task.CompletedTask;
+            }, false));
         }
 
         Task IMultiplayerClient.HostChanged(int userId)
         {
-            Scheduler.Add(() =>
+            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
@@ -474,9 +473,7 @@ namespace osu.Game.Online.Multiplayer
                 APIRoom.Host.Value = user?.User;
 
                 RoomUpdated?.Invoke();
-            }, false);
-
-            return Task.CompletedTask;
+            }, false));
         }
 
         Task IMultiplayerClient.SettingsChanged(MultiplayerRoomSettings newSettings)
@@ -487,7 +484,7 @@ namespace osu.Game.Online.Multiplayer
 
         Task IMultiplayerClient.UserStateChanged(int userId, MultiplayerUserState state)
         {
-            Scheduler.Add(() =>
+            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
             {
                 var user = Room?.Users.SingleOrDefault(u => u.UserID == userId);
 
@@ -499,14 +496,12 @@ namespace osu.Game.Online.Multiplayer
                 updateUserPlayingState(userId, state);
 
                 RoomUpdated?.Invoke();
-            }, false);
-
-            return Task.CompletedTask;
+            }, false));
         }
 
         Task IMultiplayerClient.MatchUserStateChanged(int userId, MatchUserState state)
         {
-            Scheduler.Add(() =>
+            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
             {
                 var user = Room?.Users.SingleOrDefault(u => u.UserID == userId);
 
@@ -516,28 +511,24 @@ namespace osu.Game.Online.Multiplayer
 
                 user.MatchState = state;
                 RoomUpdated?.Invoke();
-            }, false);
-
-            return Task.CompletedTask;
+            }, false));
         }
 
         Task IMultiplayerClient.MatchRoomStateChanged(MatchRoomState state)
         {
-            Scheduler.Add(() =>
+            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
 
                 Room.MatchState = state;
                 RoomUpdated?.Invoke();
-            }, false);
-
-            return Task.CompletedTask;
+            }, false));
         }
 
         public Task MatchEvent(MatchServerEvent e)
         {
-            Scheduler.Add(() =>
+            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
@@ -550,14 +541,12 @@ namespace osu.Game.Online.Multiplayer
                 }
 
                 RoomUpdated?.Invoke();
-            }, false);
-
-            return Task.CompletedTask;
+            }, false));
         }
 
         Task IMultiplayerClient.UserBeatmapAvailabilityChanged(int userId, BeatmapAvailability beatmapAvailability)
         {
-            Scheduler.Add(() =>
+            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
             {
                 var user = Room?.Users.SingleOrDefault(u => u.UserID == userId);
 
@@ -568,14 +557,12 @@ namespace osu.Game.Online.Multiplayer
                 user.BeatmapAvailability = beatmapAvailability;
 
                 RoomUpdated?.Invoke();
-            }, false);
-
-            return Task.CompletedTask;
+            }, false));
         }
 
         public Task UserModsChanged(int userId, IEnumerable<APIMod> mods)
         {
-            Scheduler.Add(() =>
+            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
             {
                 var user = Room?.Users.SingleOrDefault(u => u.UserID == userId);
 
@@ -586,53 +573,45 @@ namespace osu.Game.Online.Multiplayer
                 user.Mods = mods;
 
                 RoomUpdated?.Invoke();
-            }, false);
-
-            return Task.CompletedTask;
+            }, false));
         }
 
         Task IMultiplayerClient.LoadRequested()
         {
-            Scheduler.Add(() =>
+            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
 
                 LoadRequested?.Invoke();
-            }, false);
-
-            return Task.CompletedTask;
+            }, false));
         }
 
         Task IMultiplayerClient.MatchStarted()
         {
-            Scheduler.Add(() =>
+            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
 
                 MatchStarted?.Invoke();
-            }, false);
-
-            return Task.CompletedTask;
+            }, false));
         }
 
         Task IMultiplayerClient.ResultsReady()
         {
-            Scheduler.Add(() =>
+            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
 
                 ResultsReady?.Invoke();
-            }, false);
-
-            return Task.CompletedTask;
+            }, false));
         }
 
         public Task PlaylistItemAdded(MultiplayerPlaylistItem item)
         {
-            Scheduler.Add(() =>
+            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
@@ -644,14 +623,12 @@ namespace osu.Game.Online.Multiplayer
 
                 ItemAdded?.Invoke(item);
                 RoomUpdated?.Invoke();
-            });
-
-            return Task.CompletedTask;
+            }));
         }
 
         public Task PlaylistItemRemoved(long playlistItemId)
         {
-            Scheduler.Add(() =>
+            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
@@ -665,14 +642,12 @@ namespace osu.Game.Online.Multiplayer
 
                 ItemRemoved?.Invoke(playlistItemId);
                 RoomUpdated?.Invoke();
-            });
-
-            return Task.CompletedTask;
+            }));
         }
 
         public Task PlaylistItemChanged(MultiplayerPlaylistItem item)
         {
-            Scheduler.Add(() =>
+            return joinOrLeaveTaskChain.Add(() => Scheduler.Add(() =>
             {
                 if (Room == null)
                     return;
@@ -687,9 +662,7 @@ namespace osu.Game.Online.Multiplayer
 
                 ItemChanged?.Invoke(item);
                 RoomUpdated?.Invoke();
-            });
-
-            return Task.CompletedTask;
+            }));
         }
 
         /// <summary>
