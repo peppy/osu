@@ -85,20 +85,23 @@ namespace osu.Game.Tests.Visual.Multiplayer
         {
             ((IMultiplayerClient)this).UserJoined(user).FireAndForget(() =>
             {
-                switch (Room?.MatchState)
+                MainTaskChain.Add(() => Schedule(() =>
                 {
-                    case TeamVersusRoomState teamVersus:
-                        Debug.Assert(Room != null);
+                    switch (Room?.MatchState)
+                    {
+                        case TeamVersusRoomState teamVersus:
+                            Debug.Assert(Room != null);
 
-                        // simulate the server's automatic assignment of users to teams on join.
-                        // the "best" team is the one with the least users on it.
-                        int bestTeam = teamVersus.Teams
-                                                 .Select(team => (teamID: team.ID, userCount: Room.Users.Count(u => (u.MatchState as TeamVersusUserState)?.TeamID == team.ID)))
-                                                 .OrderBy(pair => pair.userCount)
-                                                 .First().teamID;
-                        ((IMultiplayerClient)this).MatchUserStateChanged(user.UserID, new TeamVersusUserState { TeamID = bestTeam }).FireAndForget();
-                        break;
-                }
+                            // simulate the server's automatic assignment of users to teams on join.
+                            // the "best" team is the one with the least users on it.
+                            int bestTeam = teamVersus.Teams
+                                                     .Select(team => (teamID: team.ID, userCount: Room.Users.Count(u => (u.MatchState as TeamVersusUserState)?.TeamID == team.ID)))
+                                                     .OrderBy(pair => pair.userCount)
+                                                     .First().teamID;
+                            ((IMultiplayerClient)this).MatchUserStateChanged(user.UserID, new TeamVersusUserState { TeamID = bestTeam }).FireAndForget();
+                            break;
+                    }
+                }));
             });
         }
 
@@ -107,77 +110,76 @@ namespace osu.Game.Tests.Visual.Multiplayer
             Debug.Assert(Room != null);
             ((IMultiplayerClient)this).UserLeft(new MultiplayerRoomUser(user.Id)).FireAndForget(() =>
             {
-                Schedule(() =>
+                MainTaskChain.Add(() => Schedule(() =>
                 {
                     if (Room.Users.Any())
                         TransferHost(Room.Users.First().UserID);
-                });
+                }));
             });
         }
 
         public void ChangeRoomState(MultiplayerRoomState newState) => ((IMultiplayerClient)this).RoomStateChanged(newState);
 
-        public void ChangeUserState(int userId, MultiplayerUserState newState) => ((IMultiplayerClient)this).UserStateChanged(userId, newState).FireAndForget(updateRoomStateIfRequired);
+        public void ChangeUserState(int userId, MultiplayerUserState newState) =>
+            ((IMultiplayerClient)this).UserStateChanged(userId, newState).FireAndForget(updateRoomStateIfRequired);
 
-        private void updateRoomStateIfRequired()
+        private void updateRoomStateIfRequired() => MainTaskChain.Add(() => Schedule(() =>
+
         {
-            Schedule(() =>
+            Debug.Assert(Room != null);
+            Debug.Assert(APIRoom != null);
+
+            switch (Room.State)
             {
-                Debug.Assert(Room != null);
-                Debug.Assert(APIRoom != null);
+                case MultiplayerRoomState.Open:
+                    // If there are no remaining ready users or the host is not ready, stop any existing countdown.
+                    // Todo: This doesn't yet support non-match-start countdowns.
+                    if (Room.Settings.AutoStartEnabled)
+                    {
+                        bool shouldHaveCountdown = !APIRoom.Playlist.GetCurrentItem()!.Expired && Room.Users.Any(u => u.State == MultiplayerUserState.Ready);
 
-                switch (Room.State)
-                {
-                    case MultiplayerRoomState.Open:
-                        // If there are no remaining ready users or the host is not ready, stop any existing countdown.
-                        // Todo: This doesn't yet support non-match-start countdowns.
-                        if (Room.Settings.AutoStartEnabled)
+                        if (shouldHaveCountdown && Room.Countdown == null)
+                            startCountdown(new MatchStartCountdown { TimeRemaining = Room.Settings.AutoStartDuration }, StartMatch);
+                    }
+
+                    break;
+
+                case MultiplayerRoomState.WaitingForLoad:
+                    if (Room.Users.All(u => u.State != MultiplayerUserState.WaitingForLoad))
+                    {
+                        var loadedUsers = Room.Users.Where(u => u.State == MultiplayerUserState.Loaded).ToArray();
+
+                        if (loadedUsers.Length == 0)
                         {
-                            bool shouldHaveCountdown = !APIRoom.Playlist.GetCurrentItem()!.Expired && Room.Users.Any(u => u.State == MultiplayerUserState.Ready);
-
-                            if (shouldHaveCountdown && Room.Countdown == null)
-                                startCountdown(new MatchStartCountdown { TimeRemaining = Room.Settings.AutoStartDuration }, StartMatch);
-                        }
-
-                        break;
-
-                    case MultiplayerRoomState.WaitingForLoad:
-                        if (Room.Users.All(u => u.State != MultiplayerUserState.WaitingForLoad))
-                        {
-                            var loadedUsers = Room.Users.Where(u => u.State == MultiplayerUserState.Loaded).ToArray();
-
-                            if (loadedUsers.Length == 0)
-                            {
-                                // all users have bailed from the load sequence. cancel the game start.
-                                ChangeRoomState(MultiplayerRoomState.Open);
-                                return;
-                            }
-
-                            foreach (var u in Room.Users.Where(u => u.State == MultiplayerUserState.Loaded))
-                                ChangeUserState(u.UserID, MultiplayerUserState.Playing);
-
-                            ChangeRoomState(MultiplayerRoomState.Playing);
-                            ((IMultiplayerClient)this).MatchStarted().FireAndForget();
-                        }
-
-                        break;
-
-                    case MultiplayerRoomState.Playing:
-                        if (Room.Users.All(u => u.State != MultiplayerUserState.Playing))
-                        {
-                            foreach (var u in Room.Users.Where(u => u.State == MultiplayerUserState.FinishedPlay))
-                                ChangeUserState(u.UserID, MultiplayerUserState.Results);
-
+                            // all users have bailed from the load sequence. cancel the game start.
                             ChangeRoomState(MultiplayerRoomState.Open);
-                            FinishCurrentItem();
-
-                            ((IMultiplayerClient)this).ResultsReady().FireAndForget();
+                            return;
                         }
 
-                        break;
-                }
-            });
-        }
+                        foreach (var u in Room.Users.Where(u => u.State == MultiplayerUserState.Loaded))
+                            ChangeUserState(u.UserID, MultiplayerUserState.Playing);
+
+                        ChangeRoomState(MultiplayerRoomState.Playing);
+                        ((IMultiplayerClient)this).MatchStarted().FireAndForget();
+                    }
+
+                    break;
+
+                case MultiplayerRoomState.Playing:
+                    if (Room.Users.All(u => u.State != MultiplayerUserState.Playing))
+                    {
+                        foreach (var u in Room.Users.Where(u => u.State == MultiplayerUserState.FinishedPlay))
+                            ChangeUserState(u.UserID, MultiplayerUserState.Results);
+
+                        ChangeRoomState(MultiplayerRoomState.Open);
+                        FinishCurrentItem();
+
+                        ((IMultiplayerClient)this).ResultsReady().FireAndForget();
+                    }
+
+                    break;
+            }
+        }));
 
         public void ChangeUserBeatmapAvailability(int userId, BeatmapAvailability newBeatmapAvailability)
         {
@@ -264,11 +266,14 @@ namespace osu.Game.Tests.Visual.Multiplayer
 
             ((IMultiplayerClient)this).SettingsChanged(settings).FireAndForget(() =>
             {
-                foreach (var user in Room.Users.Where(u => u.State == MultiplayerUserState.Ready))
-                    ChangeUserState(user.UserID, MultiplayerUserState.Idle);
+                MainTaskChain.Add(() => Schedule(() =>
+                {
+                    foreach (var user in Room.Users.Where(u => u.State == MultiplayerUserState.Ready))
+                        ChangeUserState(user.UserID, MultiplayerUserState.Idle);
 
-                changeMatchType(settings.MatchType);
-                updateRoomStateIfRequired();
+                    changeMatchType(settings.MatchType);
+                    updateRoomStateIfRequired();
+                }));
             });
 
             return Task.CompletedTask;
@@ -552,7 +557,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
             updateCurrentItem(Room);
         }
 
-        public void FinishCurrentItem() => MainTaskChain.Add(() =>
+        public void FinishCurrentItem() => MainTaskChain.Add(() => Schedule(() =>
         {
             Debug.Assert(Room != null);
             Debug.Assert(APIRoom != null);
@@ -562,7 +567,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
             currentItem.Expired = true;
             currentItem.PlayedAt = DateTimeOffset.Now;
 
-            ((IMultiplayerClient)this).PlaylistItemChanged(currentItem).FireAndForget(() =>
+            ((IMultiplayerClient)this).PlaylistItemChanged(currentItem).FireAndForget(() => MainTaskChain.Add(() => Schedule(() =>
             {
                 updatePlaylistOrder(Room);
 
@@ -571,8 +576,8 @@ namespace osu.Game.Tests.Visual.Multiplayer
                     duplicateCurrentItem();
 
                 updateCurrentItem(Room);
-            });
-        });
+            })));
+        }));
 
         private void duplicateCurrentItem()
         {
@@ -597,12 +602,15 @@ namespace osu.Game.Tests.Visual.Multiplayer
 
             serverSidePlaylist.Add(item);
             serverSideAPIRoom.Playlist.Add(new PlaylistItem(item));
-            ((IMultiplayerClient)this).PlaylistItemAdded(item).FireAndForget(() => updatePlaylistOrder(Room));
+            ((IMultiplayerClient)this).PlaylistItemAdded(item).FireAndForget(() =>
+            {
+                MainTaskChain.Add(() => Schedule(() => updatePlaylistOrder(Room)));
+            });
         }
 
         private IEnumerable<MultiplayerPlaylistItem> upcomingItems => serverSidePlaylist.Where(i => !i.Expired).OrderBy(i => i.PlaylistOrder);
 
-        private void updateCurrentItem(MultiplayerRoom room, bool notify = true)
+        private void updateCurrentItem(MultiplayerRoom room, bool notify = true) => MainTaskChain.Add(() => Schedule(() =>
         {
             // Pick the next non-expired playlist item by playlist order, or default to the most-recently-expired item.
             MultiplayerPlaylistItem nextItem = upcomingItems.FirstOrDefault() ?? serverSidePlaylist.OrderByDescending(i => i.PlayedAt).First();
@@ -614,7 +622,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
 
             if (notify && nextItem.ID != lastItem)
                 ((IMultiplayerClient)this).SettingsChanged(room.Settings).FireAndForget();
-        }
+        }));
 
         private void updatePlaylistOrder(MultiplayerRoom room)
         {
