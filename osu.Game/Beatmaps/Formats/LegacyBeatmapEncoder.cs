@@ -335,8 +335,8 @@ namespace osu.Game.Beatmaps.Formats
                     break;
             }
 
-            writer.Write(FormattableString.Invariant($"{position.X},"));
-            writer.Write(FormattableString.Invariant($"{position.Y},"));
+            writer.Write(FormattableString.Invariant($"{(int)MathF.Round(position.X)},"));
+            writer.Write(FormattableString.Invariant($"{(int)MathF.Round(position.Y)},"));
             writer.Write(FormattableString.Invariant($"{hitObject.StartTime},"));
             writer.Write(FormattableString.Invariant($"{(int)getObjectType(hitObject)},"));
             writer.Write(FormattableString.Invariant($"{(int)toLegacyHitSoundType(hitObject.Samples)},"));
@@ -445,13 +445,13 @@ namespace osu.Game.Beatmaps.Formats
                     else
                     {
                         // New segment with the same type - duplicate the control point
-                        writer.Write(FormattableString.Invariant($"{position.X + point.Position.X}:{position.Y + point.Position.Y}|"));
+                        writer.Write(FormattableString.Invariant($"{(int)MathF.Round(position.X + point.Position.X)}:{(int)MathF.Round(position.Y + point.Position.Y)}|"));
                     }
                 }
 
                 if (i != 0)
                 {
-                    writer.Write(FormattableString.Invariant($"{position.X + point.Position.X}:{position.Y + point.Position.Y}"));
+                    writer.Write(FormattableString.Invariant($"{(int)MathF.Round(position.X + point.Position.X)}:{(int)MathF.Round(position.Y + point.Position.Y)}"));
                     writer.Write(i != pathData.Path.ControlPoints.Count - 1 ? "|" : ",");
                 }
             }
