@@ -22,6 +22,7 @@ using osu.Game.Rulesets.Mania;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Rulesets.Osu;
+using osu.Game.Rulesets.Osu.Beatmaps;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Taiko;
 using osu.Game.Skinning;
@@ -140,6 +141,46 @@ namespace osu.Game.Tests.Beatmaps.Formats
             Assert.That(decodedSlider.Path.ControlPoints.Count, Is.EqualTo(5));
         }
 
+        [TestCase]
+        public void TestEncodeDecodeStabilityWithDecimalHitObjectCoords()
+        {
+            var beatmap = new OsuBeatmap
+            {
+                HitObjects = new List<OsuHitObject>
+                {
+                    new HitCircle
+                    {
+                        Position = new Vector2(2.4f, 3.2f),
+                        NewCombo = true,
+                    },
+                    new Slider
+                    {
+                        Position = new Vector2(4.4f, 9.9f),
+                        Path = new SliderPath(new[]
+                        {
+                            new PathControlPoint(Vector2.Zero, PathType.Bezier),
+                            new PathControlPoint(new Vector2(8.9f, 3.2f)),
+                            new PathControlPoint(new Vector2(4.3f, 9.8f))
+                        })
+                    }
+                }
+            };
+
+            foreach (var hitObject in beatmap.HitObjects)
+                hitObject.ApplyDefaults(beatmap.ControlPointInfo, beatmap.Difficulty);
+
+            var initialEncode = encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty)));
+            // make a copy before running the encode, as the stream will not be usable for the final assertion.
+            string initialEncodeText = new StreamReader(initialEncode).ReadToEnd();
+
+            var initialDecode = decodeFromLegacy(initialEncode, string.Empty);
+
+            var secondEncode = encodeToLegacy((convert(initialDecode.beatmap), initialDecode.skin));
+            string secondEncodeText = new StreamReader(secondEncode).ReadToEnd();
+
+            Assert.That(secondEncodeText, Is.EqualTo(initialEncodeText));
+        }
+
         private bool areComboColoursEqual(IHasComboColours a, IHasComboColours b)
         {
             // equal to null, no need to SequenceEqual
@@ -164,6 +205,8 @@ namespace osu.Game.Tests.Beatmaps.Formats
 
         private (IBeatmap beatmap, TestLegacySkin skin) decodeFromLegacy(Stream stream, string name)
         {
+            stream.Position = 0;
+
             using (var reader = new LineBufferedReader(stream))
             {
                 var beatmap = new LegacyBeatmapDecoder { ApplyOffsets = false }.Decode(reader);
