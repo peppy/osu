@@ -24,5 +24,13 @@ namespace osu.Game.Overlays.Settings
         /// Apply the default value of the associated setting.
         /// </summary>
         void ApplyDefault();
+
+        string GetClassicDefault { get; }
+
+        string GetDefault { get; }
+
+        // bool IsCurrentlyClassicDefault { get; }
+        //
+        // bool IsCurrentlyDefault { get; }
     }
 }

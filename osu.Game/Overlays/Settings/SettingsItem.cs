@@ -34,8 +34,6 @@ namespace osu.Game.Overlays.Settings
 
         private IHasCurrentValue<T> controlWithCurrent => Control as IHasCurrentValue<T>;
 
-        protected override Container<Drawable> Content => FlowContent;
-
         protected readonly FillFlowContainer FlowContent;
 
         private SpriteText labelText;
@@ -139,6 +137,9 @@ namespace osu.Game.Overlays.Settings
         public event Action SettingChanged;
 
         private T classicDefault;
+
+        public string GetClassicDefault => classicDefault.ToString();
+        public string GetDefault => Current.Default.ToString();
 
         public bool HasClassicDefault { get; private set; }
 
