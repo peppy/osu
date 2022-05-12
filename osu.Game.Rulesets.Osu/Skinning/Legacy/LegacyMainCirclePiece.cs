@@ -1,6 +1,8 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable enable
+
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.ObjectExtensions;
@@ -12,15 +14,14 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
+using osu.Game.Rulesets.Osu.Skinning.Default;
 using osu.Game.Skinning;
 using osuTK;
 using osuTK.Graphics;
 
-#nullable enable
-
 namespace osu.Game.Rulesets.Osu.Skinning.Legacy
 {
-    public class LegacyMainCirclePiece : CompositeDrawable
+    public class LegacyMainCirclePiece : CompositeDrawable, IMainCirclePiece
     {
         public override bool RemoveCompletedTransforms => false;
 
@@ -116,12 +117,12 @@ namespace osu.Game.Rulesets.Osu.Skinning.Legacy
         {
             base.LoadComplete();
 
-            accentColour.BindValueChanged(colour => CircleSprite.Colour = LegacyColourCompatibility.DisallowZeroAlpha(colour.NewValue), true);
             if (hasNumber)
                 indexInCurrentCombo.BindValueChanged(index => hitCircleText.Text = (index.NewValue + 1).ToString(), true);
 
             if (drawableObject != null)
             {
+                accentColour.BindValueChanged(colour => updateStateTransforms(drawableObject, drawableObject.State.Value));
                 drawableObject.ApplyCustomUpdateState += updateStateTransforms;
                 updateStateTransforms(drawableObject, drawableObject.State.Value);
             }
@@ -129,6 +130,9 @@ namespace osu.Game.Rulesets.Osu.Skinning.Legacy
 
         private void updateStateTransforms(DrawableHitObject drawableHitObject, ArmedState state)
         {
+            using (BeginAbsoluteSequence(drawableObject.AsNonNull().LifetimeStart))
+                CircleSprite.FadeColour(LegacyColourCompatibility.DisallowZeroAlpha(accentColour.Value));
+
             const double legacy_fade_duration = 240;
 
             using (BeginAbsoluteSequence(drawableObject.AsNonNull().HitStateUpdateTime))
@@ -169,5 +173,7 @@ namespace osu.Game.Rulesets.Osu.Skinning.Legacy
             if (drawableObject != null)
                 drawableObject.ApplyCustomUpdateState -= updateStateTransforms;
         }
+
+        public Drawable FlashTarget => CircleSprite;
     }
 }

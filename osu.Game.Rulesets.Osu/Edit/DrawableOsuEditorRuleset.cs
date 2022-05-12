@@ -6,6 +6,7 @@ using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Framework.Logging;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
 using osu.Game.Rulesets.Mods;
@@ -15,6 +16,7 @@ using osu.Game.Rulesets.Osu.Skinning.Default;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.UI;
 using osuTK;
+using osuTK.Graphics;
 
 namespace osu.Game.Rulesets.Osu.Edit
 {
@@ -55,6 +57,9 @@ namespace osu.Game.Rulesets.Osu.Edit
             protected override void OnNewDrawableHitObject(DrawableHitObject d)
             {
                 d.ApplyCustomUpdateState += updateState;
+
+                // required to keep the accent colour in sync (with flash animation applied)
+                d.AccentColour.BindValueChanged(_ => updateState(d, d.State.Value));
             }
 
             private void updateState(DrawableHitObject hitObject, ArmedState state)
@@ -84,6 +89,17 @@ namespace osu.Game.Rulesets.Osu.Edit
 
                         mainPieceContainer.CirclePiece.ApplyTransformsAt(hitObject.StateUpdateTime, true);
                         mainPieceContainer.CirclePiece.ClearTransformsAfter(hitObject.StateUpdateTime, true);
+
+                        if (mainPieceContainer.CirclePiece.Drawable is IMainCirclePiece mainCirclePiece)
+                        {
+                            using (mainCirclePiece.FlashTarget.BeginAbsoluteSequence(hitObject.HitStateUpdateTime))
+                            {
+                                mainCirclePiece.FlashTarget.ClearTransforms(targetMember: nameof(Colour));
+                                mainCirclePiece.FlashTarget
+                                               .FadeColour(Color4.White).Then()
+                                               .FadeColour(hitObject.AccentColour.Value, EDITOR_HIT_OBJECT_FADE_OUT_EXTENSION * 4);
+                            }
+                        }
                     });
                 }
 
@@ -99,7 +115,7 @@ namespace osu.Game.Rulesets.Osu.Edit
                     case DrawableSlider _:
                     case DrawableHitCircle _:
                         // Get the existing fade out transform
-                        var existing = hitObject.Transforms.LastOrDefault(t => t.TargetMember == nameof(Alpha));
+                        var existing = hitObject.TransformsForTargetMember(nameof(Alpha)).LastOrDefault();
 
                         if (existing == null)
                             return;

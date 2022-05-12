@@ -13,7 +13,7 @@ using osuTK.Graphics;
 
 namespace osu.Game.Rulesets.Osu.Skinning.Default
 {
-    public class MainCirclePiece : CompositeDrawable
+    public class MainCirclePiece : CompositeDrawable, IMainCirclePiece
     {
         private readonly CirclePiece circle;
         private readonly RingPiece ring;
@@ -114,5 +114,7 @@ namespace osu.Game.Rulesets.Osu.Skinning.Default
             if (drawableObject != null)
                 drawableObject.ApplyCustomUpdateState -= updateStateTransforms;
         }
+
+        public Drawable FlashTarget => circle;
     }
 }
