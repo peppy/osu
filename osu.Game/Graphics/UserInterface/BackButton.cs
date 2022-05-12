@@ -8,6 +8,9 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
 using osu.Game.Input.Bindings;
+using osu.Game.Localisation;
+using osu.Game.Overlays;
+using osuTK;
 
 namespace osu.Game.Graphics.UserInterface
 {
@@ -15,19 +18,23 @@ namespace osu.Game.Graphics.UserInterface
     {
         public Action Action;
 
-        private readonly TwoLayerButton button;
+        private readonly ShearedButton button;
+
+        [Cached]
+        private OverlayColourProvider colourProvider { get; set; } = new OverlayColourProvider(OverlayColourScheme.Pink);
 
         public BackButton(Receptor receptor = null)
         {
-            Size = TwoLayerButton.SIZE_EXTENDED;
+            Size = new Vector2(200, 50);
 
-            Child = button = new TwoLayerButton(HoverSampleSet.Submit)
+            Margin = new MarginPadding { Bottom = 14 };
+
+            Child = button = new ShearedButton(200)
             {
+                Text = CommonStrings.Back,
+                Action = () => Action?.Invoke(),
                 Anchor = Anchor.TopLeft,
                 Origin = Anchor.TopLeft,
-                Text = @"back",
-                Icon = OsuIcon.LeftCircle,
-                Action = () => Action?.Invoke()
             };
 
             if (receptor == null)
@@ -42,19 +49,19 @@ namespace osu.Game.Graphics.UserInterface
         [BackgroundDependencyLoader]
         private void load(OsuColour colours)
         {
-            button.BackgroundColour = colours.Pink;
-            button.HoverColour = colours.PinkDark;
+            button.DarkerColour = colours.Pink2;
+            button.LighterColour = colours.Pink1;
         }
 
         protected override void PopIn()
         {
-            button.MoveToX(0, 400, Easing.OutQuint);
+            button.MoveToY(0, 400, Easing.OutQuint);
             button.FadeIn(150, Easing.OutQuint);
         }
 
         protected override void PopOut()
         {
-            button.MoveToX(-TwoLayerButton.SIZE_EXTENDED.X / 2, 400, Easing.OutQuint);
+            button.MoveToY(100, 400, Easing.OutQuint);
             button.FadeOut(400, Easing.OutQuint);
         }
 
