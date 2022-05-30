@@ -1,6 +1,7 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Threading.Tasks;
 using NUnit.Framework;
 using osu.Framework.Testing;
 using osu.Game.Online.API;
@@ -77,10 +78,10 @@ namespace osu.Game.Tests.Online
                 gotResponse = false;
                 request = new LeaveChannelRequest(new Channel());
                 request.Success += () => gotResponse = true;
-                API.Perform(request);
+                Task.Run(() => API.Perform(request));
             });
 
-            AddAssert("response event fired", () => gotResponse);
+            AddUntilStep("response event fired", () => gotResponse);
         }
 
         [Test]

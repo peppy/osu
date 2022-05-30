@@ -63,18 +63,41 @@ namespace osu.Game.Online.API
 
         public virtual void Queue(APIRequest request)
         {
-            if (HandleRequest?.Invoke(request) != true)
+            Scheduler.Add(() =>
             {
-                request.Fail(new InvalidOperationException($@"{nameof(DummyAPIAccess)} cannot process this request."));
-            }
+                if (HandleRequest?.Invoke(request) != true)
+                    request.Fail(new InvalidOperationException($@"{nameof(DummyAPIAccess)} cannot process this request."));
+            }, false);
         }
 
-        public void Perform(APIRequest request) => HandleRequest?.Invoke(request);
+        public void Perform(APIRequest request)
+        {
+            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+
+            Scheduler.Add(() =>
+            {
+                HandleRequest?.Invoke(request);
+                tcs.SetResult(true);
+            }, false);
+
+#pragma warning disable RS0030
+            // We can't WaitSafely here (will fail with "Can't use WaitSafely from inside an async operation."), but Wait is safe enough due to
+            // the task being a TaskCompletionSource.
+            tcs.Task.Wait();
+#pragma warning restore RS0030
+        }
 
         public Task PerformAsync(APIRequest request)
         {
-            HandleRequest?.Invoke(request);
-            return Task.CompletedTask;
+            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+
+            Schedule(() =>
+            {
+                HandleRequest?.Invoke(request);
+                tcs.SetResult(true);
+            });
+
+            return tcs.Task;
         }
 
         public void Login(string username, string password)
