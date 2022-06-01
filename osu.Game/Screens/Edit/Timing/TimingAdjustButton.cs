@@ -4,6 +4,8 @@
 using System;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Audio;
+using osu.Framework.Audio.Sample;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -16,12 +18,17 @@ using osu.Game.Overlays;
 
 namespace osu.Game.Screens.Edit.Timing
 {
-    public class AdjustButton : CompositeDrawable
+    /// <summary>
+    /// A button with variable constant output based on hold position and length.
+    /// </summary>
+    public class TimingAdjustButton : CompositeDrawable
     {
         public Action<double> Action;
 
         private readonly double adjustAmount;
         private ScheduledDelegate adjustDelegate;
+
+        private const int max_multiplier = 10;
 
         private const int adjust_levels = 4;
 
@@ -37,20 +44,18 @@ namespace osu.Game.Screens.Edit.Timing
 
         private readonly OsuSpriteText text;
 
+        private Sample sample;
+
         public LocalisableString Text
         {
-            get => text?.Text ?? default;
-            set
-            {
-                if (text != null)
-                    text.Text = value;
-            }
+            get => text.Text;
+            set => text.Text = value;
         }
 
         [Resolved]
         private OverlayColourProvider colourProvider { get; set; }
 
-        public AdjustButton(double adjustAmount)
+        public TimingAdjustButton(double adjustAmount)
         {
             this.adjustAmount = adjustAmount;
 
@@ -80,8 +85,10 @@ namespace osu.Game.Screens.Edit.Timing
         }
 
         [BackgroundDependencyLoader]
-        private void load()
+        private void load(AudioManager audio)
         {
+            sample = audio.Samples.Get(@"UI/notch-tick");
+
             background.Colour = colourProvider.Background3;
 
             for (int i = 1; i <= adjust_levels; i++)
@@ -121,6 +128,17 @@ namespace osu.Game.Screens.Edit.Timing
                     adjustDelay = Math.Max(minimum_delay, adjustDelay * 0.9f);
 
                     hoveredBox.Flash();
+
+                    var channel = sample?.GetChannel();
+
+                    if (channel != null)
+                    {
+                        double repeatModifier = 0.05f * (Math.Abs(adjustDelay - initial_delay) / minimum_delay);
+                        double multiplierModifier = (hoveredBox.Multiplier / max_multiplier) * 0.2f;
+
+                        channel.Frequency.Value = 1 + multiplierModifier + repeatModifier;
+                        channel.Play();
+                    }
                 }
                 else
                 {
@@ -196,7 +214,8 @@ namespace osu.Game.Screens.Edit.Timing
 
                     case 3: return 5;
 
-                    case 4: return 10;
+                    case 4:
+                        return max_multiplier;
                 }
             }
 
