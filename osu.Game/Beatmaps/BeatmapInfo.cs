@@ -91,6 +91,12 @@ namespace osu.Game.Beatmaps
         [Indexed]
         public string MD5Hash { get; set; } = string.Empty;
 
+        public string OnlineMD5Hash { get; set; } = string.Empty;
+
+        public DateTimeOffset? LastOnlineUpdate = null;
+
+        public bool MatchesOnlineVersion => MD5Hash == OnlineMD5Hash;
+
         [JsonIgnore]
         public bool Hidden { get; set; }
 
