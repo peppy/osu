@@ -48,25 +48,31 @@ namespace osu.Game.Graphics.UserInterface
                 case DownloadState.NotDownloaded:
                     Background.FadeColour(colours.Gray4, 500, Easing.InOutExpo);
                     Icon.MoveToX(0, 500, Easing.InOutExpo);
-                    checkmark.ScaleTo(Vector2.Zero, 500, Easing.InOutExpo);
                     TooltipText = "Download";
+
+                    checkmark.ScaleTo(Vector2.Zero, 500, Easing.InOutExpo);
                     break;
 
                 case DownloadState.Downloading:
                     Background.FadeColour(colours.Blue, 500, Easing.InOutExpo);
                     Icon.MoveToX(0, 500, Easing.InOutExpo);
-                    checkmark.ScaleTo(Vector2.Zero, 500, Easing.InOutExpo);
                     TooltipText = "Downloading...";
+
+                    checkmark.ScaleTo(Vector2.Zero, 500, Easing.InOutExpo);
                     break;
 
                 case DownloadState.Importing:
                     Background.FadeColour(colours.Yellow, 500, Easing.InOutExpo);
+                    Icon.MoveToX(0, 500, Easing.InOutExpo);
                     TooltipText = "Importing";
+
+                    checkmark.ScaleTo(Vector2.Zero, 500, Easing.InOutExpo);
                     break;
 
                 case DownloadState.LocallyAvailable:
                     Background.FadeColour(colours.Green, 500, Easing.InOutExpo);
                     Icon.MoveToX(-8, 500, Easing.InOutExpo);
+
                     checkmark.ScaleTo(new Vector2(13), 500, Easing.InOutExpo);
                     break;
             }
