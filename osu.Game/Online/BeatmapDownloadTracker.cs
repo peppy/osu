@@ -37,75 +37,94 @@ namespace osu.Game.Online
             Downloader.DownloadBegan += downloadBegan;
             Downloader.DownloadFailed += downloadFailed;
 
-            // Used to interact with manager classes that don't support interface types. Will eventually be replaced.
-            var beatmapSetInfo = new BeatmapSetInfo { OnlineID = TrackedItem.OnlineID };
-
             realmSubscription = realm.RegisterForNotifications(r => r.All<BeatmapSetInfo>().Where(s => s.OnlineID == TrackedItem.OnlineID && !s.DeletePending), (items, _, _) =>
             {
-                if (items.Any())
-                    Schedule(() => UpdateState(DownloadState.LocallyAvailable));
-                else
+                bool isPresent = items.Any();
+
+                // TODO: expose via another bindable?
+                bool isUpToDate = isPresent && items.All(s => s.Beatmaps.All(b => b.MatchesOnlineVersion));
+
+                Scheduler.AddOnce(() =>
                 {
-                    Schedule(() =>
+                    if (attachedRequest != null)
+                        return;
+
+                    if (isPresent)
+                        UpdateState(DownloadState.LocallyAvailable);
+                    else
                     {
                         UpdateState(DownloadState.NotDownloaded);
-                        attachDownload(Downloader.GetExistingDownload(beatmapSetInfo));
-                    });
-                }
+
+                        var existing = Downloader.GetExistingDownload(TrackedItem);
+                        if (existing != null)
+                            attachDownload(existing);
+                    }
+                });
             });
         }
 
         private void downloadBegan(ArchiveDownloadRequest<IBeatmapSetInfo> request) => Schedule(() =>
         {
-            if (checkEquality(request.Model, TrackedItem))
-                attachDownload(request);
+            if (!checkEquality(request.Model, TrackedItem)) return;
+
+            attachDownload(request);
         });
 
-        private void downloadFailed(ArchiveDownloadRequest<IBeatmapSetInfo> request) => Schedule(() =>
+        private void onRequestSuccess(string _) => Schedule(() =>
         {
-            if (checkEquality(request.Model, TrackedItem))
-                attachDownload(null);
+            UpdateState(DownloadState.Importing);
+            clearAttachedDownload();
         });
-
-        private void attachDownload(ArchiveDownloadRequest<IBeatmapSetInfo>? request)
-        {
-            if (attachedRequest != null)
-            {
-                attachedRequest.Failure -= onRequestFailure;
-                attachedRequest.DownloadProgressed -= onRequestProgress;
-                attachedRequest.Success -= onRequestSuccess;
-            }
-
-            attachedRequest = request;
-
-            if (attachedRequest != null)
-            {
-                if (attachedRequest.Progress == 1)
-                {
-                    UpdateProgress(1);
-                    UpdateState(DownloadState.Importing);
-                }
-                else
-                {
-                    UpdateProgress(attachedRequest.Progress);
-                    UpdateState(DownloadState.Downloading);
-
-                    attachedRequest.Failure += onRequestFailure;
-                    attachedRequest.DownloadProgressed += onRequestProgress;
-                    attachedRequest.Success += onRequestSuccess;
-                }
-            }
-            else
-            {
-                UpdateState(DownloadState.NotDownloaded);
-            }
-        }
-
-        private void onRequestSuccess(string _) => Schedule(() => UpdateState(DownloadState.Importing));
 
         private void onRequestProgress(float progress) => Schedule(() => UpdateProgress(progress));
 
-        private void onRequestFailure(Exception e) => Schedule(() => attachDownload(null));
+        private void downloadFailed(ArchiveDownloadRequest<IBeatmapSetInfo> request) => Schedule(() =>
+        {
+            if (!checkEquality(request.Model, TrackedItem)) return;
+
+            UpdateState(DownloadState.NotDownloaded);
+            clearAttachedDownload();
+        });
+
+        private void onRequestFailure(Exception e) => Schedule(() =>
+        {
+            UpdateState(DownloadState.NotDownloaded);
+            clearAttachedDownload();
+        });
+
+        private void attachDownload(ArchiveDownloadRequest<IBeatmapSetInfo> request)
+        {
+            clearAttachedDownload();
+
+            attachedRequest = request;
+
+            attachedRequest.Failure += onRequestFailure;
+            attachedRequest.DownloadProgressed += onRequestProgress;
+            attachedRequest.Success += onRequestSuccess;
+
+            // If the incoming request is already in a completed state, don't bother attaching.
+            if (attachedRequest.Progress == 1)
+            {
+                UpdateProgress(1);
+                UpdateState(DownloadState.Importing);
+                clearAttachedDownload();
+                return;
+            }
+
+            UpdateProgress(attachedRequest.Progress);
+            UpdateState(DownloadState.Downloading);
+        }
+
+        private void clearAttachedDownload()
+        {
+            if (attachedRequest == null)
+                return;
+
+            attachedRequest.Failure -= onRequestFailure;
+            attachedRequest.DownloadProgressed -= onRequestProgress;
+            attachedRequest.Success -= onRequestSuccess;
+            attachedRequest = null;
+        }
 
         private bool checkEquality(IBeatmapSetInfo x, IBeatmapSetInfo y) => x.OnlineID == y.OnlineID;
 
@@ -114,7 +133,7 @@ namespace osu.Game.Online
         protected override void Dispose(bool isDisposing)
         {
             base.Dispose(isDisposing);
-            attachDownload(null);
+            clearAttachedDownload();
 
             realmSubscription?.Dispose();
 

@@ -3,9 +3,11 @@
 
 #nullable disable
 
+using System;
 using System.Linq;
 using NUnit.Framework;
 using osu.Framework.Allocation;
+using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Drawables;
@@ -22,6 +24,15 @@ namespace osu.Game.Tests.Visual.Online
 
         [Resolved]
         private BeatmapManager beatmaps { get; set; }
+
+        [Test]
+        public void TestAllStates()
+        {
+            createButton(true);
+
+            foreach (var state in Enum.GetValues<DownloadState>())
+                AddStep($"Set state to {state}", () => downloadButton.DownloadState = state);
+        }
 
         [Test]
         public void TestDownloadableBeatmap()
@@ -55,13 +66,45 @@ namespace osu.Game.Tests.Visual.Online
             AddUntilStep("button state not downloaded", () => downloadButton.DownloadState == DownloadState.NotDownloaded);
         }
 
+        // [Test]
+        // public void TestDownloadedButOutOfDate()
+        // {
+        //     AddUntilStep("ensure manager loaded", () => beatmaps != null);
+        //     ensureSoleilyRemoved();
+        //     createButtonWithBeatmap(createSoleily());
+        //     AddUntilStep("button state not downloaded", () => downloadButton.DownloadState == DownloadState.NotDownloaded);
+        //     AddStep("import soleily", () => beatmaps.Import(TestResources.GetQuickTestBeatmapForImport()));
+        //
+        //     AddUntilStep("wait for beatmap import", () => beatmaps.GetAllUsableBeatmapSets().Any(b => b.OnlineID == 241526));
+        //     AddUntilStep("button state downloaded", () => downloadButton.DownloadState == DownloadState.LocallyAvailable);
+        //
+        //     AddStep("mark modified", () =>
+        //     {
+        //         var beatmapSet = beatmaps.QueryBeatmapSet(s => s.OnlineID == 241526);
+        //
+        //         Debug.Assert(beatmapSet != null);
+        //
+        //         beatmapSet.PerformWrite(s =>
+        //         {
+        //             s.Beatmaps.First().LastOnlineUpdate = DateTimeOffset.Now;
+        //             s.Beatmaps.First().OnlineMD5Hash = "new hash";
+        //         });
+        //     });
+        //
+        //     AddUntilStep("button state out of date", () => downloadButton.DownloadState == DownloadState.LocallyAvailableWithOnlineChanges);
+        // }
+
         private void ensureSoleilyRemoved()
         {
             AddStep("remove soleily", () =>
             {
-                var beatmap = beatmaps.QueryBeatmapSet(b => b.OnlineID == 241526);
+                var beatmapSet = beatmaps.QueryBeatmapSet(b => b.OnlineID == 241526);
 
-                if (beatmap != null) beatmaps.Delete(beatmap.Value);
+                if (beatmapSet != null)
+                {
+                    beatmaps.Delete(beatmapSet.Value);
+                    beatmapSet.PerformWrite(s => s.Beatmaps.ForEach(b => b.LastOnlineUpdate = null));
+                }
             });
         }
 
@@ -143,7 +186,11 @@ namespace osu.Game.Tests.Visual.Online
         {
             public new bool DownloadEnabled => base.DownloadEnabled;
 
-            public DownloadState DownloadState => State.Value;
+            public DownloadState DownloadState
+            {
+                get => State.Value;
+                set => State.Value = value;
+            }
 
             public TestDownloadButton(IBeatmapSetInfo beatmapSet)
                 : base(beatmapSet)
