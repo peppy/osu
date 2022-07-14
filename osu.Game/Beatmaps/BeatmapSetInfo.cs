@@ -52,6 +52,14 @@ namespace osu.Game.Beatmaps
         /// </summary>
         public bool Protected { get; set; }
 
+        public DateTimeOffset? LastOnlineUpdate { get; set; }
+
+        /// <summary>
+        /// Whether this beatmap matches the online version, based on fetched online metadata.
+        /// Will return <c>true</c> if no online metadata is available.
+        /// </summary>
+        public bool MatchesOnlineVersion => LastOnlineUpdate == null || LastOnlineUpdate < DateAdded;
+
         public double MaxStarDifficulty => Beatmaps.Count == 0 ? 0 : Beatmaps.Max(b => b.StarRating);
 
         public double MaxLength => Beatmaps.Count == 0 ? 0 : Beatmaps.Max(b => b.Length);
