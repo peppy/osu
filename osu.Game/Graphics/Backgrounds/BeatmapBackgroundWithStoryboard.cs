@@ -65,7 +65,7 @@ namespace osu.Game.Graphics.Backgrounds
 
             // `MusicController` will sometimes reload the track, even when the working beatmap technically hasn't changed.
             // ensure that the storyboard's clock is always using the latest track instance.
-            storyboardClock.ChangeSource(newBeatmap.Track);
+            storyboardClock.ChangeSource(newBeatmap.Clock);
             // more often than not, the previous source track's time will be in the future relative to the new source track.
             // explicitly process a single frame so that `InterpolatingFramedClock`'s interpolation logic is bypassed
             // and the storyboard clock is correctly rewound to the source track's time exactly.

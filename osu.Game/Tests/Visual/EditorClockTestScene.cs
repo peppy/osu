@@ -60,7 +60,7 @@ namespace osu.Game.Tests.Visual
             e.OldValue?.Track.RemoveAdjustment(AdjustableProperty.Frequency, frequencyAdjustment);
 
             Clock.Beatmap = e.NewValue.Beatmap;
-            Clock.ChangeSource(e.NewValue.Track);
+            Clock.ChangeSource(e.NewValue.Clock);
             Clock.ProcessFrame();
 
             e.NewValue.Track.AddAdjustment(AdjustableProperty.Frequency, frequencyAdjustment);

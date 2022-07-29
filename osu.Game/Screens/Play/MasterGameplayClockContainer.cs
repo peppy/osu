@@ -53,9 +53,9 @@ namespace osu.Game.Screens.Play
 
         private readonly WorkingBeatmap beatmap;
 
-        private HardwareCorrectionOffsetClock userGlobalOffsetClock;
-        private HardwareCorrectionOffsetClock userBeatmapOffsetClock;
-        private HardwareCorrectionOffsetClock platformOffsetClock;
+        private OffsetCorrectionClock userGlobalOffsetClock;
+        private OffsetCorrectionClock userBeatmapOffsetClock;
+        private OffsetCorrectionClock platformOffsetClock;
         private MasterGameplayClock masterGameplayClock;
         private Bindable<double> userAudioOffset;
 
@@ -75,7 +75,7 @@ namespace osu.Game.Screens.Play
         /// <param name="beatmap">The beatmap to be used for time and metadata references.</param>
         /// <param name="skipTargetTime">The latest time which should be used when introducing gameplay. Will be used when skipping forward.</param>
         public MasterGameplayClockContainer(WorkingBeatmap beatmap, double skipTargetTime)
-            : base(beatmap.Track)
+            : base(beatmap.Clock)
         {
             this.beatmap = beatmap;
             this.skipTargetTime = skipTargetTime;
@@ -197,11 +197,11 @@ namespace osu.Game.Screens.Play
         {
             // Lazer's audio timings in general doesn't match stable. This is the result of user testing, albeit limited.
             // This only seems to be required on windows. We need to eventually figure out why, with a bit of luck.
-            platformOffsetClock = new HardwareCorrectionOffsetClock(source, pauseFreqAdjust) { Offset = RuntimeInfo.OS == RuntimeInfo.Platform.Windows ? 15 : 0 };
+            platformOffsetClock = new OffsetCorrectionClock(source, pauseFreqAdjust) { Offset = RuntimeInfo.OS == RuntimeInfo.Platform.Windows ? 15 : 0 };
 
             // the final usable gameplay clock with user-set offsets applied.
-            userGlobalOffsetClock = new HardwareCorrectionOffsetClock(platformOffsetClock, pauseFreqAdjust);
-            userBeatmapOffsetClock = new HardwareCorrectionOffsetClock(userGlobalOffsetClock, pauseFreqAdjust);
+            userGlobalOffsetClock = new OffsetCorrectionClock(platformOffsetClock, pauseFreqAdjust);
+            userBeatmapOffsetClock = new OffsetCorrectionClock(userGlobalOffsetClock, pauseFreqAdjust);
 
             return masterGameplayClock = new MasterGameplayClock(userBeatmapOffsetClock);
         }
@@ -257,51 +257,6 @@ namespace osu.Game.Screens.Play
         IClock IBeatSyncProvider.Clock => GameplayClock;
         ChannelAmplitudes? IBeatSyncProvider.Amplitudes => beatmap.TrackLoaded ? beatmap.Track.CurrentAmplitudes : null;
 
-        private class HardwareCorrectionOffsetClock : FramedOffsetClock
-        {
-            private readonly BindableDouble pauseRateAdjust;
-
-            private double offset;
-
-            public new double Offset
-            {
-                get => offset;
-                set
-                {
-                    if (value == offset)
-                        return;
-
-                    offset = value;
-
-                    updateOffset();
-                }
-            }
-
-            public double RateAdjustedOffset => base.Offset;
-
-            public HardwareCorrectionOffsetClock(IClock source, BindableDouble pauseRateAdjust)
-                : base(source)
-            {
-                this.pauseRateAdjust = pauseRateAdjust;
-            }
-
-            public override void ProcessFrame()
-            {
-                base.ProcessFrame();
-                updateOffset();
-            }
-
-            private void updateOffset()
-            {
-                // changing this during the pause transform effect will cause a potentially large offset to be suddenly applied as we approach zero rate.
-                if (pauseRateAdjust.Value == 1)
-                {
-                    // we always want to apply the same real-time offset, so it should be adjusted by the difference in playback rate (from realtime) to achieve this.
-                    base.Offset = Offset * Rate;
-                }
-            }
-        }
-
         private class MasterGameplayClock : GameplayClock
         {
             public readonly List<Bindable<double>> MutableNonGameplayAdjustments = new List<Bindable<double>>();
@@ -310,6 +265,51 @@ namespace osu.Game.Screens.Play
             public MasterGameplayClock(FramedOffsetClock underlyingClock)
                 : base(underlyingClock)
             {
+            }
+        }
+    }
+
+    public class OffsetCorrectionClock : FramedOffsetClock
+    {
+        private readonly BindableDouble pauseRateAdjust;
+
+        private double offset;
+
+        public new double Offset
+        {
+            get => offset;
+            set
+            {
+                if (value == offset)
+                    return;
+
+                offset = value;
+
+                updateOffset();
+            }
+        }
+
+        public double RateAdjustedOffset => base.Offset;
+
+        public OffsetCorrectionClock(IClock source, BindableDouble pauseRateAdjust)
+            : base(source)
+        {
+            this.pauseRateAdjust = pauseRateAdjust;
+        }
+
+        public override void ProcessFrame()
+        {
+            base.ProcessFrame();
+            updateOffset();
+        }
+
+        private void updateOffset()
+        {
+            // changing this during the pause transform effect will cause a potentially large offset to be suddenly applied as we approach zero rate.
+            if (pauseRateAdjust.Value == 1)
+            {
+                // we always want to apply the same real-time offset, so it should be adjusted by the difference in playback rate (from realtime) to achieve this.
+                base.Offset = Offset * Rate;
             }
         }
     }

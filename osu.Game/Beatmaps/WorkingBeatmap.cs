@@ -13,13 +13,16 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using osu.Framework.Audio;
 using osu.Framework.Audio.Track;
+using osu.Framework.Bindables;
 using osu.Framework.Extensions;
 using osu.Framework.Graphics.Textures;
 using osu.Framework.Logging;
 using osu.Framework.Testing;
+using osu.Framework.Timing;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.UI;
+using osu.Game.Screens.Play;
 using osu.Game.Skinning;
 using osu.Game.Storyboards;
 
@@ -65,6 +68,10 @@ namespace osu.Game.Beatmaps
             skin = new Lazy<ISkin>(GetSkin);
         }
 
+        public IFrameBasedClock Clock => clock ??= GetClock();
+
+        private IFrameBasedClock clock;
+
         #region Resource getters
 
         protected virtual Waveform GetWaveform() => new Waveform(null);
@@ -73,6 +80,19 @@ namespace osu.Game.Beatmaps
         protected abstract IBeatmap GetBeatmap();
         protected abstract Texture GetBackground();
         protected abstract Track GetBeatmapTrack();
+
+        protected virtual IFrameBasedClock GetClock()
+        {
+            BindableDouble pauseFreqAdjust = new BindableDouble();
+
+            // the final usable gameplay clock with user-set offsets applied.
+            var userGlobalOffsetClock = new OffsetCorrectionClock(Track, pauseFreqAdjust);
+
+            // todo: bind with realm
+            var userBeatmapOffsetClock = new OffsetCorrectionClock(userGlobalOffsetClock, pauseFreqAdjust);
+
+            return userBeatmapOffsetClock;
+        }
 
         /// <summary>
         /// Creates a new skin instance for this beatmap.

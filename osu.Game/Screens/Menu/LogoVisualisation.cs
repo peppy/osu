@@ -104,7 +104,7 @@ namespace osu.Game.Screens.Menu
         private void updateAmplitudes()
         {
             var effect = beatmap.Value.BeatmapLoaded && beatmap.Value.TrackLoaded
-                ? beatmap.Value.Beatmap?.ControlPointInfo.EffectPointAt(beatmap.Value.Track.CurrentTime)
+                ? beatmap.Value.Beatmap?.ControlPointInfo.EffectPointAt(beatmap.Value.Clock.CurrentTime)
                 : null;
 
             for (int i = 0; i < temporalAmplitudes.Length; i++)
