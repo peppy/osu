@@ -102,11 +102,17 @@ namespace osu.Game
 
             realmAccess.Run(r =>
             {
+                HashSet<Guid> updateable = new HashSet<Guid>();
+
                 foreach (var b in r.All<BeatmapInfo>().Where(b => b.StarRating < 0 || (b.OnlineID > 0 && b.LastOnlineUpdate == null)))
                 {
                     Debug.Assert(b.BeatmapSet != null);
-                    beatmapSetIds.Add(b.BeatmapSet.ID);
+                    updateable.Add(b.BeatmapSet.ID);
                 }
+
+                const int ranked_status_int = (int)BeatmapOnlineStatus.Ranked;
+                foreach (var s in r.All<BeatmapSetInfo>().Where(s => s.StatusInt >= ranked_status_int && s.DateRanked == null))
+                    beatmapSetIds.Add(s.ID);
             });
 
             Logger.Log($"Found {beatmapSetIds.Count} beatmap sets which require reprocessing.");
