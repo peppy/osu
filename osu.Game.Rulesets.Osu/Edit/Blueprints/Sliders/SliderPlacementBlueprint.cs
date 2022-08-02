@@ -97,6 +97,23 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders
             }
         }
 
+        protected override bool OnTouchDown(TouchDownEvent e)
+        {
+            if (e.CurrentState.Touch.ActiveSources.Count() > 1)
+                return true;
+
+            beginCurve();
+            return true;
+        }
+
+        protected override void OnTouchUp(TouchUpEvent e)
+        {
+            if (e.CurrentState.Touch.ActiveSources.Any())
+                return;
+
+            attemptBodyPointPlacement();
+        }
+
         protected override bool OnMouseDown(MouseDownEvent e)
         {
             if (e.Button != MouseButton.Left)
@@ -109,27 +126,31 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders
                     break;
 
                 case SliderPlacementState.Body:
-                    if (canPlaceNewControlPoint(out var lastPoint))
-                    {
-                        // Place a new point by detatching the current cursor.
-                        updateCursor();
-                        cursor = null;
-                    }
-                    else
-                    {
-                        // Transform the last point into a new segment.
-                        Debug.Assert(lastPoint != null);
-
-                        segmentStart = lastPoint;
-                        segmentStart.Type = PathType.Linear;
-
-                        currentSegmentLength = 1;
-                    }
-
+                    attemptBodyPointPlacement();
                     break;
             }
 
             return true;
+        }
+
+        private void attemptBodyPointPlacement()
+        {
+            if (canPlaceNewControlPoint(out var lastPoint))
+            {
+                // Place a new point by detaching the current cursor.
+                updateCursor();
+                cursor = null;
+            }
+            else
+            {
+                // Transform the last point into a new segment.
+                Debug.Assert(lastPoint != null);
+
+                segmentStart = lastPoint;
+                segmentStart.Type = PathType.Linear;
+
+                currentSegmentLength = 1;
+            }
         }
 
         protected override void OnMouseUp(MouseUpEvent e)
