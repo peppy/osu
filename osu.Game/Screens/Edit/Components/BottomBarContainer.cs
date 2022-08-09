@@ -50,7 +50,6 @@ namespace osu.Game.Screens.Edit.Components
         private void load(IBindable<WorkingBeatmap> beatmap, EditorClock clock)
         {
             Beatmap.BindTo(beatmap);
-            Track.BindTo(clock.Track);
         }
     }
 }

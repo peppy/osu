@@ -24,21 +24,17 @@ namespace osu.Game.Tests.Visual
 
         protected readonly BindableBeatDivisor BeatDivisor = new BindableBeatDivisor();
 
-        [Cached]
-        protected new readonly EditorClock Clock;
+        protected new EditorClock Clock;
 
         private readonly Bindable<double> frequencyAdjustment = new BindableDouble(1);
 
         protected virtual bool ScrollUsingMouseWheel => true;
 
-        protected EditorClockTestScene()
-        {
-            Clock = new EditorClock(new Beatmap(), BeatDivisor) { IsCoupled = false };
-        }
-
         protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent)
         {
             var dependencies = new DependencyContainer(base.CreateChildDependencies(parent));
+
+            Add(Clock = new EditorClock(new Beatmap(), BeatDivisor));
 
             dependencies.Cache(BeatDivisor);
             dependencies.CacheAs(Clock);
@@ -60,8 +56,6 @@ namespace osu.Game.Tests.Visual
             e.OldValue?.Track.RemoveAdjustment(AdjustableProperty.Frequency, frequencyAdjustment);
 
             Clock.Beatmap = e.NewValue.Beatmap;
-            Clock.ChangeSource(e.NewValue.Track);
-            Clock.ProcessFrame();
 
             e.NewValue.Track.AddAdjustment(AdjustableProperty.Frequency, frequencyAdjustment);
         }
