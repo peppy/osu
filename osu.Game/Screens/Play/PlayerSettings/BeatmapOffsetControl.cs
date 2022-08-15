@@ -190,7 +190,7 @@ namespace osu.Game.Screens.Play.PlayerSettings
 
             var hitEvents = score.NewValue.HitEvents;
 
-            if (!(hitEvents.CalculateAverageHitError() is double average))
+            if (!(hitEvents.CalculateMedianHitError() is double average))
                 return;
 
             referenceScoreContainer.Children = new Drawable[]
