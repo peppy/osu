@@ -47,6 +47,12 @@ namespace osu.Game.Beatmaps
         [Resolved]
         private IBindable<WorkingBeatmap> beatmap { get; set; } = null!;
 
+        public bool IsCoupled
+        {
+            get => decoupledClock.IsCoupled;
+            set => decoupledClock.IsCoupled = value;
+        }
+
         public FramedBeatmapClock(IClock? sourceClock = null)
         {
             // TODO: Unused for now?

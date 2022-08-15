@@ -39,6 +39,18 @@ namespace osu.Game.Screens.Edit
         [Resolved]
         private FramedBeatmapClock underlyingClock { get; set; }
 
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+            underlyingClock.IsCoupled = false;
+        }
+
+        protected override void Dispose(bool isDisposing)
+        {
+            base.Dispose(isDisposing);
+            underlyingClock.IsCoupled = true;
+        }
+
         /// <summary>
         /// Whether a seek is currently in progress. True for the duration of a seek performed via <see cref="SeekSmoothlyTo"/>.
         /// </summary>
