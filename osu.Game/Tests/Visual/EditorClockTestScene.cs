@@ -17,7 +17,7 @@ namespace osu.Game.Tests.Visual
 {
     /// <summary>
     /// Provides a clock, beat-divisor, and scrolling capability for test cases of editor components that
-    /// are preferrably tested within the presence of a clock and seek controls.
+    /// are preferably tested within the presence of a clock and seek controls.
     /// </summary>
     public abstract class EditorClockTestScene : OsuManualInputManagerTestScene
     {
@@ -58,21 +58,14 @@ namespace osu.Game.Tests.Visual
         protected override void LoadComplete()
         {
             Beatmap.Value = CreateWorkingBeatmap(editorClockBeatmap);
+            Beatmap.Value.Track.AddAdjustment(AdjustableProperty.Frequency, frequencyAdjustment);
 
             base.LoadComplete();
-
-            Beatmap.BindValueChanged(beatmapChanged, true);
 
             AddSliderStep("editor clock rate", 0.0, 2.0, 1.0, v => frequencyAdjustment.Value = v);
         }
 
         protected virtual IBeatmap CreateEditorClockBeatmap() => new Beatmap();
-
-        private void beatmapChanged(ValueChangedEvent<WorkingBeatmap> e)
-        {
-            e.OldValue?.Track.RemoveAdjustment(AdjustableProperty.Frequency, frequencyAdjustment);
-            e.NewValue.Track.AddAdjustment(AdjustableProperty.Frequency, frequencyAdjustment);
-        }
 
         protected override bool OnScroll(ScrollEvent e)
         {
