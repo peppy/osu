@@ -28,6 +28,11 @@ namespace osu.Game.Tests.Visual.Editing
         {
             base.LoadComplete();
 
+            Child = new TimingPointVisualiser(Beatmap.Value.Beatmap, 5000) { Clock = Clock };
+        }
+
+        protected override Beatmap CreateEditorClockBeatmap()
+        {
             var testBeatmap = new Beatmap
             {
                 ControlPointInfo = new ControlPointInfo(),
@@ -45,9 +50,7 @@ namespace osu.Game.Tests.Visual.Editing
             testBeatmap.ControlPointInfo.Add(450, new TimingControlPoint { BeatLength = 100 });
             testBeatmap.ControlPointInfo.Add(500, new TimingControlPoint { BeatLength = 307.69230769230802 });
 
-            Beatmap.Value = CreateWorkingBeatmap(testBeatmap);
-
-            Child = new TimingPointVisualiser(testBeatmap, 5000) { Clock = Clock };
+            return testBeatmap;
         }
 
         /// <summary>
@@ -300,7 +303,7 @@ namespace osu.Game.Tests.Visual.Editing
             checkTime(0);
         }
 
-        private void checkTime(double expectedTime) => AddAssert($"Current time is {expectedTime}", () => Clock.CurrentTime, () => Is.EqualTo(expectedTime));
+        private void checkTime(double expectedTime) => AddUntilStep($"Current time is {expectedTime}", () => Clock.CurrentTime, () => Is.EqualTo(expectedTime));
 
         private void reset()
         {

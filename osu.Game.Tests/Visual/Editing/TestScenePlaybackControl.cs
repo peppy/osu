@@ -19,7 +19,7 @@ namespace osu.Game.Tests.Visual.Editing
         [BackgroundDependencyLoader]
         private void load()
         {
-            var clock = new EditorClock { IsCoupled = false };
+            var clock = new EditorClock();
             Dependencies.CacheAs(clock);
 
             var playback = new PlaybackControl

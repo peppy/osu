@@ -6,6 +6,8 @@
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Bindables;
+using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Input.Events;
 using osu.Game.Beatmaps;
 using osu.Game.Overlays;
@@ -15,7 +17,7 @@ namespace osu.Game.Tests.Visual
 {
     /// <summary>
     /// Provides a clock, beat-divisor, and scrolling capability for test cases of editor components that
-    /// are preferrably tested within the presence of a clock and seek controls.
+    /// are preferably tested within the presence of a clock and seek controls.
     /// </summary>
     public abstract class EditorClockTestScene : OsuManualInputManagerTestScene
     {
@@ -24,21 +26,29 @@ namespace osu.Game.Tests.Visual
 
         protected readonly BindableBeatDivisor BeatDivisor = new BindableBeatDivisor();
 
-        [Cached]
-        protected new readonly EditorClock Clock;
+        // TODO: rename to EditorClock when all is said and done.
+        protected new EditorClock Clock;
 
         private readonly Bindable<double> frequencyAdjustment = new BindableDouble(1);
 
+        private IBeatmap editorClockBeatmap;
         protected virtual bool ScrollUsingMouseWheel => true;
 
-        protected EditorClockTestScene()
-        {
-            Clock = new EditorClock(new Beatmap(), BeatDivisor) { IsCoupled = false };
-        }
+        protected override Container<Drawable> Content => content;
+
+        private readonly Container<Drawable> content = new Container { RelativeSizeAxes = Axes.Both };
 
         protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent)
         {
             var dependencies = new DependencyContainer(base.CreateChildDependencies(parent));
+
+            editorClockBeatmap = CreateEditorClockBeatmap();
+
+            base.Content.AddRange(new Drawable[]
+            {
+                Clock = new EditorClock(editorClockBeatmap, BeatDivisor),
+                content
+            });
 
             dependencies.Cache(BeatDivisor);
             dependencies.CacheAs(Clock);
@@ -48,6 +58,8 @@ namespace osu.Game.Tests.Visual
 
         protected override void LoadComplete()
         {
+            Beatmap.Value = CreateWorkingBeatmap(editorClockBeatmap);
+
             base.LoadComplete();
 
             Beatmap.BindValueChanged(beatmapChanged, true);
@@ -55,22 +67,12 @@ namespace osu.Game.Tests.Visual
             AddSliderStep("editor clock rate", 0.0, 2.0, 1.0, v => frequencyAdjustment.Value = v);
         }
 
+        protected virtual IBeatmap CreateEditorClockBeatmap() => new Beatmap();
+
         private void beatmapChanged(ValueChangedEvent<WorkingBeatmap> e)
         {
             e.OldValue?.Track.RemoveAdjustment(AdjustableProperty.Frequency, frequencyAdjustment);
-
-            Clock.Beatmap = e.NewValue.Beatmap;
-            Clock.ChangeSource(e.NewValue.Track);
-            Clock.ProcessFrame();
-
             e.NewValue.Track.AddAdjustment(AdjustableProperty.Frequency, frequencyAdjustment);
-        }
-
-        protected override void Update()
-        {
-            base.Update();
-
-            Clock.ProcessFrame();
         }
 
         protected override bool OnScroll(ScrollEvent e)
