@@ -9,6 +9,7 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Testing;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics.Cursor;
 using osu.Game.Graphics.UserInterface;
@@ -68,11 +69,11 @@ namespace osu.Game.Tests.Visual.Editing
             });
         }
 
-        protected override void LoadComplete()
+        [SetUpSteps]
+        public void SetUpSteps()
         {
-            base.LoadComplete();
-
-            EditorClock.Seek(2500);
+            AddUntilStep("wait for load", () => MusicController.TrackLoaded);
+            AddStep("seek into track", () => EditorClock.Seek(2500));
         }
 
         public abstract Drawable CreateTestComponent();
