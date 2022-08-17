@@ -31,7 +31,7 @@ namespace osu.Game.Tests.Visual.Editing
             Child = new TimingPointVisualiser(Beatmap.Value.Beatmap, 5000) { Clock = EditorClock };
         }
 
-        protected override Beatmap CreateEditorClockBeatmap()
+        protected override IBeatmap CreateEditorClockBeatmap()
         {
             var testBeatmap = new Beatmap
             {
