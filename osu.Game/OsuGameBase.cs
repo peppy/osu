@@ -149,6 +149,9 @@ namespace osu.Game
         protected Bindable<WorkingBeatmap> Beatmap { get; private set; } // cached via load() method
 
         [Cached]
+        private readonly FramedBeatmapClock beatmapClock = new FramedBeatmapClock();
+
+        [Cached]
         [Cached(typeof(IBindable<RulesetInfo>))]
         protected readonly Bindable<RulesetInfo> Ruleset = new Bindable<RulesetInfo>();
 
@@ -368,6 +371,9 @@ namespace osu.Game
             AddInternal(MusicController = new MusicController());
             dependencies.CacheAs(MusicController);
 
+            AddInternal(beatmapClock);
+            MusicController.TrackChanged += (beatmap, _) => { beatmapClock.ChangeSource(beatmap.Track); };
+
             Ruleset.BindValueChanged(onRulesetChanged);
             Beatmap.BindValueChanged(onBeatmapChanged);
         }
@@ -586,8 +592,8 @@ namespace osu.Game
                 Host.ExceptionThrown -= onExceptionThrown;
         }
 
+        IClock IBeatSyncProvider.Clock => beatmapClock;
         ControlPointInfo IBeatSyncProvider.ControlPoints => Beatmap.Value.BeatmapLoaded ? Beatmap.Value.Beatmap.ControlPointInfo : null;
-        IClock IBeatSyncProvider.Clock => Beatmap.Value.TrackLoaded ? Beatmap.Value.Track : (IClock)null;
-        ChannelAmplitudes IHasAmplitudes.CurrentAmplitudes => Beatmap.Value.TrackLoaded ? Beatmap.Value.Track.CurrentAmplitudes : ChannelAmplitudes.Empty;
+        ChannelAmplitudes IHasAmplitudes.CurrentAmplitudes => MusicController.TrackLoaded ? MusicController.CurrentTrack.CurrentAmplitudes : ChannelAmplitudes.Empty;
     }
 }
