@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using osu.Framework.Logging;
 using osu.Framework.Timing;
 using osu.Game.Screens.Play;
 
@@ -79,6 +80,8 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
             {
                 double elapsedSource = masterClock.ElapsedFrameTime;
                 double elapsed = elapsedSource * Rate;
+
+                Logger.Log($"SpectatorPlayerClock current: {CurrentTime} elapsed: {elapsed}");
 
                 CurrentTime += elapsed;
                 ElapsedFrameTime = elapsed;

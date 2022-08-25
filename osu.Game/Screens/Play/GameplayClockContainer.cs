@@ -110,7 +110,7 @@ namespace osu.Game.Screens.Play
         /// <param name="time">The destination time to seek to.</param>
         public virtual void Seek(double time)
         {
-            Logger.Log($"{nameof(GameplayClockContainer)} seeking to {time}");
+            Logger.Log($"{nameof(GameplayClockContainer)}({SourceClock.GetType().Name}#{SourceClock.GetHashCode().ToString().Substring(0, 3)}) seeking to {time}");
 
             decoupledClock.Seek(time);
 

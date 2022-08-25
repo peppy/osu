@@ -76,6 +76,8 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
         public void RemoveManagedClock(SpectatorPlayerClock clock)
         {
             playerClocks.Remove(clock);
+
+            Logger.Log($"{nameof(SpectatorPlayerClock.IsRunning)} on player set to false due to managed clock removal");
             clock.IsRunning = false;
         }
 
@@ -85,9 +87,14 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
 
             if (!attemptStart())
             {
+                Logger.Log($"{nameof(SpectatorPlayerClock.IsRunning)} on all players set to false due to start attempt failure");
+
                 // Ensure all player clocks are stopped until the start succeeds.
                 foreach (var clock in playerClocks)
+                {
                     clock.IsRunning = false;
+                }
+
                 return;
             }
 
@@ -134,9 +141,13 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
         /// </summary>
         private void updatePlayerCatchup()
         {
+            Logger.Log($"{nameof(SpectatorSyncManager)} master clock running: {masterClock.IsRunning} time: {masterClock.CurrentTime:N0}");
+
             for (int i = 0; i < playerClocks.Count; i++)
             {
                 var clock = playerClocks[i];
+
+                Logger.Log($"clock {i}: {clock.CurrentTime:N0}");
 
                 // How far this player's clock is out of sync, compared to the master clock.
                 // A negative value means the player is running fast (ahead); a positive value means the player is running behind (catching up).
@@ -150,11 +161,18 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
                     // when it is required to be running (ie. if all players are ahead of the master).
                     clock.IsCatchingUp = false;
                     clock.IsRunning = false;
+                    Logger.Log($"{nameof(clock.IsRunning)} on player {i} set to false due to being too far ahead of sync target ({timeDelta} < {-SYNC_TARGET})");
                     continue;
                 }
 
                 // Make sure the player clock is running if it can.
-                clock.IsRunning = !clock.WaitingOnFrames;
+                bool hasFrames = !clock.WaitingOnFrames;
+
+                if (clock.IsRunning != hasFrames)
+                {
+                    Logger.Log($"{nameof(clock.IsRunning)} on player {i} set to {hasFrames} due to change in frame availability");
+                    clock.IsRunning = hasFrames;
+                }
 
                 if (clock.IsCatchingUp)
                 {
