@@ -5,6 +5,8 @@ using System.Diagnostics;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Logging;
+using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
 
@@ -23,16 +25,21 @@ namespace osu.Game.Rulesets.Osu.Skinning
         [BackgroundDependencyLoader]
         private void load()
         {
-            ((DrawableSlider?)ParentObject)?.Tracking.BindValueChanged(tracking =>
+            var drawableSlider = ((DrawableSlider?)ParentObject);
+
+            drawableSlider?.Tracking.BindValueChanged(tracking =>
             {
                 Debug.Assert(ParentObject != null);
                 if (ParentObject.Judged)
                     return;
 
-                if (tracking.NewValue)
-                    OnSliderPress();
-                else
-                    OnSliderRelease();
+                if (Time.Current >= drawableSlider.StateUpdateTime && Time.Current <= drawableSlider.HitObject.GetEndTime())
+                {
+                    if (tracking.NewValue)
+                        OnSliderPress();
+                    else
+                        OnSliderRelease();
+                }
             }, true);
         }
 
@@ -42,18 +49,9 @@ namespace osu.Game.Rulesets.Osu.Skinning
 
             if (ParentObject != null)
             {
-                ParentObject.HitObjectApplied += onHitObjectApplied;
-                onHitObjectApplied(ParentObject);
-
                 ParentObject.ApplyCustomUpdateState += updateStateTransforms;
                 updateStateTransforms(ParentObject, ParentObject.State.Value);
             }
-        }
-
-        private void onHitObjectApplied(DrawableHitObject drawableObject)
-        {
-            this.ScaleTo(1f)
-                .FadeOut();
         }
 
         private void updateStateTransforms(DrawableHitObject drawableObject, ArmedState state)
@@ -62,6 +60,26 @@ namespace osu.Game.Rulesets.Osu.Skinning
 
             switch (state)
             {
+                case ArmedState.Idle:
+                    switch (drawableObject)
+                    {
+                        case DrawableSliderHead:
+                            using (BeginAbsoluteSequence(ParentObject.StateUpdateTime))
+                            {
+                                Logger.Log($"Resetting at time {ParentObject.StateUpdateTime}");
+                                ClearTransformsAfter(ParentObject.StateUpdateTime, true);
+                                this.ScaleTo(1)
+                                    .FadeOut();
+
+                                if ((drawableObject as DrawableSlider)?.Tracking.Value == true)
+                                    OnSliderPress();
+                            }
+
+                            break;
+                    }
+
+                    break;
+
                 case ArmedState.Hit:
                     switch (drawableObject)
                     {
@@ -70,13 +88,21 @@ namespace osu.Game.Rulesets.Osu.Skinning
                             // HitStateUpdateTime is ~36ms before the actual slider end (aka slider
                             // tail leniency)
                             using (BeginAbsoluteSequence(ParentObject.HitStateUpdateTime))
+                            {
+                                Logger.Log($"[TAIL] Applying slider end transforms at {ParentObject.HitStateUpdateTime}");
                                 OnSliderEnd();
+                            }
+
                             break;
 
                         case DrawableSliderTick:
                         case DrawableSliderRepeat:
                             using (BeginAbsoluteSequence(drawableObject.HitStateUpdateTime))
+                            {
+                                Logger.Log($"[TICK / REPEAT] Applying slider end transforms at {drawableObject.HitStateUpdateTime}");
                                 OnSliderTick();
+                            }
+
                             break;
                     }
 
@@ -92,7 +118,11 @@ namespace osu.Game.Rulesets.Osu.Skinning
                             // here, since on stable, the break anim plays right when the tail is
                             // missed, not when the slider ends
                             using (BeginAbsoluteSequence(drawableObject.HitStateUpdateTime))
+                            {
+                                Logger.Log($"[MISS] Applying slider end transforms at {drawableObject.HitStateUpdateTime}");
                                 OnSliderBreak();
+                            }
+
                             break;
                     }
 
@@ -106,7 +136,6 @@ namespace osu.Game.Rulesets.Osu.Skinning
 
             if (ParentObject != null)
             {
-                ParentObject.HitObjectApplied -= onHitObjectApplied;
                 ParentObject.ApplyCustomUpdateState -= updateStateTransforms;
             }
         }

@@ -31,6 +31,17 @@ namespace osu.Game.Rulesets.Osu.Tests
         private int depthIndex;
 
         [Test]
+        public void TestTracking()
+        {
+            AddStep("Big Single", () => SetContents(_ =>
+            {
+                var simpleBig = testSimpleBig();
+                simpleBig.Tracking.Value = true;
+                return simpleBig;
+            }));
+        }
+
+        [Test]
         public void TestVariousSliders()
         {
             AddStep("Big Single", () => SetContents(_ => testSimpleBig()));
@@ -90,7 +101,7 @@ namespace osu.Game.Rulesets.Osu.Tests
 
             AddStep("create slider", () =>
             {
-                slider = (DrawableSlider)createSlider(repeats: 1);
+                slider = createSlider(repeats: 1);
                 Add(slider);
             });
 
@@ -105,7 +116,7 @@ namespace osu.Game.Rulesets.Osu.Tests
 
             AddStep("create slider", () =>
             {
-                slider = (DrawableSlider)createSlider(repeats: 1);
+                slider = createSlider(repeats: 1);
                 Add(slider);
             });
 
@@ -136,7 +147,7 @@ namespace osu.Game.Rulesets.Osu.Tests
 
             AddStep("create slider", () =>
             {
-                slider = (DrawableSlider)createSlider(repeats: 1);
+                slider = createSlider(repeats: 1);
 
                 for (int i = 0; i < 2; i++)
                     slider.HitObject.NodeSamples.Add(new List<HitSampleInfo> { new HitSampleInfo(HitSampleInfo.HIT_FINISH) });
@@ -160,7 +171,7 @@ namespace osu.Game.Rulesets.Osu.Tests
             static bool assertSamples(HitObject hitObject) => hitObject.Samples.All(s => s.Name != HitSampleInfo.HIT_CLAP && s.Name != HitSampleInfo.HIT_WHISTLE);
         }
 
-        private Drawable testSimpleBig(int repeats = 0) => createSlider(2, repeats: repeats);
+        private DrawableSlider testSimpleBig(int repeats = 0) => createSlider(2, repeats: repeats);
 
         private Drawable testSimpleBigLargeStackOffset(int repeats = 0) => createSlider(2, repeats: repeats, stackHeight: 10);
 
@@ -199,7 +210,7 @@ namespace osu.Game.Rulesets.Osu.Tests
 
         private const float max_length = 200;
 
-        private Drawable createSlider(float circleSize = 2, float distance = max_length, int repeats = 0, double speedMultiplier = 2, int stackHeight = 0)
+        private DrawableSlider createSlider(float circleSize = 2, float distance = max_length, int repeats = 0, double speedMultiplier = 2, int stackHeight = 0)
         {
             var slider = new Slider
             {
@@ -329,7 +340,7 @@ namespace osu.Game.Rulesets.Osu.Tests
             return createDrawable(slider, 3, 1);
         }
 
-        private Drawable createDrawable(Slider slider, float circleSize, double speedMultiplier)
+        private DrawableSlider createDrawable(Slider slider, float circleSize, double speedMultiplier)
         {
             var cpi = new LegacyControlPointInfo();
             cpi.Add(0, new DifficultyControlPoint { SliderVelocity = speedMultiplier });
