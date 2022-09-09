@@ -1,46 +1,59 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using osu.Framework.Graphics;
 using osu.Game.Graphics.Sprites;
-using System;
 using osu.Framework.Allocation;
-using osu.Framework.Timing;
+using osu.Game.Extensions;
 using osu.Game.Graphics;
+using osu.Game.Overlays;
+using osuTK;
 
 namespace osu.Game.Screens.Edit.Components
 {
     public class TimeInfoContainer : BottomBarContainer
     {
-        private readonly OsuSpriteText trackTimer;
+        private OsuSpriteText trackTimer;
+        private OsuSpriteText bpm;
 
-        private IAdjustableClock adjustableClock;
+        [Resolved]
+        private EditorBeatmap editorBeatmap { get; set; }
 
-        public TimeInfoContainer()
+        [Resolved]
+        private EditorClock editorClock { get; set; }
+
+        [BackgroundDependencyLoader]
+        private void load(OsuColour colours, OverlayColourProvider colourProvider)
         {
+            Background.Colour = colourProvider.Background5;
+
             Children = new Drawable[]
             {
                 trackTimer = new OsuSpriteText
                 {
-                    Origin = Anchor.BottomLeft,
-                    RelativePositionAxes = Axes.Y,
-                    Font = OsuFont.GetFont(size: 22, fixedWidth: true),
-                    Y = 0.5f,
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreLeft,
+                    Spacing = new Vector2(-2, 0),
+                    Font = OsuFont.Torus.With(size: 36, fixedWidth: true, weight: FontWeight.Light),
+                    Y = -10,
+                },
+                bpm = new OsuSpriteText
+                {
+                    Colour = colours.Orange1,
+                    Anchor = Anchor.CentreLeft,
+                    Font = OsuFont.Torus.With(size: 18, weight: FontWeight.SemiBold),
+                    Position = new Vector2(2, 5),
                 }
             };
-        }
-
-        [BackgroundDependencyLoader]
-        private void load(IAdjustableClock adjustableClock)
-        {
-            this.adjustableClock = adjustableClock;
         }
 
         protected override void Update()
         {
             base.Update();
-
-            trackTimer.Text = TimeSpan.FromMilliseconds(adjustableClock.CurrentTime).ToString(@"mm\:ss\:fff");
+            trackTimer.Text = editorClock.CurrentTime.ToEditorFormattedString();
+            bpm.Text = @$"{editorBeatmap.ControlPointInfo.TimingPointAt(editorClock.CurrentTime).BPM:0} BPM";
         }
     }
 }

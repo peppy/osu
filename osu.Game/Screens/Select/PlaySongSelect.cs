@@ -1,21 +1,33 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
+using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Input.Events;
 using osu.Framework.Screens;
 using osu.Game.Graphics;
+using osu.Game.Overlays;
+using osu.Game.Overlays.Notifications;
+using osu.Game.Rulesets.Mods;
+using osu.Game.Scoring;
 using osu.Game.Screens.Play;
+using osu.Game.Screens.Ranking;
 using osu.Game.Users;
+using osu.Game.Utils;
 using osuTK.Input;
 
 namespace osu.Game.Screens.Select
 {
     public class PlaySongSelect : SongSelect
     {
-        private bool removeAutoModOnResume;
-        private OsuScreen player;
+        private OsuScreen playerLoader;
+
+        [Resolved(CanBeNull = true)]
+        private INotificationOverlay notifications { get; set; }
 
         public override bool AllowExternalScreenChange => true;
 
@@ -24,56 +36,90 @@ namespace osu.Game.Screens.Select
         [BackgroundDependencyLoader]
         private void load(OsuColour colours)
         {
-            BeatmapOptions.AddButton(@"Edit", @"beatmap", FontAwesome.Solid.PencilAlt, colours.Yellow, () =>
-            {
-                ValidForResume = false;
-                Edit();
-            }, Key.Number3);
+            BeatmapOptions.AddButton(@"Edit", @"beatmap", FontAwesome.Solid.PencilAlt, colours.Yellow, () => Edit());
+
+            ((PlayBeatmapDetailArea)BeatmapDetails).Leaderboard.ScoreSelected += PresentScore;
         }
 
-        public override void OnResuming(IScreen last)
-        {
-            player = null;
+        protected void PresentScore(ScoreInfo score) =>
+            FinaliseSelection(score.BeatmapInfo, score.Ruleset, () => this.Push(new SoloResultsScreen(score, false)));
 
-            if (removeAutoModOnResume)
+        protected override BeatmapDetailArea CreateBeatmapDetailArea() => new PlayBeatmapDetailArea();
+
+        protected override bool OnKeyDown(KeyDownEvent e)
+        {
+            switch (e.Key)
             {
-                var autoType = Ruleset.Value.CreateInstance().GetAutoplayMod().GetType();
-                ModSelect.DeselectTypes(new[] { autoType }, true);
-                removeAutoModOnResume = false;
+                case Key.Enter:
+                case Key.KeypadEnter:
+                    // this is a special hard-coded case; we can't rely on OnPressed (of SongSelect) as GlobalActionContainer is
+                    // matching with exact modifier consideration (so Ctrl+Enter would be ignored).
+                    FinaliseSelection();
+                    return true;
             }
 
-            base.OnResuming(last);
+            return base.OnKeyDown(e);
         }
+
+        private IReadOnlyList<Mod> modsAtGameplayStart;
+
+        private ModAutoplay getAutoplayMod() => Ruleset.Value.CreateInstance().GetAutoplayMod();
 
         protected override bool OnStart()
         {
-            if (player != null) return false;
+            if (playerLoader != null) return false;
+
+            modsAtGameplayStart = Mods.Value;
 
             // Ctrl+Enter should start map with autoplay enabled.
             if (GetContainingInputManager().CurrentState?.Keyboard.ControlPressed == true)
             {
-                var auto = Ruleset.Value.CreateInstance().GetAutoplayMod();
-                var autoType = auto.GetType();
+                var autoInstance = getAutoplayMod();
 
-                var mods = Mods.Value;
-
-                if (mods.All(m => m.GetType() != autoType))
+                if (autoInstance == null)
                 {
-                    Mods.Value = mods.Append(auto).ToArray();
-                    removeAutoModOnResume = true;
+                    notifications?.Post(new SimpleNotification
+                    {
+                        Text = "The current ruleset doesn't have an autoplay mod avalaible!"
+                    });
+                    return false;
                 }
-            }
 
-            Beatmap.Value.Track.Looping = false;
+                var mods = Mods.Value.Append(autoInstance).ToArray();
+
+                if (!ModUtils.CheckCompatibleSet(mods, out var invalid))
+                    mods = mods.Except(invalid).Append(autoInstance).ToArray();
+
+                Mods.Value = mods;
+            }
 
             SampleConfirm?.Play();
 
-            LoadComponentAsync(player = new PlayerLoader(() => new Player { Leaderboard = BeatmapDetails.Leaderboard }), l =>
-            {
-                if (this.IsCurrentScreen()) this.Push(player);
-            });
-
+            this.Push(playerLoader = new PlayerLoader(createPlayer));
             return true;
+
+            Player createPlayer()
+            {
+                var replayGeneratingMod = Mods.Value.OfType<ICreateReplayData>().FirstOrDefault();
+
+                if (replayGeneratingMod != null)
+                {
+                    return new ReplayPlayer((beatmap, mods) => replayGeneratingMod.CreateScoreFromReplayData(beatmap, mods));
+                }
+
+                return new SoloPlayer();
+            }
+        }
+
+        public override void OnResuming(ScreenTransitionEvent e)
+        {
+            base.OnResuming(e);
+
+            if (playerLoader != null)
+            {
+                Mods.Value = modsAtGameplayStart;
+                playerLoader = null;
+            }
         }
     }
 }

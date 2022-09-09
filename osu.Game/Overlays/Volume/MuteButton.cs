@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -43,6 +45,7 @@ namespace osu.Game.Overlays.Volume
         {
             Content.BorderThickness = 3;
             Content.CornerRadius = HEIGHT / 2;
+            Content.CornerExponent = 2;
 
             Size = new Vector2(width, HEIGHT);
 
@@ -65,27 +68,26 @@ namespace osu.Game.Overlays.Volume
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    Size = new Vector2(20),
                 }
             });
 
-            Current.ValueChanged += muted =>
+            Current.BindValueChanged(muted =>
             {
                 icon.Icon = muted.NewValue ? FontAwesome.Solid.VolumeMute : FontAwesome.Solid.VolumeUp;
-            };
-
-            Current.TriggerChange();
+                icon.Size = new Vector2(muted.NewValue ? 18 : 20);
+                icon.Margin = new MarginPadding { Right = muted.NewValue ? 2 : 0 };
+            }, true);
         }
 
         protected override bool OnHover(HoverEvent e)
         {
-            Content.TransformTo<Container<Drawable>, SRGBColour>("BorderColour", hoveredColour, 500, Easing.OutQuint);
+            Content.TransformTo<Container<Drawable>, ColourInfo>("BorderColour", hoveredColour, 500, Easing.OutQuint);
             return false;
         }
 
         protected override void OnHoverLost(HoverLostEvent e)
         {
-            Content.TransformTo<Container<Drawable>, SRGBColour>("BorderColour", unhoveredColour, 500, Easing.OutQuint);
+            Content.TransformTo<Container<Drawable>, ColourInfo>("BorderColour", unhoveredColour, 500, Easing.OutQuint);
         }
     }
 }

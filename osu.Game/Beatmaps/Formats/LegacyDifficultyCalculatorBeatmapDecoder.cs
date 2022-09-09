@@ -1,8 +1,9 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System.Linq;
-using osu.Game.Beatmaps.ControlPoints;
 
 namespace osu.Game.Beatmaps.Formats
 {
@@ -24,14 +25,7 @@ namespace osu.Game.Beatmaps.Formats
         public new static void Register()
         {
             AddDecoder<Beatmap>(@"osu file format v", m => new LegacyDifficultyCalculatorBeatmapDecoder(int.Parse(m.Split('v').Last())));
-        }
-
-        protected override TimingControlPoint CreateTimingControlPoint()
-            => new LegacyDifficultyCalculatorControlPoint();
-
-        private class LegacyDifficultyCalculatorControlPoint : TimingControlPoint
-        {
-            public override double BeatLength { get; set; } = 1000;
+            SetFallbackDecoder<Beatmap>(() => new LegacyDifficultyCalculatorBeatmapDecoder());
         }
     }
 }

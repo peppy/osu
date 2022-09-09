@@ -1,13 +1,15 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using osu.Framework.MathUtils;
+using osu.Framework.Utils;
+using osu.Game.Rulesets.Catch.Mods;
 using osu.Game.Rulesets.Catch.Objects;
-using osu.Game.Rulesets.Catch.UI;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Tests.Beatmaps;
 
@@ -22,10 +24,12 @@ namespace osu.Game.Rulesets.Catch.Tests
         [TestCase("spinner")]
         [TestCase("spinner-and-circles")]
         [TestCase("slider")]
-        public new void Test(string name)
-        {
-            base.Test(name);
-        }
+        [TestCase("hardrock-stream", new[] { typeof(CatchModHardRock) })]
+        [TestCase("hardrock-repeat-slider", new[] { typeof(CatchModHardRock) })]
+        [TestCase("hardrock-spinner", new[] { typeof(CatchModHardRock) })]
+        [TestCase("right-bound-hr-offset", new[] { typeof(CatchModHardRock) })]
+        [TestCase("basic-hyperdash")]
+        public new void Test(string name, params Type[] mods) => base.Test(name, mods);
 
         protected override IEnumerable<ConvertValue> CreateConvertValue(HitObject hitObject)
         {
@@ -68,6 +72,7 @@ namespace osu.Game.Rulesets.Catch.Tests
             HitObject = hitObject;
             startTime = 0;
             position = 0;
+            hyperDash = false;
         }
 
         private double startTime;
@@ -82,12 +87,21 @@ namespace osu.Game.Rulesets.Catch.Tests
 
         public float Position
         {
-            get => HitObject?.X * CatchPlayfield.BASE_WIDTH ?? position;
+            get => HitObject?.EffectiveX ?? position;
             set => position = value;
+        }
+
+        private bool hyperDash;
+
+        public bool HyperDash
+        {
+            get => (HitObject as PalpableCatchHitObject)?.HyperDash ?? hyperDash;
+            set => hyperDash = value;
         }
 
         public bool Equals(ConvertValue other)
             => Precision.AlmostEquals(StartTime, other.StartTime, conversion_lenience)
-               && Precision.AlmostEquals(Position, other.Position, conversion_lenience);
+               && Precision.AlmostEquals(Position, other.Position, conversion_lenience)
+               && HyperDash == other.HyperDash;
     }
 }

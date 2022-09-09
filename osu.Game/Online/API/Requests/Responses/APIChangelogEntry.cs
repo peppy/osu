@@ -1,6 +1,8 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System;
 using Newtonsoft.Json;
 
@@ -24,7 +26,7 @@ namespace osu.Game.Online.API.Requests.Responses
         public string Url { get; set; }
 
         [JsonProperty("type")]
-        public string Type { get; set; }
+        public ChangelogEntryType Type { get; set; }
 
         [JsonProperty("category")]
         public string Category { get; set; }
@@ -43,5 +45,12 @@ namespace osu.Game.Online.API.Requests.Responses
 
         [JsonProperty("github_user")]
         public APIChangelogUser GithubUser { get; set; }
+    }
+
+    public enum ChangelogEntryType
+    {
+        Add,
+        Fix,
+        Misc
     }
 }

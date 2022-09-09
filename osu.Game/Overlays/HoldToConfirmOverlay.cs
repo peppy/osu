@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Bindables;
@@ -24,6 +26,13 @@ namespace osu.Game.Overlays
         [Resolved]
         private AudioManager audio { get; set; }
 
+        private readonly float finalFillAlpha;
+
+        protected HoldToConfirmOverlay(float finalFillAlpha = 1)
+        {
+            this.finalFillAlpha = finalFillAlpha;
+        }
+
         [BackgroundDependencyLoader]
         private void load()
         {
@@ -42,8 +51,10 @@ namespace osu.Game.Overlays
 
             Progress.ValueChanged += p =>
             {
-                audioVolume.Value = 1 - p.NewValue;
-                overlay.Alpha = (float)p.NewValue;
+                double target = p.NewValue * finalFillAlpha;
+
+                audioVolume.Value = 1 - target;
+                overlay.Alpha = (float)target;
             };
 
             audio.Tracks.AddAdjustment(AdjustableProperty.Volume, audioVolume);
@@ -51,7 +62,7 @@ namespace osu.Game.Overlays
 
         protected override void Dispose(bool isDisposing)
         {
-            audio.Tracks.RemoveAdjustment(AdjustableProperty.Volume, audioVolume);
+            audio?.Tracks.RemoveAdjustment(AdjustableProperty.Volume, audioVolume);
             base.Dispose(isDisposing);
         }
     }

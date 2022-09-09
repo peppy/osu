@@ -1,11 +1,12 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Graphics;
-using osu.Game.Graphics.Sprites;
 using osuTK;
 using osuTK.Graphics;
 
@@ -23,9 +24,9 @@ namespace osu.Game.Tournament.Components
 
         public ControlPanel()
         {
-            RelativeSizeAxes = Axes.Both;
+            RelativeSizeAxes = Axes.Y;
             AlwaysPresent = true;
-            Width = 0.15f;
+            Width = TournamentSceneManager.CONTROL_AREA_WIDTH;
             Anchor = Anchor.TopRight;
 
             InternalChildren = new Drawable[]
@@ -35,7 +36,7 @@ namespace osu.Game.Tournament.Components
                     RelativeSizeAxes = Axes.Both,
                     Colour = new Color4(54, 54, 54, 255)
                 },
-                new OsuSpriteText
+                new TournamentSpriteText
                 {
                     Anchor = Anchor.TopCentre,
                     Origin = Anchor.TopCentre,
@@ -48,8 +49,8 @@ namespace osu.Game.Tournament.Components
                     Origin = Anchor.TopCentre,
                     RelativeSizeAxes = Axes.X,
                     AutoSizeAxes = Axes.Y,
-                    Width = 0.75f,
                     Position = new Vector2(0, 35f),
+                    Padding = new MarginPadding(5),
                     Direction = FillDirection.Vertical,
                     Spacing = new Vector2(0, 5f),
                 },

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System.Collections.Generic;
 using System.Linq;
 using osuTK;
@@ -28,19 +30,16 @@ namespace osu.Game.Screens.Select
 
         private readonly List<OverlayContainer> overlays = new List<OverlayContainer>();
 
-        /// <param name="button">THe button to be added.</param>
+        /// <param name="button">The button to be added.</param>
         /// <param name="overlay">The <see cref="OverlayContainer"/> to be toggled by this button.</param>
         public void AddButton(FooterButton button, OverlayContainer overlay)
         {
-            overlays.Add(overlay);
-            button.Action = () => showOverlay(overlay);
+            if (overlay != null)
+            {
+                overlays.Add(overlay);
+                button.Action = () => showOverlay(overlay);
+            }
 
-            AddButton(button);
-        }
-
-        /// <param name="button">Button to be added.</param>
-        public void AddButton(FooterButton button)
-        {
             button.Hovered = updateModeLight;
             button.HoverLost = updateModeLight;
 
@@ -94,7 +93,7 @@ namespace osu.Game.Screens.Select
                         buttons = new FillFlowContainer<FooterButton>
                         {
                             Direction = FillDirection.Horizontal,
-                            Spacing = new Vector2(0.2f, 0),
+                            Spacing = new Vector2(-FooterButton.SHEAR_WIDTH, 0),
                             AutoSizeAxes = Axes.Both,
                         }
                     }
@@ -107,5 +106,7 @@ namespace osu.Game.Screens.Select
         protected override bool OnMouseDown(MouseDownEvent e) => true;
 
         protected override bool OnClick(ClickEvent e) => true;
+
+        protected override bool OnHover(HoverEvent e) => true;
     }
 }

@@ -1,24 +1,47 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\osu.Game.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup Label="Project">
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <OutputType>Library</OutputType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <ItemGroup Label="Service">
-    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  <PropertyGroup Label="Nuget">
+    <Title>osu!</Title>
+    <PackageId>ppy.osu.Game</PackageId>
+    <Version>0.0.0</Version>
+    <PackageIcon>icon.png</PackageIcon>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+  <ItemGroup Label="Icon">
+    <None Include="..\assets\lazer-nuget.png">
+      <Pack>True</Pack>
+      <PackagePath>icon.png</PackagePath>
+    </None>
   </ItemGroup>
   <ItemGroup Label="Package References">
-    <PackageReference Include="Humanizer" Version="2.6.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.2.4" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="2.2.4" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-    <PackageReference Include="ppy.osu.Game.Resources" Version="2019.702.0" />
-    <PackageReference Include="ppy.osu.Framework" Version="2019.723.0" />
-    <PackageReference Include="SharpCompress" Version="0.23.0" />
-    <PackageReference Include="NUnit" Version="3.12.0" />
-    <PackageReference Include="SharpRaven" Version="2.4.0" />
-    <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
+    <PackageReference Include="AutoMapper" Version="11.0.1" />
+    <PackageReference Include="DiffPlex" Version="1.7.1" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.43" />
+    <PackageReference Include="Humanizer" Version="2.14.1" />
+    <PackageReference Include="MessagePack" Version="2.4.35" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="6.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="6.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="5.0.14" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Toolkit.HighPerformance" Version="7.1.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="ppy.LocalisationAnalyser" Version="2022.809.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Realm" Version="10.15.1" />
+    <PackageReference Include="ppy.osu.Framework" Version="2022.908.0" />
+    <PackageReference Include="ppy.osu.Game.Resources" Version="2022.831.0" />
+    <PackageReference Include="Sentry" Version="3.20.1" />
+    <PackageReference Include="SharpCompress" Version="0.32.2" />
+    <PackageReference Include="NUnit" Version="3.13.3" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+    <PackageReference Include="TagLibSharp" Version="2.3.0" />
   </ItemGroup>
 </Project>

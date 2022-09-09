@@ -1,63 +1,77 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System.Linq;
+#nullable disable
+
+using System.Collections.Generic;
+using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Framework.Localisation;
+using osu.Game.Beatmaps.Drawables.Cards;
+using osu.Game.Online.API;
 using osu.Game.Online.API.Requests;
-using osu.Game.Overlays.Direct;
-using osu.Game.Users;
+using osu.Game.Online.API.Requests.Responses;
 using osuTK;
+using APIUser = osu.Game.Online.API.Requests.Responses.APIUser;
 
 namespace osu.Game.Overlays.Profile.Sections.Beatmaps
 {
-    public class PaginatedBeatmapContainer : PaginatedContainer
+    public class PaginatedBeatmapContainer : PaginatedProfileSubsection<APIBeatmapSet>
     {
         private const float panel_padding = 10f;
         private readonly BeatmapSetType type;
-        private GetUserBeatmapsRequest request;
 
-        public PaginatedBeatmapContainer(BeatmapSetType type, Bindable<User> user, string header, string missing = "None... yet.")
-            : base(user, header, missing)
+        protected override int InitialItemsCount => type == BeatmapSetType.Graveyard ? 2 : 6;
+
+        public PaginatedBeatmapContainer(BeatmapSetType type, Bindable<APIUser> user, LocalisableString headerText)
+            : base(user, headerText)
         {
             this.type = type;
+        }
 
-            ItemsPerPage = 6;
-
+        [BackgroundDependencyLoader]
+        private void load()
+        {
             ItemsContainer.Spacing = new Vector2(panel_padding);
         }
 
-        protected override void ShowMore()
+        protected override int GetCount(APIUser user)
         {
-            request = new GetUserBeatmapsRequest(User.Value.Id, type, VisiblePages++, ItemsPerPage);
-            request.Success += sets => Schedule(() =>
+            switch (type)
             {
-                MoreButton.FadeTo(sets.Count == ItemsPerPage ? 1 : 0);
-                MoreButton.IsLoading = false;
+                case BeatmapSetType.Favourite:
+                    return user.FavouriteBeatmapsetCount;
 
-                if (!sets.Any() && VisiblePages == 1)
-                {
-                    MissingText.Show();
-                    return;
-                }
+                case BeatmapSetType.Graveyard:
+                    return user.GraveyardBeatmapsetCount;
 
-                foreach (var s in sets)
-                {
-                    if (!s.OnlineBeatmapSetID.HasValue)
-                        continue;
+                case BeatmapSetType.Loved:
+                    return user.LovedBeatmapsetCount;
 
-                    var panel = new DirectGridPanel(s.ToBeatmapSet(Rulesets));
-                    ItemsContainer.Add(panel);
-                }
-            });
+                case BeatmapSetType.Ranked:
+                    return user.RankedBeatmapsetCount;
 
-            Api.Queue(request);
+                case BeatmapSetType.Pending:
+                    return user.PendingBeatmapsetCount;
+
+                case BeatmapSetType.Guest:
+                    return user.GuestBeatmapsetCount;
+
+                default:
+                    return 0;
+            }
         }
 
-        protected override void Dispose(bool isDisposing)
-        {
-            base.Dispose(isDisposing);
-            request?.Cancel();
-        }
+        protected override APIRequest<List<APIBeatmapSet>> CreateRequest(PaginationParameters pagination) =>
+            new GetUserBeatmapsRequest(User.Value.Id, type, pagination);
+
+        protected override Drawable CreateDrawableItem(APIBeatmapSet model) => model.OnlineID > 0
+            ? new BeatmapCardNormal(model)
+            {
+                Anchor = Anchor.TopCentre,
+                Origin = Anchor.TopCentre,
+            }
+            : null;
     }
 }

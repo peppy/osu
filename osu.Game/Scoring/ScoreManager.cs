@@ -1,74 +1,197 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
-using osu.Framework.Logging;
+using System.Threading;
+using System.Threading.Tasks;
+using JetBrains.Annotations;
+using osu.Framework.Bindables;
 using osu.Framework.Platform;
 using osu.Game.Beatmaps;
+using osu.Game.Configuration;
 using osu.Game.Database;
 using osu.Game.IO.Archives;
-using osu.Game.Online.API;
-using osu.Game.Online.API.Requests;
+using osu.Game.Overlays.Notifications;
 using osu.Game.Rulesets;
-using osu.Game.Scoring.Legacy;
+using osu.Game.Rulesets.Scoring;
+using osu.Game.Online.API;
 
 namespace osu.Game.Scoring
 {
-    public class ScoreManager : DownloadableArchiveModelManager<ScoreInfo, ScoreFileInfo>
+    public class ScoreManager : ModelManager<ScoreInfo>, IModelImporter<ScoreInfo>
     {
-        public override string[] HandledExtensions => new[] { ".osr" };
+        private readonly OsuConfigManager configManager;
+        private readonly ScoreImporter scoreImporter;
 
-        protected override string[] HashableFileTypes => new[] { ".osr" };
-
-        protected override string ImportFromStablePath => Path.Combine("Data", "r");
-
-        private readonly RulesetStore rulesets;
-        private readonly Func<BeatmapManager> beatmaps;
-
-        public ScoreManager(RulesetStore rulesets, Func<BeatmapManager> beatmaps, Storage storage, IAPIProvider api, IDatabaseContextFactory contextFactory, IIpcHost importHost = null)
-            : base(storage, contextFactory, api, new ScoreStore(contextFactory, storage), importHost)
+        public ScoreManager(RulesetStore rulesets, Func<BeatmapManager> beatmaps, Storage storage, RealmAccess realm, IAPIProvider api,
+                            OsuConfigManager configManager = null)
+            : base(storage, realm)
         {
-            this.rulesets = rulesets;
-            this.beatmaps = beatmaps;
+            this.configManager = configManager;
+
+            scoreImporter = new ScoreImporter(rulesets, beatmaps, storage, realm, api)
+            {
+                PostNotification = obj => PostNotification?.Invoke(obj)
+            };
         }
 
-        protected override ScoreInfo CreateModel(ArchiveReader archive)
-        {
-            if (archive == null)
-                return null;
+        public Score GetScore(ScoreInfo score) => scoreImporter.GetScore(score);
 
-            using (var stream = archive.GetStream(archive.Filenames.First(f => f.EndsWith(".osr"))))
+        /// <summary>
+        /// Perform a lookup query on available <see cref="ScoreInfo"/>s.
+        /// </summary>
+        /// <param name="query">The query.</param>
+        /// <returns>The first result for the provided query, or null if no results were found.</returns>
+        public ScoreInfo Query(Expression<Func<ScoreInfo, bool>> query)
+        {
+            return Realm.Run(r => r.All<ScoreInfo>().FirstOrDefault(query)?.Detach());
+        }
+
+        /// <summary>
+        /// Orders an array of <see cref="ScoreInfo"/>s by total score.
+        /// </summary>
+        /// <param name="scores">The array of <see cref="ScoreInfo"/>s to reorder.</param>
+        /// <returns>The given <paramref name="scores"/> ordered by decreasing total score.</returns>
+        public IEnumerable<ScoreInfo> OrderByTotalScore(IEnumerable<ScoreInfo> scores)
+            => scores.OrderByDescending(s => GetTotalScore(s)).ThenBy(s => s.OnlineID);
+
+        /// <summary>
+        /// Retrieves a bindable that represents the total score of a <see cref="ScoreInfo"/>.
+        /// </summary>
+        /// <remarks>
+        /// Responds to changes in the currently-selected <see cref="ScoringMode"/>.
+        /// </remarks>
+        /// <param name="score">The <see cref="ScoreInfo"/> to retrieve the bindable for.</param>
+        /// <returns>The bindable containing the total score.</returns>
+        public Bindable<long> GetBindableTotalScore([NotNull] ScoreInfo score) => new TotalScoreBindable(score, this, configManager);
+
+        /// <summary>
+        /// Retrieves a bindable that represents the formatted total score string of a <see cref="ScoreInfo"/>.
+        /// </summary>
+        /// <remarks>
+        /// Responds to changes in the currently-selected <see cref="ScoringMode"/>.
+        /// </remarks>
+        /// <param name="score">The <see cref="ScoreInfo"/> to retrieve the bindable for.</param>
+        /// <returns>The bindable containing the formatted total score string.</returns>
+        public Bindable<string> GetBindableTotalScoreString([NotNull] ScoreInfo score) => new TotalScoreStringBindable(GetBindableTotalScore(score));
+
+        /// <summary>
+        /// Retrieves the total score of a <see cref="ScoreInfo"/> in the given <see cref="ScoringMode"/>.
+        /// </summary>
+        /// <param name="score">The <see cref="ScoreInfo"/> to calculate the total score of.</param>
+        /// <param name="mode">The <see cref="ScoringMode"/> to return the total score as.</param>
+        /// <returns>The total score.</returns>
+        public long GetTotalScore([NotNull] ScoreInfo score, ScoringMode mode = ScoringMode.Standardised)
+        {
+            // TODO: This is required for playlist aggregate scores. They should likely not be getting here in the first place.
+            if (string.IsNullOrEmpty(score.BeatmapInfo.MD5Hash))
+                return score.TotalScore;
+
+            var ruleset = score.Ruleset.CreateInstance();
+            var scoreProcessor = ruleset.CreateScoreProcessor();
+            scoreProcessor.Mods.Value = score.Mods;
+
+            return (long)Math.Round(scoreProcessor.ComputeScore(mode, score));
+        }
+
+        /// <summary>
+        /// Retrieves the maximum achievable combo for the provided score.
+        /// </summary>
+        /// <param name="score">The <see cref="ScoreInfo"/> to compute the maximum achievable combo for.</param>
+        /// <returns>The maximum achievable combo.</returns>
+        public int GetMaximumAchievableCombo([NotNull] ScoreInfo score) => score.MaximumStatistics.Where(kvp => kvp.Key.AffectsCombo()).Sum(kvp => kvp.Value);
+
+        /// <summary>
+        /// Provides the total score of a <see cref="ScoreInfo"/>. Responds to changes in the currently-selected <see cref="ScoringMode"/>.
+        /// </summary>
+        private class TotalScoreBindable : Bindable<long>
+        {
+            private readonly Bindable<ScoringMode> scoringMode = new Bindable<ScoringMode>();
+
+            /// <summary>
+            /// Creates a new <see cref="TotalScoreBindable"/>.
+            /// </summary>
+            /// <param name="score">The <see cref="ScoreInfo"/> to provide the total score of.</param>
+            /// <param name="scoreManager">The <see cref="ScoreManager"/>.</param>
+            /// <param name="configManager">The config.</param>
+            public TotalScoreBindable(ScoreInfo score, ScoreManager scoreManager, OsuConfigManager configManager)
             {
-                try
-                {
-                    return new DatabasedLegacyScoreParser(rulesets, beatmaps()).Parse(stream).ScoreInfo;
-                }
-                catch (LegacyScoreParser.BeatmapNotFoundException e)
-                {
-                    Logger.Log(e.Message, LoggingTarget.Information, LogLevel.Error);
-                    return null;
-                }
+                configManager?.BindWith(OsuSetting.ScoreDisplayMode, scoringMode);
+                scoringMode.BindValueChanged(mode => Value = scoreManager.GetTotalScore(score, mode.NewValue), true);
             }
         }
 
-        protected override IEnumerable<string> GetStableImportPaths(Storage stableStorage)
-            => stableStorage.GetFiles(ImportFromStablePath).Where(p => HandledExtensions.Any(ext => Path.GetExtension(p)?.Equals(ext, StringComparison.InvariantCultureIgnoreCase) ?? false));
+        /// <summary>
+        /// Provides the total score of a <see cref="ScoreInfo"/> as a formatted string. Responds to changes in the currently-selected <see cref="ScoringMode"/>.
+        /// </summary>
+        private class TotalScoreStringBindable : Bindable<string>
+        {
+            // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable (need to hold a reference)
+            private readonly IBindable<long> totalScore;
 
-        public Score GetScore(ScoreInfo score) => new LegacyDatabasedScore(score, rulesets, beatmaps(), Files.Store);
+            public TotalScoreStringBindable(IBindable<long> totalScore)
+            {
+                this.totalScore = totalScore;
+                this.totalScore.BindValueChanged(v => Value = v.NewValue.ToString("N0"), true);
+            }
+        }
 
-        public List<ScoreInfo> GetAllUsableScores() => ModelStore.ConsumableItems.Where(s => !s.DeletePending).ToList();
+        public void Delete([CanBeNull] Expression<Func<ScoreInfo, bool>> filter = null, bool silent = false)
+        {
+            Realm.Run(r =>
+            {
+                var items = r.All<ScoreInfo>()
+                             .Where(s => !s.DeletePending);
 
-        public IEnumerable<ScoreInfo> QueryScores(Expression<Func<ScoreInfo, bool>> query) => ModelStore.ConsumableItems.AsNoTracking().Where(query);
+                if (filter != null)
+                    items = items.Where(filter);
 
-        public ScoreInfo Query(Expression<Func<ScoreInfo, bool>> query) => ModelStore.ConsumableItems.AsNoTracking().FirstOrDefault(query);
+                Delete(items.ToList(), silent);
+            });
+        }
 
-        protected override ArchiveDownloadRequest<ScoreInfo> CreateDownloadRequest(ScoreInfo score, bool minimiseDownload) => new DownloadReplayRequest(score);
+        public void Delete(BeatmapInfo beatmap, bool silent = false)
+        {
+            Realm.Run(r =>
+            {
+                var beatmapScores = r.Find<BeatmapInfo>(beatmap.ID).Scores.ToList();
+                Delete(beatmapScores, silent);
+            });
+        }
 
-        protected override bool CheckLocalAvailability(ScoreInfo model, IQueryable<ScoreInfo> items) => items.Any(s => s.OnlineScoreID == model.OnlineScoreID && s.Files.Any());
+        public Task Import(params string[] paths) => scoreImporter.Import(paths);
+
+        public Task Import(params ImportTask[] tasks) => scoreImporter.Import(tasks);
+
+        public override bool IsAvailableLocally(ScoreInfo model) => Realm.Run(realm => realm.All<ScoreInfo>().Any(s => s.OnlineID == model.OnlineID));
+
+        public IEnumerable<string> HandledExtensions => scoreImporter.HandledExtensions;
+
+        public Task<IEnumerable<Live<ScoreInfo>>> Import(ProgressNotification notification, params ImportTask[] tasks) => scoreImporter.Import(notification, tasks);
+
+        public Task<Live<ScoreInfo>> ImportAsUpdate(ProgressNotification notification, ImportTask task, ScoreInfo original) => scoreImporter.ImportAsUpdate(notification, task, original);
+
+        public Live<ScoreInfo> Import(ScoreInfo item, ArchiveReader archive = null, bool batchImport = false, CancellationToken cancellationToken = default) =>
+            scoreImporter.ImportModel(item, archive, batchImport, cancellationToken);
+
+        /// <summary>
+        /// Populates the <see cref="ScoreInfo.MaximumStatistics"/> for a given <see cref="ScoreInfo"/>.
+        /// </summary>
+        /// <param name="score">The score to populate the statistics of.</param>
+        public void PopulateMaximumStatistics(ScoreInfo score) => scoreImporter.PopulateMaximumStatistics(score);
+
+        #region Implementation of IPresentImports<ScoreInfo>
+
+        public Action<IEnumerable<Live<ScoreInfo>>> PresentImport
+        {
+            set => scoreImporter.PresentImport = value;
+        }
+
+        #endregion
     }
 }

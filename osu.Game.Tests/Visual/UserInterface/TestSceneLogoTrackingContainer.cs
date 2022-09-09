@@ -1,18 +1,18 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
-using osu.Framework.Graphics.UserInterface;
-using osu.Framework.MathUtils;
+using osu.Framework.Utils;
 using osu.Framework.Testing;
 using osu.Game.Graphics.Containers;
 using osu.Game.Screens.Menu;
-using osu.Game.Screens.Play;
 using osuTK;
 using osuTK.Graphics;
 
@@ -20,17 +20,6 @@ namespace osu.Game.Tests.Visual.UserInterface
 {
     public class TestSceneLogoTrackingContainer : OsuTestScene
     {
-        public override IReadOnlyList<Type> RequiredTypes => new[]
-        {
-            typeof(PlayerLoader),
-            typeof(Player),
-            typeof(LogoTrackingContainer),
-            typeof(ButtonSystem),
-            typeof(ButtonSystemState),
-            typeof(Menu),
-            typeof(MainMenu)
-        };
-
         private OsuLogo logo;
         private TestLogoTrackingContainer trackingContainer;
         private Container transferContainer;
@@ -270,14 +259,14 @@ namespace osu.Game.Tests.Visual.UserInterface
 
         private void removeFacade()
         {
-            trackingContainer.Remove(logoFacade);
+            trackingContainer.Remove(logoFacade, false);
             visualBox.Colour = Color4.White;
             moveLogoFacade();
         }
 
         private void moveLogoFacade()
         {
-            if (logoFacade?.Transforms.Count == 0 && transferContainer?.Transforms.Count == 0)
+            if (!logoFacade.Transforms.Any() && !transferContainer.Transforms.Any())
             {
                 Random random = new Random();
                 trackingContainer.Delay(500).MoveTo(new Vector2(random.Next(0, (int)logo.Parent.DrawWidth), random.Next(0, (int)logo.Parent.DrawHeight)), 300);

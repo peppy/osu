@@ -1,23 +1,24 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using osu.Framework.Graphics;
+using osu.Framework.Localisation;
 using osu.Game.Graphics.UserInterface;
 
 namespace osu.Game.Overlays.Settings
 {
     public class SettingsCheckbox : SettingsItem<bool>
     {
-        private OsuCheckbox checkbox;
+        private LocalisableString labelText;
 
-        private string labelText;
+        protected override Drawable CreateControl() => new OsuCheckbox();
 
-        protected override Drawable CreateControl() => checkbox = new OsuCheckbox();
-
-        public override string LabelText
+        public override LocalisableString LabelText
         {
             get => labelText;
-            set => checkbox.LabelText = labelText = value;
+            set => ((OsuCheckbox)Control).LabelText = labelText = value;
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using osu.Framework.Input.Events;
 using osuTK.Input;
 using osuTK;
@@ -36,14 +38,19 @@ namespace osu.Game.Screens.Play
 
         protected override bool OnMouseDown(MouseDownEvent e)
         {
-            if (e.Button == Button) IsLit = true;
+            if (e.Button == Button)
+            {
+                IsLit = true;
+                Increment();
+            }
+
             return base.OnMouseDown(e);
         }
 
-        protected override bool OnMouseUp(MouseUpEvent e)
+        protected override void OnMouseUp(MouseUpEvent e)
         {
             if (e.Button == Button) IsLit = false;
-            return base.OnMouseUp(e);
+            base.OnMouseUp(e);
         }
     }
 }

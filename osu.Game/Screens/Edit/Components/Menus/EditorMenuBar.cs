@@ -1,24 +1,21 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using osu.Framework.Allocation;
-using osu.Framework.Bindables;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Overlays;
 using osuTK;
-using osuTK.Graphics;
 
 namespace osu.Game.Screens.Edit.Components.Menus
 {
     public class EditorMenuBar : OsuMenu
     {
-        public readonly Bindable<EditorScreenMode> Mode = new Bindable<EditorScreenMode>();
-
         public EditorMenuBar()
             : base(Direction.Horizontal, true)
         {
@@ -26,26 +23,12 @@ namespace osu.Game.Screens.Edit.Components.Menus
 
             MaskingContainer.CornerRadius = 0;
             ItemsContainer.Padding = new MarginPadding { Left = 100 };
-            BackgroundColour = OsuColour.FromHex("111");
-
-            ScreenSelectionTabControl tabControl;
-            AddRangeInternal(new Drawable[]
-            {
-                tabControl = new ScreenSelectionTabControl
-                {
-                    Anchor = Anchor.BottomRight,
-                    Origin = Anchor.BottomRight,
-                    X = -15
-                }
-            });
-
-            Mode.BindTo(tabControl.Current);
         }
 
-        protected override void LoadComplete()
+        [BackgroundDependencyLoader]
+        private void load(OverlayColourProvider colourProvider)
         {
-            base.LoadComplete();
-            Mode.TriggerChange();
+            BackgroundColour = colourProvider.Background3;
         }
 
         protected override Framework.Graphics.UserInterface.Menu CreateSubMenu() => new SubMenu();
@@ -54,29 +37,26 @@ namespace osu.Game.Screens.Edit.Components.Menus
 
         private class DrawableEditorBarMenuItem : DrawableOsuMenuItem
         {
-            private BackgroundBox background;
-
             public DrawableEditorBarMenuItem(MenuItem item)
                 : base(item)
             {
-                Anchor = Anchor.CentreLeft;
-                Origin = Anchor.CentreLeft;
-
-                StateChanged += stateChanged;
             }
 
             [BackgroundDependencyLoader]
-            private void load(OsuColour colours)
+            private void load(OverlayColourProvider colourProvider)
             {
-                ForegroundColour = colours.BlueLight;
-                BackgroundColour = Color4.Transparent;
-                ForegroundColourHover = Color4.White;
-                BackgroundColourHover = colours.Gray3;
+                ForegroundColour = colourProvider.Light3;
+                BackgroundColour = colourProvider.Background2;
+                ForegroundColourHover = colourProvider.Content1;
+                BackgroundColourHover = colourProvider.Background1;
             }
 
-            public override void SetFlowDirection(Direction direction)
+            protected override void LoadComplete()
             {
-                AutoSizeAxes = Axes.Both;
+                base.LoadComplete();
+
+                Foreground.Anchor = Anchor.CentreLeft;
+                Foreground.Origin = Anchor.CentreLeft;
             }
 
             protected override void UpdateBackgroundColour()
@@ -95,53 +75,15 @@ namespace osu.Game.Screens.Edit.Components.Menus
                     base.UpdateForegroundColour();
             }
 
-            private void stateChanged(MenuItemState newState)
-            {
-                if (newState == MenuItemState.Selected)
-                    background.Expand();
-                else
-                    background.Contract();
-            }
-
-            protected override Drawable CreateBackground() => background = new BackgroundBox();
             protected override DrawableOsuMenuItem.TextContainer CreateTextContainer() => new TextContainer();
 
             private new class TextContainer : DrawableOsuMenuItem.TextContainer
             {
                 public TextContainer()
                 {
-                    NormalText.Font = NormalText.Font.With(size: 14);
-                    BoldText.Font = BoldText.Font.With(size: 14);
-                    NormalText.Margin = BoldText.Margin = new MarginPadding { Horizontal = 10, Vertical = MARGIN_VERTICAL };
+                    NormalText.Font = OsuFont.TorusAlternate;
+                    BoldText.Font = OsuFont.TorusAlternate.With(weight: FontWeight.Bold);
                 }
-            }
-
-            private class BackgroundBox : CompositeDrawable
-            {
-                private readonly Container innerBackground;
-
-                public BackgroundBox()
-                {
-                    RelativeSizeAxes = Axes.Both;
-                    Masking = true;
-                    InternalChild = innerBackground = new Container
-                    {
-                        RelativeSizeAxes = Axes.Both,
-                        Masking = true,
-                        CornerRadius = 4,
-                        Child = new Box { RelativeSizeAxes = Axes.Both }
-                    };
-                }
-
-                /// <summary>
-                /// Expands the background such that it doesn't show the bottom corners.
-                /// </summary>
-                public void Expand() => innerBackground.Height = 2;
-
-                /// <summary>
-                /// Contracts the background such that it shows the bottom corners.
-                /// </summary>
-                public void Contract() => innerBackground.Height = 1;
             }
         }
 
@@ -150,42 +92,79 @@ namespace osu.Game.Screens.Edit.Components.Menus
             public SubMenu()
                 : base(Direction.Vertical)
             {
-                OriginPosition = new Vector2(5, 1);
-                ItemsContainer.Padding = new MarginPadding { Top = 5, Bottom = 5 };
+                ItemsContainer.Padding = new MarginPadding();
+
+                MaskingContainer.CornerRadius = 0;
             }
 
             [BackgroundDependencyLoader]
-            private void load(OsuColour colours)
+            private void load(OverlayColourProvider colourProvider)
             {
-                BackgroundColour = colours.Gray3;
+                BackgroundColour = colourProvider.Background2;
             }
 
             protected override Framework.Graphics.UserInterface.Menu CreateSubMenu() => new SubMenu();
 
-            protected override DrawableMenuItem CreateDrawableMenuItem(MenuItem item) => new DrawableSubMenuItem(item);
-
-            private class DrawableSubMenuItem : DrawableOsuMenuItem
+            protected override DrawableMenuItem CreateDrawableMenuItem(MenuItem item)
             {
-                public DrawableSubMenuItem(MenuItem item)
+                switch (item)
+                {
+                    case EditorMenuItemSpacer spacer:
+                        return new DrawableSpacer(spacer);
+
+                    case StatefulMenuItem stateful:
+                        return new EditorStatefulMenuItem(stateful);
+
+                    default:
+                        return new EditorMenuItem(item);
+                }
+            }
+
+            private class EditorStatefulMenuItem : DrawableStatefulMenuItem
+            {
+                public EditorStatefulMenuItem(StatefulMenuItem item)
                     : base(item)
                 {
                 }
 
-                protected override bool OnHover(HoverEvent e)
+                [BackgroundDependencyLoader]
+                private void load(OverlayColourProvider colourProvider)
                 {
-                    if (Item is EditorMenuItemSpacer)
-                        return true;
+                    BackgroundColour = colourProvider.Background2;
+                    BackgroundColourHover = colourProvider.Background1;
 
-                    return base.OnHover(e);
+                    Foreground.Padding = new MarginPadding { Vertical = 2 };
+                }
+            }
+
+            private class EditorMenuItem : DrawableOsuMenuItem
+            {
+                public EditorMenuItem(MenuItem item)
+                    : base(item)
+                {
                 }
 
-                protected override bool OnClick(ClickEvent e)
+                [BackgroundDependencyLoader]
+                private void load(OverlayColourProvider colourProvider)
                 {
-                    if (Item is EditorMenuItemSpacer)
-                        return true;
+                    BackgroundColour = colourProvider.Background2;
+                    BackgroundColourHover = colourProvider.Background1;
 
-                    return base.OnClick(e);
+                    Foreground.Padding = new MarginPadding { Vertical = 2 };
                 }
+            }
+
+            private class DrawableSpacer : DrawableOsuMenuItem
+            {
+                public DrawableSpacer(MenuItem item)
+                    : base(item)
+                {
+                    Scale = new Vector2(1, 0.3f);
+                }
+
+                protected override bool OnHover(HoverEvent e) => true;
+
+                protected override bool OnClick(ClickEvent e) => true;
             }
         }
     }

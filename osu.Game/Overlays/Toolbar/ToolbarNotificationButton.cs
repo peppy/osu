@@ -1,14 +1,16 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
-using osu.Framework.Graphics.Sprites;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Input.Bindings;
 using osuTK;
 using osuTK.Graphics;
 
@@ -18,15 +20,13 @@ namespace osu.Game.Overlays.Toolbar
     {
         protected override Anchor TooltipAnchor => Anchor.TopRight;
 
-        public BindableInt NotificationCount = new BindableInt();
+        public IBindable<int> NotificationCount = new BindableInt();
 
         private readonly CountCircle countDisplay;
 
         public ToolbarNotificationButton()
         {
-            Icon = FontAwesome.Solid.Bars;
-            TooltipMain = "Notifications";
-            TooltipSub = "Waiting for 'ya";
+            Hotkey = GlobalAction.ToggleNotifications;
 
             Add(countDisplay = new CountCircle
             {
@@ -38,10 +38,10 @@ namespace osu.Game.Overlays.Toolbar
             });
         }
 
-        [BackgroundDependencyLoader(true)]
-        private void load(NotificationOverlay notificationOverlay)
+        [BackgroundDependencyLoader]
+        private void load(INotificationOverlay notificationOverlay)
         {
-            StateContainer = notificationOverlay;
+            StateContainer = notificationOverlay as NotificationOverlay;
 
             if (notificationOverlay != null)
                 NotificationCount.BindTo(notificationOverlay.UnreadCount);

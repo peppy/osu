@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -8,12 +10,13 @@ using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
+using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osuTK;
 using osuTK.Graphics;
-using osuTK.Input;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.UserInterface;
 
 namespace osu.Game.Screens.Select.Options
 {
@@ -40,19 +43,17 @@ namespace osu.Game.Screens.Select.Options
             set => iconText.Icon = value;
         }
 
-        public string FirstLineText
+        public LocalisableString FirstLineText
         {
             get => firstLine.Text;
             set => firstLine.Text = value;
         }
 
-        public string SecondLineText
+        public LocalisableString SecondLineText
         {
             get => secondLine.Text;
             set => secondLine.Text = value;
         }
-
-        public Key? HotKey;
 
         protected override bool OnMouseDown(MouseDownEvent e)
         {
@@ -60,10 +61,10 @@ namespace osu.Game.Screens.Select.Options
             return base.OnMouseDown(e);
         }
 
-        protected override bool OnMouseUp(MouseUpEvent e)
+        protected override void OnMouseUp(MouseUpEvent e)
         {
             flash.FadeTo(0, 1000, Easing.OutQuint);
-            return base.OnMouseUp(e);
+            base.OnMouseUp(e);
         }
 
         protected override bool OnClick(ClickEvent e)
@@ -75,20 +76,10 @@ namespace osu.Game.Screens.Select.Options
             return base.OnClick(e);
         }
 
-        protected override bool OnKeyDown(KeyDownEvent e)
-        {
-            if (!e.Repeat && e.Key == HotKey)
-            {
-                Click();
-                return true;
-            }
-
-            return false;
-        }
-
         public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => box.ReceivePositionalInputAt(screenSpacePos);
 
         public BeatmapOptionsButton()
+            : base(HoverSampleSet.Button)
         {
             Width = width;
             RelativeSizeAxes = Axes.Y;
@@ -121,7 +112,7 @@ namespace osu.Game.Screens.Select.Options
                         {
                             RelativeSizeAxes = Axes.Both,
                             EdgeSmoothness = new Vector2(1.5f, 0),
-                            Blending = BlendingMode.Additive,
+                            Blending = BlendingParameters.Additive,
                             Colour = Color4.White,
                             Alpha = 0,
                         },

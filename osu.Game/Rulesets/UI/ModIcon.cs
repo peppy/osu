@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System;
 using osuTK.Graphics;
 using osu.Framework.Allocation;
@@ -9,35 +11,59 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Sprites;
 using osu.Game.Graphics;
+using osu.Game.Graphics.Sprites;
 using osu.Game.Rulesets.Mods;
 using osuTK;
+using osu.Framework.Bindables;
+using osu.Framework.Extensions.Color4Extensions;
+using osu.Framework.Localisation;
 
 namespace osu.Game.Rulesets.UI
 {
+    /// <summary>
+    /// Display the specified mod at a fixed size.
+    /// </summary>
     public class ModIcon : Container, IHasTooltip
     {
+        public readonly BindableBool Selected = new BindableBool();
+
         private readonly SpriteIcon modIcon;
+        private readonly SpriteText modAcronym;
         private readonly SpriteIcon background;
 
         private const float size = 80;
 
-        public IconUsage Icon
+        public virtual LocalisableString TooltipText => showTooltip ? ((mod as Mod)?.IconTooltip ?? mod.Name) : null;
+
+        private IMod mod;
+        private readonly bool showTooltip;
+
+        public IMod Mod
         {
-            get => modIcon.Icon;
-            set => modIcon.Icon = value;
+            get => mod;
+            set
+            {
+                mod = value;
+
+                if (IsLoaded)
+                    updateMod(value);
+            }
         }
 
-        private readonly ModType type;
+        [Resolved]
+        private OsuColour colours { get; set; }
 
-        public virtual string TooltipText { get; }
+        private Color4 backgroundColour;
 
-        public ModIcon(Mod mod)
+        /// <summary>
+        /// Construct a new instance.
+        /// </summary>
+        /// <param name="mod">The mod to be displayed</param>
+        /// <param name="showTooltip">Whether a tooltip describing the mod should display on hover.</param>
+        public ModIcon(IMod mod, bool showTooltip = true)
         {
-            if (mod == null) throw new ArgumentNullException(nameof(mod));
-
-            type = mod.Type;
-
-            TooltipText = mod.Name;
+            this.mod = mod ?? throw new ArgumentNullException(nameof(mod));
+            this.showTooltip = showTooltip;
 
             Size = new Vector2(size);
 
@@ -49,74 +75,61 @@ namespace osu.Game.Rulesets.UI
                     Anchor = Anchor.Centre,
                     Size = new Vector2(size),
                     Icon = OsuIcon.ModBg,
-                    Y = -6.5f,
                     Shadow = true,
+                },
+                modAcronym = new OsuSpriteText
+                {
+                    Origin = Anchor.Centre,
+                    Anchor = Anchor.Centre,
+                    Colour = OsuColour.Gray(84),
+                    Alpha = 0,
+                    Font = OsuFont.Numeric.With(null, 22f),
+                    UseFullGlyphHeight = false,
+                    Text = mod.Acronym
                 },
                 modIcon = new SpriteIcon
                 {
                     Origin = Anchor.Centre,
                     Anchor = Anchor.Centre,
                     Colour = OsuColour.Gray(84),
-                    Size = new Vector2(size - 35),
-                    Icon = mod.Icon
+                    Size = new Vector2(45),
+                    Icon = FontAwesome.Solid.Question
                 },
             };
         }
 
-        private Color4 backgroundColour;
-        private Color4 highlightedColour;
-
-        [BackgroundDependencyLoader]
-        private void load(OsuColour colours)
+        protected override void LoadComplete()
         {
-            switch (type)
-            {
-                default:
-                case ModType.DifficultyIncrease:
-                    backgroundColour = colours.Yellow;
-                    highlightedColour = colours.YellowLight;
-                    break;
+            base.LoadComplete();
 
-                case ModType.DifficultyReduction:
-                    backgroundColour = colours.Green;
-                    highlightedColour = colours.GreenLight;
-                    break;
+            Selected.BindValueChanged(_ => updateColour());
 
-                case ModType.Automation:
-                    backgroundColour = colours.Blue;
-                    highlightedColour = colours.BlueLight;
-                    break;
-
-                case ModType.Conversion:
-                    backgroundColour = colours.Purple;
-                    highlightedColour = colours.PurpleLight;
-                    break;
-
-                case ModType.Fun:
-                    backgroundColour = colours.Pink;
-                    highlightedColour = colours.PinkLight;
-                    break;
-            }
-
-            applyStyle();
+            updateMod(mod);
         }
 
-        private bool highlighted;
-
-        public bool Highlighted
+        private void updateMod(IMod value)
         {
-            get => highlighted;
+            modAcronym.Text = value.Acronym;
+            modIcon.Icon = value.Icon ?? FontAwesome.Solid.Question;
 
-            set
+            if (value.Icon is null)
             {
-                highlighted = value;
-                applyStyle();
+                modIcon.FadeOut();
+                modAcronym.FadeIn();
             }
+            else
+            {
+                modIcon.FadeIn();
+                modAcronym.FadeOut();
+            }
+
+            backgroundColour = colours.ForModType(value.Type);
+            updateColour();
         }
 
-        private void applyStyle()
+        private void updateColour()
         {
-            background.Colour = highlighted ? highlightedColour : backgroundColour;
+            background.Colour = Selected.Value ? backgroundColour.Lighten(0.2f) : backgroundColour;
         }
     }
 }

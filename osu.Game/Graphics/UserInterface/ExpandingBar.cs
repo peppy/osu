@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Shapes;
 using osuTK;
@@ -13,17 +15,17 @@ namespace osu.Game.Graphics.UserInterface
     /// </summary>
     public class ExpandingBar : Circle
     {
-        private bool isCollapsed;
+        private bool expanded = true;
 
-        public bool IsCollapsed
+        public bool Expanded
         {
-            get => isCollapsed;
+            get => expanded;
             set
             {
-                if (value == isCollapsed)
+                if (value == expanded)
                     return;
 
-                isCollapsed = value;
+                expanded = value;
                 updateState();
             }
         }
@@ -83,19 +85,21 @@ namespace osu.Game.Graphics.UserInterface
             updateState();
         }
 
-        public void Collapse() => IsCollapsed = true;
+        public void Collapse() => Expanded = false;
 
-        public void Expand() => IsCollapsed = false;
+        public void Expand() => Expanded = true;
 
         private void updateState()
         {
-            float newSize = IsCollapsed ? CollapsedSize : ExpandedSize;
-            Easing easingType = IsCollapsed ? Easing.Out : Easing.OutElastic;
+            float newSize = expanded ? ExpandedSize : CollapsedSize;
+            Easing easingType = expanded ? Easing.OutElastic : Easing.Out;
 
             if (RelativeSizeAxes == Axes.X)
                 this.ResizeHeightTo(newSize, 400, easingType);
             else
                 this.ResizeWidthTo(newSize, 400, easingType);
+
+            this.FadeTo(expanded ? 1 : 0.5f, 100, Easing.OutQuint);
         }
     }
 }

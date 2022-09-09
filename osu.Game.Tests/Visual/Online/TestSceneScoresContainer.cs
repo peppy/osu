@@ -1,38 +1,41 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
+
+#nullable disable
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using NUnit.Framework;
+using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
-using osu.Framework.MathUtils;
+using osu.Framework.Testing;
+using osu.Framework.Utils;
+using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
+using osu.Game.Overlays;
 using osu.Game.Overlays.BeatmapSet.Scores;
-using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using osu.Game.Users;
 using osuTK.Graphics;
+using APIUser = osu.Game.Online.API.Requests.Responses.APIUser;
 
 namespace osu.Game.Tests.Visual.Online
 {
     public class TestSceneScoresContainer : OsuTestScene
     {
-        public override IReadOnlyList<Type> RequiredTypes => new[]
-        {
-            typeof(DrawableTopScore),
-            typeof(TopScoreUserSection),
-            typeof(TopScoreStatisticsSection),
-            typeof(ScoreTable),
-            typeof(ScoreTableRowBackground),
-        };
+        [Cached]
+        private readonly OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Blue);
 
-        public TestSceneScoresContainer()
-        {
-            TestScoresContainer scoresContainer;
+        private TestScoresContainer scoresContainer;
 
+        [SetUpSteps]
+        public void SetUp() => Schedule(() =>
+        {
             Child = new Container
             {
                 Anchor = Anchor.TopCentre,
@@ -46,32 +49,135 @@ namespace osu.Game.Tests.Visual.Online
                         RelativeSizeAxes = Axes.Both,
                         Colour = Color4.Black,
                     },
-                    scoresContainer = new TestScoresContainer(),
+                    scoresContainer = new TestScoresContainer
+                    {
+                        Beatmap = { Value = CreateAPIBeatmap() }
+                    }
                 }
             };
+        });
 
-            var allScores = new APILegacyScores
+        [Test]
+        public void TestNoUserBest()
+        {
+            AddStep("Scores with no user best", () =>
             {
-                Scores = new List<APILegacyScoreInfo>
+                var allScores = createScores();
+
+                allScores.UserScore = null;
+
+                scoresContainer.Scores = allScores;
+            });
+
+            AddUntilStep("wait for scores displayed", () => scoresContainer.ChildrenOfType<ScoreTableRowBackground>().Any());
+            AddAssert("no user best displayed", () => scoresContainer.ChildrenOfType<DrawableTopScore>().Count() == 1);
+
+            AddStep("Load null scores", () => scoresContainer.Scores = null);
+
+            AddUntilStep("wait for scores not displayed", () => !scoresContainer.ChildrenOfType<ScoreTableRowBackground>().Any());
+            AddAssert("no best score displayed", () => !scoresContainer.ChildrenOfType<DrawableTopScore>().Any());
+
+            AddStep("Load only one score", () =>
+            {
+                var allScores = createScores();
+
+                allScores.Scores.RemoveRange(1, allScores.Scores.Count - 1);
+
+                scoresContainer.Scores = allScores;
+            });
+
+            AddUntilStep("wait for scores not displayed", () => scoresContainer.ChildrenOfType<ScoreTableRowBackground>().Count() == 1);
+            AddAssert("no best score displayed", () => scoresContainer.ChildrenOfType<DrawableTopScore>().Count() == 1);
+        }
+
+        [Test]
+        public void TestUserBest()
+        {
+            AddStep("Load scores with personal best", () =>
+            {
+                var allScores = createScores();
+                allScores.UserScore = createUserBest();
+                scoresContainer.Scores = allScores;
+            });
+
+            AddUntilStep("wait for scores displayed", () => scoresContainer.ChildrenOfType<ScoreTableRowBackground>().Any());
+            AddAssert("best score displayed", () => scoresContainer.ChildrenOfType<DrawableTopScore>().Count() == 2);
+
+            AddStep("Load scores with personal best (null position)", () =>
+            {
+                var allScores = createScores();
+                var userBest = createUserBest();
+                userBest.Position = null;
+                allScores.UserScore = userBest;
+                scoresContainer.Scores = allScores;
+            });
+
+            AddUntilStep("wait for scores displayed", () => scoresContainer.ChildrenOfType<ScoreTableRowBackground>().Any());
+            AddAssert("best score displayed", () => scoresContainer.ChildrenOfType<DrawableTopScore>().Count() == 2);
+
+            AddStep("Load scores with personal best (first place)", () =>
+            {
+                var allScores = createScores();
+                allScores.UserScore = new APIScoreWithPosition
                 {
-                    new APILegacyScoreInfo
+                    Score = allScores.Scores.First(),
+                    Position = 1,
+                };
+                scoresContainer.Scores = allScores;
+            });
+
+            AddUntilStep("wait for scores displayed", () => scoresContainer.ChildrenOfType<ScoreTableRowBackground>().Any());
+            AddAssert("best score displayed", () => scoresContainer.ChildrenOfType<DrawableTopScore>().Count() == 1);
+
+            AddStep("Scores with no user best", () =>
+            {
+                var allScores = createScores();
+
+                allScores.UserScore = null;
+
+                scoresContainer.Scores = allScores;
+            });
+
+            AddUntilStep("best score not displayed", () => scoresContainer.ChildrenOfType<DrawableTopScore>().Count() == 1);
+        }
+
+        [Test]
+        public void TestUnprocessedPP()
+        {
+            AddStep("Load scores with unprocessed PP", () =>
+            {
+                var allScores = createScores();
+                allScores.Scores[0].PP = null;
+                allScores.UserScore = createUserBest();
+                allScores.UserScore.Score.PP = null;
+                scoresContainer.Scores = allScores;
+            });
+        }
+
+        private ulong onlineID = 1;
+
+        private APIScoresCollection createScores()
+        {
+            var scores = new APIScoresCollection
+            {
+                Scores = new List<SoloScoreInfo>
+                {
+                    new SoloScoreInfo
                     {
-                        User = new User
+                        EndedAt = DateTimeOffset.Now,
+                        ID = onlineID++,
+                        User = new APIUser
                         {
                             Id = 6602580,
                             Username = @"waaiiru",
-                            Country = new Country
-                            {
-                                FullName = @"Spain",
-                                FlagName = @"ES",
-                            },
+                            CountryCode = CountryCode.ES,
                         },
-                        Mods = new Mod[]
+                        Mods = new[]
                         {
-                            new OsuModDoubleTime(),
-                            new OsuModHidden(),
-                            new OsuModFlashlight(),
-                            new OsuModHardRock(),
+                            new APIMod { Acronym = new OsuModDoubleTime().Acronym },
+                            new APIMod { Acronym = new OsuModHidden().Acronym },
+                            new APIMod { Acronym = new OsuModFlashlight().Acronym },
+                            new APIMod { Acronym = new OsuModHardRock().Acronym },
                         },
                         Rank = ScoreRank.XH,
                         PP = 200,
@@ -79,23 +185,21 @@ namespace osu.Game.Tests.Visual.Online
                         TotalScore = 1234567890,
                         Accuracy = 1,
                     },
-                    new APILegacyScoreInfo
+                    new SoloScoreInfo
                     {
-                        User = new User
+                        EndedAt = DateTimeOffset.Now,
+                        ID = onlineID++,
+                        User = new APIUser
                         {
                             Id = 4608074,
                             Username = @"Skycries",
-                            Country = new Country
-                            {
-                                FullName = @"Brazil",
-                                FlagName = @"BR",
-                            },
+                            CountryCode = CountryCode.BR,
                         },
-                        Mods = new Mod[]
+                        Mods = new[]
                         {
-                            new OsuModDoubleTime(),
-                            new OsuModHidden(),
-                            new OsuModFlashlight(),
+                            new APIMod { Acronym = new OsuModDoubleTime().Acronym },
+                            new APIMod { Acronym = new OsuModHidden().Acronym },
+                            new APIMod { Acronym = new OsuModFlashlight().Acronym },
                         },
                         Rank = ScoreRank.S,
                         PP = 190,
@@ -103,22 +207,20 @@ namespace osu.Game.Tests.Visual.Online
                         TotalScore = 1234789,
                         Accuracy = 0.9997,
                     },
-                    new APILegacyScoreInfo
+                    new SoloScoreInfo
                     {
-                        User = new User
+                        EndedAt = DateTimeOffset.Now,
+                        ID = onlineID++,
+                        User = new APIUser
                         {
                             Id = 1014222,
                             Username = @"eLy",
-                            Country = new Country
-                            {
-                                FullName = @"Japan",
-                                FlagName = @"JP",
-                            },
+                            CountryCode = CountryCode.JP,
                         },
-                        Mods = new Mod[]
+                        Mods = new[]
                         {
-                            new OsuModDoubleTime(),
-                            new OsuModHidden(),
+                            new APIMod { Acronym = new OsuModDoubleTime().Acronym },
+                            new APIMod { Acronym = new OsuModHidden().Acronym },
                         },
                         Rank = ScoreRank.B,
                         PP = 180,
@@ -126,21 +228,19 @@ namespace osu.Game.Tests.Visual.Online
                         TotalScore = 12345678,
                         Accuracy = 0.9854,
                     },
-                    new APILegacyScoreInfo
+                    new SoloScoreInfo
                     {
-                        User = new User
+                        EndedAt = DateTimeOffset.Now,
+                        ID = onlineID++,
+                        User = new APIUser
                         {
                             Id = 1541390,
                             Username = @"Toukai",
-                            Country = new Country
-                            {
-                                FullName = @"Canada",
-                                FlagName = @"CA",
-                            },
+                            CountryCode = CountryCode.CA,
                         },
-                        Mods = new Mod[]
+                        Mods = new[]
                         {
-                            new OsuModDoubleTime(),
+                            new APIMod { Acronym = new OsuModDoubleTime().Acronym },
                         },
                         Rank = ScoreRank.C,
                         PP = 170,
@@ -148,17 +248,15 @@ namespace osu.Game.Tests.Visual.Online
                         TotalScore = 1234567,
                         Accuracy = 0.8765,
                     },
-                    new APILegacyScoreInfo
+                    new SoloScoreInfo
                     {
-                        User = new User
+                        EndedAt = DateTimeOffset.Now,
+                        ID = onlineID++,
+                        User = new APIUser
                         {
                             Id = 7151382,
                             Username = @"Mayuri Hana",
-                            Country = new Country
-                            {
-                                FullName = @"Thailand",
-                                FlagName = @"TH",
-                            },
+                            CountryCode = CountryCode.TH,
                         },
                         Rank = ScoreRank.D,
                         PP = 160,
@@ -169,86 +267,55 @@ namespace osu.Game.Tests.Visual.Online
                 }
             };
 
-            var myBestScore = new APILegacyUserTopScoreInfo
-            {
-                Score = new APILegacyScoreInfo
-                {
-                    User = new User
-                    {
-                        Id = 7151382,
-                        Username = @"Mayuri Hana",
-                        Country = new Country
-                        {
-                            FullName = @"Thailand",
-                            FlagName = @"TH",
-                        },
-                    },
-                    Rank = ScoreRank.D,
-                    PP = 160,
-                    MaxCombo = 1234,
-                    TotalScore = 123456,
-                    Accuracy = 0.6543,
-                },
-                Position = 1337,
-            };
+            const int initial_great_count = 2000;
+            const int initial_tick_count = 100;
 
-            var oneScore = new APILegacyScores
-            {
-                Scores = new List<APILegacyScoreInfo>
-                {
-                    new APILegacyScoreInfo
-                    {
-                        User = new User
-                        {
-                            Id = 6602580,
-                            Username = @"waaiiru",
-                            Country = new Country
-                            {
-                                FullName = @"Spain",
-                                FlagName = @"ES",
-                            },
-                        },
-                        Mods = new Mod[]
-                        {
-                            new OsuModDoubleTime(),
-                            new OsuModHidden(),
-                            new OsuModFlashlight(),
-                            new OsuModHardRock(),
-                        },
-                        Rank = ScoreRank.XH,
-                        PP = 200,
-                        MaxCombo = 1234,
-                        TotalScore = 1234567890,
-                        Accuracy = 1,
-                    }
-                }
-            };
+            int greatCount = initial_great_count;
+            int tickCount = initial_tick_count;
 
-            foreach (var s in allScores.Scores)
+            foreach (var s in scores.Scores)
             {
-                s.Statistics.Add(HitResult.Great, RNG.Next(2000));
-                s.Statistics.Add(HitResult.Good, RNG.Next(2000));
-                s.Statistics.Add(HitResult.Meh, RNG.Next(2000));
-                s.Statistics.Add(HitResult.Miss, RNG.Next(2000));
+                s.Statistics = new Dictionary<HitResult, int>
+                {
+                    { HitResult.Great, greatCount },
+                    { HitResult.LargeTickHit, tickCount },
+                    { HitResult.Ok, RNG.Next(100) },
+                    { HitResult.Meh, RNG.Next(100) },
+                    { HitResult.Miss, initial_great_count - greatCount },
+                    { HitResult.LargeTickMiss, initial_tick_count - tickCount },
+                };
+
+                greatCount -= 100;
+                tickCount -= RNG.Next(1, 5);
             }
 
-            AddStep("Load all scores", () =>
-            {
-                allScores.UserScore = null;
-                scoresContainer.Scores = allScores;
-            });
-            AddStep("Load null scores", () => scoresContainer.Scores = null);
-            AddStep("Load only one score", () => scoresContainer.Scores = oneScore);
-            AddStep("Load scores with my best", () =>
-            {
-                allScores.UserScore = myBestScore;
-                scoresContainer.Scores = allScores;
-            });
+            return scores;
         }
+
+        private APIScoreWithPosition createUserBest() => new APIScoreWithPosition
+        {
+            Score = new SoloScoreInfo
+            {
+                EndedAt = DateTimeOffset.Now,
+                ID = onlineID++,
+                User = new APIUser
+                {
+                    Id = 7151382,
+                    Username = @"Mayuri Hana",
+                    CountryCode = CountryCode.TH,
+                },
+                Rank = ScoreRank.D,
+                PP = 160,
+                MaxCombo = 1234,
+                TotalScore = 123456,
+                Accuracy = 0.6543,
+            },
+            Position = 1337,
+        };
 
         private class TestScoresContainer : ScoresContainer
         {
-            public new APILegacyScores Scores
+            public new APIScoresCollection Scores
             {
                 set => base.Scores = value;
             }

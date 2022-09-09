@@ -1,11 +1,9 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using osuTK;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Shapes;
-using osu.Game.Rulesets.Objects.Drawables;
-using osuTK.Graphics;
+using osuTK;
 
 namespace osu.Game.Rulesets.Mania.Objects.Drawables
 {
@@ -15,21 +13,11 @@ namespace osu.Game.Rulesets.Mania.Objects.Drawables
     /// </summary>
     public class DrawableBarLine : DrawableManiaHitObject<BarLine>
     {
-        /// <summary>
-        /// Height of major bar line triangles.
-        /// </summary>
-        private const float triangle_height = 12;
-
-        /// <summary>
-        /// Offset of the major bar line triangles from the sides of the bar line.
-        /// </summary>
-        private const float triangle_offset = 9;
-
         public DrawableBarLine(BarLine barLine)
             : base(barLine)
         {
             RelativeSizeAxes = Axes.X;
-            Height = 2f;
+            Height = barLine.Major ? 1.7f : 1.2f;
 
             AddInternal(new Box
             {
@@ -37,40 +25,39 @@ namespace osu.Game.Rulesets.Mania.Objects.Drawables
                 Anchor = Anchor.BottomCentre,
                 Origin = Anchor.BottomCentre,
                 RelativeSizeAxes = Axes.Both,
-                Colour = new Color4(255, 204, 33, 255),
+                Alpha = barLine.Major ? 0.5f : 0.2f
             });
 
-            bool isMajor = barLine.BeatIndex % (int)barLine.ControlPoint.TimeSignature == 0;
-
-            if (isMajor)
+            if (barLine.Major)
             {
-                AddInternal(new EquilateralTriangle
+                Vector2 size = new Vector2(22, 6);
+                const float line_offset = 4;
+
+                AddInternal(new Circle
                 {
-                    Name = "Left triangle",
-                    Anchor = Anchor.BottomLeft,
-                    Origin = Anchor.TopCentre,
-                    Size = new Vector2(triangle_height),
-                    X = -triangle_offset,
-                    Rotation = 90
+                    Name = "Left line",
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreRight,
+
+                    Size = size,
+                    X = -line_offset,
                 });
 
-                AddInternal(new EquilateralTriangle
+                AddInternal(new Circle
                 {
-                    Name = "Right triangle",
-                    Anchor = Anchor.BottomRight,
-                    Origin = Anchor.TopCentre,
-                    Size = new Vector2(triangle_height),
-                    X = triangle_offset,
-                    Rotation = -90
+                    Name = "Right line",
+                    Anchor = Anchor.CentreRight,
+                    Origin = Anchor.CentreLeft,
+                    Size = size,
+                    X = line_offset,
                 });
             }
-
-            if (!isMajor && barLine.BeatIndex % 2 == 1)
-                Alpha = 0.2f;
         }
 
-        protected override void UpdateState(ArmedState state)
+        protected override void UpdateInitialTransforms()
         {
         }
+
+        protected override void UpdateStartTimeStateTransforms() => this.FadeOut(150);
     }
 }

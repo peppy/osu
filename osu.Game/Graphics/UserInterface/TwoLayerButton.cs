@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
@@ -12,9 +14,11 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Beatmaps.ControlPoints;
 using osu.Framework.Audio.Track;
 using System;
+using osu.Framework.Extensions.EnumExtensions;
 using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
+using osu.Game.Screens.Select;
 
 namespace osu.Game.Graphics.UserInterface
 {
@@ -28,7 +32,9 @@ namespace osu.Game.Graphics.UserInterface
         private const int transform_time = 600;
         private const int pulse_length = 250;
 
-        private const float shear = 0.1f;
+        private const float shear_width = 5f;
+
+        private static readonly Vector2 shear = new Vector2(shear_width / Footer.HEIGHT, 0);
 
         public static readonly Vector2 SIZE_EXTENDED = new Vector2(140, 50);
         public static readonly Vector2 SIZE_RETRACTED = new Vector2(100, 50);
@@ -53,23 +59,25 @@ namespace osu.Game.Graphics.UserInterface
             set
             {
                 base.Origin = value;
-                c1.Origin = c1.Anchor = value.HasFlag(Anchor.x2) ? Anchor.TopLeft : Anchor.TopRight;
-                c2.Origin = c2.Anchor = value.HasFlag(Anchor.x2) ? Anchor.TopRight : Anchor.TopLeft;
+                c1.Origin = c1.Anchor = value.HasFlagFast(Anchor.x2) ? Anchor.TopLeft : Anchor.TopRight;
+                c2.Origin = c2.Anchor = value.HasFlagFast(Anchor.x2) ? Anchor.TopRight : Anchor.TopLeft;
 
-                X = value.HasFlag(Anchor.x2) ? SIZE_RETRACTED.X * shear * 0.5f : 0;
+                X = value.HasFlagFast(Anchor.x2) ? SIZE_RETRACTED.X * shear.X * 0.5f : 0;
 
-                Remove(c1);
-                Remove(c2);
-                c1.Depth = value.HasFlag(Anchor.x2) ? 0 : 1;
-                c2.Depth = value.HasFlag(Anchor.x2) ? 1 : 0;
+                Remove(c1, false);
+                Remove(c2, false);
+                c1.Depth = value.HasFlagFast(Anchor.x2) ? 0 : 1;
+                c2.Depth = value.HasFlagFast(Anchor.x2) ? 1 : 0;
                 Add(c1);
                 Add(c2);
             }
         }
 
-        public TwoLayerButton()
+        public TwoLayerButton(HoverSampleSet sampleSet = HoverSampleSet.Default)
+            : base(sampleSet)
         {
             Size = SIZE_RETRACTED;
+            Shear = shear;
 
             Children = new Drawable[]
             {
@@ -82,7 +90,6 @@ namespace osu.Game.Graphics.UserInterface
                         new Container
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Shear = new Vector2(shear, 0),
                             Masking = true,
                             MaskingSmoothness = 2,
                             EdgeEffect = new EdgeEffectParameters
@@ -105,6 +112,7 @@ namespace osu.Game.Graphics.UserInterface
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
+                            Shear = -shear,
                         },
                     }
                 },
@@ -119,7 +127,6 @@ namespace osu.Game.Graphics.UserInterface
                         new Container
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Shear = new Vector2(shear, 0),
                             Masking = true,
                             MaskingSmoothness = 2,
                             EdgeEffect = new EdgeEffectParameters
@@ -144,6 +151,7 @@ namespace osu.Game.Graphics.UserInterface
                         {
                             Origin = Anchor.Centre,
                             Anchor = Anchor.Centre,
+                            Shear = -shear,
                         }
                     }
                 },
@@ -188,7 +196,6 @@ namespace osu.Game.Graphics.UserInterface
             var flash = new Box
             {
                 RelativeSizeAxes = Axes.Both,
-                Shear = new Vector2(shear, 0),
                 Colour = Color4.White.Opacity(0.5f),
             };
             Add(flash);
@@ -227,11 +234,11 @@ namespace osu.Game.Graphics.UserInterface
                 };
             }
 
-            protected override void OnNewBeat(int beatIndex, TimingControlPoint timingPoint, EffectControlPoint effectPoint, TrackAmplitudes amplitudes)
+            protected override void OnNewBeat(int beatIndex, TimingControlPoint timingPoint, EffectControlPoint effectPoint, ChannelAmplitudes amplitudes)
             {
                 base.OnNewBeat(beatIndex, timingPoint, effectPoint, amplitudes);
 
-                var beatLength = timingPoint.BeatLength;
+                double beatLength = timingPoint.BeatLength;
 
                 float amplitudeAdjust = Math.Min(1, 0.4f + amplitudes.Maximum);
 

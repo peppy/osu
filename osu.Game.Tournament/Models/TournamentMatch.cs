@@ -1,13 +1,15 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Drawing;
 using Newtonsoft.Json;
 using osu.Framework.Bindables;
 using osu.Game.Tournament.Screens.Ladder.Components;
-using SixLabors.Primitives;
 
 namespace osu.Game.Tournament.Models
 {
@@ -90,6 +92,8 @@ namespace osu.Game.Tournament.Models
         [JsonIgnore]
         public TournamentTeam Loser => !Completed.Value ? null : Team1Score.Value > Team2Score.Value ? Team2.Value : Team1.Value;
 
+        public TeamColour WinnerColour => Winner == Team1.Value ? TeamColour.Red : TeamColour.Blue;
+
         public int PointsToWin => Round.Value?.BestOf.Value / 2 + 1 ?? 0;
 
         /// <summary>
@@ -102,11 +106,14 @@ namespace osu.Game.Tournament.Models
         }
 
         /// <summary>
-        /// Initialise this match with zeroed scores. Will be a noop if either team is not present.
+        /// Initialise this match with zeroed scores. Will be a noop if either team is not present or if either of the scores are non-zero.
         /// </summary>
         public void StartMatch()
         {
             if (Team1.Value == null || Team2.Value == null)
+                return;
+
+            if (Team1Score.Value > 0 || Team2Score.Value > 0)
                 return;
 
             Team1Score.Value = 0;

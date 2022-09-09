@@ -1,12 +1,13 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System;
 using System.Threading;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Textures;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
 using osu.Game.Graphics.Backgrounds;
@@ -28,16 +29,21 @@ namespace osu.Game.Screens.Backgrounds
         private WorkingBeatmap beatmap;
 
         /// <summary>
-        /// Whether or not user dim settings should be applied to this Background.
+        /// Whether or not user-configured settings relating to brightness of elements should be ignored.
         /// </summary>
-        public readonly Bindable<bool> EnableUserDim = new Bindable<bool>();
+        /// <remarks>
+        /// Beatmap background screens should not apply user settings by default.
+        /// </remarks>
+        public readonly Bindable<bool> IgnoreUserSettings = new Bindable<bool>(true);
 
         public readonly Bindable<bool> StoryboardReplacesBackground = new Bindable<bool>();
 
         /// <summary>
         /// The amount of blur to be applied in addition to user-specified blur.
         /// </summary>
-        public readonly Bindable<float> BlurAmount = new Bindable<float>();
+        public readonly Bindable<float> BlurAmount = new BindableFloat();
+
+        internal readonly IBindable<bool> IsBreakTime = new Bindable<bool>();
 
         private readonly DimmableBackground dimmable;
 
@@ -48,8 +54,12 @@ namespace osu.Game.Screens.Backgrounds
             Beatmap = beatmap;
 
             InternalChild = dimmable = CreateFadeContainer();
-            dimmable.EnableUserDim.BindTo(EnableUserDim);
+
+            dimmable.IgnoreUserSettings.BindTo(IgnoreUserSettings);
+            dimmable.IsBreakTime.BindTo(IsBreakTime);
             dimmable.BlurAmount.BindTo(BlurAmount);
+
+            StoryboardReplacesBackground.BindTo(dimmable.StoryboardReplacesBackground);
         }
 
         [BackgroundDependencyLoader]
@@ -74,7 +84,7 @@ namespace osu.Game.Screens.Backgrounds
 
                 Schedule(() =>
                 {
-                    if ((Background as BeatmapBackground)?.Beatmap == beatmap)
+                    if ((Background as BeatmapBackground)?.Beatmap.BeatmapInfo.BackgroundEquals(beatmap?.BeatmapInfo) ?? false)
                         return;
 
                     cancellationSource?.Cancel();
@@ -97,7 +107,6 @@ namespace osu.Game.Screens.Backgrounds
 
             b.Depth = newDepth;
             dimmable.Background = Background = b;
-            StoryboardReplacesBackground.BindTo(dimmable.StoryboardReplacesBackground);
         }
 
         public override bool Equals(BackgroundScreen other)
@@ -105,22 +114,6 @@ namespace osu.Game.Screens.Backgrounds
             if (!(other is BackgroundScreenBeatmap otherBeatmapBackground)) return false;
 
             return base.Equals(other) && beatmap == otherBeatmapBackground.Beatmap;
-        }
-
-        protected class BeatmapBackground : Background
-        {
-            public readonly WorkingBeatmap Beatmap;
-
-            public BeatmapBackground(WorkingBeatmap beatmap)
-            {
-                Beatmap = beatmap;
-            }
-
-            [BackgroundDependencyLoader]
-            private void load(TextureStore textures)
-            {
-                Sprite.Texture = Beatmap?.Background ?? textures.Get(@"Backgrounds/bg1");
-            }
         }
 
         public class DimmableBackground : UserDimContainer
@@ -131,7 +124,7 @@ namespace osu.Game.Screens.Backgrounds
             /// <remarks>
             /// Used in contexts where there can potentially be both user and screen-specified blurring occuring at the same time, such as in <see cref="PlayerLoader"/>
             /// </remarks>
-            public readonly Bindable<float> BlurAmount = new Bindable<float>();
+            public readonly Bindable<float> BlurAmount = new BindableFloat();
 
             public Background Background
             {
@@ -160,7 +153,7 @@ namespace osu.Game.Screens.Backgrounds
             /// <summary>
             /// As an optimisation, we add the two blur portions to be applied rather than actually applying two separate blurs.
             /// </summary>
-            private Vector2 blurTarget => EnableUserDim.Value
+            private Vector2 blurTarget => !IgnoreUserSettings.Value
                 ? new Vector2(BlurAmount.Value + (float)userBlurLevel.Value * USER_BLUR_FACTOR)
                 : new Vector2(BlurAmount.Value);
 
@@ -178,7 +171,9 @@ namespace osu.Game.Screens.Backgrounds
                 BlurAmount.ValueChanged += _ => UpdateVisuals();
             }
 
-            protected override bool ShowDimContent => !ShowStoryboard.Value || !StoryboardReplacesBackground.Value; // The background needs to be hidden in the case of it being replaced by the storyboard
+            protected override bool ShowDimContent
+                // The background needs to be hidden in the case of it being replaced by the storyboard
+                => (!ShowStoryboard.Value && !IgnoreUserSettings.Value) || !StoryboardReplacesBackground.Value;
 
             protected override void UpdateVisuals()
             {

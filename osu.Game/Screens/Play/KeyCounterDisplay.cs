@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System;
 using System.Linq;
 using osu.Framework.Allocation;
@@ -14,17 +16,39 @@ using osuTK.Graphics;
 
 namespace osu.Game.Screens.Play
 {
-    public class KeyCounterDisplay : FillFlowContainer<KeyCounter>
+    public class KeyCounterDisplay : Container<KeyCounter>
     {
         private const int duration = 100;
+        private const double key_fade_time = 80;
 
-        public readonly Bindable<bool> Visible = new Bindable<bool>(true);
         private readonly Bindable<bool> configVisibility = new Bindable<bool>();
+
+        protected readonly FillFlowContainer<KeyCounter> KeyFlow;
+
+        protected override Container<KeyCounter> Content => KeyFlow;
+
+        /// <summary>
+        /// Whether the key counter should be visible regardless of the configuration value.
+        /// This is true by default, but can be changed.
+        /// </summary>
+        public readonly Bindable<bool> AlwaysVisible = new Bindable<bool>(true);
 
         public KeyCounterDisplay()
         {
-            Direction = FillDirection.Horizontal;
-            AutoSizeAxes = Axes.Both;
+            InternalChild = KeyFlow = new FillFlowContainer<KeyCounter>
+            {
+                Direction = FillDirection.Horizontal,
+                AutoSizeAxes = Axes.Both,
+            };
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+
+            // Don't use autosize as it will shrink to zero when KeyFlow is hidden.
+            // In turn this can cause the display to be masked off screen and never become visible again.
+            Size = KeyFlow.Size;
         }
 
         public override void Add(KeyCounter key)
@@ -33,23 +57,22 @@ namespace osu.Game.Screens.Play
 
             base.Add(key);
             key.IsCounting = IsCounting;
-            key.FadeTime = FadeTime;
+            key.FadeTime = key_fade_time;
             key.KeyDownTextColor = KeyDownTextColor;
             key.KeyUpTextColor = KeyUpTextColor;
-        }
-
-        public void ResetCount()
-        {
-            foreach (var counter in Children)
-                counter.ResetCount();
         }
 
         [BackgroundDependencyLoader]
         private void load(OsuConfigManager config)
         {
             config.BindWith(OsuSetting.KeyOverlay, configVisibility);
+        }
 
-            Visible.BindValueChanged(_ => updateVisibility());
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            AlwaysVisible.BindValueChanged(_ => updateVisibility());
             configVisibility.BindValueChanged(_ => updateVisibility(), true);
         }
 
@@ -65,22 +88,6 @@ namespace osu.Game.Screens.Play
                 isCounting = value;
                 foreach (var child in Children)
                     child.IsCounting = value;
-            }
-        }
-
-        private int fadeTime;
-
-        public int FadeTime
-        {
-            get => fadeTime;
-            set
-            {
-                if (value != fadeTime)
-                {
-                    fadeTime = value;
-                    foreach (var child in Children)
-                        child.FadeTime = value;
-                }
             }
         }
 
@@ -116,17 +123,14 @@ namespace osu.Game.Screens.Play
             }
         }
 
-        private void updateVisibility() => this.FadeTo(Visible.Value || configVisibility.Value ? 1 : 0, duration);
+        private void updateVisibility() =>
+            // Isolate changing visibility of the key counters from fading this component.
+            KeyFlow.FadeTo(AlwaysVisible.Value || configVisibility.Value ? 1 : 0, duration);
 
         public override bool HandleNonPositionalInput => receptor == null;
         public override bool HandlePositionalInput => receptor == null;
 
         private Receptor receptor;
-
-        public Receptor GetReceptor()
-        {
-            return receptor ?? (receptor = new Receptor(this));
-        }
 
         public void SetReceptor(Receptor receptor)
         {
@@ -153,10 +157,10 @@ namespace osu.Game.Screens.Play
             {
                 switch (e)
                 {
-                    case KeyDownEvent _:
-                    case KeyUpEvent _:
-                    case MouseDownEvent _:
-                    case MouseUpEvent _:
+                    case KeyDownEvent:
+                    case KeyUpEvent:
+                    case MouseDownEvent:
+                    case MouseUpEvent:
                         return Target.Children.Any(c => c.TriggerEvent(e));
                 }
 

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Shapes;
@@ -40,8 +42,19 @@ namespace osu.Game.Graphics.UserInterface
             set => CurrentNumber.Value = value;
         }
 
-        public ProgressBar()
+        private readonly bool allowSeek;
+
+        public override bool HandlePositionalInput => allowSeek;
+        public override bool HandleNonPositionalInput => allowSeek;
+
+        /// <summary>
+        /// Construct a new progress bar.
+        /// </summary>
+        /// <param name="allowSeek">Whether the user should be allowed to click/drag to adjust the value.</param>
+        public ProgressBar(bool allowSeek)
         {
+            this.allowSeek = allowSeek;
+
             CurrentNumber.MinValue = 0;
             CurrentNumber.MaxValue = 1;
             RelativeSizeAxes = Axes.X;

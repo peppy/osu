@@ -1,25 +1,41 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
+
+#nullable disable
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using osu.Framework.Allocation;
-using osuTK.Graphics;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Cursor;
 using osu.Game.Online.Chat;
+using osuTK.Graphics;
 
 namespace osu.Game.Overlays.Chat
 {
     public class DrawableChannel : Container
     {
         public readonly Channel Channel;
-        protected ChatLineContainer ChatLineFlow;
-        private OsuScrollContainer scroll;
+        protected FillFlowContainer ChatLineFlow;
+        private ChannelScrollContainer scroll;
+
+        private bool scrollbarVisible = true;
+
+        public bool ScrollbarVisible
+        {
+            set
+            {
+                if (scrollbarVisible == value) return;
+
+                scrollbarVisible = value;
+                if (scroll != null)
+                    scroll.ScrollbarVisible = value;
+            }
+        }
 
         public DrawableChannel(Channel channel)
         {
@@ -27,30 +43,30 @@ namespace osu.Game.Overlays.Chat
             RelativeSizeAxes = Axes.Both;
         }
 
+        private Bindable<Message> highlightedMessage;
+
         [BackgroundDependencyLoader]
         private void load()
         {
-            Children = new Drawable[]
+            Child = new OsuContextMenuContainer
             {
-                scroll = new OsuScrollContainer
+                RelativeSizeAxes = Axes.Both,
+                Masking = true,
+                Child = scroll = new ChannelScrollContainer
                 {
+                    ScrollbarVisible = scrollbarVisible,
                     RelativeSizeAxes = Axes.Both,
                     // Some chat lines have effects that slightly protrude to the bottom,
                     // which we do not want to mask away, hence the padding.
                     Padding = new MarginPadding { Bottom = 5 },
-                    Child = new OsuContextMenuContainer
+                    Child = ChatLineFlow = new FillFlowContainer
                     {
+                        Padding = new MarginPadding { Horizontal = 10 },
                         RelativeSizeAxes = Axes.X,
                         AutoSizeAxes = Axes.Y,
-                        Child = ChatLineFlow = new ChatLineContainer
-                        {
-                            Padding = new MarginPadding { Left = 20, Right = 20 },
-                            RelativeSizeAxes = Axes.X,
-                            AutoSizeAxes = Axes.Y,
-                            Direction = FillDirection.Vertical,
-                        }
-                    },
-                }
+                        Direction = FillDirection.Vertical,
+                    }
+                },
             };
 
             newMessagesArrived(Channel.Messages);
@@ -63,8 +79,30 @@ namespace osu.Game.Overlays.Chat
         protected override void LoadComplete()
         {
             base.LoadComplete();
-            scrollToEnd();
+
+            highlightedMessage = Channel.HighlightedMessage.GetBoundCopy();
+            highlightedMessage.BindValueChanged(_ => processMessageHighlighting(), true);
         }
+
+        /// <summary>
+        /// Processes any pending message in <see cref="highlightedMessage"/>.
+        /// </summary>
+        // ScheduleAfterChildren is for ensuring the scroll flow has updated with any new chat lines.
+        private void processMessageHighlighting() => SchedulerAfterChildren.AddOnce(() =>
+        {
+            if (highlightedMessage.Value == null)
+                return;
+
+            var chatLine = chatLines.FirstOrDefault(c => c.Message.Equals(highlightedMessage.Value));
+            if (chatLine == null)
+                return;
+
+            float center = scroll.GetChildPosInContent(chatLine, chatLine.DrawSize / 2) - scroll.DisplayableContent / 2;
+            scroll.ScrollTo(Math.Clamp(center, 0, scroll.ScrollableExtent));
+            chatLine.Highlight();
+
+            highlightedMessage.Value = null;
+        });
 
         protected override void Dispose(bool isDisposing)
         {
@@ -77,58 +115,83 @@ namespace osu.Game.Overlays.Chat
 
         protected virtual ChatLine CreateChatLine(Message m) => new ChatLine(m);
 
-        private void newMessagesArrived(IEnumerable<Message> newMessages)
+        protected virtual DaySeparator CreateDaySeparator(DateTimeOffset time) => new DaySeparator(time);
+
+        private void newMessagesArrived(IEnumerable<Message> newMessages) => Schedule(() =>
         {
-            // Add up to last Channel.MAX_HISTORY messages
-            var displayMessages = newMessages.Skip(Math.Max(0, newMessages.Count() - Channel.MaxHistory));
-
-            ChatLineFlow.AddRange(displayMessages.Select(CreateChatLine));
-
-            if (scroll.IsScrolledToEnd(10) || !ChatLineFlow.Children.Any() || newMessages.Any(m => m is LocalMessage))
-                scrollToEnd();
-
-            var staleMessages = ChatLineFlow.Children.Where(c => c.LifetimeEnd == double.MaxValue).ToArray();
-            int count = staleMessages.Length - Channel.MaxHistory;
-
-            for (int i = 0; i < count; i++)
+            if (newMessages.Min(m => m.Id) < chatLines.Max(c => c.Message.Id))
             {
-                var d = staleMessages[i];
-                if (!scroll.IsScrolledToEnd(10))
-                    scroll.OffsetScrollPosition(-d.DrawHeight);
-                d.Expire();
+                // there is a case (on initial population) that we may receive past messages and need to reorder.
+                // easiest way is to just combine messages and recreate drawables (less worrying about day separators etc.)
+                newMessages = newMessages.Concat(chatLines.Select(c => c.Message)).OrderBy(m => m.Id).ToList();
+                ChatLineFlow.Clear();
             }
-        }
 
-        private void pendingMessageResolved(Message existing, Message updated)
+            // Add up to last Channel.MAX_HISTORY messages
+            var displayMessages = newMessages.Skip(Math.Max(0, newMessages.Count() - Channel.MAX_HISTORY));
+
+            Message lastMessage = chatLines.LastOrDefault()?.Message;
+
+            foreach (var message in displayMessages)
+            {
+                if (lastMessage == null || lastMessage.Timestamp.ToLocalTime().Date != message.Timestamp.ToLocalTime().Date)
+                    ChatLineFlow.Add(CreateDaySeparator(message.Timestamp));
+
+                ChatLineFlow.Add(CreateChatLine(message));
+                lastMessage = message;
+            }
+
+            var staleMessages = chatLines.Where(c => c.LifetimeEnd == double.MaxValue).ToArray();
+            int count = staleMessages.Length - Channel.MAX_HISTORY;
+
+            if (count > 0)
+            {
+                void expireAndAdjustScroll(Drawable d)
+                {
+                    scroll.OffsetScrollPosition(-d.DrawHeight);
+                    d.Expire();
+                }
+
+                for (int i = 0; i < count; i++)
+                    expireAndAdjustScroll(staleMessages[i]);
+
+                // remove all adjacent day separators after stale message removal
+                for (int i = 0; i < ChatLineFlow.Count - 1; i++)
+                {
+                    if (!(ChatLineFlow[i] is DaySeparator)) break;
+                    if (!(ChatLineFlow[i + 1] is DaySeparator)) break;
+
+                    expireAndAdjustScroll(ChatLineFlow[i]);
+                }
+            }
+
+            // due to the scroll adjusts from old messages removal above, a scroll-to-end must be enforced,
+            // to avoid making the container think the user has scrolled back up and unwantedly disable auto-scrolling.
+            if (newMessages.Any(m => m is LocalMessage))
+                scroll.ScrollToEnd();
+
+            processMessageHighlighting();
+        });
+
+        private void pendingMessageResolved(Message existing, Message updated) => Schedule(() =>
         {
-            var found = ChatLineFlow.Children.LastOrDefault(c => c.Message == existing);
+            var found = chatLines.LastOrDefault(c => c.Message == existing);
 
             if (found != null)
             {
                 Trace.Assert(updated.Id.HasValue, "An updated message was returned with no ID.");
 
-                ChatLineFlow.Remove(found);
+                ChatLineFlow.Remove(found, false);
                 found.Message = updated;
                 ChatLineFlow.Add(found);
             }
-        }
+        });
 
-        private void messageRemoved(Message removed)
+        private void messageRemoved(Message removed) => Schedule(() =>
         {
-            ChatLineFlow.Children.FirstOrDefault(c => c.Message == removed)?.FadeColour(Color4.Red, 400).FadeOut(600).Expire();
-        }
+            chatLines.FirstOrDefault(c => c.Message == removed)?.FadeColour(Color4.Red, 400).FadeOut(600).Expire();
+        });
 
-        private void scrollToEnd() => ScheduleAfterChildren(() => scroll.ScrollToEnd());
-
-        protected class ChatLineContainer : FillFlowContainer<ChatLine>
-        {
-            protected override int Compare(Drawable x, Drawable y)
-            {
-                var xC = (ChatLine)x;
-                var yC = (ChatLine)y;
-
-                return xC.Message.CompareTo(yC.Message);
-            }
-        }
+        private IEnumerable<ChatLine> chatLines => ChatLineFlow.Children.OfType<ChatLine>();
     }
 }

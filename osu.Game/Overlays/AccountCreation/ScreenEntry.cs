@@ -1,15 +1,16 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using osu.Framework.Allocation;
-using osu.Framework.Extensions.IEnumerableExtensions;
+using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.MathUtils;
+using osu.Framework.Utils;
 using osu.Framework.Platform;
 using osu.Framework.Screens;
 using osu.Game.Graphics;
@@ -18,6 +19,7 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Online.API;
 using osu.Game.Overlays.Settings;
+using osu.Game.Resources.Localisation.Web;
 using osuTK;
 using osuTK.Graphics;
 
@@ -33,20 +35,21 @@ namespace osu.Game.Overlays.AccountCreation
         private OsuTextBox emailTextBox;
         private OsuPasswordTextBox passwordTextBox;
 
-        private IAPIProvider api;
+        [Resolved]
+        private IAPIProvider api { get; set; }
+
         private ShakeContainer registerShake;
-        private IEnumerable<Drawable> characterCheckText;
+        private ITextPart characterCheckText;
 
         private OsuTextBox[] textboxes;
-        private ProcessingOverlay processingOverlay;
-        private GameHost host;
+        private LoadingLayer loadingLayer;
+
+        [Resolved]
+        private GameHost host { get; set; }
 
         [BackgroundDependencyLoader]
-        private void load(OsuColour colours, IAPIProvider api, GameHost host)
+        private void load()
         {
-            this.api = api;
-            this.host = host;
-
             InternalChildren = new Drawable[]
             {
                 new FillFlowContainer
@@ -69,7 +72,7 @@ namespace osu.Game.Overlays.AccountCreation
                         },
                         usernameTextBox = new OsuTextBox
                         {
-                            PlaceholderText = "username",
+                            PlaceholderText = UsersStrings.LoginUsername.ToLower(),
                             RelativeSizeAxes = Axes.X,
                             TabbableContentContainer = this
                         },
@@ -91,7 +94,7 @@ namespace osu.Game.Overlays.AccountCreation
                         },
                         passwordTextBox = new OsuPasswordTextBox
                         {
-                            PlaceholderText = "password",
+                            PlaceholderText = UsersStrings.LoginPassword.ToLower(),
                             RelativeSizeAxes = Axes.X,
                             TabbableContentContainer = this,
                         },
@@ -121,7 +124,7 @@ namespace osu.Game.Overlays.AccountCreation
                         },
                     },
                 },
-                processingOverlay = new ProcessingOverlay { Alpha = 0 }
+                loadingLayer = new LoadingLayer(true)
             };
 
             textboxes = new[] { usernameTextBox, emailTextBox, passwordTextBox };
@@ -129,32 +132,36 @@ namespace osu.Game.Overlays.AccountCreation
             usernameDescription.AddText("This will be your public presence. No profanity, no impersonation. Avoid exposing your own personal details, too!");
 
             emailAddressDescription.AddText("Will be used for notifications, account verification and in the case you forget your password. No spam, ever.");
-            emailAddressDescription.AddText(" Make sure to get it right!", cp => cp.Font = cp.Font.With(Typeface.Exo, weight: FontWeight.Bold));
+            emailAddressDescription.AddText(" Make sure to get it right!", cp => cp.Font = cp.Font.With(Typeface.Torus, weight: FontWeight.Bold));
 
             passwordDescription.AddText("At least ");
             characterCheckText = passwordDescription.AddText("8 characters long");
             passwordDescription.AddText(". Choose something long but also something you will remember, like a line from your favourite song.");
 
-            passwordTextBox.Current.ValueChanged += password => { characterCheckText.ForEach(s => s.Colour = password.NewValue.Length == 0 ? Color4.White : Interpolation.ValueAt(password.NewValue.Length, Color4.OrangeRed, Color4.YellowGreen, 0, 8, Easing.In)); };
+            passwordTextBox.Current.BindValueChanged(_ => updateCharacterCheckTextColour(), true);
+            characterCheckText.DrawablePartsRecreated += _ => updateCharacterCheckTextColour();
         }
 
-        protected override void Update()
+        private void updateCharacterCheckTextColour()
         {
-            base.Update();
+            string password = passwordTextBox.Text;
 
-            if (host?.OnScreenKeyboardOverlapsGameWindow != true && !textboxes.Any(t => t.HasFocus))
-                focusNextTextbox();
+            foreach (var d in characterCheckText.Drawables)
+                d.Colour = password.Length == 0 ? Color4.White : Interpolation.ValueAt(password.Length, Color4.OrangeRed, Color4.YellowGreen, 0, 8, Easing.In);
         }
 
-        public override void OnEntering(IScreen last)
+        public override void OnEntering(ScreenTransitionEvent e)
         {
-            base.OnEntering(last);
-            processingOverlay.Hide();
+            base.OnEntering(e);
+            loadingLayer.Hide();
+
+            if (host?.OnScreenKeyboardOverlapsGameWindow != true)
+                focusNextTextBox();
         }
 
         private void performRegistration()
         {
-            if (focusNextTextbox())
+            if (focusNextTextBox())
             {
                 registerShake.Shake();
                 return;
@@ -164,7 +171,7 @@ namespace osu.Game.Overlays.AccountCreation
             emailAddressDescription.ClearErrors();
             passwordDescription.ClearErrors();
 
-            processingOverlay.Show();
+            loadingLayer.Show();
 
             Task.Run(() =>
             {
@@ -197,28 +204,28 @@ namespace osu.Game.Overlays.AccountCreation
                         }
 
                         registerShake.Shake();
-                        processingOverlay.Hide();
+                        loadingLayer.Hide();
                         return;
                     }
 
-                    api.Login(emailTextBox.Text, passwordTextBox.Text);
+                    api.Login(usernameTextBox.Text, passwordTextBox.Text);
                 });
             });
         }
 
-        private bool focusNextTextbox()
+        private bool focusNextTextBox()
         {
-            var nextTextbox = nextUnfilledTextbox();
+            var nextTextBox = nextUnfilledTextBox();
 
-            if (nextTextbox != null)
+            if (nextTextBox != null)
             {
-                Schedule(() => GetContainingInputManager().ChangeFocus(nextTextbox));
+                Schedule(() => GetContainingInputManager().ChangeFocus(nextTextBox));
                 return true;
             }
 
             return false;
         }
 
-        private OsuTextBox nextUnfilledTextbox() => textboxes.FirstOrDefault(t => string.IsNullOrEmpty(t.Text));
+        private OsuTextBox nextUnfilledTextBox() => textboxes.FirstOrDefault(t => string.IsNullOrEmpty(t.Text));
     }
 }

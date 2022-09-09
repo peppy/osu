@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using osuTK;
 using osuTK.Graphics;
 using osu.Framework.Allocation;
@@ -9,6 +11,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Localisation;
 using osu.Game.Graphics.Sprites;
 
 namespace osu.Game.Graphics.Cursor
@@ -30,22 +33,19 @@ namespace osu.Game.Graphics.Cursor
             private readonly OsuSpriteText text;
             private bool instantMovement = true;
 
-            public override string TooltipText
+            public override void SetContent(LocalisableString contentString)
             {
-                set
+                if (contentString == text.Text) return;
+
+                text.Text = contentString;
+
+                if (IsPresent)
                 {
-                    if (value == text.Text) return;
-
-                    text.Text = value;
-
-                    if (IsPresent)
-                    {
-                        AutoSizeDuration = 250;
-                        background.FlashColour(OsuColour.Gray(0.4f), 1000, Easing.OutQuint);
-                    }
-                    else
-                        AutoSizeDuration = 0;
+                    AutoSizeDuration = 250;
+                    background.FlashColour(OsuColour.Gray(0.4f), 1000, Easing.OutQuint);
                 }
+                else
+                    AutoSizeDuration = 0;
             }
 
             public OsuTooltip()

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
@@ -32,6 +34,13 @@ namespace osu.Game.Overlays.Toolbar
                     Action = stateContainer.ToggleVisibility;
                     overlayState.BindTo(stateContainer.State);
                 }
+
+                if (stateContainer is INamedOverlayComponent named)
+                {
+                    TooltipMain = named.Title;
+                    TooltipSub = named.Description;
+                    SetIcon(named.IconTexture);
+                }
             }
         }
 
@@ -41,7 +50,7 @@ namespace osu.Game.Overlays.Toolbar
             {
                 RelativeSizeAxes = Axes.Both,
                 Colour = OsuColour.Gray(150).Opacity(180),
-                Blending = BlendingMode.Additive,
+                Blending = BlendingParameters.Additive,
                 Depth = 2,
                 Alpha = 0,
             });

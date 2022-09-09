@@ -5,9 +5,10 @@ namespace osu.Game.Online
 {
     public enum DownloadState
     {
+        Unknown,
         NotDownloaded,
         Downloading,
-        Downloaded,
+        Importing,
         LocallyAvailable
     }
 }

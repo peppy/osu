@@ -1,10 +1,13 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using NUnit.Framework;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mania.Difficulty;
+using osu.Game.Rulesets.Mania.Mods;
 using osu.Game.Tests.Beatmaps;
 
 namespace osu.Game.Rulesets.Mania.Tests
@@ -13,11 +16,15 @@ namespace osu.Game.Rulesets.Mania.Tests
     {
         protected override string ResourceAssembly => "osu.Game.Rulesets.Mania";
 
-        [TestCase(2.3683365342338796d, "diffcalc-test")]
-        public void Test(double expected, string name)
-            => base.Test(expected, name);
+        [TestCase(2.3493769750220914d, 242, "diffcalc-test")]
+        public void Test(double expectedStarRating, int expectedMaxCombo, string name)
+            => base.Test(expectedStarRating, expectedMaxCombo, name);
 
-        protected override DifficultyCalculator CreateDifficultyCalculator(WorkingBeatmap beatmap) => new ManiaDifficultyCalculator(new ManiaRuleset(), beatmap);
+        [TestCase(2.797245912537965d, 242, "diffcalc-test")]
+        public void TestClockRateAdjusted(double expectedStarRating, int expectedMaxCombo, string name)
+            => Test(expectedStarRating, expectedMaxCombo, name, new ManiaModDoubleTime());
+
+        protected override DifficultyCalculator CreateDifficultyCalculator(IWorkingBeatmap beatmap) => new ManiaDifficultyCalculator(new ManiaRuleset().RulesetInfo, beatmap);
 
         protected override Ruleset CreateRuleset() => new ManiaRuleset();
     }

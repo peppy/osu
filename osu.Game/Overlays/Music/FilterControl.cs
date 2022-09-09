@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Game.Graphics;
@@ -8,13 +10,15 @@ using osu.Game.Graphics.UserInterface;
 using osuTK;
 using System;
 using osu.Framework.Allocation;
-using osu.Framework.Bindables;
 
 namespace osu.Game.Overlays.Music
 {
     public class FilterControl : Container
     {
+        public Action<FilterCriteria> FilterChanged;
+
         public readonly FilterTextBox Search;
+        private readonly NowPlayingCollectionDropdown collectionDropdown;
 
         public FilterControl()
         {
@@ -31,27 +35,30 @@ namespace osu.Game.Overlays.Music
                         {
                             RelativeSizeAxes = Axes.X,
                             Height = 40,
-                            Exit = () => ExitRequested?.Invoke(),
                         },
-                        new CollectionsDropdown<PlaylistCollection>
-                        {
-                            RelativeSizeAxes = Axes.X,
-                            Items = new[] { PlaylistCollection.All },
-                        }
+                        collectionDropdown = new NowPlayingCollectionDropdown { RelativeSizeAxes = Axes.X }
                     },
                 },
             };
-
-            Search.Current.ValueChanged += current_ValueChanged;
         }
 
-        private void current_ValueChanged(ValueChangedEvent<string> e) => FilterChanged?.Invoke(e.NewValue);
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
 
-        public Action ExitRequested;
+            Search.Current.BindValueChanged(_ => updateCriteria());
+            collectionDropdown.Current.BindValueChanged(_ => updateCriteria(), true);
+        }
 
-        public Action<string> FilterChanged;
+        private void updateCriteria() => FilterChanged?.Invoke(createCriteria());
 
-        public class FilterTextBox : SearchTextBox
+        private FilterCriteria createCriteria() => new FilterCriteria
+        {
+            SearchText = Search.Current.Value,
+            Collection = collectionDropdown.Current.Value?.Collection
+        };
+
+        public class FilterTextBox : BasicSearchTextBox
         {
             protected override bool AllowCommit => true;
 

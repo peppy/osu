@@ -1,22 +1,24 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
-using osu.Framework.MathUtils;
+using osu.Framework.Utils;
 using osu.Game.Tournament.IPC;
 using osu.Game.Tournament.Screens.Gameplay.Components;
 
 namespace osu.Game.Tournament.Tests.Components
 {
-    public class TestSceneMatchScoreDisplay : LadderTestScene
+    public class TestSceneMatchScoreDisplay : TournamentTestScene
     {
         [Cached(Type = typeof(MatchIPCInfo))]
         private MatchIPCInfo matchInfo = new MatchIPCInfo();
 
         public TestSceneMatchScoreDisplay()
         {
-            Add(new MatchScoreDisplay
+            Add(new TournamentMatchScoreDisplay
             {
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,

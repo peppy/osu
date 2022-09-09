@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System;
 using osuTK;
 using osuTK.Graphics;
@@ -11,6 +13,7 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
+using osu.Framework.Localisation;
 using osu.Game.Graphics.Sprites;
 
 namespace osu.Game.Graphics.UserInterface
@@ -24,13 +27,31 @@ namespace osu.Game.Graphics.UserInterface
             Height = 30;
         }
 
-        public class PageTabItem : TabItem<T>
+        [BackgroundDependencyLoader]
+        private void load(OsuColour colours)
+        {
+            AccentColour = colours.Yellow;
+        }
+
+        public class PageTabItem : TabItem<T>, IHasAccentColour
         {
             private const float transition_duration = 100;
 
             private readonly Box box;
 
             protected readonly SpriteText Text;
+
+            private Color4 accentColour;
+
+            public Color4 AccentColour
+            {
+                get => accentColour;
+                set
+                {
+                    accentColour = value;
+                    box.Colour = accentColour;
+                }
+            }
 
             public PageTabItem(T value)
                 : base(value)
@@ -45,7 +66,7 @@ namespace osu.Game.Graphics.UserInterface
                         Margin = new MarginPadding { Top = 8, Bottom = 8 },
                         Origin = Anchor.BottomLeft,
                         Anchor = Anchor.BottomLeft,
-                        Text = (value as Enum)?.GetDescription() ?? value.ToString(),
+                        Text = CreateText(),
                         Font = OsuFont.GetFont(size: 14)
                     },
                     box = new Box
@@ -57,17 +78,13 @@ namespace osu.Game.Graphics.UserInterface
                         Origin = Anchor.BottomLeft,
                         Anchor = Anchor.BottomLeft,
                     },
-                    new HoverClickSounds()
+                    new HoverClickSounds(HoverSampleSet.TabSelect)
                 };
 
-                Active.BindValueChanged(active => Text.Font = Text.Font.With(Typeface.Exo, weight: active.NewValue ? FontWeight.Bold : FontWeight.Medium), true);
+                Active.BindValueChanged(active => Text.Font = Text.Font.With(Typeface.Torus, weight: active.NewValue ? FontWeight.Bold : FontWeight.Medium), true);
             }
 
-            [BackgroundDependencyLoader]
-            private void load(OsuColour colours)
-            {
-                box.Colour = colours.Yellow;
-            }
+            protected virtual LocalisableString CreateText() => (Value as Enum)?.GetLocalisableDescription() ?? Value.ToString();
 
             protected override bool OnHover(HoverEvent e)
             {

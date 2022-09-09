@@ -7,273 +7,599 @@ using System.Linq;
 using NUnit.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Graphics;
-using osu.Game.Graphics.Sprites;
+using osu.Framework.Graphics.Containers;
+using osu.Framework.Localisation;
+using osu.Framework.Testing;
+using osu.Framework.Utils;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.Mods;
-using osu.Game.Overlays.Mods.Sections;
+using osu.Game.Overlays.Settings;
 using osu.Game.Rulesets;
-using osu.Game.Rulesets.Mania.Mods;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Osu.Mods;
-using osu.Game.Rulesets.UI;
-using osu.Game.Screens.Play.HUD;
+using osu.Game.Tests.Mods;
 using osuTK;
-using osuTK.Graphics;
+using osuTK.Input;
 
 namespace osu.Game.Tests.Visual.UserInterface
 {
-    [Description("mod select and icon display")]
-    public class TestSceneModSelectOverlay : OsuTestScene
+    [TestFixture]
+    public class TestSceneModSelectOverlay : OsuManualInputManagerTestScene
     {
-        public override IReadOnlyList<Type> RequiredTypes => new[]
-        {
-            typeof(ModDisplay),
-            typeof(ModSection),
-            typeof(ModIcon),
-            typeof(ModButton),
-            typeof(ModButtonEmpty),
-            typeof(DifficultyReductionSection),
-            typeof(DifficultyIncreaseSection),
-            typeof(AutomationSection),
-            typeof(ConversionSection),
-            typeof(FunSection),
-        };
+        protected override bool UseFreshStoragePerRun => true;
 
-        private RulesetStore rulesets;
-        private ModDisplay modDisplay;
-        private TestModSelectOverlay modSelect;
+        private RulesetStore rulesetStore = null!;
+
+        private TestModSelectOverlay modSelectOverlay = null!;
 
         [BackgroundDependencyLoader]
-        private void load(RulesetStore rulesets)
+        private void load()
         {
-            this.rulesets = rulesets;
+            Dependencies.Cache(rulesetStore = new RealmRulesetStore(Realm));
+            Dependencies.Cache(Realm);
+        }
 
-            Add(modSelect = new TestModSelectOverlay
+        [SetUpSteps]
+        public void SetUpSteps()
+        {
+            AddStep("clear contents", Clear);
+            AddStep("reset ruleset", () => Ruleset.Value = rulesetStore.GetRuleset(0));
+            AddStep("reset mods", () => SelectedMods.SetDefault());
+            AddStep("set up presets", () =>
             {
-                RelativeSizeAxes = Axes.X,
-                Origin = Anchor.BottomCentre,
-                Anchor = Anchor.BottomCentre,
+                Realm.Write(r =>
+                {
+                    r.RemoveAll<ModPreset>();
+                    r.Add(new ModPreset
+                    {
+                        Name = "AR0",
+                        Description = "Too... many... circles...",
+                        Ruleset = r.Find<RulesetInfo>(OsuRuleset.SHORT_NAME),
+                        Mods = new[]
+                        {
+                            new OsuModDifficultyAdjust
+                            {
+                                ApproachRate = { Value = 0 }
+                            }
+                        }
+                    });
+                });
             });
+        }
 
-            Add(modDisplay = new ModDisplay
+        private void createScreen()
+        {
+            AddStep("create screen", () => Child = modSelectOverlay = new TestModSelectOverlay
             {
-                Anchor = Anchor.TopRight,
-                Origin = Anchor.TopRight,
-                AutoSizeAxes = Axes.Both,
-                Position = new Vector2(0, 25),
+                RelativeSizeAxes = Axes.Both,
+                State = { Value = Visibility.Visible },
+                SelectedMods = { BindTarget = SelectedMods }
             });
-
-            modDisplay.Current.UnbindBindings();
-            modDisplay.Current.BindTo(modSelect.SelectedMods);
-
-            AddStep("Show", modSelect.Show);
-            AddStep("Toggle", modSelect.ToggleVisibility);
-            AddStep("Toggle", modSelect.ToggleVisibility);
+            waitForColumnLoad();
         }
 
         [Test]
-        public void TestOsuMods()
+        public void TestStateChange()
         {
-            var ruleset = rulesets.AvailableRulesets.First(r => r.ID == 0);
-            changeRuleset(ruleset);
-
-            var instance = ruleset.CreateInstance();
-
-            var easierMods = instance.GetModsFor(ModType.DifficultyReduction);
-            var harderMods = instance.GetModsFor(ModType.DifficultyIncrease);
-            var assistMods = instance.GetModsFor(ModType.Automation);
-
-            var noFailMod = easierMods.FirstOrDefault(m => m is OsuModNoFail);
-            var hiddenMod = harderMods.FirstOrDefault(m => m is OsuModHidden);
-
-            var doubleTimeMod = harderMods.OfType<MultiMod>().FirstOrDefault(m => m.Mods.Any(a => a is OsuModDoubleTime));
-
-            var autoPilotMod = assistMods.FirstOrDefault(m => m is OsuModAutopilot);
-
-            var easy = easierMods.FirstOrDefault(m => m is OsuModEasy);
-            var hardRock = harderMods.FirstOrDefault(m => m is OsuModHardRock);
-
-            testSingleMod(noFailMod);
-            testMultiMod(doubleTimeMod);
-            testIncompatibleMods(easy, hardRock);
-            testDeselectAll(easierMods.Where(m => !(m is MultiMod)));
-            testMultiplierTextColour(noFailMod, modSelect.LowMultiplierColour);
-            testMultiplierTextColour(hiddenMod, modSelect.HighMultiplierColour);
-
-            testUnimplementedMod(autoPilotMod);
+            createScreen();
+            AddStep("toggle state", () => modSelectOverlay.ToggleVisibility());
         }
 
         [Test]
-        public void TestManiaMods()
+        public void TestPreexistingSelection()
         {
-            var ruleset = rulesets.AvailableRulesets.First(r => r.ID == 3);
-            changeRuleset(ruleset);
+            AddStep("set mods", () => SelectedMods.Value = new Mod[] { new OsuModAlternate(), new OsuModDaycore() });
+            createScreen();
+            AddUntilStep("two panels active", () => modSelectOverlay.ChildrenOfType<ModPanel>().Count(panel => panel.Active.Value) == 2);
+            AddAssert("mod multiplier correct", () =>
+            {
+                double multiplier = SelectedMods.Value.Aggregate(1d, (m, mod) => m * mod.ScoreMultiplier);
+                return Precision.AlmostEquals(multiplier, modSelectOverlay.ChildrenOfType<DifficultyMultiplierDisplay>().Single().Current.Value);
+            });
+            assertCustomisationToggleState(disabled: false, active: false);
+            AddAssert("setting items created", () => modSelectOverlay.ChildrenOfType<ISettingsItem>().Any());
+        }
 
-            testRankedText(ruleset.CreateInstance().GetModsFor(ModType.Conversion).First(m => m is ManiaModRandom));
+        [Test]
+        public void TestExternalSelection()
+        {
+            createScreen();
+            AddStep("set mods", () => SelectedMods.Value = new Mod[] { new OsuModAlternate(), new OsuModDaycore() });
+            AddUntilStep("two panels active", () => modSelectOverlay.ChildrenOfType<ModPanel>().Count(panel => panel.Active.Value) == 2);
+            AddAssert("mod multiplier correct", () =>
+            {
+                double multiplier = SelectedMods.Value.Aggregate(1d, (m, mod) => m * mod.ScoreMultiplier);
+                return Precision.AlmostEquals(multiplier, modSelectOverlay.ChildrenOfType<DifficultyMultiplierDisplay>().Single().Current.Value);
+            });
+            assertCustomisationToggleState(disabled: false, active: false);
+            AddAssert("setting items created", () => modSelectOverlay.ChildrenOfType<ISettingsItem>().Any());
+        }
+
+        [Test]
+        public void TestRulesetChange()
+        {
+            createScreen();
+            changeRuleset(0);
+            changeRuleset(1);
+            changeRuleset(2);
+            changeRuleset(3);
+        }
+
+        [Test]
+        public void TestIncompatibilityToggling()
+        {
+            createScreen();
+            changeRuleset(0);
+
+            AddStep("activate DT", () => getPanelForMod(typeof(OsuModDoubleTime)).TriggerClick());
+            AddAssert("DT active", () => SelectedMods.Value.Single().GetType() == typeof(OsuModDoubleTime));
+            AddAssert("DT panel active", () => getPanelForMod(typeof(OsuModDoubleTime)).Active.Value);
+
+            AddStep("activate NC", () => getPanelForMod(typeof(OsuModNightcore)).TriggerClick());
+            AddAssert("only NC active", () => SelectedMods.Value.Single().GetType() == typeof(OsuModNightcore));
+            AddAssert("DT panel not active", () => !getPanelForMod(typeof(OsuModDoubleTime)).Active.Value);
+            AddAssert("NC panel active", () => getPanelForMod(typeof(OsuModNightcore)).Active.Value);
+
+            AddStep("activate HR", () => getPanelForMod(typeof(OsuModHardRock)).TriggerClick());
+            AddAssert("NC+HR active", () => SelectedMods.Value.Any(mod => mod.GetType() == typeof(OsuModNightcore))
+                                            && SelectedMods.Value.Any(mod => mod.GetType() == typeof(OsuModHardRock)));
+            AddAssert("NC panel active", () => getPanelForMod(typeof(OsuModNightcore)).Active.Value);
+            AddAssert("HR panel active", () => getPanelForMod(typeof(OsuModHardRock)).Active.Value);
+
+            AddStep("activate MR", () => getPanelForMod(typeof(OsuModMirror)).TriggerClick());
+            AddAssert("NC+MR active", () => SelectedMods.Value.Any(mod => mod.GetType() == typeof(OsuModNightcore))
+                                            && SelectedMods.Value.Any(mod => mod.GetType() == typeof(OsuModMirror)));
+            AddAssert("NC panel active", () => getPanelForMod(typeof(OsuModNightcore)).Active.Value);
+            AddAssert("HR panel not active", () => !getPanelForMod(typeof(OsuModHardRock)).Active.Value);
+            AddAssert("MR panel active", () => getPanelForMod(typeof(OsuModMirror)).Active.Value);
+        }
+
+        [Test]
+        public void TestDimmedState()
+        {
+            createScreen();
+            changeRuleset(0);
+
+            AddUntilStep("any column dimmed", () => this.ChildrenOfType<ModColumn>().Any(column => !column.Active.Value));
+
+            ModSelectColumn lastColumn = null!;
+
+            AddAssert("last column dimmed", () => !this.ChildrenOfType<ModColumn>().Last().Active.Value);
+            AddStep("request scroll to last column", () =>
+            {
+                var lastDimContainer = this.ChildrenOfType<ModSelectOverlay.ColumnDimContainer>().Last();
+                lastColumn = lastDimContainer.Column;
+                lastDimContainer.RequestScroll?.Invoke(lastDimContainer);
+            });
+            AddUntilStep("column undimmed", () => lastColumn.Active.Value);
+
+            AddStep("click panel", () =>
+            {
+                InputManager.MoveMouseTo(lastColumn.ChildrenOfType<ModPanel>().First());
+                InputManager.Click(MouseButton.Left);
+            });
+            AddUntilStep("panel selected", () => lastColumn.ChildrenOfType<ModPanel>().First().Active.Value);
+        }
+
+        [Test]
+        public void TestCustomisationToggleState()
+        {
+            createScreen();
+            assertCustomisationToggleState(disabled: true, active: false);
+
+            AddStep("select customisable mod", () => SelectedMods.Value = new[] { new OsuModDoubleTime() });
+            assertCustomisationToggleState(disabled: false, active: false);
+
+            AddStep("select mod requiring configuration externally", () => SelectedMods.Value = new[] { new OsuModDifficultyAdjust() });
+            assertCustomisationToggleState(disabled: false, active: false);
+
+            AddStep("reset mods", () => SelectedMods.SetDefault());
+            AddStep("select difficulty adjust via panel", () => getPanelForMod(typeof(OsuModDifficultyAdjust)).TriggerClick());
+            assertCustomisationToggleState(disabled: false, active: true);
+
+            AddStep("dismiss mod customisation via toggle", () =>
+            {
+                InputManager.MoveMouseTo(modSelectOverlay.CustomisationButton);
+                InputManager.Click(MouseButton.Left);
+            });
+            assertCustomisationToggleState(disabled: false, active: false);
+
+            AddStep("reset mods", () => SelectedMods.SetDefault());
+            AddStep("select difficulty adjust via panel", () => getPanelForMod(typeof(OsuModDifficultyAdjust)).TriggerClick());
+            assertCustomisationToggleState(disabled: false, active: true);
+
+            AddStep("dismiss mod customisation via keyboard", () => InputManager.Key(Key.Escape));
+            assertCustomisationToggleState(disabled: false, active: false);
+
+            AddStep("append another mod not requiring config", () => SelectedMods.Value = SelectedMods.Value.Append(new OsuModFlashlight()).ToArray());
+            assertCustomisationToggleState(disabled: false, active: false);
+
+            AddStep("select mod without configuration", () => SelectedMods.Value = new[] { new OsuModAutoplay() });
+            assertCustomisationToggleState(disabled: true, active: false);
+
+            AddStep("select difficulty adjust via panel", () => getPanelForMod(typeof(OsuModDifficultyAdjust)).TriggerClick());
+            assertCustomisationToggleState(disabled: false, active: true);
+
+            AddStep("select mod without configuration", () => SelectedMods.Value = new[] { new OsuModAutoplay() });
+            assertCustomisationToggleState(disabled: true, active: false); // config was dismissed without explicit user action.
+
+            AddStep("select mod preset with mod requiring configuration", () =>
+            {
+                InputManager.MoveMouseTo(this.ChildrenOfType<ModPresetPanel>().First());
+                InputManager.Click(MouseButton.Left);
+            });
+            assertCustomisationToggleState(disabled: false, active: false);
+        }
+
+        [Test]
+        public void TestDismissCustomisationViaDimmedArea()
+        {
+            createScreen();
+            assertCustomisationToggleState(disabled: true, active: false);
+
+            AddStep("select difficulty adjust via panel", () => getPanelForMod(typeof(OsuModDifficultyAdjust)).TriggerClick());
+            assertCustomisationToggleState(disabled: false, active: true);
+
+            AddStep("move mouse to settings area", () => InputManager.MoveMouseTo(this.ChildrenOfType<ModSettingsArea>().Single()));
+            AddStep("move mouse to dimmed area", () =>
+            {
+                InputManager.MoveMouseTo(new Vector2(
+                    modSelectOverlay.ScreenSpaceDrawQuad.TopLeft.X,
+                    (modSelectOverlay.ScreenSpaceDrawQuad.TopLeft.Y + modSelectOverlay.ScreenSpaceDrawQuad.BottomLeft.Y) / 2));
+            });
+            AddStep("click", () => InputManager.Click(MouseButton.Left));
+            assertCustomisationToggleState(disabled: false, active: false);
+
+            AddStep("move mouse to first mod panel", () => InputManager.MoveMouseTo(modSelectOverlay.ChildrenOfType<ModPanel>().First()));
+            AddAssert("first mod panel is hovered", () => modSelectOverlay.ChildrenOfType<ModPanel>().First().IsHovered);
+        }
+
+        /// <summary>
+        /// Ensure that two mod overlays are not cross polluting via central settings instances.
+        /// </summary>
+        [Test]
+        public void TestSettingsNotCrossPolluting()
+        {
+            Bindable<IReadOnlyList<Mod>> selectedMods2 = null!;
+            ModSelectOverlay modSelectOverlay2 = null!;
+
+            createScreen();
+            AddStep("select difficulty adjust via panel", () => getPanelForMod(typeof(OsuModDifficultyAdjust)).TriggerClick());
+
+            AddStep("set setting", () => modSelectOverlay.ChildrenOfType<OsuSliderBar<float>>().First().Current.Value = 8);
+
+            AddAssert("ensure setting is propagated", () => SelectedMods.Value.OfType<OsuModDifficultyAdjust>().Single().CircleSize.Value == 8);
+
+            AddStep("create second bindable", () => selectedMods2 = new Bindable<IReadOnlyList<Mod>>(new Mod[] { new OsuModDifficultyAdjust() }));
+
+            AddStep("create second overlay", () =>
+            {
+                Add(modSelectOverlay2 = new UserModSelectOverlay().With(d =>
+                {
+                    d.Origin = Anchor.TopCentre;
+                    d.Anchor = Anchor.TopCentre;
+                    d.SelectedMods.BindTarget = selectedMods2;
+                }));
+            });
+
+            AddStep("show", () => modSelectOverlay2.Show());
+
+            AddAssert("ensure first is unchanged", () => SelectedMods.Value.OfType<OsuModDifficultyAdjust>().Single().CircleSize.Value == 8);
+            AddAssert("ensure second is default", () => selectedMods2.Value.OfType<OsuModDifficultyAdjust>().Single().CircleSize.Value == null);
+        }
+
+        [Test]
+        public void TestSettingsResetOnDeselection()
+        {
+            var osuModDoubleTime = new OsuModDoubleTime { SpeedChange = { Value = 1.2 } };
+
+            createScreen();
+            changeRuleset(0);
+
+            AddStep("set dt mod with custom rate", () => { SelectedMods.Value = new[] { osuModDoubleTime }; });
+
+            AddAssert("selected mod matches", () => (SelectedMods.Value.Single() as OsuModDoubleTime)?.SpeedChange.Value == 1.2);
+
+            AddStep("deselect", () => getPanelForMod(typeof(OsuModDoubleTime)).TriggerClick());
+            AddAssert("selected mods empty", () => SelectedMods.Value.Count == 0);
+
+            AddStep("reselect", () => getPanelForMod(typeof(OsuModDoubleTime)).TriggerClick());
+            AddAssert("selected mod has default value", () => (SelectedMods.Value.Single() as OsuModDoubleTime)?.SpeedChange.IsDefault == true);
+        }
+
+        [Test]
+        public void TestAnimationFlushOnClose()
+        {
+            createScreen();
+            changeRuleset(0);
+
+            AddStep("Select all fun mods", () =>
+            {
+                modSelectOverlay.ChildrenOfType<ModColumn>()
+                                .Single(c => c.ModType == ModType.DifficultyIncrease)
+                                .SelectAll();
+            });
+
+            AddUntilStep("many mods selected", () => SelectedMods.Value.Count >= 5);
+
+            AddStep("trigger deselect and close overlay", () =>
+            {
+                modSelectOverlay.ChildrenOfType<ModColumn>()
+                                .Single(c => c.ModType == ModType.DifficultyIncrease)
+                                .DeselectAll();
+
+                modSelectOverlay.Hide();
+            });
+
+            AddAssert("all mods deselected", () => SelectedMods.Value.Count == 0);
         }
 
         [Test]
         public void TestRulesetChanges()
         {
-            var rulesetOsu = rulesets.AvailableRulesets.First(r => r.ID == 0);
-            var rulesetMania = rulesets.AvailableRulesets.First(r => r.ID == 3);
+            createScreen();
+            changeRuleset(0);
 
-            changeRuleset(null);
+            var noFailMod = new OsuRuleset().GetModsFor(ModType.DifficultyReduction).FirstOrDefault(m => m is OsuModNoFail);
 
-            var instance = rulesetOsu.CreateInstance();
-            var easierMods = instance.GetModsFor(ModType.DifficultyReduction);
-            var noFailMod = easierMods.FirstOrDefault(m => m is OsuModNoFail);
+            AddStep("set mods externally", () => { SelectedMods.Value = new[] { noFailMod }; });
 
-            AddStep("set mods externally", () => { modDisplay.Current.Value = new[] { noFailMod }; });
+            changeRuleset(0);
 
-            changeRuleset(rulesetOsu);
+            AddAssert("ensure mods still selected", () => SelectedMods.Value.SingleOrDefault(m => m is OsuModNoFail) != null);
 
-            AddAssert("ensure mods still selected", () => modDisplay.Current.Value.Single(m => m is OsuModNoFail) != null);
+            changeRuleset(3);
 
-            changeRuleset(rulesetMania);
+            AddAssert("ensure mods not selected", () => SelectedMods.Value.Count == 0);
 
-            AddAssert("ensure mods not selected", () => !modDisplay.Current.Value.Any(m => m is OsuModNoFail));
+            changeRuleset(0);
 
-            changeRuleset(rulesetOsu);
-
-            AddAssert("ensure mods not selected", () => !modDisplay.Current.Value.Any());
+            AddAssert("ensure mods not selected", () => SelectedMods.Value.Count == 0);
         }
 
-        private void testSingleMod(Mod mod)
+        [Test]
+        public void TestExternallySetCustomizedMod()
         {
-            selectNext(mod);
-            checkSelected(mod);
+            createScreen();
+            changeRuleset(0);
 
-            selectPrevious(mod);
-            checkNotSelected(mod);
+            AddStep("set customized mod externally", () => SelectedMods.Value = new[] { new OsuModDoubleTime { SpeedChange = { Value = 1.01 } } });
 
-            selectNext(mod);
-            selectNext(mod);
-            checkNotSelected(mod);
-
-            selectPrevious(mod);
-            selectPrevious(mod);
-            checkNotSelected(mod);
-        }
-
-        private void testMultiMod(MultiMod multiMod)
-        {
-            foreach (var mod in multiMod.Mods)
+            AddAssert("ensure button is selected and customized accordingly", () =>
             {
-                selectNext(mod);
-                checkSelected(mod);
-            }
-
-            for (int index = multiMod.Mods.Length - 1; index >= 0; index--)
-                selectPrevious(multiMod.Mods[index]);
-
-            foreach (var mod in multiMod.Mods)
-                checkNotSelected(mod);
-        }
-
-        private void testUnimplementedMod(Mod mod)
-        {
-            selectNext(mod);
-            checkNotSelected(mod);
-        }
-
-        private void testIncompatibleMods(Mod modA, Mod modB)
-        {
-            selectNext(modA);
-            checkSelected(modA);
-            checkNotSelected(modB);
-
-            selectNext(modB);
-            checkSelected(modB);
-            checkNotSelected(modA);
-
-            selectPrevious(modB);
-            checkNotSelected(modA);
-            checkNotSelected(modB);
-        }
-
-        private void testDeselectAll(IEnumerable<Mod> mods)
-        {
-            foreach (var mod in mods)
-                selectNext(mod);
-
-            AddAssert("check for any selection", () => modSelect.SelectedMods.Value.Any());
-            AddStep("deselect all", modSelect.DeselectAllButton.Action.Invoke);
-            AddAssert("check for no selection", () => !modSelect.SelectedMods.Value.Any());
-        }
-
-        private void testMultiplierTextColour(Mod mod, Color4 colour)
-        {
-            checkLabelColor(Color4.White);
-            selectNext(mod);
-            AddWaitStep("wait for changing colour", 1);
-            checkLabelColor(colour);
-            selectPrevious(mod);
-            AddWaitStep("wait for changing colour", 1);
-            checkLabelColor(Color4.White);
-        }
-
-        private void testRankedText(Mod mod)
-        {
-            AddUntilStep("check for ranked", () => modSelect.UnrankedLabel.Alpha == 0);
-            selectNext(mod);
-            AddUntilStep("check for unranked", () => modSelect.UnrankedLabel.Alpha != 0);
-            selectPrevious(mod);
-            AddUntilStep("check for ranked", () => modSelect.UnrankedLabel.Alpha == 0);
-        }
-
-        private void selectNext(Mod mod) => AddStep($"left click {mod.Name}", () => modSelect.GetModButton(mod)?.SelectNext(1));
-
-        private void selectPrevious(Mod mod) => AddStep($"right click {mod.Name}", () => modSelect.GetModButton(mod)?.SelectNext(-1));
-
-        private void checkSelected(Mod mod)
-        {
-            AddAssert($"check {mod.Name} is selected", () =>
-            {
-                var button = modSelect.GetModButton(mod);
-                return modSelect.SelectedMods.Value.Single(m => m.Name == mod.Name) != null && button.SelectedMod.GetType() == mod.GetType() && button.Selected;
+                var button = getPanelForMod(SelectedMods.Value.Single().GetType());
+                return ((OsuModDoubleTime)button.Mod).SpeedChange.Value == 1.01;
             });
         }
 
-        private void changeRuleset(RulesetInfo ruleset)
+        [Test]
+        public void TestSettingsAreRetainedOnReload()
         {
-            AddStep($"change ruleset to {ruleset}", () => { Ruleset.Value = ruleset; });
-            waitForLoad();
+            createScreen();
+            changeRuleset(0);
+
+            AddStep("set customized mod externally", () => SelectedMods.Value = new[] { new OsuModDoubleTime { SpeedChange = { Value = 1.01 } } });
+            AddAssert("setting remains", () => (SelectedMods.Value.SingleOrDefault() as OsuModDoubleTime)?.SpeedChange.Value == 1.01);
+
+            createScreen();
+            AddAssert("setting remains", () => (SelectedMods.Value.SingleOrDefault() as OsuModDoubleTime)?.SpeedChange.Value == 1.01);
         }
 
-        private void waitForLoad() =>
-            AddUntilStep("wait for icons to load", () => modSelect.AllLoaded);
-
-        private void checkNotSelected(Mod mod)
+        [Test]
+        public void TestExternallySetModIsReplacedByOverlayInstance()
         {
-            AddAssert($"check {mod.Name} is not selected", () =>
+            Mod external = new OsuModDoubleTime();
+            Mod overlayButtonMod = null!;
+
+            createScreen();
+            changeRuleset(0);
+
+            AddStep("set mod externally", () => { SelectedMods.Value = new[] { external }; });
+
+            AddAssert("ensure button is selected", () =>
             {
-                var button = modSelect.GetModButton(mod);
-                return modSelect.SelectedMods.Value.All(m => m.GetType() != mod.GetType()) && button.SelectedMod?.GetType() != mod.GetType();
+                var button = getPanelForMod(SelectedMods.Value.Single().GetType());
+                overlayButtonMod = button.Mod;
+                return button.Active.Value;
             });
+
+            // Right now, when an external change occurs, the ModSelectOverlay will replace the global instance with its own
+            AddAssert("mod instance doesn't match", () => external != overlayButtonMod);
+
+            AddAssert("one mod present in global selected", () => SelectedMods.Value.Count == 1);
+            AddAssert("globally selected matches button's mod instance", () => SelectedMods.Value.Any(mod => ReferenceEquals(mod, overlayButtonMod)));
+            AddAssert("globally selected doesn't contain original external change", () => !SelectedMods.Value.Any(mod => ReferenceEquals(mod, external)));
         }
 
-        private void checkLabelColor(Color4 color) => AddAssert("check label has expected colour", () => modSelect.MultiplierLabel.Colour.AverageColour == color);
-
-        private class TestModSelectOverlay : ModSelectOverlay
+        [Test]
+        public void TestChangeIsValidChangesButtonVisibility()
         {
-            public new Bindable<IReadOnlyList<Mod>> SelectedMods => base.SelectedMods;
+            createScreen();
+            changeRuleset(0);
 
-            public bool AllLoaded => ModSectionsContainer.Children.All(c => c.ModIconsLoaded);
+            AddAssert("double time visible", () => modSelectOverlay.ChildrenOfType<ModPanel>().Where(panel => panel.Mod is OsuModDoubleTime).Any(panel => !panel.Filtered.Value));
 
-            public ModButton GetModButton(Mod mod)
+            AddStep("make double time invalid", () => modSelectOverlay.IsValidMod = m => !(m is OsuModDoubleTime));
+            AddUntilStep("double time not visible", () => modSelectOverlay.ChildrenOfType<ModPanel>().Where(panel => panel.Mod is OsuModDoubleTime).All(panel => panel.Filtered.Value));
+            AddAssert("nightcore still visible", () => modSelectOverlay.ChildrenOfType<ModPanel>().Where(panel => panel.Mod is OsuModNightcore).Any(panel => !panel.Filtered.Value));
+
+            AddStep("make double time valid again", () => modSelectOverlay.IsValidMod = _ => true);
+            AddUntilStep("double time visible", () => modSelectOverlay.ChildrenOfType<ModPanel>().Where(panel => panel.Mod is OsuModDoubleTime).Any(panel => !panel.Filtered.Value));
+            AddAssert("nightcore still visible", () => modSelectOverlay.ChildrenOfType<ModPanel>().Where(b => b.Mod is OsuModNightcore).Any(panel => !panel.Filtered.Value));
+        }
+
+        [Test]
+        public void TestChangeIsValidPreservesSelection()
+        {
+            createScreen();
+            changeRuleset(0);
+
+            AddStep("select DT + HD", () => SelectedMods.Value = new Mod[] { new OsuModDoubleTime(), new OsuModHidden() });
+            AddAssert("DT + HD selected", () => modSelectOverlay.ChildrenOfType<ModPanel>().Count(panel => panel.Active.Value) == 2);
+
+            AddStep("make NF invalid", () => modSelectOverlay.IsValidMod = m => !(m is ModNoFail));
+            AddAssert("DT + HD still selected", () => modSelectOverlay.ChildrenOfType<ModPanel>().Count(panel => panel.Active.Value) == 2);
+        }
+
+        [Test]
+        public void TestUnimplementedModIsUnselectable()
+        {
+            var testRuleset = new TestUnimplementedModOsuRuleset();
+
+            createScreen();
+
+            AddStep("set ruleset", () => Ruleset.Value = testRuleset.RulesetInfo);
+            waitForColumnLoad();
+
+            AddAssert("unimplemented mod panel is filtered", () => getPanelForMod(typeof(TestUnimplementedMod)).Filtered.Value);
+        }
+
+        [Test]
+        public void TestDeselectAllViaKey()
+        {
+            createScreen();
+            changeRuleset(0);
+
+            AddStep("select DT + HD", () => SelectedMods.Value = new Mod[] { new OsuModDoubleTime(), new OsuModHidden() });
+            AddAssert("DT + HD selected", () => modSelectOverlay.ChildrenOfType<ModPanel>().Count(panel => panel.Active.Value) == 2);
+
+            AddStep("press backspace", () => InputManager.Key(Key.BackSpace));
+            AddUntilStep("all mods deselected", () => !SelectedMods.Value.Any());
+        }
+
+        [Test]
+        public void TestDeselectAllViaButton()
+        {
+            createScreen();
+            changeRuleset(0);
+
+            AddAssert("deselect all button disabled", () => !this.ChildrenOfType<DeselectAllModsButton>().Single().Enabled.Value);
+
+            AddStep("select DT + HD", () => SelectedMods.Value = new Mod[] { new OsuModDoubleTime(), new OsuModHidden() });
+            AddAssert("DT + HD selected", () => modSelectOverlay.ChildrenOfType<ModPanel>().Count(panel => panel.Active.Value) == 2);
+            AddAssert("deselect all button enabled", () => this.ChildrenOfType<DeselectAllModsButton>().Single().Enabled.Value);
+
+            AddStep("click deselect all button", () =>
             {
-                var section = ModSectionsContainer.Children.Single(s => s.ModType == mod.Type);
-                return section.ButtonsContainer.OfType<ModButton>().Single(b => b.Mods.Any(m => m.GetType() == mod.GetType()));
+                InputManager.MoveMouseTo(this.ChildrenOfType<DeselectAllModsButton>().Single());
+                InputManager.Click(MouseButton.Left);
+            });
+            AddUntilStep("all mods deselected", () => !SelectedMods.Value.Any());
+            AddAssert("deselect all button disabled", () => !this.ChildrenOfType<DeselectAllModsButton>().Single().Enabled.Value);
+        }
+
+        [Test]
+        public void TestCloseViaBackButton()
+        {
+            createScreen();
+            changeRuleset(0);
+
+            AddStep("select difficulty adjust via panel", () => getPanelForMod(typeof(OsuModDifficultyAdjust)).TriggerClick());
+            assertCustomisationToggleState(disabled: false, active: true);
+            AddAssert("back button disabled", () => !modSelectOverlay.BackButton.Enabled.Value);
+
+            AddStep("dismiss customisation area", () => InputManager.Key(Key.Escape));
+            AddStep("click back button", () =>
+            {
+                InputManager.MoveMouseTo(modSelectOverlay.BackButton);
+                InputManager.Click(MouseButton.Left);
+            });
+            AddAssert("mod select hidden", () => modSelectOverlay.State.Value == Visibility.Hidden);
+        }
+
+        [Test]
+        public void TestColumnHiding()
+        {
+            AddStep("create screen", () => Child = modSelectOverlay = new TestModSelectOverlay
+            {
+                RelativeSizeAxes = Axes.Both,
+                State = { Value = Visibility.Visible },
+                SelectedMods = { BindTarget = SelectedMods },
+                IsValidMod = mod => mod.Type == ModType.DifficultyIncrease || mod.Type == ModType.Conversion
+            });
+            waitForColumnLoad();
+            changeRuleset(0);
+
+            AddAssert("two columns visible", () => this.ChildrenOfType<ModColumn>().Count(col => col.IsPresent) == 2);
+
+            AddStep("unset filter", () => modSelectOverlay.IsValidMod = _ => true);
+            AddAssert("all columns visible", () => this.ChildrenOfType<ModColumn>().All(col => col.IsPresent));
+
+            AddStep("filter out everything", () => modSelectOverlay.IsValidMod = _ => false);
+            AddAssert("no columns visible", () => this.ChildrenOfType<ModColumn>().All(col => !col.IsPresent));
+
+            AddStep("hide", () => modSelectOverlay.Hide());
+            AddStep("set filter for 3 columns", () => modSelectOverlay.IsValidMod = mod => mod.Type == ModType.DifficultyReduction
+                                                                                           || mod.Type == ModType.Automation
+                                                                                           || mod.Type == ModType.Conversion);
+
+            AddStep("show", () => modSelectOverlay.Show());
+            AddUntilStep("3 columns visible", () => this.ChildrenOfType<ModColumn>().Count(col => col.IsPresent) == 3);
+        }
+
+        [Test]
+        public void TestColumnHidingOnRulesetChange()
+        {
+            createScreen();
+
+            changeRuleset(0);
+            AddAssert("5 columns visible", () => this.ChildrenOfType<ModColumn>().Count(col => col.IsPresent) == 5);
+
+            AddStep("change to ruleset without all mod types", () => Ruleset.Value = TestCustomisableModRuleset.CreateTestRulesetInfo());
+            AddUntilStep("1 column visible", () => this.ChildrenOfType<ModColumn>().Count(col => col.IsPresent) == 1);
+
+            changeRuleset(0);
+            AddAssert("5 columns visible", () => this.ChildrenOfType<ModColumn>().Count(col => col.IsPresent) == 5);
+        }
+
+        private void waitForColumnLoad() => AddUntilStep("all column content loaded",
+            () => modSelectOverlay.ChildrenOfType<ModColumn>().Any() && modSelectOverlay.ChildrenOfType<ModColumn>().All(column => column.IsLoaded && column.ItemsLoaded));
+
+        private void changeRuleset(int id)
+        {
+            AddStep($"set ruleset to {id}", () => Ruleset.Value = rulesetStore.GetRuleset(id));
+            waitForColumnLoad();
+        }
+
+        private void assertCustomisationToggleState(bool disabled, bool active)
+        {
+            AddAssert($"customisation toggle is {(disabled ? "" : "not ")}disabled", () => modSelectOverlay.CustomisationButton.AsNonNull().Active.Disabled == disabled);
+            AddAssert($"customisation toggle is {(active ? "" : "not ")}active", () => modSelectOverlay.CustomisationButton.AsNonNull().Active.Value == active);
+        }
+
+        private ModPanel getPanelForMod(Type modType)
+            => modSelectOverlay.ChildrenOfType<ModPanel>().Single(panel => panel.Mod.GetType() == modType);
+
+        private class TestModSelectOverlay : UserModSelectOverlay
+        {
+            protected override bool ShowPresets => true;
+
+            public new ShearedButton BackButton => base.BackButton;
+            public new ShearedToggleButton? CustomisationButton => base.CustomisationButton;
+        }
+
+        private class TestUnimplementedMod : Mod
+        {
+            public override string Name => "Unimplemented mod";
+            public override string Acronym => "UM";
+            public override LocalisableString Description => "A mod that is not implemented.";
+            public override double ScoreMultiplier => 1;
+            public override ModType Type => ModType.Conversion;
+        }
+
+        private class TestUnimplementedModOsuRuleset : OsuRuleset
+        {
+            public override string ShortName => "unimplemented";
+
+            public override IEnumerable<Mod> GetModsFor(ModType type)
+            {
+                if (type == ModType.Conversion) return base.GetModsFor(type).Concat(new[] { new TestUnimplementedMod() });
+
+                return base.GetModsFor(type);
             }
-
-            public new OsuSpriteText MultiplierLabel => base.MultiplierLabel;
-            public new OsuSpriteText UnrankedLabel => base.UnrankedLabel;
-            public new TriangleButton DeselectAllButton => base.DeselectAllButton;
-
-            public new Color4 LowMultiplierColour => base.LowMultiplierColour;
-            public new Color4 HighMultiplierColour => base.HighMultiplierColour;
         }
     }
 }

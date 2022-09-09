@@ -3,6 +3,7 @@
 
 using System;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Localisation;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 
@@ -12,12 +13,16 @@ namespace osu.Game.Rulesets.Mods
     {
         public override string Name => "Hard Rock";
         public override string Acronym => "HR";
-        public override IconUsage Icon => OsuIcon.ModHardrock;
+        public override IconUsage? Icon => OsuIcon.ModHardRock;
         public override ModType Type => ModType.DifficultyIncrease;
-        public override string Description => "Everything just got a bit harder...";
-        public override Type[] IncompatibleMods => new[] { typeof(ModEasy) };
+        public override LocalisableString Description => "Everything just got a bit harder...";
+        public override Type[] IncompatibleMods => new[] { typeof(ModEasy), typeof(ModDifficultyAdjust) };
 
-        public void ApplyToDifficulty(BeatmapDifficulty difficulty)
+        public void ReadFromDifficulty(IBeatmapDifficultyInfo difficulty)
+        {
+        }
+
+        public virtual void ApplyToDifficulty(BeatmapDifficulty difficulty)
         {
             const float ratio = 1.4f;
             difficulty.CircleSize = Math.Min(difficulty.CircleSize * 1.3f, 10.0f); // CS uses a custom 1.3 ratio.

@@ -1,6 +1,8 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System.Linq;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Lines;
@@ -10,8 +12,8 @@ namespace osu.Game.Tournament.Screens.Ladder.Components
 {
     public class ProgressionPath : Path
     {
-        public DrawableTournamentMatch Source { get; private set; }
-        public DrawableTournamentMatch Destination { get; private set; }
+        public DrawableTournamentMatch Source { get; }
+        public DrawableTournamentMatch Destination { get; }
 
         public ProgressionPath(DrawableTournamentMatch source, DrawableTournamentMatch destination)
         {
@@ -26,7 +28,7 @@ namespace osu.Game.Tournament.Screens.Ladder.Components
         {
             base.LoadComplete();
 
-            Vector2 getCenteredVector(Vector2 top, Vector2 bottom) => new Vector2(top.X, top.Y + (bottom.Y - top.Y) / 2);
+            static Vector2 getCenteredVector(Vector2 top, Vector2 bottom) => new Vector2(top.X, top.Y + (bottom.Y - top.Y) / 2);
 
             var q1 = Source.ScreenSpaceDrawQuad;
             var q2 = Destination.ScreenSpaceDrawQuad;
@@ -36,11 +38,7 @@ namespace osu.Game.Tournament.Screens.Ladder.Components
             bool progressionToRight = q2.TopLeft.X > q1.TopLeft.X;
 
             if (!progressionToRight)
-            {
-                var temp = q2;
-                q2 = q1;
-                q1 = temp;
-            }
+                (q2, q1) = (q1, q2);
 
             var c1 = getCenteredVector(q1.TopRight, q1.BottomRight) + new Vector2(padding, 0);
             var c2 = getCenteredVector(q2.TopLeft, q2.BottomLeft) - new Vector2(padding, 0);

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using osuTK;
 using osuTK.Graphics;
 using osuTK.Input;
@@ -12,19 +14,31 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input;
 using osu.Framework.Input.Events;
+using osu.Framework.Localisation;
 using osu.Framework.Platform;
 
 namespace osu.Game.Graphics.UserInterface
 {
     public class OsuPasswordTextBox : OsuTextBox, ISuppressKeyEventLogging
     {
-        protected override Drawable GetDrawableCharacter(char c) => new PasswordMaskChar(CalculatedTextSize);
+        protected override Drawable GetDrawableCharacter(char c) => new FallingDownContainer
+        {
+            AutoSizeAxes = Axes.Both,
+            Child = new PasswordMaskChar(CalculatedTextSize),
+        };
+
+        protected override bool AllowUniqueCharacterSamples => false;
 
         protected override bool AllowClipboardExport => false;
 
+        protected override bool AllowWordNavigation => false;
+
+        protected override bool AllowIme => false;
+
         private readonly CapsWarning warning;
 
-        private GameHost host;
+        [Resolved]
+        private GameHost host { get; set; }
 
         public OsuPasswordTextBox()
         {
@@ -36,12 +50,6 @@ namespace osu.Game.Graphics.UserInterface
                 Margin = new MarginPadding { Right = 10 },
                 Alpha = 0,
             });
-        }
-
-        [BackgroundDependencyLoader]
-        private void load(GameHost host)
-        {
-            this.host = host;
         }
 
         protected override bool OnKeyDown(KeyDownEvent e)
@@ -104,7 +112,7 @@ namespace osu.Game.Graphics.UserInterface
 
         private class CapsWarning : SpriteIcon, IHasTooltip
         {
-            public string TooltipText => @"Caps lock is active";
+            public LocalisableString TooltipText => "caps lock is active";
 
             public CapsWarning()
             {

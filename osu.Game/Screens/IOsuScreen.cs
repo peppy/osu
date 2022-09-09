@@ -1,11 +1,14 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using osu.Framework.Bindables;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
 using osu.Game.Overlays;
 using osu.Game.Rulesets;
+using osu.Game.Users;
 
 namespace osu.Game.Screens
 {
@@ -39,9 +42,14 @@ namespace osu.Game.Screens
         bool HideOverlaysOnEnter { get; }
 
         /// <summary>
-        /// Whether overlays should be able to be opened once this screen is entered or resumed.
+        /// Whether overlays should be able to be opened when this screen is current.
         /// </summary>
-        OverlayActivation InitialOverlayActivationMode { get; }
+        IBindable<OverlayActivation> OverlayActivationMode { get; }
+
+        /// <summary>
+        /// The current <see cref="UserActivity"/> for this screen.
+        /// </summary>
+        IBindable<UserActivity> Activity { get; }
 
         /// <summary>
         /// The amount of parallax to be applied while this screen is displayed.
@@ -51,5 +59,23 @@ namespace osu.Game.Screens
         Bindable<WorkingBeatmap> Beatmap { get; }
 
         Bindable<RulesetInfo> Ruleset { get; }
+
+        /// <summary>
+        /// Whether mod track adjustments should be applied on entering this screen.
+        /// A <see langword="null"/> value means that the parent screen's value of this setting will be used.
+        /// </summary>
+        bool? AllowTrackAdjustments { get; }
+
+        /// <summary>
+        /// Invoked when the back button has been pressed to close any overlays before exiting this <see cref="IOsuScreen"/>.
+        /// </summary>
+        /// <remarks>
+        /// If this <see cref="IOsuScreen"/> has not yet finished loading, the exit will occur immediately without this method being invoked.
+        /// <para>
+        /// Return <c>true</c> to block this <see cref="IOsuScreen"/> from being exited after closing an overlay.
+        /// Return <c>false</c> if this <see cref="IOsuScreen"/> should continue exiting.
+        /// </para>
+        /// </remarks>
+        bool OnBackButton();
     }
 }

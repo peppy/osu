@@ -1,12 +1,13 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using Newtonsoft.Json;
-using osu.Framework.IO.Network;
 
 namespace osu.Game.Online.API
 {
-    public class RegistrationRequest : WebRequest
+    public class RegistrationRequest : OsuWebRequest
     {
         internal string Username;
         internal string Email;

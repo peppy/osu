@@ -1,6 +1,8 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using NUnit.Framework;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -12,7 +14,7 @@ using osuTK.Graphics;
 namespace osu.Game.Tests.Visual.Components
 {
     [TestFixture]
-    public class TestSceneIdleTracker : ManualInputManagerTestScene
+    public class TestSceneIdleTracker : OsuManualInputManagerTestScene
     {
         private IdleTrackingBox box1;
         private IdleTrackingBox box2;
@@ -81,6 +83,13 @@ namespace osu.Game.Tests.Visual.Components
         [Test]
         public void TestMovement()
         {
+            checkIdleStatus(1, false);
+            checkIdleStatus(2, false);
+            checkIdleStatus(3, false);
+            checkIdleStatus(4, false);
+
+            waitForAllIdle();
+
             AddStep("move to top right", () => InputManager.MoveMouseTo(box2));
 
             checkIdleStatus(1, true);
@@ -102,6 +111,8 @@ namespace osu.Game.Tests.Visual.Components
         [Test]
         public void TestTimings()
         {
+            waitForAllIdle();
+
             AddStep("move to centre", () => InputManager.MoveMouseTo(Content));
 
             checkIdleStatus(1, false);
@@ -140,7 +151,7 @@ namespace osu.Game.Tests.Visual.Components
 
         private void waitForAllIdle()
         {
-            AddUntilStep("Wait for all idle", () => box1.IsIdle && box2.IsIdle && box3.IsIdle && box4.IsIdle);
+            AddUntilStep("wait for all idle", () => box1.IsIdle && box2.IsIdle && box3.IsIdle && box4.IsIdle);
         }
 
         private class IdleTrackingBox : CompositeDrawable
@@ -149,7 +160,7 @@ namespace osu.Game.Tests.Visual.Components
 
             public bool IsIdle => idleTracker.IsIdle.Value;
 
-            public IdleTrackingBox(double timeToIdle)
+            public IdleTrackingBox(int timeToIdle)
             {
                 Box box;
 
@@ -158,7 +169,7 @@ namespace osu.Game.Tests.Visual.Components
 
                 InternalChildren = new Drawable[]
                 {
-                    idleTracker = new IdleTracker(timeToIdle),
+                    idleTracker = new GameIdleTracker(timeToIdle),
                     box = new Box
                     {
                         Colour = Color4.White,

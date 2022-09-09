@@ -1,24 +1,30 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
-using osu.Framework.Extensions.Color4Extensions;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Effects;
-using osu.Framework.Graphics.Shapes;
-using osu.Game.Beatmaps.ControlPoints;
+using osu.Framework.Graphics.Pooling;
+using osu.Framework.Graphics.Primitives;
 using osu.Game.Graphics;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Judgements;
+using osu.Game.Rulesets.Objects;
+using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.UI;
 using osu.Game.Rulesets.UI.Scrolling;
-using osu.Game.Rulesets.Taiko.Objects;
 using osu.Game.Rulesets.Taiko.Objects.Drawables;
 using osu.Game.Rulesets.Taiko.Judgements;
+using osu.Game.Rulesets.Taiko.Objects;
+using osu.Game.Rulesets.Taiko.Scoring;
+using osu.Game.Skinning;
 using osuTK;
-using osuTK.Graphics;
 
 namespace osu.Game.Rulesets.Taiko.UI
 {
@@ -27,233 +33,329 @@ namespace osu.Game.Rulesets.Taiko.UI
         /// <summary>
         /// Default height of a <see cref="TaikoPlayfield"/> when inside a <see cref="DrawableTaikoRuleset"/>.
         /// </summary>
-        public const float DEFAULT_HEIGHT = 178;
+        public const float DEFAULT_HEIGHT = 200;
 
         /// <summary>
-        /// The offset from <see cref="left_area_size"/> which the center of the hit target lies at.
+        /// Whether the hit target should be nudged further towards the left area, matching the stable "classic" position.
         /// </summary>
-        public const float HIT_TARGET_OFFSET = 100;
+        public Bindable<bool> ClassicHitTargetPosition = new BindableBool();
 
-        /// <summary>
-        /// The size of the left area of the playfield. This area contains the input drum.
-        /// </summary>
-        private const float left_area_size = 240;
+        private Container<HitExplosion> hitExplosionContainer;
+        private Container<KiaiHitExplosion> kiaiExplosionContainer;
+        private JudgementContainer<DrawableTaikoJudgement> judgementContainer;
+        private ScrollingHitObjectContainer drumRollHitContainer;
+        internal Drawable HitTarget;
+        private SkinnableDrawable mascot;
 
-        private readonly Container<HitExplosion> hitExplosionContainer;
-        private readonly Container<KiaiHitExplosion> kiaiExplosionContainer;
-        private readonly JudgementContainer<DrawableTaikoJudgement> judgementContainer;
-        internal readonly HitTarget HitTarget;
+        private readonly IDictionary<HitResult, DrawablePool<DrawableTaikoJudgement>> judgementPools = new Dictionary<HitResult, DrawablePool<DrawableTaikoJudgement>>();
+        private readonly IDictionary<HitResult, HitExplosionPool> explosionPools = new Dictionary<HitResult, HitExplosionPool>();
 
-        private readonly Container topLevelHitContainer;
+        private ProxyContainer topLevelHitContainer;
+        private InputDrum inputDrum;
+        private Container rightArea;
 
-        private readonly Container barlineContainer;
+        /// <remarks>
+        /// <see cref="Playfield.AddNested"/> is purposefully not called on this to prevent i.e. being able to interact
+        /// with bar lines in the editor.
+        /// </remarks>
+        private BarLinePlayfield barLinePlayfield;
 
-        private readonly Container overlayBackgroundContainer;
-        private readonly Container backgroundContainer;
-
-        private readonly Box overlayBackground;
-        private readonly Box background;
-
-        public TaikoPlayfield(ControlPointInfo controlPoints)
-        {
-            InternalChildren = new Drawable[]
-            {
-                backgroundContainer = new Container
-                {
-                    Name = "Transparent playfield background",
-                    RelativeSizeAxes = Axes.Both,
-                    Masking = true,
-                    EdgeEffect = new EdgeEffectParameters
-                    {
-                        Type = EdgeEffectType.Shadow,
-                        Colour = Color4.Black.Opacity(0.2f),
-                        Radius = 5,
-                    },
-                    Children = new Drawable[]
-                    {
-                        background = new Box
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Alpha = 0.6f
-                        },
-                    }
-                },
-                new Container
-                {
-                    Name = "Right area",
-                    RelativeSizeAxes = Axes.Both,
-                    Padding = new MarginPadding { Left = left_area_size },
-                    Children = new Drawable[]
-                    {
-                        new Container
-                        {
-                            Name = "Masked elements before hit objects",
-                            RelativeSizeAxes = Axes.Both,
-                            Padding = new MarginPadding { Left = HIT_TARGET_OFFSET },
-                            Masking = true,
-                            Children = new Drawable[]
-                            {
-                                hitExplosionContainer = new Container<HitExplosion>
-                                {
-                                    RelativeSizeAxes = Axes.Both,
-                                    FillMode = FillMode.Fit,
-                                    Blending = BlendingMode.Additive,
-                                },
-                                HitTarget = new HitTarget
-                                {
-                                    Anchor = Anchor.CentreLeft,
-                                    Origin = Anchor.Centre,
-                                    RelativeSizeAxes = Axes.Both,
-                                    FillMode = FillMode.Fit
-                                }
-                            }
-                        },
-                        barlineContainer = new Container
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Padding = new MarginPadding { Left = HIT_TARGET_OFFSET }
-                        },
-                        new Container
-                        {
-                            Name = "Hit objects",
-                            RelativeSizeAxes = Axes.Both,
-                            Padding = new MarginPadding { Left = HIT_TARGET_OFFSET },
-                            Masking = true,
-                            Child = HitObjectContainer
-                        },
-                        kiaiExplosionContainer = new Container<KiaiHitExplosion>
-                        {
-                            Name = "Kiai hit explosions",
-                            RelativeSizeAxes = Axes.Both,
-                            FillMode = FillMode.Fit,
-                            Margin = new MarginPadding { Left = HIT_TARGET_OFFSET },
-                            Blending = BlendingMode.Additive
-                        },
-                        judgementContainer = new JudgementContainer<DrawableTaikoJudgement>
-                        {
-                            Name = "Judgements",
-                            RelativeSizeAxes = Axes.Y,
-                            Margin = new MarginPadding { Left = HIT_TARGET_OFFSET },
-                            Blending = BlendingMode.Additive
-                        },
-                    }
-                },
-                overlayBackgroundContainer = new Container
-                {
-                    Name = "Left overlay",
-                    RelativeSizeAxes = Axes.Y,
-                    Size = new Vector2(left_area_size, 1),
-                    Children = new Drawable[]
-                    {
-                        overlayBackground = new Box
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                        },
-                        new InputDrum(controlPoints)
-                        {
-                            Anchor = Anchor.CentreRight,
-                            Origin = Anchor.CentreRight,
-                            Scale = new Vector2(0.9f),
-                            Margin = new MarginPadding { Right = 20 }
-                        },
-                        new Box
-                        {
-                            Anchor = Anchor.TopRight,
-                            RelativeSizeAxes = Axes.Y,
-                            Width = 10,
-                            Colour = Framework.Graphics.Colour.ColourInfo.GradientHorizontal(Color4.Black.Opacity(0.6f), Color4.Black.Opacity(0)),
-                        },
-                    }
-                },
-                new Container
-                {
-                    Name = "Border",
-                    RelativeSizeAxes = Axes.Both,
-                    Masking = true,
-                    MaskingSmoothness = 0,
-                    BorderThickness = 2,
-                    AlwaysPresent = true,
-                    Children = new[]
-                    {
-                        new Box
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Alpha = 0,
-                            AlwaysPresent = true
-                        }
-                    }
-                },
-                topLevelHitContainer = new Container
-                {
-                    Name = "Top level hit objects",
-                    RelativeSizeAxes = Axes.Both,
-                }
-            };
-        }
+        private Container playfieldContent;
+        private Container playfieldOverlay;
 
         [BackgroundDependencyLoader]
         private void load(OsuColour colours)
         {
-            overlayBackgroundContainer.BorderColour = colours.Gray0;
-            overlayBackground.Colour = colours.Gray1;
+            inputDrum = new InputDrum
+            {
+                Anchor = Anchor.CentreLeft,
+                Origin = Anchor.CentreLeft,
+                AutoSizeAxes = Axes.X,
+                RelativeSizeAxes = Axes.Y,
+            };
 
-            backgroundContainer.BorderColour = colours.Gray1;
-            background.Colour = colours.Gray0;
+            InternalChildren = new[]
+            {
+                new SkinnableDrawable(new TaikoSkinComponent(TaikoSkinComponents.PlayfieldBackgroundRight), _ => new PlayfieldBackgroundRight()),
+                new Container
+                {
+                    Name = "Left overlay",
+                    RelativeSizeAxes = Axes.Both,
+                    FillMode = FillMode.Fit,
+                    BorderColour = colours.Gray0,
+                    Children = new[]
+                    {
+                        new SkinnableDrawable(new TaikoSkinComponent(TaikoSkinComponents.PlayfieldBackgroundLeft), _ => new PlayfieldBackgroundLeft()),
+                        inputDrum.CreateProxy(),
+                    }
+                },
+                mascot = new SkinnableDrawable(new TaikoSkinComponent(TaikoSkinComponents.Mascot), _ => Empty())
+                {
+                    Origin = Anchor.BottomLeft,
+                    Anchor = Anchor.TopLeft,
+                    RelativePositionAxes = Axes.Y,
+                    RelativeSizeAxes = Axes.None,
+                    Y = 0.2f
+                },
+                rightArea = new Container
+                {
+                    Name = "Right area",
+                    RelativeSizeAxes = Axes.Both,
+                    RelativePositionAxes = Axes.Both,
+                    Children = new Drawable[]
+                    {
+                        new Container
+                        {
+                            Name = "Elements before hit objects",
+                            RelativeSizeAxes = Axes.Both,
+                            FillMode = FillMode.Fit,
+                            Children = new[]
+                            {
+                                hitExplosionContainer = new Container<HitExplosion>
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                },
+                                HitTarget = new SkinnableDrawable(new TaikoSkinComponent(TaikoSkinComponents.HitTarget), _ => new TaikoHitTarget())
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                }
+                            }
+                        },
+                        new Container
+                        {
+                            Name = "Masked hit objects content",
+                            RelativeSizeAxes = Axes.Both,
+                            Masking = true,
+                            Child = playfieldContent = new Container
+                            {
+                                RelativeSizeAxes = Axes.Both,
+                                Children = new Drawable[]
+                                {
+                                    barLinePlayfield = new BarLinePlayfield(),
+                                    HitObjectContainer,
+                                }
+                            }
+                        },
+                        playfieldOverlay = new Container
+                        {
+                            Name = "Elements after hit objects",
+                            RelativeSizeAxes = Axes.Both,
+                            Children = new Drawable[]
+                            {
+                                drumRollHitContainer = new DrumRollHitContainer(),
+                                kiaiExplosionContainer = new Container<KiaiHitExplosion>
+                                {
+                                    Name = "Kiai hit explosions",
+                                    RelativeSizeAxes = Axes.Both,
+                                    FillMode = FillMode.Fit,
+                                },
+                                judgementContainer = new JudgementContainer<DrawableTaikoJudgement>
+                                {
+                                    Name = "Judgements",
+                                    RelativeSizeAxes = Axes.Y,
+                                },
+                            }
+                        },
+                    }
+                },
+                topLevelHitContainer = new ProxyContainer
+                {
+                    Name = "Top level hit objects",
+                    RelativeSizeAxes = Axes.Both,
+                },
+                drumRollHitContainer.CreateProxy(),
+                new DrumSamplePlayer(HitObjectContainer),
+                // this is added at the end of the hierarchy to receive input before taiko objects.
+                // but is proxied below everything to not cover visual effects such as hit explosions.
+                inputDrum,
+            };
+
+            RegisterPool<Hit, DrawableHit>(50);
+            RegisterPool<Hit.StrongNestedHit, DrawableHit.StrongNestedHit>(50);
+
+            RegisterPool<DrumRoll, DrawableDrumRoll>(5);
+            RegisterPool<DrumRoll.StrongNestedHit, DrawableDrumRoll.StrongNestedHit>(5);
+
+            RegisterPool<DrumRollTick, DrawableDrumRollTick>(100);
+            RegisterPool<DrumRollTick.StrongNestedHit, DrawableDrumRollTick.StrongNestedHit>(100);
+
+            RegisterPool<Swell, DrawableSwell>(5);
+            RegisterPool<SwellTick, DrawableSwellTick>(100);
+
+            var hitWindows = new TaikoHitWindows();
+
+            foreach (var result in Enum.GetValues(typeof(HitResult)).OfType<HitResult>().Where(r => hitWindows.IsHitResultAllowed(r)))
+            {
+                judgementPools.Add(result, new DrawablePool<DrawableTaikoJudgement>(15));
+                explosionPools.Add(result, new HitExplosionPool(result));
+            }
+
+            AddRangeInternal(judgementPools.Values);
+            AddRangeInternal(explosionPools.Values);
         }
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+            NewResult += OnNewResult;
+        }
+
+        protected override void OnNewDrawableHitObject(DrawableHitObject drawableHitObject)
+        {
+            base.OnNewDrawableHitObject(drawableHitObject);
+
+            var taikoObject = (DrawableTaikoHitObject)drawableHitObject;
+            topLevelHitContainer.Add(taikoObject.CreateProxiedContent());
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+
+            // Padding is required to be updated for elements which are based on "absolute" X sized elements.
+            // This is basically allowing for correct alignment as relative pieces move around them.
+            rightArea.Padding = new MarginPadding { Left = inputDrum.Width };
+            playfieldContent.Padding = new MarginPadding { Left = HitTarget.DrawWidth / 2 };
+            playfieldOverlay.Padding = new MarginPadding { Left = HitTarget.DrawWidth / 2 };
+
+            mascot.Scale = new Vector2(DrawHeight / DEFAULT_HEIGHT);
+        }
+
+        #region Pooling support
+
+        public override void Add(HitObject h)
+        {
+            switch (h)
+            {
+                case BarLine barLine:
+                    barLinePlayfield.Add(barLine);
+                    break;
+
+                case TaikoHitObject taikoHitObject:
+                    base.Add(taikoHitObject);
+                    break;
+
+                default:
+                    throw new ArgumentException($"Unsupported {nameof(HitObject)} type: {h.GetType()}");
+            }
+        }
+
+        public override bool Remove(HitObject h)
+        {
+            switch (h)
+            {
+                case BarLine barLine:
+                    return barLinePlayfield.Remove(barLine);
+
+                case TaikoHitObject taikoHitObject:
+                    return base.Remove(taikoHitObject);
+
+                default:
+                    throw new ArgumentException($"Unsupported {nameof(HitObject)} type: {h.GetType()}");
+            }
+        }
+
+        #endregion
+
+        #region Non-pooling support
 
         public override void Add(DrawableHitObject h)
         {
-            h.OnNewResult += OnNewResult;
-
-            base.Add(h);
-
             switch (h)
             {
-                case DrawableBarLine barline:
-                    barlineContainer.Add(barline.CreateProxy());
+                case DrawableBarLine barLine:
+                    barLinePlayfield.Add(barLine);
                     break;
 
-                case DrawableTaikoHitObject taikoObject:
-                    topLevelHitContainer.Add(taikoObject.CreateProxiedContent());
+                case DrawableTaikoHitObject:
+                    base.Add(h);
                     break;
+
+                default:
+                    throw new ArgumentException($"Unsupported {nameof(DrawableHitObject)} type: {h.GetType()}");
             }
         }
+
+        public override bool Remove(DrawableHitObject h)
+        {
+            switch (h)
+            {
+                case DrawableBarLine barLine:
+                    return barLinePlayfield.Remove(barLine);
+
+                case DrawableTaikoHitObject:
+                    return base.Remove(h);
+
+                default:
+                    throw new ArgumentException($"Unsupported {nameof(DrawableHitObject)} type: {h.GetType()}");
+            }
+        }
+
+        #endregion
 
         internal void OnNewResult(DrawableHitObject judgedObject, JudgementResult result)
         {
             if (!DisplayJudgements.Value)
                 return;
-
             if (!judgedObject.DisplayResult)
                 return;
 
             switch (result.Judgement)
             {
-                case TaikoStrongJudgement _:
+                case TaikoStrongJudgement:
                     if (result.IsHit)
-                        hitExplosionContainer.Children.FirstOrDefault(e => e.JudgedObject == ((DrawableStrongNestedHit)judgedObject).MainObject)?.VisualiseSecondHit();
+                        hitExplosionContainer.Children.FirstOrDefault(e => e.JudgedObject == ((DrawableStrongNestedHit)judgedObject).ParentHitObject)?.VisualiseSecondHit(result);
                     break;
 
-                default:
-                    judgementContainer.Add(new DrawableTaikoJudgement(result, judgedObject)
-                    {
-                        Anchor = result.IsHit ? Anchor.TopLeft : Anchor.CentreLeft,
-                        Origin = result.IsHit ? Anchor.BottomCentre : Anchor.Centre,
-                        RelativePositionAxes = Axes.X,
-                        X = result.IsHit ? judgedObject.Position.X : 0,
-                    });
-
+                case TaikoDrumRollTickJudgement:
                     if (!result.IsHit)
                         break;
 
-                    bool isRim = judgedObject.HitObject is RimHit;
+                    var drawableTick = (DrawableDrumRollTick)judgedObject;
 
-                    hitExplosionContainer.Add(new HitExplosion(judgedObject, isRim));
-
-                    if (judgedObject.HitObject.Kiai)
-                        kiaiExplosionContainer.Add(new KiaiHitExplosion(judgedObject, isRim));
-
+                    addDrumRollHit(drawableTick);
                     break;
+
+                default:
+                    if (!result.Type.IsScorable())
+                        break;
+
+                    judgementContainer.Add(judgementPools[result.Type].Get(j =>
+                    {
+                        j.Apply(result, judgedObject);
+
+                        j.Anchor = result.IsHit ? Anchor.TopLeft : Anchor.CentreLeft;
+                        j.Origin = result.IsHit ? Anchor.BottomCentre : Anchor.Centre;
+                        j.RelativePositionAxes = Axes.X;
+                        j.X = result.IsHit ? judgedObject.Position.X : 0;
+                    }));
+
+                    var type = (judgedObject.HitObject as Hit)?.Type ?? HitType.Centre;
+                    addExplosion(judgedObject, result.Type, type);
+                    break;
+            }
+        }
+
+        private void addDrumRollHit(DrawableDrumRollTick drawableTick) =>
+            drumRollHitContainer.Add(new DrawableFlyingHit(drawableTick));
+
+        private void addExplosion(DrawableHitObject drawableObject, HitResult result, HitType type)
+        {
+            hitExplosionContainer.Add(explosionPools[result]
+                .Get(explosion => explosion.Apply(drawableObject)));
+            if (drawableObject.HitObject.Kiai)
+                kiaiExplosionContainer.Add(new KiaiHitExplosion(drawableObject, type));
+        }
+
+        private class ProxyContainer : LifetimeManagementContainer
+        {
+            public void Add(Drawable proxy) => AddInternal(proxy);
+
+            public override bool UpdateSubTreeMasking(Drawable source, RectangleF maskingBounds)
+            {
+                // DrawableHitObject disables masking.
+                // Hitobject content is proxied and unproxied based on hit status and the IsMaskedAway value could get stuck because of this.
+                return false;
             }
         }
     }

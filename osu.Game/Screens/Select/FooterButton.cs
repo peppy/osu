@@ -1,27 +1,33 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System;
-using osuTK;
-using osuTK.Graphics;
-using osuTK.Input;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
-using osu.Game.Graphics.Sprites;
+using osu.Framework.Localisation;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.Sprites;
+using osu.Game.Input.Bindings;
+using osuTK;
+using osuTK.Graphics;
 
 namespace osu.Game.Screens.Select
 {
-    public class FooterButton : OsuClickableContainer
+    public class FooterButton : OsuClickableContainer, IKeyBindingHandler<GlobalAction>
     {
-        private static readonly Vector2 shearing = new Vector2(0.15f, 0);
+        public const float SHEAR_WIDTH = 7.5f;
 
-        public string Text
+        protected static readonly Vector2 SHEAR = new Vector2(SHEAR_WIDTH / Footer.HEIGHT, 0);
+
+        public LocalisableString Text
         {
-            get => SpriteText?.Text;
+            get => SpriteText?.Text ?? default;
             set
             {
                 if (SpriteText != null)
@@ -54,48 +60,82 @@ namespace osu.Game.Screens.Select
             }
         }
 
+        protected FillFlowContainer ButtonContentContainer;
         protected readonly Container TextContainer;
         protected readonly SpriteText SpriteText;
         private readonly Box box;
         private readonly Box light;
 
-        public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => box.ReceivePositionalInputAt(screenSpacePos);
-
         public FooterButton()
         {
             AutoSizeAxes = Axes.Both;
+            Shear = SHEAR;
             Children = new Drawable[]
             {
-                TextContainer = new Container
-                {
-                    Size = new Vector2(100, 50),
-                    Child = SpriteText = new OsuSpriteText
-                    {
-                        Anchor = Anchor.Centre,
-                        Origin = Anchor.Centre,
-                    }
-                },
                 box = new Box
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Shear = shearing,
                     EdgeSmoothness = new Vector2(2, 0),
                     Colour = Color4.White,
                     Alpha = 0,
                 },
                 light = new Box
                 {
-                    Shear = shearing,
                     Height = 4,
                     EdgeSmoothness = new Vector2(2, 0),
                     RelativeSizeAxes = Axes.X,
+                },
+                new Container
+                {
+                    AutoSizeAxes = Axes.Both,
+                    Children = new Drawable[]
+                    {
+                        ButtonContentContainer = new FillFlowContainer
+                        {
+                            Anchor = Anchor.CentreLeft,
+                            Origin = Anchor.CentreLeft,
+                            Direction = FillDirection.Horizontal,
+                            Shear = -SHEAR,
+                            AutoSizeAxes = Axes.X,
+                            Height = 50,
+                            Spacing = new Vector2(15, 0),
+                            Children = new Drawable[]
+                            {
+                                TextContainer = new Container
+                                {
+                                    Anchor = Anchor.Centre,
+                                    Origin = Anchor.Centre,
+                                    AutoSizeAxes = Axes.Both,
+                                    Child = SpriteText = new OsuSpriteText
+                                    {
+                                        AlwaysPresent = true,
+                                        Anchor = Anchor.Centre,
+                                        Origin = Anchor.Centre,
+                                    }
+                                },
+                            },
+                        },
+                    },
                 },
             };
         }
 
         public Action Hovered;
         public Action HoverLost;
-        public Key? Hotkey;
+        public GlobalAction? Hotkey;
+
+        protected override void UpdateAfterChildren()
+        {
+            base.UpdateAfterChildren();
+
+            float horizontalMargin = (100 - TextContainer.Width) / 2;
+            ButtonContentContainer.Padding = new MarginPadding
+            {
+                Left = horizontalMargin,
+                // right side margin offset to compensate for shear
+                Right = horizontalMargin - SHEAR_WIDTH / 2
+            };
+        }
 
         protected override bool OnHover(HoverEvent e)
         {
@@ -118,10 +158,10 @@ namespace osu.Game.Screens.Select
             return base.OnMouseDown(e);
         }
 
-        protected override bool OnMouseUp(MouseUpEvent e)
+        protected override void OnMouseUp(MouseUpEvent e)
         {
             box.FadeOut(Footer.TRANSITION_LENGTH, Easing.OutQuint);
-            return base.OnMouseUp(e);
+            base.OnMouseUp(e);
         }
 
         protected override bool OnClick(ClickEvent e)
@@ -132,15 +172,17 @@ namespace osu.Game.Screens.Select
             return base.OnClick(e);
         }
 
-        protected override bool OnKeyDown(KeyDownEvent e)
+        public virtual bool OnPressed(KeyBindingPressEvent<GlobalAction> e)
         {
-            if (!e.Repeat && e.Key == Hotkey)
+            if (e.Action == Hotkey && !e.Repeat)
             {
-                Click();
+                TriggerClick();
                 return true;
             }
 
-            return base.OnKeyDown(e);
+            return false;
         }
+
+        public virtual void OnReleased(KeyBindingReleaseEvent<GlobalAction> e) { }
     }
 }

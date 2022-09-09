@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Extensions.Color4Extensions;
@@ -10,22 +12,19 @@ using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
-using osu.Game.Graphics;
+using osu.Framework.Localisation;
 using osu.Game.Graphics.Backgrounds;
 using osu.Game.Graphics.Containers;
-using osu.Game.Input.Bindings;
 using osuTK;
 using osuTK.Graphics;
 using osuTK.Input;
 
 namespace osu.Game.Overlays.Dialog
 {
-    public class PopupDialog : OsuFocusedOverlayContainer
+    public abstract class PopupDialog : VisibilityContainer
     {
-        public static readonly float ENTER_DURATION = 500;
-        public static readonly float EXIT_DURATION = 200;
-
-        protected override bool BlockPositionalInput => false;
+        public const float ENTER_DURATION = 500;
+        public const float EXIT_DURATION = 200;
 
         private readonly Vector2 ringSize = new Vector2(100f);
         private readonly Vector2 ringMinifiedSize = new Vector2(20f);
@@ -46,25 +45,34 @@ namespace osu.Game.Overlays.Dialog
             set => icon.Icon = value;
         }
 
-        private string text;
+        private LocalisableString headerText;
 
-        public string HeaderText
+        public LocalisableString HeaderText
         {
-            get => text;
+            get => headerText;
             set
             {
-                if (text == value)
+                if (headerText == value)
                     return;
 
-                text = value;
-
+                headerText = value;
                 header.Text = value;
             }
         }
 
-        public string BodyText
+        private LocalisableString bodyText;
+
+        public LocalisableString BodyText
         {
-            set => body.Text = value;
+            get => bodyText;
+            set
+            {
+                if (bodyText == value)
+                    return;
+
+                bodyText = value;
+                body.Text = value;
+            }
         }
 
         public IEnumerable<PopupDialogButton> Buttons
@@ -82,15 +90,19 @@ namespace osu.Game.Overlays.Dialog
                         if (actionInvoked) return;
 
                         actionInvoked = true;
-                        action?.Invoke();
 
+                        // Hide the dialog before running the action.
+                        // This is important as the code which is performed may check for a dialog being present (ie. `OsuGame.PerformFromScreen`)
+                        // and we don't want it to see the already dismissed dialog.
                         Hide();
+
+                        action?.Invoke();
                     };
                 }
             }
         }
 
-        public PopupDialog()
+        protected PopupDialog()
         {
             RelativeSizeAxes = Axes.Both;
 
@@ -117,13 +129,13 @@ namespace osu.Game.Overlays.Dialog
                                 new Box
                                 {
                                     RelativeSizeAxes = Axes.Both,
-                                    Colour = OsuColour.FromHex(@"221a21"),
+                                    Colour = Color4Extensions.FromHex(@"221a21"),
                                 },
                                 new Triangles
                                 {
                                     RelativeSizeAxes = Axes.Both,
-                                    ColourLight = OsuColour.FromHex(@"271e26"),
-                                    ColourDark = OsuColour.FromHex(@"1e171e"),
+                                    ColourLight = Color4Extensions.FromHex(@"271e26"),
+                                    ColourDark = Color4Extensions.FromHex(@"1e171e"),
                                     TriangleScale = 4,
                                 },
                             },
@@ -200,19 +212,21 @@ namespace osu.Game.Overlays.Dialog
                     },
                 },
             };
+
+            // It's important we start in a visible state so our state fires on hide, even before load.
+            // This is used by the dialog overlay to know when the dialog was dismissed.
+            Show();
         }
 
-        public override bool OnPressed(GlobalAction action)
-        {
-            switch (action)
-            {
-                case GlobalAction.Select:
-                    Buttons.OfType<PopupDialogOkButton>().FirstOrDefault()?.Click();
-                    return true;
-            }
+        /// <summary>
+        /// Programmatically clicks the first <see cref="PopupDialogOkButton"/>.
+        /// </summary>
+        public void PerformOkAction() => PerformAction<PopupDialogOkButton>();
 
-            return base.OnPressed(action);
-        }
+        /// <summary>
+        /// Programmatically clicks the first button of the provided type.
+        /// </summary>
+        public void PerformAction<T>() where T : PopupDialogButton => Buttons.OfType<T>().First().TriggerClick();
 
         protected override bool OnKeyDown(KeyDownEvent e)
         {
@@ -238,8 +252,6 @@ namespace osu.Game.Overlays.Dialog
 
         protected override void PopIn()
         {
-            base.PopIn();
-
             actionInvoked = false;
 
             // Reset various animations but only if the dialog animation fully completed
@@ -261,16 +273,15 @@ namespace osu.Game.Overlays.Dialog
             if (!actionInvoked)
                 // In the case a user did not choose an action before a hide was triggered, press the last button.
                 // This is presumed to always be a sane default "cancel" action.
-                buttonsContainer.Last().Click();
+                buttonsContainer.Last().TriggerClick();
 
-            base.PopOut();
             content.FadeOut(EXIT_DURATION, Easing.InSine);
         }
 
         private void pressButtonAtIndex(int index)
         {
             if (index < Buttons.Count())
-                Buttons.Skip(index).First().Click();
+                Buttons.Skip(index).First().TriggerClick();
         }
     }
 }

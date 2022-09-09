@@ -4,47 +4,42 @@
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Input.Events;
 using osu.Framework.Timing;
 using osu.Game.Rulesets.Edit;
+using osu.Game.Rulesets.Objects.Drawables;
+using osu.Game.Screens.Edit;
 
 namespace osu.Game.Tests.Visual
 {
-    public abstract class SelectionBlueprintTestScene : OsuTestScene
+    public abstract class SelectionBlueprintTestScene : OsuManualInputManagerTestScene
     {
-        private SelectionBlueprint blueprint;
+        [Cached]
+        private readonly EditorClock editorClock = new EditorClock();
 
-        protected override Container<Drawable> Content => content ?? base.Content;
+        protected override Container<Drawable> Content => content;
         private readonly Container content;
 
         protected SelectionBlueprintTestScene()
         {
-            base.Content.Add(content = new Container
+            base.Content.AddRange(new Drawable[]
             {
-                Clock = new FramedClock(new StopwatchClock()),
-                RelativeSizeAxes = Axes.Both
+                editorClock,
+                content = new Container
+                {
+                    Clock = new FramedClock(new StopwatchClock()),
+                    RelativeSizeAxes = Axes.Both
+                }
             });
         }
 
-        [BackgroundDependencyLoader]
-        private void load()
+        protected void AddBlueprint(HitObjectSelectionBlueprint blueprint, DrawableHitObject? drawableObject = null)
         {
-            blueprint = CreateBlueprint();
-            blueprint.Depth = float.MinValue;
-            blueprint.SelectionRequested += (_, __) => blueprint.Select();
-
-            Add(blueprint);
-
-            AddStep("Select", () => blueprint.Select());
-            AddStep("Deselect", () => blueprint.Deselect());
+            Add(blueprint.With(d =>
+            {
+                d.DrawableObject = drawableObject;
+                d.Depth = float.MinValue;
+                d.Select();
+            }));
         }
-
-        protected override bool OnClick(ClickEvent e)
-        {
-            blueprint.Deselect();
-            return true;
-        }
-
-        protected abstract SelectionBlueprint CreateBlueprint();
     }
 }

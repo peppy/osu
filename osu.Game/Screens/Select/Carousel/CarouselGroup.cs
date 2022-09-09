@@ -6,57 +6,60 @@ using System.Collections.Generic;
 namespace osu.Game.Screens.Select.Carousel
 {
     /// <summary>
-    /// A group which ensures only one child is selected.
+    /// A group which ensures only one item is selected.
     /// </summary>
     public class CarouselGroup : CarouselItem
     {
-        protected override DrawableCarouselItem CreateDrawableRepresentation() => null;
+        public override DrawableCarouselItem? CreateDrawableRepresentation() => null;
 
-        public IReadOnlyList<CarouselItem> Children => InternalChildren;
+        public IReadOnlyList<CarouselItem> Items => items;
 
-        protected List<CarouselItem> InternalChildren = new List<CarouselItem>();
+        private readonly List<CarouselItem> items = new List<CarouselItem>();
 
         /// <summary>
-        /// Used to assign a monotonically increasing ID to children as they are added. This member is
-        /// incremented whenever a child is added.
+        /// Used to assign a monotonically increasing ID to items as they are added. This member is
+        /// incremented whenever an item is added.
         /// </summary>
-        private ulong currentChildID;
+        private ulong currentItemID;
 
-        public override List<DrawableCarouselItem> Drawables
+        private Comparer<CarouselItem>? criteriaComparer;
+        private FilterCriteria? lastCriteria;
+
+        protected int GetIndexOfItem(CarouselItem lastSelected) => items.IndexOf(lastSelected);
+
+        public virtual void RemoveItem(CarouselItem i)
         {
-            get
-            {
-                var drawables = base.Drawables;
-
-                // if we are explicitly not present, don't ever present children.
-                // without this check, children drawables can potentially be presented without their group header.
-                if (DrawableRepresentation.Value?.IsPresent == false) return drawables;
-
-                foreach (var c in InternalChildren)
-                    drawables.AddRange(c.Drawables);
-                return drawables;
-            }
-        }
-
-        public virtual void RemoveChild(CarouselItem i)
-        {
-            InternalChildren.Remove(i);
+            items.Remove(i);
 
             // it's important we do the deselection after removing, so any further actions based on
             // State.ValueChanged make decisions post-removal.
             i.State.Value = CarouselItemState.Collapsed;
         }
 
-        public virtual void AddChild(CarouselItem i)
+        public virtual void AddItem(CarouselItem i)
         {
             i.State.ValueChanged += state => ChildItemStateChanged(i, state.NewValue);
-            i.ChildID = ++currentChildID;
-            InternalChildren.Add(i);
+            i.ItemID = ++currentItemID;
+
+            if (lastCriteria != null)
+            {
+                i.Filter(lastCriteria);
+
+                int index = items.BinarySearch(i, criteriaComparer);
+                if (index < 0) index = ~index; // BinarySearch hacks multiple return values with 2's complement.
+
+                items.Insert(index, i);
+            }
+            else
+            {
+                // criteria may be null for initial population. the filtering will be applied post-add.
+                items.Add(i);
+            }
         }
 
-        public CarouselGroup(List<CarouselItem> items = null)
+        public CarouselGroup(List<CarouselItem>? items = null)
         {
-            if (items != null) InternalChildren = items;
+            if (items != null) this.items = items;
 
             State.ValueChanged += state =>
             {
@@ -64,11 +67,11 @@ namespace osu.Game.Screens.Select.Carousel
                 {
                     case CarouselItemState.Collapsed:
                     case CarouselItemState.NotSelected:
-                        InternalChildren.ForEach(c => c.State.Value = CarouselItemState.Collapsed);
+                        this.items.ForEach(c => c.State.Value = CarouselItemState.Collapsed);
                         break;
 
                     case CarouselItemState.Selected:
-                        InternalChildren.ForEach(c =>
+                        this.items.ForEach(c =>
                         {
                             if (c.State.Value == CarouselItemState.Collapsed) c.State.Value = CarouselItemState.NotSelected;
                         });
@@ -81,12 +84,20 @@ namespace osu.Game.Screens.Select.Carousel
         {
             base.Filter(criteria);
 
-            var children = new List<CarouselItem>(InternalChildren);
+            items.ForEach(c => c.Filter(criteria));
 
-            children.Sort((x, y) => x.CompareTo(criteria, y));
-            children.ForEach(c => c.Filter(criteria));
+            criteriaComparer = Comparer<CarouselItem>.Create((x, y) =>
+            {
+                int comparison = x.CompareTo(criteria, y);
+                if (comparison != 0)
+                    return comparison;
 
-            InternalChildren = children;
+                return x.ItemID.CompareTo(y.ItemID);
+            });
+
+            items.Sort(criteriaComparer);
+
+            lastCriteria = criteria;
         }
 
         protected virtual void ChildItemStateChanged(CarouselItem item, CarouselItemState value)
@@ -94,7 +105,7 @@ namespace osu.Game.Screens.Select.Carousel
             // ensure we are the only item selected
             if (value == CarouselItemState.Selected)
             {
-                foreach (var b in InternalChildren)
+                foreach (var b in items)
                 {
                     if (item == b) continue;
 

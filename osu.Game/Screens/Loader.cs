@@ -1,14 +1,22 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shaders;
+using osu.Framework.Utils;
 using osu.Game.Screens.Menu;
-using osuTK;
 using osu.Framework.Screens;
+using osu.Framework.Threading;
+using osu.Game.Configuration;
+using osu.Game.Database;
+using osu.Game.Graphics.UserInterface;
+using IntroSequence = osu.Game.Configuration.IntroSequence;
 
 namespace osu.Game.Screens
 {
@@ -21,59 +29,108 @@ namespace osu.Game.Screens
             ValidForResume = false;
         }
 
-        protected override void LogoArriving(OsuLogo logo, bool resuming)
-        {
-            base.LogoArriving(logo, resuming);
-
-            logo.BeatMatching = false;
-            logo.Triangles = false;
-            logo.RelativePositionAxes = Axes.None;
-            logo.Origin = Anchor.BottomRight;
-            logo.Anchor = Anchor.BottomRight;
-            logo.Position = new Vector2(-40);
-            logo.Scale = new Vector2(0.2f);
-
-            logo.Delay(500).FadeInFromZero(1000, Easing.OutQuint);
-        }
-
-        protected override void LogoSuspending(OsuLogo logo)
-        {
-            base.LogoSuspending(logo);
-            logo.FadeOut(logo.Alpha * 400);
-        }
-
         private OsuScreen loadableScreen;
         private ShaderPrecompiler precompiler;
 
-        protected virtual OsuScreen CreateLoadableScreen() => showDisclaimer ? (OsuScreen)new Disclaimer() : new Intro();
+        private IntroSequence introSequence;
+        private LoadingSpinner spinner;
+        private ScheduledDelegate spinnerShow;
+
+        protected virtual OsuScreen CreateLoadableScreen()
+        {
+            if (showDisclaimer)
+                return new Disclaimer(getIntroSequence());
+
+            return getIntroSequence();
+        }
+
+        private IntroScreen getIntroSequence()
+        {
+            if (introSequence == IntroSequence.Random)
+                introSequence = (IntroSequence)RNG.Next(0, (int)IntroSequence.Random);
+
+            switch (introSequence)
+            {
+                case IntroSequence.Circles:
+                    return new IntroCircles(createMainMenu);
+
+                case IntroSequence.Welcome:
+                    return new IntroWelcome(createMainMenu);
+
+                default:
+                    return new IntroTriangles(createMainMenu);
+            }
+
+            MainMenu createMainMenu() => new MainMenu();
+        }
 
         protected virtual ShaderPrecompiler CreateShaderPrecompiler() => new ShaderPrecompiler();
 
-        public override void OnEntering(IScreen last)
+        [Resolved(canBeNull: true)]
+        private DatabaseContextFactory efContextFactory { get; set; }
+
+        private EFToRealmMigrator realmMigrator;
+
+        public override void OnEntering(ScreenTransitionEvent e)
         {
-            base.OnEntering(last);
+            base.OnEntering(e);
 
             LoadComponentAsync(precompiler = CreateShaderPrecompiler(), AddInternal);
-            LoadComponentAsync(loadableScreen = CreateLoadableScreen());
+
+            // A non-null context factory means there's still content to migrate.
+            if (efContextFactory != null)
+            {
+                LoadComponentAsync(realmMigrator = new EFToRealmMigrator(), AddInternal);
+                realmMigrator.MigrationCompleted.ContinueWith(_ => Schedule(() =>
+                {
+                    // Delay initial screen loading to ensure that the migration is in a complete and sane state
+                    // before the intro screen may import the game intro beatmap.
+                    LoadComponentAsync(loadableScreen = CreateLoadableScreen());
+                }));
+            }
+            else
+            {
+                LoadComponentAsync(loadableScreen = CreateLoadableScreen());
+            }
+
+            LoadComponentAsync(spinner = new LoadingSpinner(true, true)
+            {
+                Anchor = Anchor.BottomRight,
+                Origin = Anchor.BottomRight,
+                Margin = new MarginPadding(40),
+            }, _ =>
+            {
+                AddInternal(spinner);
+                spinnerShow = Scheduler.AddDelayed(spinner.Show, 200);
+            });
 
             checkIfLoaded();
         }
 
         private void checkIfLoaded()
         {
-            if (loadableScreen.LoadState != LoadState.Ready || !precompiler.FinishedCompiling)
+            if (loadableScreen?.LoadState != LoadState.Ready || !precompiler.FinishedCompiling)
             {
                 Schedule(checkIfLoaded);
                 return;
             }
 
-            this.Push(loadableScreen);
+            spinnerShow?.Cancel();
+
+            if (spinner.State.Value == Visibility.Visible)
+            {
+                spinner.Hide();
+                Scheduler.AddDelayed(() => this.Push(loadableScreen), LoadingSpinner.TRANSITION_DURATION);
+            }
+            else
+                this.Push(loadableScreen);
         }
 
         [BackgroundDependencyLoader]
-        private void load(OsuGameBase game)
+        private void load(OsuGameBase game, OsuConfigManager config)
         {
             showDisclaimer = game.IsDeployedBuild;
+            introSequence = config.Get<IntroSequence>(OsuSetting.IntroSequence);
         }
 
         /// <summary>

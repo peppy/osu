@@ -1,10 +1,14 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
+using osu.Framework.Allocation;
 using osu.Game.Rulesets.Objects;
 
 namespace osu.Game.Screens.Edit.Compose
 {
+    [Cached]
     public interface IPlacementHandler
     {
         /// <summary>
@@ -17,7 +21,8 @@ namespace osu.Game.Screens.Edit.Compose
         /// Notifies that a placement has finished.
         /// </summary>
         /// <param name="hitObject">The <see cref="HitObject"/> that has been placed.</param>
-        void EndPlacement(HitObject hitObject);
+        /// <param name="commit">Whether the object should be committed.</param>
+        void EndPlacement(HitObject hitObject, bool commit);
 
         /// <summary>
         /// Deletes a <see cref="HitObject"/>.

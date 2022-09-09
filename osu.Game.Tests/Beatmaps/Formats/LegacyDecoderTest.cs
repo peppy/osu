@@ -1,10 +1,12 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System.Collections.Generic;
-using System.IO;
 using NUnit.Framework;
 using osu.Game.Beatmaps.Formats;
+using osu.Game.IO;
 using osu.Game.Tests.Resources;
 
 namespace osu.Game.Tests.Beatmaps.Formats
@@ -18,7 +20,7 @@ namespace osu.Game.Tests.Beatmaps.Formats
             var decoder = new LineLoggingDecoder(14);
 
             using (var resStream = TestResources.OpenResource("comments.osu"))
-            using (var stream = new StreamReader(resStream))
+            using (var stream = new LineBufferedReader(resStream))
             {
                 decoder.Decode(stream);
 
@@ -40,7 +42,7 @@ namespace osu.Game.Tests.Beatmaps.Formats
 
             protected override bool ShouldSkipLine(string line)
             {
-                var result = base.ShouldSkipLine(line);
+                bool result = base.ShouldSkipLine(line);
 
                 if (!result)
                     ParsedLines.Add(line);

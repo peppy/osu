@@ -1,20 +1,28 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using NUnit.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.UserInterface;
+using osu.Framework.Testing;
 using osu.Game.Beatmaps;
+using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch;
 using osu.Game.Rulesets.Mania;
 using osu.Game.Rulesets.Objects;
+using osu.Game.Rulesets.Objects.Legacy;
 using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Rulesets.Osu;
+using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Taiko;
 using osu.Game.Screens.Select;
 using osuTK;
@@ -45,13 +53,8 @@ namespace osu.Game.Tests.Visual.SongSelect
                 Margin = new MarginPadding { Top = 20 }
             });
 
-            AddStep("show", () =>
-            {
-                infoWedge.Show();
-                infoWedge.Beatmap = Beatmap.Value;
-            });
+            AddStep("show", () => infoWedge.Show());
 
-            // select part is redundant, but wait for load isn't
             selectBeatmap(Beatmap.Value.Beatmap);
 
             AddWaitStep("wait for select", 3);
@@ -62,6 +65,12 @@ namespace osu.Game.Tests.Visual.SongSelect
 
             AddStep("show", () => { infoWedge.Show(); });
 
+            AddSliderStep("change star difficulty", 0, 11.9, 5.55, v =>
+            {
+                foreach (var hasCurrentValue in infoWedge.Info.ChildrenOfType<IHasCurrentValue<StarDifficulty>>())
+                    hasCurrentValue.Current.Value = new StarDifficulty(v, 0);
+            });
+
             foreach (var rulesetInfo in rulesets.AvailableRulesets)
             {
                 var instance = rulesetInfo.CreateInstance();
@@ -69,28 +78,27 @@ namespace osu.Game.Tests.Visual.SongSelect
 
                 beatmaps.Add(testBeatmap);
 
-                AddStep("set ruleset", () => Ruleset.Value = rulesetInfo);
+                setRuleset(rulesetInfo);
 
                 selectBeatmap(testBeatmap);
 
                 testBeatmapLabels(instance);
 
-                // TODO: adjust cases once more info is shown for other gamemodes
                 switch (instance)
                 {
-                    case OsuRuleset _:
+                    case OsuRuleset:
                         testInfoLabels(5);
                         break;
 
-                    case TaikoRuleset _:
+                    case TaikoRuleset:
                         testInfoLabels(5);
                         break;
 
-                    case CatchRuleset _:
+                    case CatchRuleset:
                         testInfoLabels(5);
                         break;
 
-                    case ManiaRuleset _:
+                    case ManiaRuleset:
                         testInfoLabels(4);
                         break;
 
@@ -99,45 +107,119 @@ namespace osu.Game.Tests.Visual.SongSelect
                         break;
                 }
             }
-
-            testNullBeatmap();
         }
 
         private void testBeatmapLabels(Ruleset ruleset)
         {
-            AddAssert("check version", () => infoWedge.Info.VersionLabel.Text == $"{ruleset.ShortName}Version");
-            AddAssert("check title", () => infoWedge.Info.TitleLabel.Text == $"{ruleset.ShortName}Source — {ruleset.ShortName}Title");
-            AddAssert("check artist", () => infoWedge.Info.ArtistLabel.Text == $"{ruleset.ShortName}Artist");
-            AddAssert("check author", () => infoWedge.Info.MapperContainer.Children.OfType<OsuSpriteText>().Any(s => s.Text == $"{ruleset.ShortName}Author"));
+            AddAssert("check version", () => infoWedge.Info.VersionLabel.Current.Value == $"{ruleset.ShortName}Version");
+            AddAssert("check title", () => infoWedge.Info.TitleLabel.Current.Value == $"{ruleset.ShortName}Title");
+            AddAssert("check artist", () => infoWedge.Info.ArtistLabel.Current.Value == $"{ruleset.ShortName}Artist");
+            AddAssert("check author", () => infoWedge.Info.MapperContainer.ChildrenOfType<OsuSpriteText>().Any(s => s.Current.Value == $"{ruleset.ShortName}Author"));
         }
 
         private void testInfoLabels(int expectedCount)
         {
-            AddAssert("check info labels exists", () => infoWedge.Info.InfoLabelContainer.Children.Any());
-            AddAssert("check info labels count", () => infoWedge.Info.InfoLabelContainer.Children.Count == expectedCount);
+            AddAssert("check info labels exists", () => infoWedge.Info.ChildrenOfType<BeatmapInfoWedge.WedgeInfoText.InfoLabel>().Any());
+            AddAssert("check info labels count", () => infoWedge.Info.ChildrenOfType<BeatmapInfoWedge.WedgeInfoText.InfoLabel>().Count() == expectedCount);
         }
 
-        private void testNullBeatmap()
+        [SetUpSteps]
+        public void SetUpSteps()
+        {
+            AddStep("reset mods", () => SelectedMods.SetDefault());
+        }
+
+        [Test]
+        public void TestNullBeatmap()
         {
             selectBeatmap(null);
-            AddAssert("check empty version", () => string.IsNullOrEmpty(infoWedge.Info.VersionLabel.Text));
-            AddAssert("check default title", () => infoWedge.Info.TitleLabel.Text == Beatmap.Default.BeatmapInfo.Metadata.Title);
-            AddAssert("check default artist", () => infoWedge.Info.ArtistLabel.Text == Beatmap.Default.BeatmapInfo.Metadata.Artist);
-            AddAssert("check empty author", () => !infoWedge.Info.MapperContainer.Children.Any());
-            AddAssert("check no info labels", () => !infoWedge.Info.InfoLabelContainer.Children.Any());
+            AddAssert("check empty version", () => string.IsNullOrEmpty(infoWedge.Info.VersionLabel.Current.Value));
+            AddAssert("check default title", () => infoWedge.Info.TitleLabel.Current.Value == Beatmap.Default.BeatmapInfo.Metadata.Title);
+            AddAssert("check default artist", () => infoWedge.Info.ArtistLabel.Current.Value == Beatmap.Default.BeatmapInfo.Metadata.Artist);
+            AddAssert("check empty author", () => !infoWedge.Info.MapperContainer.ChildrenOfType<OsuSpriteText>().Any());
+            AddAssert("check no info labels", () => !infoWedge.Info.ChildrenOfType<BeatmapInfoWedge.WedgeInfoText.InfoLabel>().Any());
+        }
+
+        [Test]
+        public void TestTruncation()
+        {
+            selectBeatmap(createLongMetadata());
+        }
+
+        [Test]
+        public void TestBPMUpdates()
+        {
+            const double bpm = 120;
+            IBeatmap beatmap = createTestBeatmap(new OsuRuleset().RulesetInfo);
+            beatmap.ControlPointInfo.Add(0, new TimingControlPoint { BeatLength = 60 * 1000 / bpm });
+
+            OsuModDoubleTime doubleTime = null;
+
+            selectBeatmap(beatmap);
+            checkDisplayedBPM($"{bpm}");
+
+            AddStep("select DT", () => SelectedMods.Value = new[] { doubleTime = new OsuModDoubleTime() });
+            checkDisplayedBPM($"{bpm * 1.5f}");
+
+            AddStep("change DT rate", () => doubleTime.SpeedChange.Value = 2);
+            checkDisplayedBPM($"{bpm * 2}");
+        }
+
+        [TestCase(120, 125, null, "120-125 (mostly 120)")]
+        [TestCase(120, 120.6, null, "120-121 (mostly 120)")]
+        [TestCase(120, 120.4, null, "120")]
+        [TestCase(120, 120.6, "DT", "180-182 (mostly 180)")]
+        [TestCase(120, 120.4, "DT", "180")]
+        public void TestVaryingBPM(double commonBpm, double otherBpm, string mod, string expectedDisplay)
+        {
+            IBeatmap beatmap = createTestBeatmap(new OsuRuleset().RulesetInfo);
+            beatmap.ControlPointInfo.Add(0, new TimingControlPoint { BeatLength = 60 * 1000 / commonBpm });
+            beatmap.ControlPointInfo.Add(100, new TimingControlPoint { BeatLength = 60 * 1000 / otherBpm });
+            beatmap.ControlPointInfo.Add(200, new TimingControlPoint { BeatLength = 60 * 1000 / commonBpm });
+
+            if (mod != null)
+                AddStep($"select {mod}", () => SelectedMods.Value = new[] { Ruleset.Value.CreateInstance().CreateModFromAcronym(mod) });
+
+            selectBeatmap(beatmap);
+            checkDisplayedBPM(expectedDisplay);
+        }
+
+        private void checkDisplayedBPM(string target)
+        {
+            AddUntilStep($"displayed bpm is {target}", () =>
+            {
+                var label = infoWedge.DisplayedContent.ChildrenOfType<BeatmapInfoWedge.WedgeInfoText.InfoLabel>().Single(l => l.Statistic.Name == "BPM");
+                return label.Statistic.Content == target;
+            });
+        }
+
+        private void setRuleset(RulesetInfo rulesetInfo)
+        {
+            Container containerBefore = null;
+
+            AddStep("set ruleset", () =>
+            {
+                // wedge content is only refreshed if the ruleset changes, so only wait for load in that case.
+                if (!rulesetInfo.Equals(Ruleset.Value))
+                    containerBefore = infoWedge.DisplayedContent;
+
+                Ruleset.Value = rulesetInfo;
+            });
+
+            AddUntilStep("wait for async load", () => infoWedge.DisplayedContent != containerBefore);
         }
 
         private void selectBeatmap([CanBeNull] IBeatmap b)
         {
-            BeatmapInfoWedge.BufferedWedgeInfo infoBefore = null;
+            Container containerBefore = null;
 
             AddStep($"select {b?.Metadata.Title ?? "null"} beatmap", () =>
             {
-                infoBefore = infoWedge.Info;
+                containerBefore = infoWedge.DisplayedContent;
                 infoWedge.Beatmap = Beatmap.Value = b == null ? Beatmap.Default : CreateWorkingBeatmap(b);
             });
 
-            AddUntilStep("wait for async load", () => infoWedge.Info != infoBefore);
+            AddUntilStep("wait for async load", () => infoWedge.DisplayedContent != containerBefore);
         }
 
         private IBeatmap createTestBeatmap(RulesetInfo ruleset)
@@ -152,29 +234,50 @@ namespace osu.Game.Tests.Visual.SongSelect
                 {
                     Metadata = new BeatmapMetadata
                     {
-                        AuthorString = $"{ruleset.ShortName}Author",
+                        Author = { Username = $"{ruleset.ShortName}Author" },
                         Artist = $"{ruleset.ShortName}Artist",
                         Source = $"{ruleset.ShortName}Source",
                         Title = $"{ruleset.ShortName}Title"
                     },
                     Ruleset = ruleset,
-                    StarDifficulty = 6,
-                    Version = $"{ruleset.ShortName}Version",
-                    BaseDifficulty = new BeatmapDifficulty()
+                    StarRating = 6,
+                    DifficultyName = $"{ruleset.ShortName}Version",
+                    Difficulty = new BeatmapDifficulty()
                 },
                 HitObjects = objects
             };
         }
 
-        private class TestBeatmapInfoWedge : BeatmapInfoWedge
+        private IBeatmap createLongMetadata()
         {
-            public new BufferedWedgeInfo Info => base.Info;
+            return new Beatmap
+            {
+                BeatmapInfo = new BeatmapInfo
+                {
+                    Metadata = new BeatmapMetadata
+                    {
+                        Author = { Username = "WWWWWWWWWWWWWWW" },
+                        Artist = "Verrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrry long Artist",
+                        Source = "Verrrrry long Source",
+                        Title = "Verrrrry long Title"
+                    },
+                    DifficultyName = "Verrrrrrrrrrrrrrrrrrrrrrrrrrrrry long Version",
+                    Status = BeatmapOnlineStatus.Graveyard,
+                },
+            };
         }
 
-        private class TestHitObject : HitObject, IHasPosition
+        private class TestBeatmapInfoWedge : BeatmapInfoWedge
         {
-            public float X { get; } = 0;
-            public float Y { get; } = 0;
+            public new Container DisplayedContent => base.DisplayedContent;
+
+            public new WedgeInfoText Info => base.Info;
+        }
+
+        private class TestHitObject : ConvertHitObject, IHasPosition
+        {
+            public float X => 0;
+            public float Y => 0;
             public Vector2 Position { get; } = Vector2.Zero;
         }
     }

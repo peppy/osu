@@ -1,14 +1,16 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
@@ -17,6 +19,7 @@ using osu.Game.Graphics.UserInterface;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
+using osu.Game.Overlays.Comments;
 using osuTK;
 
 namespace osu.Game.Overlays.Changelog
@@ -31,7 +34,7 @@ namespace osu.Game.Overlays.Changelog
         }
 
         [BackgroundDependencyLoader]
-        private void load(CancellationToken? cancellation, IAPIProvider api)
+        private void load(CancellationToken? cancellation, IAPIProvider api, OverlayColourProvider colourProvider)
         {
             bool complete = false;
 
@@ -43,8 +46,7 @@ namespace osu.Game.Overlays.Changelog
             };
             req.Failure += _ => complete = true;
 
-            // This is done on a separate thread to support cancellation below
-            Task.Run(() => req.Perform(api));
+            api.PerformAsync(req);
 
             while (!complete)
             {
@@ -58,11 +60,35 @@ namespace osu.Game.Overlays.Changelog
             }
 
             if (build != null)
+            {
+                CommentsContainer comments;
+
                 Children = new Drawable[]
                 {
                     new ChangelogBuildWithNavigation(build) { SelectBuild = SelectBuild },
-                    new Comments(build)
+                    new Box
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        Height = 2,
+                        Colour = colourProvider.Background6,
+                        Margin = new MarginPadding { Top = 30 },
+                    },
+                    new ChangelogSupporterPromo
+                    {
+                        Alpha = api.LocalUser.Value.IsSupporter ? 0 : 1,
+                    },
+                    new Box
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        Height = 2,
+                        Colour = colourProvider.Background6,
+                        Alpha = api.LocalUser.Value.IsSupporter ? 0 : 1,
+                    },
+                    comments = new CommentsContainer()
                 };
+
+                comments.ShowComments(CommentableType.Build, build.Id);
+            }
         }
 
         public class ChangelogBuildWithNavigation : ChangelogBuild
@@ -71,6 +97,8 @@ namespace osu.Game.Overlays.Changelog
                 : base(build)
             {
             }
+
+            private OsuSpriteText date;
 
             protected override FillFlowContainer CreateHeader()
             {
@@ -81,11 +109,10 @@ namespace osu.Game.Overlays.Changelog
                     existing.Scale = new Vector2(1.25f);
                     existing.Action = null;
 
-                    existing.Add(new OsuSpriteText
+                    existing.Add(date = new OsuSpriteText
                     {
-                        Text = Build.CreatedAt.Date.ToString("dd MMM yyyy"),
+                        Text = Build.CreatedAt.Date.ToString("dd MMMM yyyy"),
                         Font = OsuFont.GetFont(weight: FontWeight.Regular, size: 14),
-                        Colour = OsuColour.FromHex(@"FD5"),
                         Anchor = Anchor.BottomCentre,
                         Origin = Anchor.TopCentre,
                         Margin = new MarginPadding { Top = 5 },
@@ -104,6 +131,12 @@ namespace osu.Game.Overlays.Changelog
                 });
 
                 return fill;
+            }
+
+            [BackgroundDependencyLoader]
+            private void load(OverlayColourProvider colourProvider)
+            {
+                date.Colour = colourProvider.Light1;
             }
         }
 

@@ -1,95 +1,74 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using JetBrains.Annotations;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
+using osu.Framework.Development;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Threading;
+using osu.Framework.Graphics.Sprites;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.Cursor;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Online.API;
+using osu.Game.Online.Placeholders;
 using osuTK;
 using osuTK.Graphics;
+using osu.Game.Localisation;
 
 namespace osu.Game.Online.Leaderboards
 {
-    public abstract class Leaderboard<TScope, ScoreInfo> : Container, ILeaderboard, IOnlineComponent
-        where ScoreInfo : Scoring.ScoreInfo
+    /// <summary>
+    /// A leaderboard which displays a scrolling list of top scores, along with a single "user best"
+    /// for the local user.
+    /// </summary>
+    /// <typeparam name="TScope">The scope of the leaderboard (ie. global or local).</typeparam>
+    /// <typeparam name="TScoreInfo">The score model class.</typeparam>
+    public abstract class Leaderboard<TScope, TScoreInfo> : CompositeDrawable
     {
+        /// <summary>
+        /// The currently displayed scores.
+        /// </summary>
+        public IEnumerable<TScoreInfo> Scores => scores;
+
+        /// <summary>
+        /// Whether the current scope should refetch in response to changes in API connectivity state.
+        /// </summary>
+        protected abstract bool IsOnlineScope { get; }
+
         private const double fade_duration = 300;
 
         private readonly OsuScrollContainer scrollContainer;
         private readonly Container placeholderContainer;
+        private readonly UserTopScoreContainer<TScoreInfo> userScoreContainer;
 
-        private FillFlowContainer<LeaderboardScore> scrollFlow;
+        private FillFlowContainer<LeaderboardScore> scoreFlowContainer;
 
-        private readonly LoadingAnimation loading;
+        private readonly LoadingSpinner loading;
 
-        private ScheduledDelegate showScoresDelegate;
-        private CancellationTokenSource showScoresCancellationSource;
+        private CancellationTokenSource currentFetchCancellationSource;
+        private CancellationTokenSource currentScoresAsyncLoadCancellationSource;
 
-        private bool scoresLoadedOnce;
+        private APIRequest fetchScoresRequest;
 
-        private IEnumerable<ScoreInfo> scores;
+        private LeaderboardState state;
 
-        public IEnumerable<ScoreInfo> Scores
-        {
-            get => scores;
-            set
-            {
-                scores = value;
+        [Resolved(CanBeNull = true)]
+        private IAPIProvider api { get; set; }
 
-                scoresLoadedOnce = true;
+        private readonly IBindable<APIState> apiState = new Bindable<APIState>();
 
-                scrollFlow?.FadeOut(fade_duration, Easing.OutQuint).Expire();
-                scrollFlow = null;
-
-                loading.Hide();
-
-                showScoresDelegate?.Cancel();
-                showScoresCancellationSource?.Cancel();
-
-                if (scores == null || !scores.Any())
-                    return;
-
-                // ensure placeholder is hidden when displaying scores
-                PlaceholderState = PlaceholderState.Successful;
-
-                var sf = CreateScoreFlow();
-                sf.ChildrenEnumerable = scores.Select((s, index) => CreateDrawableScore(s, index + 1));
-
-                // schedule because we may not be loaded yet (LoadComponentAsync complains).
-                showScoresDelegate = Schedule(() => LoadComponentAsync(sf, _ =>
-                {
-                    scrollContainer.Add(scrollFlow = sf);
-
-                    int i = 0;
-
-                    foreach (var s in scrollFlow.Children)
-                        using (s.BeginDelayedSequence(i++ * 50, true))
-                            s.Show();
-
-                    scrollContainer.ScrollTo(0f, false);
-                }, (showScoresCancellationSource = new CancellationTokenSource()).Token));
-            }
-        }
-
-        IEnumerable<Scoring.ScoreInfo> ILeaderboard.Scores => Scores;
-
-        protected virtual FillFlowContainer<LeaderboardScore> CreateScoreFlow()
-            => new FillFlowContainer<LeaderboardScore>
-            {
-                RelativeSizeAxes = Axes.X,
-                AutoSizeAxes = Axes.Y,
-                Spacing = new Vector2(0f, 5f),
-                Padding = new MarginPadding { Top = 10, Bottom = 5 },
-            };
+        private ICollection<TScoreInfo> scores;
 
         private TScope scope;
 
@@ -98,77 +77,48 @@ namespace osu.Game.Online.Leaderboards
             get => scope;
             set
             {
-                if (value.Equals(scope))
+                if (EqualityComparer<TScope>.Default.Equals(value, scope))
                     return;
 
                 scope = value;
-                UpdateScores();
-            }
-        }
-
-        private PlaceholderState placeholderState;
-
-        /// <summary>
-        /// Update the placeholder visibility.
-        /// Setting this to anything other than PlaceholderState.Successful will cancel all existing retrieval requests and hide scores.
-        /// </summary>
-        protected PlaceholderState PlaceholderState
-        {
-            get => placeholderState;
-            set
-            {
-                if (value != PlaceholderState.Successful)
-                {
-                    getScoresRequest?.Cancel();
-                    getScoresRequest = null;
-                    Scores = null;
-                }
-
-                if (value == placeholderState)
-                    return;
-
-                switch (placeholderState = value)
-                {
-                    case PlaceholderState.NetworkFailure:
-                        replacePlaceholder(new RetrievalFailurePlaceholder
-                        {
-                            OnRetry = UpdateScores,
-                        });
-                        break;
-
-                    case PlaceholderState.Unavailable:
-                        replacePlaceholder(new MessagePlaceholder(@"Leaderboards are not available for this beatmap!"));
-                        break;
-
-                    case PlaceholderState.NoScores:
-                        replacePlaceholder(new MessagePlaceholder(@"No records yet!"));
-                        break;
-
-                    case PlaceholderState.NotLoggedIn:
-                        replacePlaceholder(new MessagePlaceholder(@"Please sign in to view online leaderboards!"));
-                        break;
-
-                    case PlaceholderState.NotSupporter:
-                        replacePlaceholder(new MessagePlaceholder(@"Please invest in an osu!supporter tag to view this leaderboard!"));
-                        break;
-
-                    default:
-                        replacePlaceholder(null);
-                        break;
-                }
+                RefetchScores();
             }
         }
 
         protected Leaderboard()
         {
-            Children = new Drawable[]
+            InternalChildren = new Drawable[]
             {
-                scrollContainer = new OsuScrollContainer
+                new OsuContextMenuContainer
                 {
                     RelativeSizeAxes = Axes.Both,
-                    ScrollbarVisible = false,
+                    Masking = true,
+                    Child = new GridContainer
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        RowDimensions = new[]
+                        {
+                            new Dimension(),
+                            new Dimension(GridSizeMode.AutoSize),
+                        },
+                        Content = new[]
+                        {
+                            new Drawable[]
+                            {
+                                scrollContainer = new OsuScrollContainer
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                    ScrollbarVisible = false,
+                                }
+                            },
+                            new Drawable[]
+                            {
+                                userScoreContainer = new UserTopScoreContainer<TScoreInfo>(CreateDrawableTopScore)
+                            },
+                        },
+                    },
                 },
-                loading = new LoadingAnimation(),
+                loading = new LoadingSpinner(),
                 placeholderContainer = new Container
                 {
                     RelativeSizeAxes = Axes.Both
@@ -176,150 +126,274 @@ namespace osu.Game.Online.Leaderboards
             };
         }
 
-        private IAPIProvider api;
-
-        private ScheduledDelegate pendingUpdateScores;
-
-        [BackgroundDependencyLoader(true)]
-        private void load(IAPIProvider api)
+        protected override void LoadComplete()
         {
-            this.api = api;
-            api?.Register(this);
+            base.LoadComplete();
+
+            if (api != null)
+            {
+                apiState.BindTo(api.State);
+                apiState.BindValueChanged(state =>
+                {
+                    switch (state.NewValue)
+                    {
+                        case APIState.Online:
+                        case APIState.Offline:
+                            if (IsOnlineScope)
+                                RefetchScores();
+
+                            break;
+                    }
+                });
+            }
+
+            RefetchScores();
         }
 
-        protected override void Dispose(bool isDisposing)
-        {
-            base.Dispose(isDisposing);
-            api?.Unregister(this);
-        }
+        /// <summary>
+        /// Perform a full refetch of scores using current criteria.
+        /// </summary>
+        public void RefetchScores() => Scheduler.AddOnce(refetchScores);
 
-        public void RefreshScores() => UpdateScores();
-
-        private APIRequest getScoresRequest;
-
-        public abstract bool IsOnlineScope { get; }
-
-        public void APIStateChanged(IAPIProvider api, APIState state)
+        /// <summary>
+        /// Call when a retrieval or display failure happened to show a relevant message to the user.
+        /// </summary>
+        /// <param name="state">The state to display.</param>
+        protected void SetErrorState(LeaderboardState state)
         {
             switch (state)
             {
-                case APIState.Online:
-                case APIState.Offline:
-                    if (IsOnlineScope)
-                        UpdateScores();
-
-                    break;
+                case LeaderboardState.NoScores:
+                case LeaderboardState.Retrieving:
+                case LeaderboardState.Success:
+                    throw new InvalidOperationException($"State {state} cannot be set by a leaderboard implementation.");
             }
+
+            Debug.Assert(scores?.Any() != true);
+
+            setState(state);
         }
 
-        protected void UpdateScores()
+        /// <summary>
+        /// Call when retrieved scores are ready to be displayed.
+        /// </summary>
+        /// <param name="scores">The scores to display.</param>
+        /// <param name="userScore">The user top score, if any.</param>
+        protected void SetScores(IEnumerable<TScoreInfo> scores, TScoreInfo userScore = default)
         {
-            // don't display any scores or placeholder until the first Scores_Set has been called.
-            // this avoids scope changes flickering a "no scores" placeholder before initialisation of song select is finished.
-            if (!scoresLoadedOnce) return;
+            this.scores = scores?.ToList();
+            userScoreContainer.Score.Value = userScore;
 
-            getScoresRequest?.Cancel();
-            getScoresRequest = null;
+            if (userScore == null)
+                userScoreContainer.Hide();
+            else
+                userScoreContainer.Show();
 
-            pendingUpdateScores?.Cancel();
-            pendingUpdateScores = Schedule(() =>
-            {
-                PlaceholderState = PlaceholderState.Retrieving;
-                loading.Show();
-
-                getScoresRequest = FetchScores(scores => Schedule(() =>
-                {
-                    Scores = scores;
-                    PlaceholderState = Scores.Any() ? PlaceholderState.Successful : PlaceholderState.NoScores;
-                }));
-
-                if (getScoresRequest == null)
-                    return;
-
-                getScoresRequest.Failure += e => Schedule(() =>
-                {
-                    if (e is OperationCanceledException)
-                        return;
-
-                    PlaceholderState = PlaceholderState.NetworkFailure;
-                });
-
-                api.Queue(getScoresRequest);
-            });
+            Scheduler.Add(updateScoresDrawables, false);
         }
 
         /// <summary>
         /// Performs a fetch/refresh of scores to be displayed.
         /// </summary>
-        /// <param name="scoresCallback">A callback which should be called when fetching is completed. Scheduling is not required.</param>
+        /// <param name="cancellationToken"></param>
         /// <returns>An <see cref="APIRequest"/> responsible for the fetch operation. This will be queued and performed automatically.</returns>
-        protected abstract APIRequest FetchScores(Action<IEnumerable<ScoreInfo>> scoresCallback);
+        [CanBeNull]
+        protected abstract APIRequest FetchScores(CancellationToken cancellationToken);
 
-        private Placeholder currentPlaceholder;
+        protected abstract LeaderboardScore CreateDrawableScore(TScoreInfo model, int index);
 
-        private void replacePlaceholder(Placeholder placeholder)
+        protected abstract LeaderboardScore CreateDrawableTopScore(TScoreInfo model);
+
+        private void refetchScores()
         {
-            if (placeholder != null && placeholder.Equals(currentPlaceholder))
+            Debug.Assert(ThreadSafety.IsUpdateThread);
+
+            cancelPendingWork();
+            SetScores(null);
+
+            setState(LeaderboardState.Retrieving);
+
+            currentFetchCancellationSource = new CancellationTokenSource();
+
+            fetchScoresRequest = FetchScores(currentFetchCancellationSource.Token);
+
+            if (fetchScoresRequest == null)
                 return;
 
-            currentPlaceholder?.FadeOut(150, Easing.OutQuint).Expire();
-
-            if (placeholder == null)
+            fetchScoresRequest.Failure += e => Schedule(() =>
             {
-                currentPlaceholder = null;
+                if (e is OperationCanceledException || currentFetchCancellationSource.IsCancellationRequested)
+                    return;
+
+                SetErrorState(LeaderboardState.NetworkFailure);
+            });
+
+            api?.Queue(fetchScoresRequest);
+        }
+
+        private void cancelPendingWork()
+        {
+            currentFetchCancellationSource?.Cancel();
+            currentScoresAsyncLoadCancellationSource?.Cancel();
+            fetchScoresRequest?.Cancel();
+        }
+
+        private void updateScoresDrawables()
+        {
+            currentScoresAsyncLoadCancellationSource?.Cancel();
+
+            scoreFlowContainer?
+                .FadeOut(fade_duration, Easing.OutQuint)
+                .Expire();
+            scoreFlowContainer = null;
+
+            if (scores?.Any() != true)
+            {
+                setState(LeaderboardState.NoScores);
                 return;
             }
+
+            LoadComponentAsync(new FillFlowContainer<LeaderboardScore>
+            {
+                RelativeSizeAxes = Axes.X,
+                AutoSizeAxes = Axes.Y,
+                Spacing = new Vector2(0f, 5f),
+                Padding = new MarginPadding { Top = 10, Bottom = 5 },
+                ChildrenEnumerable = scores.Select((s, index) => CreateDrawableScore(s, index + 1))
+            }, newFlow =>
+            {
+                setState(LeaderboardState.Success);
+
+                scrollContainer.Add(scoreFlowContainer = newFlow);
+
+                double delay = 0;
+
+                foreach (var s in scoreFlowContainer.Children)
+                {
+                    using (s.BeginDelayedSequence(delay))
+                        s.Show();
+
+                    delay += 50;
+                }
+
+                scrollContainer.ScrollToStart(false);
+            }, (currentScoresAsyncLoadCancellationSource = new CancellationTokenSource()).Token);
+        }
+
+        #region Placeholder handling
+
+        private Placeholder placeholder;
+
+        private void setState(LeaderboardState state)
+        {
+            if (state == this.state)
+                return;
+
+            if (state == LeaderboardState.Retrieving)
+                loading.Show();
+            else
+                loading.Hide();
+
+            this.state = state;
+
+            placeholder?.FadeOut(150, Easing.OutQuint).Expire();
+
+            placeholder = getPlaceholderFor(state);
+
+            if (placeholder == null)
+                return;
 
             placeholderContainer.Child = placeholder;
 
             placeholder.ScaleTo(0.8f).Then().ScaleTo(1, fade_duration * 3, Easing.OutQuint);
             placeholder.FadeInFromZero(fade_duration, Easing.OutQuint);
-
-            currentPlaceholder = placeholder;
         }
 
-        protected virtual bool FadeBottom => true;
-        protected virtual bool FadeTop => false;
+        private Placeholder getPlaceholderFor(LeaderboardState state)
+        {
+            switch (state)
+            {
+                case LeaderboardState.NetworkFailure:
+                    return new ClickablePlaceholder(LeaderboardStrings.CouldntFetchScores, FontAwesome.Solid.Sync)
+                    {
+                        Action = RefetchScores
+                    };
+
+                case LeaderboardState.NoneSelected:
+                    return new MessagePlaceholder(LeaderboardStrings.PleaseSelectABeatmap);
+
+                case LeaderboardState.RulesetUnavailable:
+                    return new MessagePlaceholder(LeaderboardStrings.LeaderboardsAreNotAvailableForThisRuleset);
+
+                case LeaderboardState.BeatmapUnavailable:
+                    return new MessagePlaceholder(LeaderboardStrings.LeaderboardsAreNotAvailableForThisBeatmap);
+
+                case LeaderboardState.NoScores:
+                    return new MessagePlaceholder(LeaderboardStrings.NoRecordsYet);
+
+                case LeaderboardState.NotLoggedIn:
+                    return new LoginPlaceholder(LeaderboardStrings.PleaseSignInToViewOnlineLeaderboards);
+
+                case LeaderboardState.NotSupporter:
+                    return new MessagePlaceholder(LeaderboardStrings.PleaseInvestInAnOsuSupporterTagToViewThisLeaderboard);
+
+                case LeaderboardState.Retrieving:
+                    return null;
+
+                case LeaderboardState.Success:
+                    return null;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        #endregion
+
+        #region Fade handling
 
         protected override void UpdateAfterChildren()
         {
             base.UpdateAfterChildren();
 
-            var fadeBottom = scrollContainer.Current + scrollContainer.DrawHeight;
-            var fadeTop = scrollContainer.Current + LeaderboardScore.HEIGHT;
+            float fadeBottom = scrollContainer.Current + scrollContainer.DrawHeight;
+            float fadeTop = scrollContainer.Current + LeaderboardScore.HEIGHT;
 
             if (!scrollContainer.IsScrolledToEnd())
                 fadeBottom -= LeaderboardScore.HEIGHT;
 
-            if (scrollFlow == null)
+            if (scoreFlowContainer == null)
                 return;
 
-            foreach (var c in scrollFlow.Children)
+            foreach (var c in scoreFlowContainer.Children)
             {
-                var topY = c.ToSpaceOfOtherDrawable(Vector2.Zero, scrollFlow).Y;
-                var bottomY = topY + LeaderboardScore.HEIGHT;
+                float topY = c.ToSpaceOfOtherDrawable(Vector2.Zero, scoreFlowContainer).Y;
+                float bottomY = topY + LeaderboardScore.HEIGHT;
 
-                bool requireTopFade = FadeTop && topY <= fadeTop;
-                bool requireBottomFade = FadeBottom && bottomY >= fadeBottom;
+                bool requireBottomFade = bottomY >= fadeBottom;
 
-                if (!requireTopFade && !requireBottomFade)
+                if (!requireBottomFade)
                     c.Colour = Color4.White;
                 else if (topY > fadeBottom + LeaderboardScore.HEIGHT || bottomY < fadeTop - LeaderboardScore.HEIGHT)
                     c.Colour = Color4.Transparent;
                 else
                 {
-                    if (bottomY - fadeBottom > 0 && FadeBottom)
+                    if (bottomY - fadeBottom > 0)
+                    {
                         c.Colour = ColourInfo.GradientVertical(
                             Color4.White.Opacity(Math.Min(1 - (topY - fadeBottom) / LeaderboardScore.HEIGHT, 1)),
                             Color4.White.Opacity(Math.Min(1 - (bottomY - fadeBottom) / LeaderboardScore.HEIGHT, 1)));
-                    else if (FadeTop)
+                    }
+                    else
+                    {
                         c.Colour = ColourInfo.GradientVertical(
                             Color4.White.Opacity(Math.Min(1 - (fadeTop - topY) / LeaderboardScore.HEIGHT, 1)),
                             Color4.White.Opacity(Math.Min(1 - (fadeTop - bottomY) / LeaderboardScore.HEIGHT, 1)));
+                    }
                 }
             }
         }
 
-        protected abstract LeaderboardScore CreateDrawableScore(ScoreInfo model, int index);
+        #endregion
     }
 }

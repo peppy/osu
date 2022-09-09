@@ -1,14 +1,14 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
-using osu.Framework.MathUtils;
+using osu.Framework.Testing;
+using osu.Framework.Utils;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Notifications;
@@ -18,25 +18,18 @@ namespace osu.Game.Tests.Visual.UserInterface
     [TestFixture]
     public class TestSceneNotificationOverlay : OsuTestScene
     {
-        public override IReadOnlyList<Type> RequiredTypes => new[]
-        {
-            typeof(NotificationSection),
-            typeof(SimpleNotification),
-            typeof(ProgressNotification),
-            typeof(ProgressCompletionNotification),
-            typeof(IHasCompletionTarget),
-            typeof(Notification)
-        };
-
-        private NotificationOverlay notificationOverlay;
+        private NotificationOverlay notificationOverlay = null!;
 
         private readonly List<ProgressNotification> progressingNotifications = new List<ProgressNotification>();
 
-        private SpriteText displayedCount;
+        private SpriteText displayedCount = null!;
+
+        public double TimeToCompleteProgress { get; set; } = 2000;
 
         [SetUp]
         public void SetUp() => Schedule(() =>
         {
+            TimeToCompleteProgress = 2000;
             progressingNotifications.Clear();
 
             Content.Children = new Drawable[]
@@ -53,6 +46,95 @@ namespace osu.Game.Tests.Visual.UserInterface
         });
 
         [Test]
+        public void TestPresence()
+        {
+            AddAssert("tray not present", () => !notificationOverlay.ChildrenOfType<NotificationOverlayToastTray>().Single().IsPresent);
+            AddAssert("overlay not present", () => !notificationOverlay.IsPresent);
+
+            AddStep(@"post notification", sendBackgroundNotification);
+
+            AddUntilStep("wait tray not present", () => !notificationOverlay.ChildrenOfType<NotificationOverlayToastTray>().Single().IsPresent);
+            AddUntilStep("wait overlay not present", () => !notificationOverlay.IsPresent);
+        }
+
+        [Test]
+        public void TestPresenceWithManualDismiss()
+        {
+            AddAssert("tray not present", () => !notificationOverlay.ChildrenOfType<NotificationOverlayToastTray>().Single().IsPresent);
+            AddAssert("overlay not present", () => !notificationOverlay.IsPresent);
+
+            AddStep(@"post notification", sendBackgroundNotification);
+            AddStep("click notification", () => notificationOverlay.ChildrenOfType<Notification>().Single().TriggerClick());
+
+            AddUntilStep("wait tray not present", () => !notificationOverlay.ChildrenOfType<NotificationOverlayToastTray>().Single().IsPresent);
+            AddUntilStep("wait overlay not present", () => !notificationOverlay.IsPresent);
+        }
+
+        [Test]
+        public void TestCompleteProgress()
+        {
+            ProgressNotification notification = null!;
+
+            AddStep("add progress notification", () =>
+            {
+                notification = new ProgressNotification
+                {
+                    Text = @"Uploading to BSS...",
+                    CompletionText = "Uploaded to BSS!",
+                };
+                notificationOverlay.Post(notification);
+                progressingNotifications.Add(notification);
+            });
+
+            AddUntilStep("wait completion", () => notification.State == ProgressNotificationState.Completed);
+
+            AddAssert("Completion toast shown", () => notificationOverlay.ToastCount == 1);
+            AddUntilStep("wait forwarded", () => notificationOverlay.ToastCount == 0);
+        }
+
+        [Test]
+        public void TestCompleteProgressSlow()
+        {
+            ProgressNotification notification = null!;
+
+            AddStep("Set progress slow", () => TimeToCompleteProgress *= 2);
+            AddStep("add progress notification", () =>
+            {
+                notification = new ProgressNotification
+                {
+                    Text = @"Uploading to BSS...",
+                    CompletionText = "Uploaded to BSS!",
+                };
+                notificationOverlay.Post(notification);
+                progressingNotifications.Add(notification);
+            });
+
+            AddUntilStep("wait completion", () => notification.State == ProgressNotificationState.Completed);
+
+            AddAssert("Completion toast shown", () => notificationOverlay.ToastCount == 1);
+        }
+
+        [Test]
+        public void TestCancelProgress()
+        {
+            ProgressNotification notification = null!;
+            AddStep("add progress notification", () =>
+            {
+                notification = new ProgressNotification
+                {
+                    Text = @"Uploading to BSS...",
+                    CompletionText = "Uploaded to BSS!",
+                };
+                notificationOverlay.Post(notification);
+                progressingNotifications.Add(notification);
+            });
+
+            AddWaitStep("wait 3", 3);
+
+            AddStep("cancel notification", () => notification.State = ProgressNotificationState.Cancelled);
+        }
+
+        [Test]
         public void TestBasicFlow()
         {
             setState(Visibility.Visible);
@@ -67,9 +149,7 @@ namespace osu.Game.Tests.Visual.UserInterface
 
             AddRepeatStep(@"add many simple", sendManyNotifications, 3);
 
-            AddWaitStep("wait some", 5);
-
-            checkProgressingCount(0);
+            waitForCompletion();
 
             AddStep(@"progress #3", sendUploadProgress);
 
@@ -77,9 +157,7 @@ namespace osu.Game.Tests.Visual.UserInterface
 
             checkDisplayedCount(33);
 
-            AddWaitStep("wait some", 10);
-
-            checkProgressingCount(0);
+            waitForCompletion();
         }
 
         [Test]
@@ -87,7 +165,8 @@ namespace osu.Game.Tests.Visual.UserInterface
         {
             AddStep(@"simple #1", sendHelloNotification);
 
-            AddAssert("Is visible", () => notificationOverlay.State.Value == Visibility.Visible);
+            AddAssert("toast displayed", () => notificationOverlay.ToastCount == 1);
+            AddAssert("is not visible", () => notificationOverlay.State.Value == Visibility.Hidden);
 
             checkDisplayedCount(1);
 
@@ -109,15 +188,24 @@ namespace osu.Game.Tests.Visual.UserInterface
 
             AddStep(@"background progress #1", sendBackgroundUploadProgress);
 
-            AddWaitStep("wait some", 5);
+            checkProgressingCount(1);
 
-            checkProgressingCount(0);
+            waitForCompletion();
 
             checkDisplayedCount(2);
 
             AddStep(@"simple #1", sendHelloNotification);
 
             checkDisplayedCount(3);
+        }
+
+        [Test]
+        public void TestError()
+        {
+            setState(Visibility.Visible);
+            AddStep(@"error #1", sendErrorNotification);
+            AddAssert("Is visible", () => notificationOverlay.State.Value == Visibility.Visible);
+            checkDisplayedCount(1);
         }
 
         [Test]
@@ -144,14 +232,14 @@ namespace osu.Game.Tests.Visual.UserInterface
             foreach (var n in progressingNotifications.FindAll(n => n.State == ProgressNotificationState.Active))
             {
                 if (n.Progress < 1)
-                    n.Progress += (float)(Time.Elapsed / 400) * RNG.NextSingle();
+                    n.Progress += (float)(Time.Elapsed / TimeToCompleteProgress);
                 else
                     n.State = ProgressNotificationState.Completed;
             }
         }
 
         private void checkDisplayedCount(int expected) =>
-            AddAssert($"Displayed count is {expected}", () => notificationOverlay.UnreadCount.Value == expected);
+            AddUntilStep($"Displayed count is {expected}", () => notificationOverlay.UnreadCount.Value == expected);
 
         private void sendDownloadProgress()
         {
@@ -190,9 +278,11 @@ namespace osu.Game.Tests.Visual.UserInterface
 
         private void checkProgressingCount(int expected) => AddAssert($"progressing count is {expected}", () => progressingNotifications.Count == expected);
 
+        private void waitForCompletion() => AddUntilStep("wait for notification progress completion", () => progressingNotifications.Count == 0);
+
         private void sendBarrage()
         {
-            switch (RNG.Next(0, 4))
+            switch (RNG.Next(0, 5))
             {
                 case 0:
                     sendHelloNotification();
@@ -208,6 +298,10 @@ namespace osu.Game.Tests.Visual.UserInterface
 
                 case 3:
                     sendDownloadProgress();
+                    break;
+
+                case 4:
+                    sendErrorNotification();
                     break;
             }
         }
@@ -225,6 +319,11 @@ namespace osu.Game.Tests.Visual.UserInterface
         private void sendBackgroundNotification()
         {
             notificationOverlay.Post(new BackgroundNotification { Text = @"Welcome to osu!. Enjoy your stay!" });
+        }
+
+        private void sendErrorNotification()
+        {
+            notificationOverlay.Post(new SimpleErrorNotification { Text = @"Rut roh!. Something went wrong!" });
         }
 
         private void sendManyNotifications()

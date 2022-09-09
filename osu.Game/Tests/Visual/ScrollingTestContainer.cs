@@ -1,6 +1,8 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics.Containers;
@@ -30,6 +32,11 @@ namespace osu.Game.Tests.Visual
             set => scrollingInfo.TimeRange.Value = value;
         }
 
+        public ScrollingDirection Direction
+        {
+            set => scrollingInfo.Direction.Value = value;
+        }
+
         public IScrollingInfo ScrollingInfo => scrollingInfo;
 
         [Cached(Type = typeof(IScrollingInfo))]
@@ -42,19 +49,19 @@ namespace osu.Game.Tests.Visual
 
         public void Flip() => scrollingInfo.Direction.Value = scrollingInfo.Direction.Value == ScrollingDirection.Up ? ScrollingDirection.Down : ScrollingDirection.Up;
 
-        private class TestScrollingInfo : IScrollingInfo
+        public class TestScrollingInfo : IScrollingInfo
         {
             public readonly Bindable<ScrollingDirection> Direction = new Bindable<ScrollingDirection>();
             IBindable<ScrollingDirection> IScrollingInfo.Direction => Direction;
 
-            public readonly Bindable<double> TimeRange = new Bindable<double>(1000) { Value = 1000 };
+            public readonly Bindable<double> TimeRange = new BindableDouble(1000) { Value = 1000 };
             IBindable<double> IScrollingInfo.TimeRange => TimeRange;
 
             public readonly TestScrollAlgorithm Algorithm = new TestScrollAlgorithm();
             IScrollAlgorithm IScrollingInfo.Algorithm => Algorithm;
         }
 
-        private class TestScrollAlgorithm : IScrollAlgorithm
+        public class TestScrollAlgorithm : IScrollAlgorithm
         {
             public readonly SortedList<MultiplierControlPoint> ControlPoints = new SortedList<MultiplierControlPoint>();
 
@@ -86,8 +93,8 @@ namespace osu.Game.Tests.Visual
                 }
             }
 
-            public double GetDisplayStartTime(double time, double timeRange)
-                => implementation.GetDisplayStartTime(time, timeRange);
+            public double GetDisplayStartTime(double originTime, float offset, double timeRange, float scrollLength)
+                => implementation.GetDisplayStartTime(originTime, offset, timeRange, scrollLength);
 
             public float GetLength(double startTime, double endTime, double timeRange, float scrollLength)
                 => implementation.GetLength(startTime, endTime, timeRange, scrollLength);

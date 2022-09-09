@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Game.Configuration;
@@ -10,7 +12,10 @@ namespace osu.Game.Screens.Play.PlayerSettings
 {
     public class DiscussionSettings : PlayerSettingsGroup
     {
-        protected override string Title => @"discussions";
+        public DiscussionSettings()
+            : base("discussions")
+        {
+        }
 
         [BackgroundDependencyLoader]
         private void load(OsuConfigManager config)

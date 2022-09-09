@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,13 +11,11 @@ using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Sprites;
-using osu.Framework.Graphics.Textures;
+using osu.Framework.Graphics.Shapes;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Game.Graphics;
-using osu.Game.Graphics.Sprites;
-using osu.Game.Graphics.UserInterface;
+using osu.Game.Graphics.Containers;
 using osu.Game.Tournament.Components;
 using osu.Game.Tournament.Models;
 using osu.Game.Tournament.Screens.Drawings.Components;
@@ -24,13 +24,13 @@ using osuTK.Graphics;
 
 namespace osu.Game.Tournament.Screens.Drawings
 {
-    public class DrawingsScreen : CompositeDrawable
+    public class DrawingsScreen : TournamentScreen
     {
         private const string results_filename = "drawings_results.txt";
 
         private ScrollingTeamContainer teamsContainer;
         private GroupContainer groupsContainer;
-        private OsuSpriteText fullTeamNameText;
+        private TournamentSpriteText fullTeamNameText;
 
         private readonly List<TournamentTeam> allTeams = new List<TournamentTeam>();
 
@@ -43,17 +43,39 @@ namespace osu.Game.Tournament.Screens.Drawings
         public ITeamList TeamList;
 
         [BackgroundDependencyLoader]
-        private void load(TextureStore textures, Storage storage)
+        private void load(Storage storage)
         {
             RelativeSizeAxes = Axes.Both;
 
             this.storage = storage;
 
-            if (TeamList == null)
-                TeamList = new StorageBackedTeamList(storage);
+            TeamList ??= new StorageBackedTeamList(storage);
 
             if (!TeamList.Teams.Any())
             {
+                LinkFlowContainer links;
+
+                InternalChildren = new Drawable[]
+                {
+                    new Box
+                    {
+                        Colour = Color4.Black,
+                        RelativeSizeAxes = Axes.Both,
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        Height = 0.3f,
+                    },
+                    new WarningBox("No drawings.txt file found. Please create one and restart the client."),
+                    links = new LinkFlowContainer
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        Y = 60,
+                        AutoSizeAxes = Axes.Both
+                    }
+                };
+
+                links.AddLink("Click for details on the file format", "https://osu.ppy.sh/wiki/en/Tournament_Drawings", t => t.Colour = Color4.White);
                 return;
             }
 
@@ -67,11 +89,10 @@ namespace osu.Game.Tournament.Screens.Drawings
                     RelativeSizeAxes = Axes.Both,
                     Children = new Drawable[]
                     {
-                        new Sprite
+                        new TourneyVideo("drawings")
                         {
+                            Loop = true,
                             RelativeSizeAxes = Axes.Both,
-                            FillMode = FillMode.Fill,
-                            Texture = textures.Get(@"Backgrounds/Drawings/background.png")
                         },
                         // Visualiser
                         new VisualiserContainer
@@ -110,39 +131,39 @@ namespace osu.Game.Tournament.Screens.Drawings
                             RelativeSizeAxes = Axes.X,
                         },
                         // Scrolling team name
-                        fullTeamNameText = new OsuSpriteText
+                        fullTeamNameText = new TournamentSpriteText
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.TopCentre,
 
                             Position = new Vector2(0, 45f),
 
-                            Colour = OsuColour.Gray(0.33f),
+                            Colour = OsuColour.Gray(0.95f),
 
                             Alpha = 0,
 
-                            Font = OsuFont.GetFont(weight: FontWeight.Light, size: 42),
+                            Font = OsuFont.Torus.With(weight: FontWeight.Light, size: 42),
                         }
                     }
                 },
                 // Control panel container
                 new ControlPanel
                 {
-                    new OsuButton
+                    new TourneyButton
                     {
                         RelativeSizeAxes = Axes.X,
 
                         Text = "Begin random",
                         Action = teamsContainer.StartScrolling,
                     },
-                    new OsuButton
+                    new TourneyButton
                     {
                         RelativeSizeAxes = Axes.X,
 
                         Text = "Stop random",
                         Action = teamsContainer.StopScrolling,
                     },
-                    new OsuButton
+                    new TourneyButton
                     {
                         RelativeSizeAxes = Axes.X,
 
@@ -150,7 +171,7 @@ namespace osu.Game.Tournament.Screens.Drawings
                         Action = reloadTeams
                     },
                     new ControlPanel.Spacer(),
-                    new OsuButton
+                    new TourneyButton
                     {
                         RelativeSizeAxes = Axes.X,
 
@@ -183,7 +204,7 @@ namespace osu.Game.Tournament.Screens.Drawings
                 try
                 {
                     // Write to drawings_results
-                    using (Stream stream = storage.GetStream(results_filename, FileAccess.Write, FileMode.Create))
+                    using (Stream stream = storage.CreateFileSafely(results_filename))
                     using (StreamWriter sw = new StreamWriter(stream))
                     {
                         sw.Write(text);
@@ -195,7 +216,7 @@ namespace osu.Game.Tournament.Screens.Drawings
                 }
             }
 
-            writeOp = writeOp?.ContinueWith(t => { writeAction(); }) ?? Task.Run((Action)writeAction);
+            writeOp = writeOp?.ContinueWith(_ => { writeAction(); }) ?? Task.Run(writeAction);
         }
 
         private void reloadTeams()
@@ -237,7 +258,7 @@ namespace osu.Game.Tournament.Screens.Drawings
                             if (string.IsNullOrEmpty(line))
                                 continue;
 
-                            if (line.ToUpperInvariant().StartsWith("GROUP"))
+                            if (line.ToUpperInvariant().StartsWith("GROUP", StringComparison.Ordinal))
                                 continue;
 
                             // ReSharper disable once AccessToModifiedClosure
