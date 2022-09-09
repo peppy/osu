@@ -31,7 +31,7 @@ namespace osu.Game.Screens.OnlinePlay.Match.Components
             }, true);
         }
 
-        protected override bool IsOnlineScope => true;
+        public override bool IsOnlineScope => true;
 
         protected override APIRequest FetchScores(CancellationToken cancellationToken)
         {

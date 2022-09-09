@@ -95,7 +95,7 @@ namespace osu.Game.Screens.Select.Leaderboards
             };
         }
 
-        protected override bool IsOnlineScope => Scope != BeatmapLeaderboardScope.Local;
+        public override bool IsOnlineScope => Scope != BeatmapLeaderboardScope.Local;
 
         protected override APIRequest FetchScores(CancellationToken cancellationToken)
         {
