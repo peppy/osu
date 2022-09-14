@@ -131,6 +131,12 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders.Components
         // The connecting path is excluded from positional input
         public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => marker.ReceivePositionalInputAt(screenSpacePos);
 
+        protected override void Dispose(bool isDisposing)
+        {
+            base.Dispose(isDisposing);
+            ControlPoint.Changed -= updateMarkerDisplay;
+        }
+
         protected override bool OnHover(HoverEvent e)
         {
             updateMarkerDisplay();
