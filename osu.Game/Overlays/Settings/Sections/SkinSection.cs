@@ -35,6 +35,9 @@ namespace osu.Game.Overlays.Settings.Sections
             Icon = FontAwesome.Solid.PaintBrush
         };
 
+        private readonly Bindable<Live<SkinInfo>> dropdownBindable = new Bindable<Live<SkinInfo>> { Default = DefaultSkinTriangles.CreateInfo().ToLiveUnmanaged() };
+        private readonly Bindable<string> configBindable = new Bindable<string>();
+
         private static readonly Live<SkinInfo> random_skin_info = new SkinInfo
         {
             ID = SkinInfo.RANDOM_SKIN,
