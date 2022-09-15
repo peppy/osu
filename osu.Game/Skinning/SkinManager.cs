@@ -49,19 +49,21 @@ namespace osu.Game.Skinning
 
         public readonly Bindable<Skin> CurrentSkin = new Bindable<Skin>();
 
-        public readonly Bindable<Live<SkinInfo>> CurrentSkinInfo = new Bindable<Live<SkinInfo>>(Skinning.DefaultSkinTriangles.CreateInfo().ToLiveUnmanaged())
-        {
-            Default = Skinning.DefaultSkinTriangles.CreateInfo().ToLiveUnmanaged()
-        };
+        public readonly Bindable<Live<SkinInfo>> CurrentSkinInfo = new Bindable<Live<SkinInfo>>(DefaultSkinArgon.CreateInfo().ToLiveUnmanaged());
 
         private readonly SkinImporter skinImporter;
 
         private readonly IResourceStore<byte[]> userFiles;
 
         /// <summary>
-        /// The default skin.
+        /// The default skin (latest).
         /// </summary>
-        public Skin DefaultSkinTriangles { get; }
+        private Skin defaultSkinArgon { get; }
+
+        /// <summary>
+        /// The default skin (old).
+        /// </summary>
+        private Skin defaultSkinTriangles { get; }
 
         /// <summary>
         /// The default legacy skin.
@@ -86,7 +88,8 @@ namespace osu.Game.Skinning
             var defaultSkins = new[]
             {
                 DefaultLegacySkin = new DefaultLegacySkin(this),
-                DefaultSkinTriangles = new DefaultSkinTriangles(this),
+                defaultSkinTriangles = new DefaultSkinTriangles(this),
+                defaultSkinArgon = new DefaultSkinArgon(this),
             };
 
             // Ensure the default entries are present.
@@ -104,7 +107,7 @@ namespace osu.Game.Skinning
                 CurrentSkin.Value = skin.NewValue.PerformRead(GetSkin);
             };
 
-            CurrentSkin.Value = DefaultSkinTriangles;
+            CurrentSkin.Value = defaultSkinArgon;
             CurrentSkin.ValueChanged += skin =>
             {
                 if (!skin.NewValue.SkinInfo.Equals(CurrentSkinInfo.Value))
@@ -125,7 +128,7 @@ namespace osu.Game.Skinning
 
                 if (randomChoices.Length == 0)
                 {
-                    CurrentSkinInfo.Value = Skinning.DefaultSkinTriangles.CreateInfo().ToLiveUnmanaged();
+                    CurrentSkinInfo.Value = DefaultSkinArgon.CreateInfo().ToLiveUnmanaged();
                     return;
                 }
 
@@ -232,8 +235,9 @@ namespace osu.Game.Skinning
                 if (CurrentSkin.Value is LegacySkin && CurrentSkin.Value != DefaultLegacySkin)
                     yield return DefaultLegacySkin;
 
-                if (CurrentSkin.Value != DefaultSkinTriangles)
-                    yield return DefaultSkinTriangles;
+                // TODO: check whether this is required.
+                if (CurrentSkin.Value != defaultSkinTriangles)
+                    yield return defaultSkinTriangles;
             }
         }
 
@@ -294,7 +298,7 @@ namespace osu.Game.Skinning
                 Guid currentUserSkin = CurrentSkinInfo.Value.ID;
 
                 if (items.Any(s => s.ID == currentUserSkin))
-                    scheduler.Add(() => CurrentSkinInfo.Value = Skinning.DefaultSkinTriangles.CreateInfo().ToLiveUnmanaged());
+                    scheduler.Add(() => CurrentSkinInfo.Value = DefaultSkinArgon.CreateInfo().ToLiveUnmanaged());
 
                 Delete(items.ToList(), silent);
             });

@@ -113,6 +113,7 @@ namespace osu.Game.Skinning
                 // Temporarily used to exclude undesirable ISkin implementations
                 static bool isUserSkin(ISkin skin)
                     => skin.GetType() == typeof(DefaultSkinTriangles)
+                       || skin.GetType() == typeof(DefaultSkinArgon)
                        || skin.GetType() == typeof(DefaultLegacySkin)
                        || skin.GetType() == typeof(LegacySkin);
             }
