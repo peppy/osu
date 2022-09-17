@@ -25,10 +25,10 @@ namespace osu.Game.Rulesets.Osu.Tests
         [Test]
         public void TestHits()
         {
+            AddStep("Hit Big Stream", () => SetContents(_ => testStream(2, true)));
             AddStep("Hit Big Single", () => SetContents(_ => testSingle(2, true)));
             AddStep("Hit Medium Single", () => SetContents(_ => testSingle(5, true)));
             AddStep("Hit Small Single", () => SetContents(_ => testSingle(7, true)));
-            AddStep("Hit Big Stream", () => SetContents(_ => testStream(2, true)));
             AddStep("Hit Medium Stream", () => SetContents(_ => testStream(5, true)));
             AddStep("Hit Small Stream", () => SetContents(_ => testStream(7, true)));
         }
@@ -60,8 +60,8 @@ namespace osu.Game.Rulesets.Osu.Tests
         {
             var playfield = new TestOsuPlayfield();
 
-            for (double t = timeOffset; t < timeOffset + 60000; t += 2000)
-                playfield.Add(createSingle(circleSize, auto, t, positionOffset));
+            for (int i = 1; i < 20; i++)
+                playfield.Add(createSingle(circleSize, auto, i * 100, i * new Vector2(5)));
 
             return playfield;
         }
@@ -88,7 +88,7 @@ namespace osu.Game.Rulesets.Osu.Tests
             var circle = new HitCircle
             {
                 StartTime = Time.Current + 1000 + timeOffset,
-                Position = OsuPlayfield.BASE_SIZE / 4 + positionOffset.Value,
+                Position = OsuPlayfield.BASE_SIZE / 2 + positionOffset.Value,
             };
 
             circle.ApplyDefaults(new ControlPointInfo(), new BeatmapDifficulty { CircleSize = circleSize });

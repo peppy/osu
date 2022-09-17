@@ -5,7 +5,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
@@ -29,32 +28,20 @@ namespace osu.Game.Tests.Visual
 {
     public abstract class SkinnableTestScene : OsuGridTestScene, IStorageResourceProvider
     {
-        private Skin metricsSkin;
-        private Skin defaultClassic;
-        private Skin defaultTriangles;
         private Skin defaultArgon;
-        private Skin specialSkin;
-        private Skin oldSkin;
 
         [Resolved]
         private GameHost host { get; set; }
 
         protected SkinnableTestScene()
-            : base(2, 3)
+            : base(1, 1)
         {
         }
 
         [BackgroundDependencyLoader]
         private void load()
         {
-            var dllStore = new DllResourceStore(GetType().Assembly);
-
-            metricsSkin = new TestLegacySkin(new SkinInfo { Name = "metrics-skin" }, new NamespacedResourceStore<byte[]>(dllStore, "Resources/metrics_skin"), this, true);
-            defaultClassic = new DefaultLegacySkin(this);
-            defaultTriangles = new DefaultSkinTriangles(this);
             defaultArgon = new DefaultSkinArgon(this);
-            specialSkin = new TestLegacySkin(new SkinInfo { Name = "special-skin" }, new NamespacedResourceStore<byte[]>(dllStore, "Resources/special_skin"), this, true);
-            oldSkin = new TestLegacySkin(new SkinInfo { Name = "old-skin" }, new NamespacedResourceStore<byte[]>(dllStore, "Resources/old_skin"), this, true);
         }
 
         private readonly List<Drawable> createdDrawables = new List<Drawable>();
@@ -65,12 +52,7 @@ namespace osu.Game.Tests.Visual
 
             var beatmap = CreateBeatmapForSkinProvider();
 
-            Cell(0).Child = createProvider(defaultTriangles, creationFunction, beatmap);
-            Cell(1).Child = createProvider(defaultArgon, creationFunction, beatmap);
-            Cell(2).Child = createProvider(metricsSkin, creationFunction, beatmap);
-            Cell(3).Child = createProvider(defaultClassic, creationFunction, beatmap);
-            Cell(4).Child = createProvider(specialSkin, creationFunction, beatmap);
-            Cell(5).Child = createProvider(oldSkin, creationFunction, beatmap);
+            Cell(0).Child = createProvider(defaultArgon, creationFunction, beatmap);
         }
 
         protected IEnumerable<Drawable> CreatedDrawables => createdDrawables;
@@ -186,36 +168,6 @@ namespace osu.Game.Tests.Visual
                     Colour = Color4.Brown,
                     AlwaysPresent = true
                 };
-            }
-        }
-
-        private class TestLegacySkin : LegacySkin
-        {
-            private readonly bool extrapolateAnimations;
-
-            public TestLegacySkin(SkinInfo skin, IResourceStore<byte[]> storage, IStorageResourceProvider resources, bool extrapolateAnimations)
-                : base(skin, resources, storage)
-            {
-                this.extrapolateAnimations = extrapolateAnimations;
-            }
-
-            public override Texture GetTexture(string componentName, WrapMode wrapModeS, WrapMode wrapModeT)
-            {
-                var lookup = base.GetTexture(componentName, wrapModeS, wrapModeT);
-
-                if (lookup != null)
-                    return lookup;
-
-                // extrapolate frames to test longer animations
-                if (extrapolateAnimations)
-                {
-                    var match = Regex.Match(componentName, "-([0-9]*)");
-
-                    if (match.Length > 0 && int.TryParse(match.Groups[1].Value, out int number) && number < 60)
-                        return base.GetTexture(componentName.Replace($"-{number}", $"-{number % 2}"), wrapModeS, wrapModeT);
-                }
-
-                return null;
             }
         }
     }
