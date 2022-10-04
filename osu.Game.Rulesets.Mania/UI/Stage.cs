@@ -3,8 +3,10 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Pooling;
@@ -28,6 +30,9 @@ namespace osu.Game.Rulesets.Mania.UI
     /// </summary>
     public class Stage : ScrollingPlayfield
     {
+        [Cached]
+        public readonly StageDefinition Definition;
+
         public const float COLUMN_SPACING = 1;
 
         public const float HIT_TARGET_POSITION = 110;
@@ -40,12 +45,9 @@ namespace osu.Game.Rulesets.Mania.UI
 
         private readonly Drawable barLineContainer;
 
-        private readonly Dictionary<ColumnType, Color4> columnColours = new Dictionary<ColumnType, Color4>
-        {
-            { ColumnType.Even, new Color4(6, 84, 0, 255) },
-            { ColumnType.Odd, new Color4(94, 0, 57, 255) },
-            { ColumnType.Special, new Color4(0, 48, 63, 255) }
-        };
+        private readonly Color4 colourEven = new Color4(6, 84, 0, 255);
+        private readonly Color4 colourOdd = new Color4(94, 0, 57, 255);
+        private readonly Color4 colourSpecial = new Color4(0, 48, 63, 255);
 
         public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => Columns.Any(c => c.ReceivePositionalInputAt(screenSpacePos));
 
@@ -54,6 +56,7 @@ namespace osu.Game.Rulesets.Mania.UI
         public Stage(int firstColumnIndex, StageDefinition definition, ref ManiaAction normalColumnStartAction, ref ManiaAction specialColumnStartAction)
         {
             this.firstColumnIndex = firstColumnIndex;
+            Definition = definition;
 
             Name = "Stage";
 
@@ -118,14 +121,24 @@ namespace osu.Game.Rulesets.Mania.UI
 
             for (int i = 0; i < definition.Columns; i++)
             {
-                var columnType = definition.GetTypeOfColumn(i);
+                bool isSpecial = definition.IsSpecialColumn(i);
 
-                var column = new Column(firstColumnIndex + i, columnType)
+                Color4 colour;
+
+                if (isSpecial)
+                    colour = colourSpecial;
+                else
+                {
+                    int distanceToEdge = Math.Min(i, (definition.Columns - 1) - i);
+                    colour = distanceToEdge % 2 == 0 ? colourOdd : colourEven;
+                }
+
+                var column = new Column(firstColumnIndex + i, isSpecial)
                 {
                     RelativeSizeAxes = Axes.Both,
-                    AccentColour = columnColours[columnType],
-                    Action = { Value = columnType == ColumnType.Special ? specialColumnStartAction++ : normalColumnStartAction++ }
                     Width = 1,
+                    AccentColour = colour,
+                    Action = { Value = isSpecial ? specialColumnStartAction++ : normalColumnStartAction++ }
                 };
 
                 topLevelContainer.Add(column.TopLevelContainer.CreateProxy());
