@@ -26,6 +26,7 @@ using osu.Game.Rulesets.Mania.Edit.Setup;
 using osu.Game.Rulesets.Mania.Mods;
 using osu.Game.Rulesets.Mania.Replays;
 using osu.Game.Rulesets.Mania.Scoring;
+using osu.Game.Rulesets.Mania.Skinning.Default;
 using osu.Game.Rulesets.Mania.Skinning.Legacy;
 using osu.Game.Rulesets.Mania.UI;
 using osu.Game.Rulesets.Mods;
@@ -66,6 +67,9 @@ namespace osu.Game.Rulesets.Mania
         {
             switch (skin)
             {
+                case TrianglesSkin:
+                    return new ManiaTrianglesSkinTransformer(skin);
+
                 case LegacySkin:
                     return new ManiaLegacySkinTransformer(skin, beatmap);
             }
