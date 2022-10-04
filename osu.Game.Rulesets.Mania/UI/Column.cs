@@ -13,12 +13,12 @@ using osu.Framework.Graphics.Pooling;
 using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
 using osu.Game.Rulesets.Judgements;
+using osu.Game.Rulesets.Mania.Objects;
+using osu.Game.Rulesets.Mania.Objects.Drawables;
 using osu.Game.Rulesets.Mania.UI.Components;
 using osu.Game.Rulesets.UI.Scrolling;
 using osu.Game.Skinning;
 using osuTK;
-using osu.Game.Rulesets.Mania.Objects;
-using osu.Game.Rulesets.Mania.Objects.Drawables;
 using osu.Game.Rulesets.UI;
 
 namespace osu.Game.Rulesets.Mania.UI
