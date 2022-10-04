@@ -19,8 +19,6 @@ namespace osu.Game.Rulesets.Mania.Skinning.Legacy
 {
     public class ManiaLegacySkinTransformer : LegacySkinTransformer
     {
-        private readonly ManiaBeatmap beatmap;
-
         /// <summary>
         /// Mapping of <see cref="HitResult"/> to their corresponding
         /// <see cref="LegacyManiaSkinConfigurationLookups"/> value.
@@ -59,6 +57,8 @@ namespace osu.Game.Rulesets.Mania.Skinning.Legacy
         /// </summary>
         private readonly Lazy<bool> hasKeyTexture;
 
+        private readonly ManiaBeatmap beatmap;
+
         public ManiaLegacySkinTransformer(ISkin skin, IBeatmap beatmap)
             : base(skin)
         {
@@ -67,7 +67,7 @@ namespace osu.Game.Rulesets.Mania.Skinning.Legacy
             isLegacySkin = new Lazy<bool>(() => GetConfig<SkinConfiguration.LegacySetting, decimal>(SkinConfiguration.LegacySetting.Version) != null);
             hasKeyTexture = new Lazy<bool>(() =>
             {
-                string keyImage = this.GetManiaSkinConfig<string>(LegacyManiaSkinConfigurationLookups.KeyImage, new StageDefinition(), 0)?.Value ?? "mania-key1";
+                string keyImage = this.GetManiaSkinConfig<string>(LegacyManiaSkinConfigurationLookups.KeyImage, new StageDefinition { Columns = 1 }, 0)?.Value ?? "mania-key1";
                 return this.GetAnimation(keyImage, true, true) != null;
             });
         }
