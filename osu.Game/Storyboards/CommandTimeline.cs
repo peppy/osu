@@ -54,6 +54,9 @@ namespace osu.Game.Storyboards
             public double EndTime { get; set; }
             public double Duration => EndTime - StartTime;
 
+            public double LoopDelay;
+            public int LoopCount;
+
             public T StartValue;
             public T EndValue;
 

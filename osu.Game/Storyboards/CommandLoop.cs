@@ -33,14 +33,22 @@ namespace osu.Game.Storyboards
             TotalIterations = repeatCount + 1;
         }
 
+        // TODO: remove offset?
         public override IEnumerable<CommandTimeline<T>.TypedCommand> GetCommands<T>(CommandTimelineSelector<T> timelineSelector, double offset = 0)
         {
-            for (int loop = 0; loop < TotalIterations; loop++)
+            foreach (var command in base.GetCommands(timelineSelector, offset))
             {
-                double loopOffset = LoopStartTime + loop * CommandsDuration;
-                foreach (var command in base.GetCommands(timelineSelector, offset + loopOffset))
-                    yield return command;
+                command.LoopCount = TotalIterations;
+                command.LoopDelay = CommandsDuration - command.Duration;
+                yield return command;
             }
+            //
+            // for (int loop = 0; loop < TotalIterations; loop++)
+            // {
+            //     double loopOffset = LoopStartTime + loop * CommandsDuration;
+            //     foreach (var command in base.GetCommands(timelineSelector, offset + loopOffset))
+            //         yield return command;
+            // }
         }
 
         public override string ToString()

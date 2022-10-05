@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Transforms;
 using osu.Game.Storyboards.Drawables;
 using osuTK;
 
@@ -88,7 +89,7 @@ namespace osu.Game.Storyboards
 
         private delegate void DrawablePropertyInitializer<in T>(Drawable drawable, T value);
 
-        private delegate void DrawableTransformer<in T>(Drawable drawable, T value, double duration, Easing easing);
+        private delegate TransformSequence<Drawable> DrawableTransformer<in T>(TransformSequence<Drawable> drawable, T value, double duration, Easing easing);
 
         public StoryboardSprite(string path, Anchor origin, Vector2 initialPosition)
         {
@@ -128,22 +129,22 @@ namespace osu.Game.Storyboards
             generateCommands(generated, getCommands(g => g.Rotation, triggeredGroups), (d, value) => d.Rotation = value, (d, value, duration, easing) => d.RotateTo(value, duration, easing));
             generateCommands(generated, getCommands(g => g.Colour, triggeredGroups), (d, value) => d.Colour = value, (d, value, duration, easing) => d.FadeColour(value, duration, easing));
             generateCommands(generated, getCommands(g => g.Alpha, triggeredGroups), (d, value) => d.Alpha = value, (d, value, duration, easing) => d.FadeTo(value, duration, easing));
-            generateCommands(generated, getCommands(g => g.BlendingParameters, triggeredGroups), (d, value) => d.Blending = value, (d, value, duration, _) => d.TransformBlendingMode(value, duration),
-                false);
+            //generateCommands(generated, getCommands(g => g.BlendingParameters, triggeredGroups), (d, value) => d.Blending = value, (d, value, duration, _) => d.TransformBlendingMode(value, duration),
+                // false);
 
-            if (drawable is IVectorScalable vectorScalable)
-            {
-                generateCommands(generated, getCommands(g => g.VectorScale, triggeredGroups), (_, value) => vectorScalable.VectorScale = value,
-                    (_, value, duration, easing) => vectorScalable.VectorScaleTo(value, duration, easing));
-            }
-
-            if (drawable is IFlippable flippable)
-            {
-                generateCommands(generated, getCommands(g => g.FlipH, triggeredGroups), (_, value) => flippable.FlipH = value, (_, value, duration, _) => flippable.TransformFlipH(value, duration),
-                    false);
-                generateCommands(generated, getCommands(g => g.FlipV, triggeredGroups), (_, value) => flippable.FlipV = value, (_, value, duration, _) => flippable.TransformFlipV(value, duration),
-                    false);
-            }
+            // if (drawable is IVectorScalable vectorScalable)
+            // {
+            //     generateCommands(generated, getCommands(g => g.VectorScale, triggeredGroups), (_, value) => vectorScalable.VectorScale = value,
+            //         (_, value, duration, easing) => vectorScalable.VectorScaleTo(value, duration, easing));
+            // }
+            //
+            // if (drawable is IFlippable flippable)
+            // {
+            //     generateCommands(generated, getCommands(g => g.FlipH, triggeredGroups), (_, value) => flippable.FlipH = value, (_, value, duration, _) => flippable.TransformFlipH(value, duration),
+            //         false);
+            //     generateCommands(generated, getCommands(g => g.FlipV, triggeredGroups), (_, value) => flippable.FlipV = value, (_, value, duration, _) => flippable.TransformFlipV(value, duration),
+            //         false);
+            // }
 
             foreach (var command in generated.OrderBy(g => g.StartTime))
                 command.ApplyTo(drawable);
@@ -215,8 +216,14 @@ namespace osu.Game.Storyboards
 
                 using (drawable.BeginAbsoluteSequence(command.StartTime))
                 {
-                    transform(drawable, command.StartValue, 0, Easing.None);
-                    transform(drawable, command.EndValue, command.Duration, command.Easing);
+                    // delay is pointless, but i want a sequence.
+                    var sequence = drawable.Delay(0);
+
+                    sequence = transform(sequence, command.StartValue, 0, Easing.None);
+                    sequence = transform(sequence, command.EndValue, command.Duration, command.Easing);
+
+                    if (command.LoopCount > 0)
+                        sequence.Loop(command.LoopDelay, command.LoopCount);
                 }
             }
         }
