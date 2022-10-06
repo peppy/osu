@@ -68,7 +68,7 @@ namespace osu.Game.Rulesets.Mania
             switch (skin)
             {
                 case TrianglesSkin:
-                    return new ManiaTrianglesSkinTransformer(skin);
+                    return new ManiaTrianglesSkinTransformer(skin, beatmap);
 
                 case DefaultLegacySkin:
                     return new ManiaClassicSkinTransformer(skin, beatmap);

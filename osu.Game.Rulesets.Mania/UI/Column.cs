@@ -68,9 +68,6 @@ namespace osu.Game.Rulesets.Mania.UI
         [Resolved]
         private ISkinSource skin { get; set; }
 
-        [Resolved]
-        private StageDefinition stageDefinition { get; set; }
-
         [BackgroundDependencyLoader]
         private void load()
         {
@@ -116,7 +113,7 @@ namespace osu.Game.Rulesets.Mania.UI
 
         private void onSourceChanged()
         {
-            AccentColour.Value = skin.GetManiaSkinConfig<Color4>(LegacyManiaSkinConfigurationLookups.ColumnBackgroundColour, stageDefinition, Index)?.Value ?? Color4.Black;
+            AccentColour.Value = skin.GetManiaSkinConfig<Color4>(LegacyManiaSkinConfigurationLookups.ColumnBackgroundColour, Index)?.Value ?? Color4.Black;
         }
 
         protected override void LoadComplete()

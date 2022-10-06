@@ -60,5 +60,10 @@ namespace osu.Game.Rulesets.Mania.Beatmaps
                 },
             };
         }
+
+        public void GetStageForColumnIndex(int column)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
