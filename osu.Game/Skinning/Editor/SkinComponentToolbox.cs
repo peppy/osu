@@ -22,12 +22,12 @@ namespace osu.Game.Skinning.Editor
     {
         public Action<Type>? RequestPlacement;
 
-        private readonly CompositeDrawable? target;
+        private readonly ISkinnableTarget? target;
 
         private FillFlowContainer fill = null!;
 
-        public SkinComponentToolbox(CompositeDrawable? target = null)
-            : base("Components")
+        public SkinComponentToolbox(ISkinnableTarget? target = null)
+            : base(target == null ? "Components" : target.Ruleset == null ? $"Components for {target.Target}" : $"Components for {target.Target} ({target.Ruleset.Description})")
         {
             this.target = target;
         }
@@ -50,7 +50,7 @@ namespace osu.Game.Skinning.Editor
         {
             fill.Clear();
 
-            var skinnableTypes = SkinnableInfo.GetAllAvailableDrawables();
+            var skinnableTypes = SkinnableInfo.GetAllAvailableDrawables(target?.Ruleset);
             foreach (var type in skinnableTypes)
                 attemptAddComponent(type);
         }
@@ -65,7 +65,7 @@ namespace osu.Game.Skinning.Editor
 
                 if (!((ISkinnableDrawable)instance).IsEditable) return;
 
-                fill.Add(new ToolboxComponentButton(instance, target)
+                fill.Add(new ToolboxComponentButton(instance, target as CompositeDrawable)
                 {
                     RequestPlacement = t => RequestPlacement?.Invoke(t)
                 });
