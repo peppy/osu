@@ -244,7 +244,7 @@ namespace osu.Game.Skinning
                 }
 
                 // Then serialise each of the drawable component groups into respective files.
-                foreach (var drawableInfo in skin.DrawableComponentInfo)
+                foreach (var drawableInfo in skin.TargetInfo)
                 {
                     string json = JsonConvert.SerializeObject(drawableInfo.Value, new JsonSerializerSettings { Formatting = Formatting.Indented });
 
