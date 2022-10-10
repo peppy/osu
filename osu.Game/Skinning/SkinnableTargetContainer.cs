@@ -1,21 +1,21 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#nullable disable
-
 using System;
 using System.Linq;
 using System.Threading;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Game.Rulesets;
 
 namespace osu.Game.Skinning
 {
     public class SkinnableTargetContainer : SkinReloadableDrawable, ISkinnableTarget
     {
-        private SkinnableTargetComponentsContainer content;
+        private SkinnableTargetComponentsContainer? content;
 
         public SkinnableTarget Target { get; }
+        public Ruleset? Ruleset { get; }
 
         public IBindableList<ISkinnableDrawable> Components => components;
 
@@ -25,11 +25,12 @@ namespace osu.Game.Skinning
 
         public bool ComponentsLoaded { get; private set; }
 
-        private CancellationTokenSource cancellationSource;
+        private CancellationTokenSource? cancellationSource;
 
-        public SkinnableTargetContainer(SkinnableTarget target)
+        public SkinnableTargetContainer(SkinnableTarget target, Ruleset? ruleset = null)
         {
             Target = target;
+            Ruleset = ruleset;
         }
 
         /// <summary>
@@ -41,7 +42,7 @@ namespace osu.Game.Skinning
             components.Clear();
             ComponentsLoaded = false;
 
-            content = CurrentSkin.GetDrawableComponent(new SkinnableTargetComponent(Target)) as SkinnableTargetComponentsContainer;
+            content = CurrentSkin.GetDrawableComponent(new SkinnableTargetComponent(Target, Ruleset)) as SkinnableTargetComponentsContainer;
 
             cancellationSource?.Cancel();
             cancellationSource = null;
