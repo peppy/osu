@@ -8,6 +8,12 @@ namespace osu.Game.Skinning
     public enum SkinnableTarget
     {
         MainHUDComponents,
+        RulesetHUDComponents,
         SongSelect
+    }
+
+    public static class SkinnableTargetExtensions
+    {
+        public static bool RequiresRuleset(this SkinnableTarget target) => target == SkinnableTarget.RulesetHUDComponents;
     }
 }

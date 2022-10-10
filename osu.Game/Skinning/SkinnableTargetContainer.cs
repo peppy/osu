@@ -29,6 +29,9 @@ namespace osu.Game.Skinning
 
         public SkinnableTargetContainer(SkinnableTarget target, Ruleset? ruleset = null)
         {
+            if (ruleset == null && target.RequiresRuleset())
+                throw new InvalidOperationException($"Attempting to create a container for target \"{target}\" without any ruleset provided.");
+
             Target = target;
             Ruleset = ruleset;
         }
