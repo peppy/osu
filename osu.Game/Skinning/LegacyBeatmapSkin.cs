@@ -5,6 +5,7 @@ using osu.Framework.Audio.Sample;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Textures;
 using osu.Framework.IO.Stores;
 using osu.Game.Audio;
 using osu.Game.Beatmaps;
@@ -22,6 +23,10 @@ namespace osu.Game.Skinning
         protected override bool AllowManiaSkin => false;
         protected override bool UseCustomSampleBanks => true;
 
+        private bool successfullyProvidedResources;
+
+        private readonly DefaultLegacySkin defaultLegacy;
+
         /// <summary>
         /// Construct a new legacy beatmap skin instance.
         /// </summary>
@@ -32,6 +37,8 @@ namespace osu.Game.Skinning
         {
             // Disallow default colours fallback on beatmap skins to allow using parent skin combo colours. (via SkinProvidingContainer)
             Configuration.AllowDefaultComboColoursFallback = false;
+
+            defaultLegacy = new DefaultLegacySkin(resources);
         }
 
         private static IResourceStore<byte[]> createRealmBackedStore(BeatmapInfo beatmapInfo, IStorageResourceProvider? resources)
@@ -59,7 +66,38 @@ namespace osu.Game.Skinning
                 }
             }
 
-            return base.GetDrawableComponent(component);
+            var drawableComponent = base.GetDrawableComponent(component);
+
+            if (drawableComponent != null)
+            {
+                successfullyProvidedResources = true;
+                return drawableComponent;
+            }
+
+            // If we ever provided a resource successfully, we should also allow falling back to the default skin in case
+            // the beatmap skin is missing some pieces.
+            if (successfullyProvidedResources)
+                return defaultLegacy.GetDrawableComponent(component);
+
+            return null;
+        }
+
+        public override Texture? GetTexture(string componentName, WrapMode wrapModeS, WrapMode wrapModeT)
+        {
+            var texture = base.GetTexture(componentName, wrapModeS, wrapModeT);
+
+            if (texture != null)
+            {
+                successfullyProvidedResources = true;
+                return texture;
+            }
+
+            // If we ever provided a resource successfully, we should also allow falling back to the default skin in case
+            // the beatmap skin is missing some pieces.
+            if (successfullyProvidedResources)
+                return defaultLegacy.GetTexture(componentName, wrapModeS, wrapModeT);
+
+            return null;
         }
 
         public override IBindable<TValue>? GetConfig<TLookup, TValue>(TLookup lookup)
