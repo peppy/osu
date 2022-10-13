@@ -16,7 +16,8 @@ namespace osu.Game.Rulesets.Judgements
         /// <summary>
         /// Start the animation for this judgement from the current point in time.
         /// </summary>
-        void PlayAnimation();
+        /// <param name="offset"></param>
+        void PlayAnimation(double offset);
 
         /// <summary>
         /// Get proxied content which should be displayed above all hitobjects.

@@ -37,13 +37,13 @@ namespace osu.Game.Rulesets.Mania.UI
                 JudgementText.Font = JudgementText.Font.With(size: 25);
             }
 
-            public override void PlayAnimation()
+            public override void PlayAnimation(double offset)
             {
                 switch (Result)
                 {
                     case HitResult.None:
                     case HitResult.Miss:
-                        base.PlayAnimation();
+                        base.PlayAnimation(offset);
                         break;
 
                     default:

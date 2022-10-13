@@ -4,6 +4,7 @@
 using System;
 using osu.Framework.Allocation;
 using osu.Framework.Extensions;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
@@ -25,6 +26,10 @@ namespace osu.Game.Rulesets.Osu.Skinning.Argon
 
         private RingExplosion? ringExplosion;
 
+        private SpriteIcon offsetCircle = null!;
+
+        private Container proxiedContent = null!;
+
         [Resolved]
         private OsuColour colours { get; set; } = null!;
 
@@ -41,15 +46,33 @@ namespace osu.Game.Rulesets.Osu.Skinning.Argon
 
             InternalChildren = new Drawable[]
             {
-                JudgementText = new OsuSpriteText
+                proxiedContent = new Container
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    Text = Result.GetDescription().ToUpperInvariant(),
-                    Colour = colours.ForHitResult(Result),
-                    Blending = BlendingParameters.Additive,
-                    Spacing = new Vector2(5, 0),
-                    Font = OsuFont.Default.With(size: 20, weight: FontWeight.Bold),
+                    RelativeSizeAxes = Axes.Both,
+                    Children = new Drawable[]
+                    {
+                        JudgementText = new OsuSpriteText
+                        {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            Text = Result.GetDescription().ToUpperInvariant(),
+                            Colour = colours.ForHitResult(Result),
+                            Blending = BlendingParameters.Additive,
+                            Spacing = new Vector2(5, 0),
+                            Font = OsuFont.Default.With(size: 20, weight: FontWeight.Bold),
+                        },
+                        offsetCircle = new SpriteIcon
+                        {
+                            Size = new Vector2(12),
+                            Colour = colours.ForHitResult(Result),
+                            Icon = FontAwesome.Solid.ChevronUp,
+                            Blending = BlendingParameters.Additive,
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                        }
+                    }
                 },
             };
 
@@ -65,30 +88,48 @@ namespace osu.Game.Rulesets.Osu.Skinning.Argon
         /// <summary>
         /// Plays the default animation for this judgement piece.
         /// </summary>
+        /// <param name="offset"></param>
         /// <remarks>
         /// The base implementation only handles fade (for all result types) and misses.
         /// Individual rulesets are recommended to implement their appropriate hit animations.
         /// </remarks>
-        public virtual void PlayAnimation()
+        public virtual void PlayAnimation(double offset)
         {
+            proxiedContent
+                .FadeInFromZero(300, Easing.OutQuint);
+
+            offset = Math.Sign(offset) * (Math.Abs(offset) - 16);
+
+            if (Math.Abs(offset) <= 0)
+                offsetCircle.FadeOut();
+            else
+            {
+                float restingPosition = Math.Sign(offset) * (JudgementText.DrawHeight - 5);
+
+                offsetCircle
+                    .RotateTo(offset < 0 ? 180 : 0)
+                    .FadeIn(100)
+                    .MoveToY(restingPosition + (float)offset * 8f)
+                    .MoveToY(restingPosition, Math.Abs(offset) * 30, Easing.OutQuint);
+            }
+
             switch (Result)
             {
                 default:
                     JudgementText
-                        .FadeInFromZero(300, Easing.OutQuint)
                         .ScaleTo(Vector2.One)
                         .ScaleTo(new Vector2(1.2f), 1800, Easing.OutQuint);
                     break;
 
                 case HitResult.Miss:
-                    this.ScaleTo(1.6f);
-                    this.ScaleTo(1, 100, Easing.In);
+                    JudgementText.ScaleTo(1.6f);
+                    JudgementText.ScaleTo(1, 100, Easing.In);
 
-                    this.MoveTo(Vector2.Zero);
-                    this.MoveToOffset(new Vector2(0, 100), 800, Easing.InQuint);
+                    JudgementText.MoveTo(Vector2.Zero);
+                    JudgementText.MoveToOffset(new Vector2(0, 100), 800, Easing.InQuint);
 
-                    this.RotateTo(0);
-                    this.RotateTo(40, 800, Easing.InQuint);
+                    JudgementText.RotateTo(0);
+                    JudgementText.RotateTo(40, 800, Easing.InQuint);
                     break;
             }
 
@@ -97,7 +138,7 @@ namespace osu.Game.Rulesets.Osu.Skinning.Argon
             ringExplosion?.PlayAnimation();
         }
 
-        public Drawable? GetAboveHitObjectsProxiedContent() => JudgementText.CreateProxy();
+        public Drawable? GetAboveHitObjectsProxiedContent() => proxiedContent.CreateProxy();
 
         private class RingExplosion : CompositeDrawable
         {

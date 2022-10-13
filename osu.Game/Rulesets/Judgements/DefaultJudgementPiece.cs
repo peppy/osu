@@ -52,11 +52,12 @@ namespace osu.Game.Rulesets.Judgements
         /// <summary>
         /// Plays the default animation for this judgement piece.
         /// </summary>
+        /// <param name="offset">The hit offset in milliseconds.</param>
         /// <remarks>
         /// The base implementation only handles fade (for all result types) and misses.
         /// Individual rulesets are recommended to implement their appropriate hit animations.
         /// </remarks>
-        public virtual void PlayAnimation()
+        public virtual void PlayAnimation(double offset)
         {
             switch (Result)
             {

@@ -32,7 +32,7 @@ namespace osu.Game.Skinning
             InternalChild = createMainDrawable();
         }
 
-        public virtual void PlayAnimation()
+        public virtual void PlayAnimation(double offset)
         {
             var animation = InternalChild as IFramedAnimation;
 

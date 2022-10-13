@@ -74,7 +74,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             {
             }
 
-            public override void PlayAnimation()
+            public override void PlayAnimation(double offset)
             {
                 if (Result != HitResult.Miss)
                 {
@@ -83,7 +83,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
                         .ScaleTo(new Vector2(1.2f, 1), 1800, Easing.OutQuint);
                 }
 
-                base.PlayAnimation();
+                base.PlayAnimation(offset);
             }
         }
     }

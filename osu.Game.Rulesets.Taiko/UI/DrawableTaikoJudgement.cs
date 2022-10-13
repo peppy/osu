@@ -29,7 +29,7 @@ namespace osu.Game.Rulesets.Taiko.UI
             {
             }
 
-            public override void PlayAnimation()
+            public override void PlayAnimation(double offset)
             {
                 if (Result != HitResult.Miss)
                 {
@@ -37,7 +37,7 @@ namespace osu.Game.Rulesets.Taiko.UI
                     JudgementText.ScaleTo(1, 500, Easing.OutElastic);
                 }
 
-                base.PlayAnimation();
+                base.PlayAnimation(offset);
             }
         }
     }

@@ -51,7 +51,7 @@ namespace osu.Game.Rulesets.Mania.Skinning.Legacy
             }
         }
 
-        public void PlayAnimation()
+        public void PlayAnimation(double offset)
         {
             if (animation == null)
                 return;

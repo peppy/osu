@@ -143,7 +143,7 @@ namespace osu.Game.Rulesets.Judgements
                 }
 
                 if (JudgementBody.Drawable is IAnimatableJudgement animatable)
-                    animatable.PlayAnimation();
+                    animatable.PlayAnimation(Result.TimeOffset);
 
                 // a derived version of DrawableJudgement may be proposing a lifetime.
                 // if not adjusted (or the skinned portion requires greater bounds than calculated) use the skinned source's lifetime.

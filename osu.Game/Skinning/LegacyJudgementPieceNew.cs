@@ -65,7 +65,7 @@ namespace osu.Game.Skinning
             }
         }
 
-        public void PlayAnimation()
+        public void PlayAnimation(double offset)
         {
             var animation = mainPiece as IFramedAnimation;
 
@@ -88,7 +88,7 @@ namespace osu.Game.Skinning
             // new style non-miss judgements show the original style temporarily, with additive colour.
             if (temporaryOldStyle != null)
             {
-                temporaryOldStyle.PlayAnimation();
+                temporaryOldStyle.PlayAnimation(offset);
 
                 temporaryOldStyle.Hide();
                 temporaryOldStyle.Delay(-16)
