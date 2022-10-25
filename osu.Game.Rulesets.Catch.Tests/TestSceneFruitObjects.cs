@@ -21,7 +21,7 @@ namespace osu.Game.Rulesets.Catch.Tests
         {
             base.LoadComplete();
 
-            AddStep("show pear", () => SetContents(_ => createDrawableFruit(0)));
+            AddRepeatStep("show pear", () => SetContents(_ => createDrawableFruit(0)), 1000);
             AddStep("show grape", () => SetContents(_ => createDrawableFruit(1)));
             AddStep("show pineapple / apple", () => SetContents(_ => createDrawableFruit(2)));
             AddStep("show raspberry / orange", () => SetContents(_ => createDrawableFruit(3)));
