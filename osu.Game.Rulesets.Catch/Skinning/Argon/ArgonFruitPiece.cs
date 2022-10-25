@@ -7,10 +7,13 @@ using System.Linq;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Lines;
+using osu.Framework.Graphics.Shapes;
 using osu.Framework.Utils;
 using osu.Game.Rulesets.Catch.Objects;
 using osu.Game.Rulesets.Catch.Skinning.Default;
+using osu.Game.Rulesets.Catch.UI;
 using osuTK;
 
 namespace osu.Game.Rulesets.Catch.Skinning.Argon
@@ -19,38 +22,67 @@ namespace osu.Game.Rulesets.Catch.Skinning.Argon
     {
         public readonly Bindable<FruitVisualRepresentation> VisualRepresentation = new Bindable<FruitVisualRepresentation>();
 
-        protected override HyperBorderPiece HyperBorderPiece { get; }
+        private readonly Container buffered;
+
+        protected override Drawable HyperBorderPiece { get; }
 
         public ArgonFruitPiece()
         {
             RelativeSizeAxes = Axes.Both;
 
-            InternalChildren = new Drawable[]
+            InternalChildren = new[]
             {
-                // new SmoothPath
-                // {
-                //     Anchor = Anchor.Centre,
-                //     Origin = Anchor.Centre,
-                //     Alpha = 0.15f,
-                //     PathRadius = 22.5f,
-                //     Vertices = generateRandomCircle(),
-                // },
-                // new SmoothPath
-                // {
-                //     Anchor = Anchor.Centre,
-                //     Origin = Anchor.Centre,
-                //     Alpha = 0.5f,
-                //     PathRadius = 9,
-                //     Vertices = generateRandomCircle(),
-                // },
-                new SmoothPath
+                buffered = new Container
+                {
+                    AutoSizeAxes = Axes.Both,
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    Children = new Drawable[]
+                    {
+                        new SmoothPath
+                        {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            Blending = BlendingParameters.Additive,
+                            Alpha = 0.15f,
+                            PathRadius = 22.5f,
+                            Vertices = generateRandomCircle(),
+                        },
+                        new SmoothPath
+                        {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            Blending = BlendingParameters.Additive,
+                            Alpha = 0.5f,
+                            PathRadius = 9,
+                            Vertices = generateRandomCircle(),
+                        },
+                        new SmoothPath
+                        {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            Blending = BlendingParameters.Additive,
+                            PathRadius = 3,
+                            Vertices = generateRandomCircle(),
+                        },
+                    }
+                },
+                new Circle
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    PathRadius = 3,
+                    Size = new Vector2(20),
+                },
+                HyperBorderPiece = new SmoothPath
+                {
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    Colour = Catcher.DEFAULT_HYPER_DASH_COLOUR,
+                    Blending = BlendingParameters.Additive,
+                    Alpha = 0.15f,
+                    PathRadius = 22.5f,
                     Vertices = generateRandomCircle(),
                 },
-                HyperBorderPiece = new HyperBorderPiece()
             };
         }
 
@@ -59,9 +91,9 @@ namespace osu.Game.Rulesets.Catch.Skinning.Argon
             List<Vector2> vertices = new List<Vector2>();
             List<float> variances = new List<float>();
 
-            const float variance_per_point = 0.8f;
+            const float variance_per_point = 0.7f;
             const int point_count = 8;
-            const float radius = 64;
+            const float radius = 40;
 
             float variance = 0;
 
@@ -72,7 +104,7 @@ namespace osu.Game.Rulesets.Catch.Skinning.Argon
                 switch (i)
                 {
                     case 0:
-                        variance = RNG.NextSingle(1 - variance_per_point, 1 + variance_per_point);
+                        variance = RNG.NextSingle(1 - variance_per_point, 1);
                         break;
 
                     default:
@@ -94,13 +126,22 @@ namespace osu.Game.Rulesets.Catch.Skinning.Argon
 
             var catmullPart = PathApproximator.ApproximateCatmull(vertices.Take(vertices.Count - 1).ToArray()).Skip(1);
 
+            const float extension_length = 0.5f;
 
+            // create a connecting bezier using the first and last points of the original curve, extending them and adding a midpoint.
+            Vector2 p1 = vertices[^2];
+            Vector2 p2 = vertices[^2] + Vector2.Normalize(vertices[^2] - vertices[^3]) * Vector2.Distance(vertices[^3], vertices[^2]) * extension_length;
+
+            Vector2 p3 = vertices[^2] + (vertices[0] - vertices[^2]) / 2;
+
+            Vector2 p4 = vertices[0] - Vector2.Normalize(vertices[1] - vertices[0]) * Vector2.Distance(vertices[0], vertices[1]) * extension_length;
+            Vector2 p5 = vertices[0];
 
             // to connect the start to end, let's use a bezier with the correct derivative variance at each end.
-            var bezierPart = PathApproximator.ApproximateBezier(vertices.TakeLast(2).Concat(vertices.Take(2)).ToArray());
+            var bezierPart1 = PathApproximator.ApproximateBezier(new[] { p1, p2, p3, p4, p5 });
 
             return catmullPart
-                   //.Concat(bezierPart.Skip(1).SkipLast(1))
+                   .Concat(bezierPart1)
                    .ToList();
         }
 
@@ -113,7 +154,7 @@ namespace osu.Game.Rulesets.Catch.Skinning.Argon
                 VisualRepresentation.Value = Fruit.GetVisualRepresentation(index.NewValue);
             }, true);
 
-            AccentColour.BindValueChanged(colour => InternalChildren.OfType<SmoothPath>().ForEach(s => s.Colour = colour.NewValue), true);
+            AccentColour.BindValueChanged(colour => buffered.OfType<SmoothPath>().ForEach(s => s.Colour = colour.NewValue), true);
         }
     }
 }
