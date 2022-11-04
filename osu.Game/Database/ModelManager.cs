@@ -16,7 +16,7 @@ using Realms;
 namespace osu.Game.Database
 {
     public class ModelManager<TModel> : IModelManager<TModel>, IModelFileManager<TModel, RealmNamedFileUsage>
-        where TModel : RealmObject, IHasRealmFiles, IHasGuidPrimaryKey, ISoftDelete
+        where TModel : class, IRealmObject, IHasRealmFiles, IHasGuidPrimaryKey, ISoftDelete
     {
         protected RealmAccess Realm { get; }
 

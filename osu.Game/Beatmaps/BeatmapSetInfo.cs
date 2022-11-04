@@ -19,7 +19,7 @@ namespace osu.Game.Beatmaps
     /// </summary>
     [ExcludeFromDynamicCompile]
     [MapTo("BeatmapSet")]
-    public class BeatmapSetInfo : RealmObject, IHasGuidPrimaryKey, IHasRealmFiles, ISoftDelete, IEquatable<BeatmapSetInfo>, IBeatmapSetInfo
+    public partial class BeatmapSetInfo : IRealmObject, IHasGuidPrimaryKey, IHasRealmFiles, ISoftDelete, IEquatable<BeatmapSetInfo>, IBeatmapSetInfo
     {
         [PrimaryKey]
         public Guid ID { get; set; }

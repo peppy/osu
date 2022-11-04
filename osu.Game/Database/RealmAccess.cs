@@ -509,7 +509,7 @@ namespace osu.Game.Database
         /// </returns>
         /// <seealso cref="IRealmCollection{T}.SubscribeForNotifications"/>
         public IDisposable RegisterForNotifications<T>(Func<Realm, IQueryable<T>> query, NotificationCallbackDelegate<T> callback)
-            where T : RealmObjectBase
+            where T : IRealmObjectBase
         {
             Func<Realm, IDisposable?> action = realm => query(realm).QueryAsyncWithNotifications(callback);
 
@@ -539,7 +539,7 @@ namespace osu.Game.Database
         /// To stop receiving notifications, call <see cref="IDisposable.Dispose"/>.
         /// </returns>
         public IDisposable SubscribeToPropertyChanged<TModel, TProperty>(Func<Realm, TModel?> modelAccessor, Expression<Func<TModel, TProperty>> propertyLookup, Action<TProperty> onChanged)
-            where TModel : RealmObjectBase
+            where TModel : IRealmObjectBase
         {
             return RegisterCustomSubscription(_ =>
             {
@@ -715,7 +715,7 @@ namespace osu.Game.Database
                     convertOnlineIDs<BeatmapSetInfo>();
                     convertOnlineIDs<RulesetInfo>();
 
-                    void convertOnlineIDs<T>() where T : RealmObject
+                    void convertOnlineIDs<T>() where T : IRealmObject
                     {
                         string className = getMappedOrOriginalName(typeof(T));
 

@@ -9,7 +9,7 @@ namespace osu.Game.Models
 {
     [ExcludeFromDynamicCompile]
     [MapTo("File")]
-    public class RealmFile : RealmObject, IFileInfo
+    public partial class RealmFile : IRealmObject, IFileInfo
     {
         [PrimaryKey]
         public string Hash { get; set; } = string.Empty;

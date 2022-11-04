@@ -6,7 +6,7 @@ using Realms;
 namespace osu.Game.Configuration
 {
     [MapTo(@"RulesetSetting")]
-    public class RealmRulesetSetting : RealmObject
+    public partial class RealmRulesetSetting : IRealmObject
     {
         [Indexed]
         public string RulesetName { get; set; } = string.Empty;

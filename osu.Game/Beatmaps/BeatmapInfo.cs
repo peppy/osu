@@ -30,7 +30,7 @@ namespace osu.Game.Beatmaps
     [ExcludeFromDynamicCompile]
     [Serializable]
     [MapTo("Beatmap")]
-    public class BeatmapInfo : RealmObject, IHasGuidPrimaryKey, IBeatmapInfo, IEquatable<BeatmapInfo>
+    public partial class BeatmapInfo : IRealmObject, IHasGuidPrimaryKey, IBeatmapInfo, IEquatable<BeatmapInfo>
     {
         [PrimaryKey]
         public Guid ID { get; set; }

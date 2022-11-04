@@ -24,7 +24,7 @@ namespace osu.Game.Scoring
 {
     [ExcludeFromDynamicCompile]
     [MapTo("Score")]
-    public class ScoreInfo : RealmObject, IHasGuidPrimaryKey, IHasRealmFiles, ISoftDelete, IEquatable<ScoreInfo>, IScoreInfo
+    public partial class ScoreInfo : IRealmObject, IHasGuidPrimaryKey, IHasRealmFiles, ISoftDelete, IEquatable<ScoreInfo>, IScoreInfo
     {
         [PrimaryKey]
         public Guid ID { get; set; }
