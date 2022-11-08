@@ -1,6 +1,7 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
@@ -10,12 +11,14 @@ using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Testing;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Skinning.Default;
+using osu.Game.Skinning;
 using osuTK;
 using osuTK.Graphics;
 
@@ -37,12 +40,15 @@ namespace osu.Game.Rulesets.Osu.Skinning.Argon
         private readonly Circle innerGradient;
         private readonly Circle innerFill;
 
-        private readonly RingPiece border;
+        private RingPiece? border => skinnableContent.ChildrenOfType<RingPiece>().FirstOrDefault();
+
         private readonly OsuSpriteText number;
 
         private readonly IBindable<Color4> accentColour = new Bindable<Color4>();
         private readonly IBindable<int> indexInCurrentCombo = new Bindable<int>();
         private readonly FlashPiece flash;
+
+        private readonly SkinnableTargetContainer skinnableContent;
 
         [Resolved]
         private DrawableHitObject drawableObject { get; set; } = null!;
@@ -91,7 +97,12 @@ namespace osu.Game.Rulesets.Osu.Skinning.Argon
                     Text = @"1",
                 },
                 flash = new FlashPiece(),
-                border = new RingPiece(BORDER_THICKNESS),
+                skinnableContent = new SkinnableTargetContainer(SkinnableTarget.OsuHitCircle)
+                {
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    RelativeSizeAxes = Axes.Both,
+                },
             };
         }
 
@@ -159,17 +170,20 @@ namespace osu.Game.Rulesets.Osu.Skinning.Argon
                         // a few milliseconds before it's hidden by the flash, so it's pointless overhead to bother with it.
                         innerGradient.FadeOut(flash_in_duration, Easing.OutQuint);
 
-                        // The border is always white, but after hit it gets coloured by the skin/beatmap's colouring.
-                        // A gradient is applied to make the border less prominent over the course of the animation.
-                        // Without this, the border dominates the visual presence of the explosion animation in a bad way.
-                        border.TransformTo(nameof
-                            (BorderColour), ColourInfo.GradientVertical(
-                            accentColour.Value.Opacity(0.5f),
-                            accentColour.Value.Opacity(0)), fade_out_time);
+                        if (border != null)
+                        {
+                            // The border is always white, but after hit it gets coloured by the skin/beatmap's colouring.
+                            // A gradient is applied to make the border less prominent over the course of the animation.
+                            // Without this, the border dominates the visual presence of the explosion animation in a bad way.
+                            border.TransformTo(nameof
+                                (BorderColour), ColourInfo.GradientVertical(
+                                accentColour.Value.Opacity(0.5f),
+                                accentColour.Value.Opacity(0)), fade_out_time);
 
-                        // The outer ring shrinks immediately, but accounts for its thickness so it doesn't overlap the inner
-                        // gradient layers.
-                        border.ResizeTo(Size * shrink_size + new Vector2(border.BorderThickness), resize_duration, Easing.OutElasticHalf);
+                            // The outer ring shrinks immediately, but accounts for its thickness so it doesn't overlap the inner
+                            // gradient layers.
+                            border.ResizeTo(Size * shrink_size + new Vector2(border.BorderThickness.Value), resize_duration, Easing.OutElasticHalf);
+                        }
 
                         // The outer gradient is resize with a slight delay from the border.
                         // This is to give it a bomb-like effect, with the border "triggering" its animation when getting close.

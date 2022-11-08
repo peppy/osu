@@ -8,6 +8,7 @@ namespace osu.Game.Skinning
     public enum SkinnableTarget
     {
         MainHUDComponents,
-        SongSelect
+        SongSelect,
+        OsuHitCircle,
     }
 }

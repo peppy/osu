@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Graphics;
+using osu.Game.Rulesets.Osu.Skinning.Default;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Skinning;
 
@@ -16,8 +17,26 @@ namespace osu.Game.Rulesets.Osu.Skinning.Argon
 
         public override Drawable? GetDrawableComponent(ISkinComponent component)
         {
+            if (base.GetDrawableComponent(component) is Drawable c)
+                return c;
+
             switch (component)
             {
+                case SkinnableTargetComponent target:
+                    switch (target.Target)
+                    {
+                        case SkinnableTarget.OsuHitCircle:
+                            return new SkinnableTargetComponentsContainer()
+                            {
+                                Children = new[]
+                                {
+                                    new RingPiece(ArgonMainCirclePiece.BORDER_THICKNESS)
+                                }
+                            };
+                    }
+
+                    break;
+
                 case GameplaySkinComponent<HitResult> resultComponent:
                     return new ArgonJudgementPiece(resultComponent.Component);
 
@@ -62,7 +81,7 @@ namespace osu.Game.Rulesets.Osu.Skinning.Argon
                     break;
             }
 
-            return base.GetDrawableComponent(component);
+            return null;
         }
     }
 }

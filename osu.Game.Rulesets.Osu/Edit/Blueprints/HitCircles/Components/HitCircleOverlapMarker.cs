@@ -45,10 +45,7 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.HitCircles.Components
                     RelativeSizeAxes = Axes.Both,
                     Colour = Color4.White,
                 },
-                ring = new RingPiece
-                {
-                    BorderThickness = 4,
-                }
+                ring = new RingPiece(4),
             };
         }
 
