@@ -7,7 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Localisation;
 using osu.Game.Graphics;
@@ -15,7 +17,7 @@ using osu.Game.Graphics.UserInterfaceV2;
 
 namespace osu.Game.Overlays.Settings
 {
-    public class SettingsButton : RoundedButton, IHasTooltip
+    public class SettingsButton : RoundedButton, IHasTooltip, IConditionalFilterable
     {
         public SettingsButton()
         {
@@ -30,6 +32,9 @@ namespace osu.Game.Overlays.Settings
         }
 
         public LocalisableString TooltipText { get; set; }
+
+        public BindableBool CanBeShown { get; } = new BindableBool(true);
+        IBindable<bool> IConditionalFilterable.CanBeShown => CanBeShown;
 
         public override IEnumerable<LocalisableString> FilterTerms
         {
