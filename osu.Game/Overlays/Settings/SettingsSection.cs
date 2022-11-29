@@ -5,6 +5,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -18,7 +19,7 @@ using osuTK;
 
 namespace osu.Game.Overlays.Settings
 {
-    public abstract class SettingsSection : Container, IFilterable
+    public abstract partial class SettingsSection : Container, IHasFilterableChildren
     {
         protected FillFlowContainer FlowContent;
         protected override Container<Drawable> Content => FlowContent;
@@ -32,6 +33,7 @@ namespace osu.Game.Overlays.Settings
         public abstract Drawable CreateIcon();
         public abstract LocalisableString Header { get; }
 
+        public IEnumerable<IFilterable> FilterableChildren => Children.OfType<IFilterable>();
         public virtual IEnumerable<LocalisableString> FilterTerms => new[] { Header };
 
         public const int ITEM_SPACING = 14;
