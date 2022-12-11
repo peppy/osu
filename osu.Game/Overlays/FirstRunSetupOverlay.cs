@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using osu.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions;
@@ -76,6 +77,8 @@ namespace osu.Game.Overlays
             steps.Add(typeof(ScreenWelcome));
             steps.Add(typeof(ScreenUIScale));
             steps.Add(typeof(ScreenBeatmaps));
+            if (RuntimeInfo.IsDesktop)
+                steps.Add(typeof(ScreenChangeFolderLocation));
             if (legacyImportManager?.SupportsImportFromStable == true)
                 steps.Add(typeof(ScreenImportFromStable));
             steps.Add(typeof(ScreenBehaviour));
@@ -264,6 +267,11 @@ namespace osu.Game.Overlays
                 stack?.FadeOut(100)
                      .Expire();
             }
+        }
+
+        public override void Hide()
+        {
+            return;
         }
 
         private void showFirstStep()

@@ -30,270 +30,270 @@ using osuTK;
 namespace osu.Game.Overlays.FirstRunSetup
 {
     [LocalisableDescription(typeof(FirstRunOverlayImportFromStableScreenStrings), nameof(FirstRunOverlayImportFromStableScreenStrings.Header))]
-    public partial class ScreenImportFromStable : FirstRunSetupScreen
-    {
-        private static readonly Vector2 button_size = new Vector2(400, 50);
-
-        private ProgressRoundedButton importButton = null!;
-
-        private OsuTextFlowContainer progressText = null!;
-
-        [Resolved]
-        private LegacyImportManager legacyImportManager { get; set; } = null!;
-
-        private StableLocatorLabelledTextBox stableLocatorTextBox = null!;
-
-        private LinkFlowContainer copyInformation = null!;
-
-        private IEnumerable<ImportCheckbox> contentCheckboxes => Content.Children.OfType<ImportCheckbox>();
-
-        [BackgroundDependencyLoader(permitNulls: true)]
-        private void load()
+        public partial class ScreenImportFromStable : FirstRunSetupScreen
         {
-            Content.Children = new Drawable[]
+            private static readonly Vector2 button_size = new Vector2(400, 50);
+
+            private ProgressRoundedButton importButton = null!;
+
+            private OsuTextFlowContainer progressText = null!;
+
+            [Resolved]
+            private LegacyImportManager legacyImportManager { get; set; } = null!;
+
+            private StableLocatorLabelledTextBox stableLocatorTextBox = null!;
+
+            private LinkFlowContainer copyInformation = null!;
+
+            private IEnumerable<ImportCheckbox> contentCheckboxes => Content.Children.OfType<ImportCheckbox>();
+
+            [BackgroundDependencyLoader(permitNulls: true)]
+            private void load()
             {
-                new LinkFlowContainer(cp => cp.Font = OsuFont.Default.With(size: CONTENT_FONT_SIZE))
+                Content.Children = new Drawable[]
                 {
-                    Colour = OverlayColourProvider.Content1,
-                    Text = FirstRunOverlayImportFromStableScreenStrings.Description,
-                    RelativeSizeAxes = Axes.X,
-                    AutoSizeAxes = Axes.Y
-                },
-                stableLocatorTextBox = new StableLocatorLabelledTextBox
-                {
-                    Label = FirstRunOverlayImportFromStableScreenStrings.LocateDirectoryLabel,
-                    PlaceholderText = FirstRunOverlayImportFromStableScreenStrings.LocateDirectoryPlaceholder
-                },
-                new ImportCheckbox(CommonStrings.Beatmaps, StableContent.Beatmaps),
-                new ImportCheckbox(CommonStrings.Scores, StableContent.Scores),
-                new ImportCheckbox(CommonStrings.Skins, StableContent.Skins),
-                new ImportCheckbox(CommonStrings.Collections, StableContent.Collections),
-                copyInformation = new LinkFlowContainer(cp => cp.Font = OsuFont.Default.With(size: CONTENT_FONT_SIZE))
-                {
-                    Colour = OverlayColourProvider.Content1,
-                    RelativeSizeAxes = Axes.X,
-                    AutoSizeAxes = Axes.Y
-                },
-                importButton = new ProgressRoundedButton
-                {
-                    Size = button_size,
-                    Anchor = Anchor.TopCentre,
-                    Origin = Anchor.TopCentre,
-                    Text = FirstRunOverlayImportFromStableScreenStrings.ImportButton,
-                    Action = runImport
-                },
-                progressText = new OsuTextFlowContainer(cp => cp.Font = OsuFont.Default.With(size: CONTENT_FONT_SIZE))
-                {
-                    Colour = OverlayColourProvider.Content1,
-                    Text = FirstRunOverlayImportFromStableScreenStrings.ImportInProgress,
-                    RelativeSizeAxes = Axes.X,
-                    AutoSizeAxes = Axes.Y,
-                    Alpha = 0,
-                },
-            };
+                    new LinkFlowContainer(cp => cp.Font = OsuFont.Default.With(size: CONTENT_FONT_SIZE))
+                    {
+                        Colour = OverlayColourProvider.Content1,
+                        Text = FirstRunOverlayImportFromStableScreenStrings.Description,
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y
+                    },
+                    stableLocatorTextBox = new StableLocatorLabelledTextBox
+                    {
+                        Label = FirstRunOverlayImportFromStableScreenStrings.LocateDirectoryLabel,
+                        PlaceholderText = FirstRunOverlayImportFromStableScreenStrings.LocateDirectoryPlaceholder
+                    },
+                    new ImportCheckbox(CommonStrings.Beatmaps, StableContent.Beatmaps),
+                    new ImportCheckbox(CommonStrings.Scores, StableContent.Scores),
+                    new ImportCheckbox(CommonStrings.Skins, StableContent.Skins),
+                    new ImportCheckbox(CommonStrings.Collections, StableContent.Collections),
+                    copyInformation = new LinkFlowContainer(cp => cp.Font = OsuFont.Default.With(size: CONTENT_FONT_SIZE))
+                    {
+                        Colour = OverlayColourProvider.Content1,
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y
+                    },
+                    importButton = new ProgressRoundedButton
+                    {
+                        Size = button_size,
+                        Anchor = Anchor.TopCentre,
+                        Origin = Anchor.TopCentre,
+                        Text = FirstRunOverlayImportFromStableScreenStrings.ImportButton,
+                        Action = runImport
+                    },
+                    progressText = new OsuTextFlowContainer(cp => cp.Font = OsuFont.Default.With(size: CONTENT_FONT_SIZE))
+                    {
+                        Colour = OverlayColourProvider.Content1,
+                        Text = FirstRunOverlayImportFromStableScreenStrings.ImportInProgress,
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        Alpha = 0,
+                    },
+                };
 
-            stableLocatorTextBox.Current.BindValueChanged(_ => updateStablePath(), true);
-        }
-
-        [Resolved(canBeNull: true)]
-        private OsuGame? game { get; set; }
-
-        private void updateStablePath()
-        {
-            var storage = legacyImportManager.GetCurrentStableStorage();
-
-            if (storage == null)
-            {
-                toggleInteraction(false);
-
-                stableLocatorTextBox.Current.Disabled = false;
-                stableLocatorTextBox.Current.Value = string.Empty;
-                return;
+                stableLocatorTextBox.Current.BindValueChanged(_ => updateStablePath(), true);
             }
 
-            foreach (var c in contentCheckboxes)
-            {
-                c.Current.Disabled = false;
-                c.UpdateCount();
-            }
+            [Resolved(canBeNull: true)]
+            private OsuGame? game { get; set; }
 
-            toggleInteraction(true);
-            stableLocatorTextBox.Current.Value = storage.GetFullPath(string.Empty);
-            importButton.Enabled.Value = true;
-
-            bool available = legacyImportManager.CheckHardLinkAvailability();
-            Logger.Log($"Hard link support is {available}");
-
-            if (available)
+            private void updateStablePath()
             {
-                copyInformation.Text = "Data migration will use \"hard links\". No extra disk space will be used, and you can delete either data folder at any point without affecting the other installation.";
-            }
-            else if (RuntimeInfo.OS != RuntimeInfo.Platform.Windows)
-                copyInformation.Text = "Lightweight linking of files are not supported on your operating system yet, so a copy of all files will be made during import.";
-            else
-            {
-                copyInformation.Text =
-                    "A second copy of all files will be made during import. To avoid this, please make sure the lazer data folder is on the same drive as your previous osu! install (and the file system is NTFS). ";
-                copyInformation.AddLink(GeneralSettingsStrings.ChangeFolderLocation, () =>
+                var storage = legacyImportManager.GetCurrentStableStorage();
+
+                if (storage == null)
                 {
-                    game?.PerformFromScreen(menu => menu.Push(new MigrationSelectScreen()));
-                });
-            }
-        }
+                    toggleInteraction(false);
 
-        private void runImport()
-        {
-            toggleInteraction(false);
-            progressText.FadeIn(1000, Easing.OutQuint);
+                    stableLocatorTextBox.Current.Disabled = false;
+                    stableLocatorTextBox.Current.Value = string.Empty;
+                    return;
+                }
 
-            StableContent importableContent = 0;
+                foreach (var c in contentCheckboxes)
+                {
+                    c.Current.Disabled = false;
+                    c.UpdateCount();
+                }
 
-            foreach (var c in contentCheckboxes.Where(c => c.Current.Value))
-                importableContent |= c.StableContent;
+                toggleInteraction(true);
+                stableLocatorTextBox.Current.Value = storage.GetFullPath(string.Empty);
+                importButton.Enabled.Value = true;
 
-            legacyImportManager.ImportFromStableAsync(importableContent, false).ContinueWith(t => Schedule(() =>
-            {
-                progressText.FadeOut(500, Easing.OutQuint);
+                bool available = legacyImportManager.CheckHardLinkAvailability();
+                Logger.Log($"Hard link support is {available}");
 
-                if (t.IsCompletedSuccessfully)
-                    importButton.Complete();
+                if (available)
+                {
+                    copyInformation.Text = "Data migration will use \"hard links\". No extra disk space will be used, and you can delete either data folder at any point without affecting the other installation.";
+                }
+                else if (RuntimeInfo.OS != RuntimeInfo.Platform.Windows)
+                    copyInformation.Text = "Lightweight linking of files are not supported on your operating system yet, so a copy of all files will be made during import.";
                 else
                 {
-                    toggleInteraction(true);
-                    importButton.Abort();
+                    copyInformation.Text =
+                        "A second copy of all files will be made during import. To avoid this, please make sure the lazer data folder is on the same drive as your previous osu! install (and the file system is NTFS). ";
+                    copyInformation.AddLink(GeneralSettingsStrings.ChangeFolderLocation, () =>
+                    {
+                        game?.PerformFromScreen(menu => menu.Push(new MigrationSelectScreen()));
+                    });
                 }
-            }));
-        }
-
-        private void toggleInteraction(bool allow)
-        {
-            importButton.Enabled.Value = allow;
-            stableLocatorTextBox.Current.Disabled = !allow;
-            foreach (var c in contentCheckboxes)
-                c.Current.Disabled = !allow;
-        }
-
-        private partial class ImportCheckbox : SettingsCheckbox
-        {
-            public readonly StableContent StableContent;
-
-            private readonly LocalisableString title;
-
-            [Resolved]
-            private LegacyImportManager legacyImportManager { get; set; } = null!;
-
-            private CancellationTokenSource? countUpdateCancellation;
-
-            public ImportCheckbox(LocalisableString title, StableContent stableContent)
-            {
-                this.title = title;
-
-                StableContent = stableContent;
-
-                Current.Default = true;
-                Current.Value = true;
-
-                LabelText = title;
             }
 
-            public void UpdateCount()
+            private void runImport()
             {
-                LabelText = LocalisableString.Interpolate($"{title} ({FirstRunOverlayImportFromStableScreenStrings.Calculating})");
+                toggleInteraction(false);
+                progressText.FadeIn(1000, Easing.OutQuint);
 
-                countUpdateCancellation?.Cancel();
-                countUpdateCancellation = new CancellationTokenSource();
+                StableContent importableContent = 0;
 
-                legacyImportManager.GetImportCount(StableContent, countUpdateCancellation.Token).ContinueWith(task => Schedule(() =>
+                foreach (var c in contentCheckboxes.Where(c => c.Current.Value))
+                    importableContent |= c.StableContent;
+
+                legacyImportManager.ImportFromStableAsync(importableContent, false).ContinueWith(t => Schedule(() =>
                 {
-                    if (task.IsCanceled)
-                        return;
+                    progressText.FadeOut(500, Easing.OutQuint);
 
-                    int count = task.GetResultSafely();
-
-                    LabelText = LocalisableString.Interpolate($"{title} ({FirstRunOverlayImportFromStableScreenStrings.Items(count)})");
+                    if (t.IsCompletedSuccessfully)
+                        importButton.Complete();
+                    else
+                    {
+                        toggleInteraction(true);
+                        importButton.Abort();
+                    }
                 }));
             }
-        }
 
-        internal partial class StableLocatorLabelledTextBox : LabelledTextBoxWithPopover, ICanAcceptFiles
-        {
-            [Resolved]
-            private LegacyImportManager legacyImportManager { get; set; } = null!;
-
-            public IEnumerable<string> HandledExtensions { get; } = new[] { string.Empty };
-
-            private readonly Bindable<DirectoryInfo?> currentDirectory = new Bindable<DirectoryInfo?>();
-
-            [Resolved(canBeNull: true)] // Can't really be null but required to handle potential of disposal before DI completes.
-            private OsuGameBase? game { get; set; }
-
-            protected override void LoadComplete()
+            private void toggleInteraction(bool allow)
             {
-                base.LoadComplete();
-
-                game?.RegisterImportHandler(this);
-
-                currentDirectory.BindValueChanged(onDirectorySelected);
-
-                string? fullPath = legacyImportManager.GetCurrentStableStorage()?.GetFullPath(string.Empty);
-                if (fullPath != null)
-                    currentDirectory.Value = new DirectoryInfo(fullPath);
+                importButton.Enabled.Value = allow;
+                stableLocatorTextBox.Current.Disabled = !allow;
+                foreach (var c in contentCheckboxes)
+                    c.Current.Disabled = !allow;
             }
 
-            private void onDirectorySelected(ValueChangedEvent<DirectoryInfo?> directory)
+            private partial class ImportCheckbox : SettingsCheckbox
             {
-                if (directory.NewValue == null)
+                public readonly StableContent StableContent;
+
+                private readonly LocalisableString title;
+
+                [Resolved]
+                private LegacyImportManager legacyImportManager { get; set; } = null!;
+
+                private CancellationTokenSource? countUpdateCancellation;
+
+                public ImportCheckbox(LocalisableString title, StableContent stableContent)
                 {
-                    Current.Value = string.Empty;
-                    return;
+                    this.title = title;
+
+                    StableContent = stableContent;
+
+                    Current.Default = true;
+                    Current.Value = true;
+
+                    LabelText = title;
                 }
 
-                // DirectorySelectors can trigger a noop value changed, but `DirectoryInfo` equality doesn't catch this.
-                if (directory.OldValue?.FullName == directory.NewValue.FullName)
-                    return;
-
-                if (directory.NewValue?.GetFiles(@"osu!.*.cfg").Any() ?? false)
+                public void UpdateCount()
                 {
-                    this.HidePopover();
+                    LabelText = LocalisableString.Interpolate($"{title} ({FirstRunOverlayImportFromStableScreenStrings.Calculating})");
 
-                    string path = directory.NewValue.FullName;
+                    countUpdateCancellation?.Cancel();
+                    countUpdateCancellation = new CancellationTokenSource();
 
-                    legacyImportManager.UpdateStorage(path);
-                    Current.Value = path;
-                }
-            }
-
-            Task ICanAcceptFiles.Import(params string[] paths)
-            {
-                Schedule(() => currentDirectory.Value = new DirectoryInfo(paths.First()));
-                return Task.CompletedTask;
-            }
-
-            Task ICanAcceptFiles.Import(params ImportTask[] tasks) => throw new NotImplementedException();
-
-            protected override void Dispose(bool isDisposing)
-            {
-                base.Dispose(isDisposing);
-                game?.UnregisterImportHandler(this);
-            }
-
-            public override Popover GetPopover() => new DirectoryChooserPopover(currentDirectory);
-
-            private partial class DirectoryChooserPopover : OsuPopover
-            {
-                public DirectoryChooserPopover(Bindable<DirectoryInfo?> currentDirectory)
-                {
-                    Child = new Container
+                    legacyImportManager.GetImportCount(StableContent, countUpdateCancellation.Token).ContinueWith(task => Schedule(() =>
                     {
-                        Size = new Vector2(600, 400),
-                        Child = new OsuDirectorySelector(currentDirectory.Value?.FullName)
+                        if (task.IsCanceled)
+                            return;
+
+                        int count = task.GetResultSafely();
+
+                        LabelText = LocalisableString.Interpolate($"{title} ({FirstRunOverlayImportFromStableScreenStrings.Items(count)})");
+                    }));
+                }
+            }
+
+            internal partial class StableLocatorLabelledTextBox : LabelledTextBoxWithPopover, ICanAcceptFiles
+            {
+                [Resolved]
+                private LegacyImportManager legacyImportManager { get; set; } = null!;
+
+                public IEnumerable<string> HandledExtensions { get; } = new[] { string.Empty };
+
+                private readonly Bindable<DirectoryInfo?> currentDirectory = new Bindable<DirectoryInfo?>();
+
+                [Resolved(canBeNull: true)] // Can't really be null but required to handle potential of disposal before DI completes.
+                private OsuGameBase? game { get; set; }
+
+                protected override void LoadComplete()
+                {
+                    base.LoadComplete();
+
+                    game?.RegisterImportHandler(this);
+
+                    currentDirectory.BindValueChanged(onDirectorySelected);
+
+                    string? fullPath = legacyImportManager.GetCurrentStableStorage()?.GetFullPath(string.Empty);
+                    if (fullPath != null)
+                        currentDirectory.Value = new DirectoryInfo(fullPath);
+                }
+
+                private void onDirectorySelected(ValueChangedEvent<DirectoryInfo?> directory)
+                {
+                    if (directory.NewValue == null)
+                    {
+                        Current.Value = string.Empty;
+                        return;
+                    }
+
+                    // DirectorySelectors can trigger a noop value changed, but `DirectoryInfo` equality doesn't catch this.
+                    if (directory.OldValue?.FullName == directory.NewValue.FullName)
+                        return;
+
+                    if (directory.NewValue?.GetFiles(@"osu!.*.cfg").Any() ?? false)
+                    {
+                        this.HidePopover();
+
+                        string path = directory.NewValue.FullName;
+
+                        legacyImportManager.UpdateStorage(path);
+                        Current.Value = path;
+                    }
+                }
+
+                Task ICanAcceptFiles.Import(params string[] paths)
+                {
+                    Schedule(() => currentDirectory.Value = new DirectoryInfo(paths.First()));
+                    return Task.CompletedTask;
+                }
+
+                Task ICanAcceptFiles.Import(params ImportTask[] tasks) => throw new NotImplementedException();
+
+                protected override void Dispose(bool isDisposing)
+                {
+                    base.Dispose(isDisposing);
+                    game?.UnregisterImportHandler(this);
+                }
+
+                public override Popover GetPopover() => new DirectoryChooserPopover(currentDirectory);
+
+                private partial class DirectoryChooserPopover : OsuPopover
+                {
+                    public DirectoryChooserPopover(Bindable<DirectoryInfo?> currentDirectory)
+                    {
+                        Child = new Container
                         {
-                            RelativeSizeAxes = Axes.Both,
-                            CurrentPath = { BindTarget = currentDirectory }
-                        },
-                    };
+                            Size = new Vector2(600, 400),
+                            Child = new OsuDirectorySelector(currentDirectory.Value?.FullName)
+                            {
+                                RelativeSizeAxes = Axes.Both,
+                                CurrentPath = { BindTarget = currentDirectory }
+                            },
+                        };
+                    }
                 }
             }
         }
     }
-}
