@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
+using osu.Framework.Extensions;
 using osu.Framework.Extensions.EnumExtensions;
 using osu.Framework.Utils;
 
@@ -291,6 +292,24 @@ namespace osu.Game.Rulesets.Scoring
         /// <param name="result">The <see cref="HitResult"/> to get the index of.</param>
         /// <returns>The index of <paramref name="result"/>.</returns>
         public static int GetIndexForOrderedDisplay(this HitResult result) => order.IndexOf(result);
+
+        /// <summary>
+        /// Get a display string of a <see cref="HitResult"/>. Allows overriding naming for some cases.
+        /// </summary>
+        /// <param name="result">The <see cref="HitResult"/> to get the display name of.</param>
+        /// <param name="perfectJudgementString">A custom term for <see cref="HitResult.Perfect"/> judgements. Defaults to "Perfect".</param>
+        /// <returns>The display string.</returns>
+        public static string GetDisplayString(this HitResult result, string perfectJudgementString = "Perfect")
+        {
+            switch (result)
+            {
+                default:
+                    return result.GetDescription();
+
+                case HitResult.Perfect:
+                    return perfectJudgementString;
+            }
+        }
     }
 #pragma warning restore CS0618
 }

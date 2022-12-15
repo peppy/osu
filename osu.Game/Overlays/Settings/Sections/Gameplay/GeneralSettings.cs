@@ -33,6 +33,11 @@ namespace osu.Game.Overlays.Settings.Sections.Gameplay
                     LabelText = GraphicsSettingsStrings.HitLighting,
                     Current = config.GetBindable<bool>(OsuSetting.HitLighting)
                 },
+                new SettingsCheckbox
+                {
+                    LabelText = "Show \"Perfect\" judgements as \"MAX\"",
+                    Current = config.GetBindable<bool>(OsuSetting.DisplayPerfectAsMax)
+                },
             };
         }
     }
