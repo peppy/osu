@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Threading;
+using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
@@ -27,13 +29,13 @@ namespace osu.Game.Overlays.Profile.Header.Components
         }
 
         [BackgroundDependencyLoader]
-        private void load(LargeTextureStore textures, ILinkHandler? linkHandler)
+        private async Task load(LargeTextureStore textures, ILinkHandler? linkHandler, CancellationToken cancellationToken)
         {
             Child = new Sprite
             {
                 FillMode = FillMode.Fit,
                 RelativeSizeAxes = Axes.Both,
-                Texture = textures.Get(badge.ImageUrl),
+                Texture = await textures.GetAsync(badge.ImageUrl, cancellationToken).ConfigureAwait(true),
             };
 
             if (!string.IsNullOrEmpty(badge.Url))

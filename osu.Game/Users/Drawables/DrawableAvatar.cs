@@ -3,6 +3,8 @@
 
 #nullable disable
 
+using System.Threading;
+using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
@@ -31,14 +33,14 @@ namespace osu.Game.Users.Drawables
         }
 
         [BackgroundDependencyLoader]
-        private void load(LargeTextureStore textures)
+        private async Task load(LargeTextureStore textures, CancellationToken cancellationToken)
         {
             if (user != null && user.OnlineID > 1)
                 // TODO: The fallback here should not need to exist. Users should be looked up and populated via UserLookupCache or otherwise
                 // in remaining cases where this is required (chat tabs, local leaderboard), at which point this should be removed.
-                Texture = textures.Get((user as APIUser)?.AvatarUrl ?? $@"https://a.ppy.sh/{user.OnlineID}");
+                Texture = await textures.GetAsync((user as APIUser)?.AvatarUrl ?? $@"https://a.ppy.sh/{user.OnlineID}", cancellationToken).ConfigureAwait(true);
 
-            Texture ??= textures.Get(@"Online/avatar-guest");
+            Texture ??= await textures.GetAsync(@"Online/avatar-guest", cancellationToken).ConfigureAwait(true);
         }
 
         protected override void LoadComplete()

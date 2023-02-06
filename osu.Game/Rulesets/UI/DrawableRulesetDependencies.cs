@@ -183,6 +183,12 @@ namespace osu.Game.Rulesets.UI
             public override Texture Get(string name, WrapMode wrapModeS, WrapMode wrapModeT)
                 => primary.Get(name, wrapModeS, wrapModeT) ?? fallback.Get(name, wrapModeS, wrapModeT);
 
+            public override async Task<Texture> GetAsync(string name, WrapMode wrapModeS, WrapMode wrapModeT, CancellationToken cancellationToken = default)
+            {
+                return await primary.GetAsync(name, wrapModeS, wrapModeT, cancellationToken).ConfigureAwait(true)
+                       ?? await fallback.GetAsync(name, wrapModeS, wrapModeT, cancellationToken).ConfigureAwait(true);
+            }
+
             protected override void Dispose(bool disposing)
             {
                 base.Dispose(disposing);

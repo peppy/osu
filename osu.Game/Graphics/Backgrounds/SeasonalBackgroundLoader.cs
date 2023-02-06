@@ -5,6 +5,8 @@
 
 using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -108,9 +110,10 @@ namespace osu.Game.Graphics.Backgrounds
         }
 
         [BackgroundDependencyLoader]
-        private void load(LargeTextureStore textures)
+        private async Task load(LargeTextureStore textures, CancellationToken cancellationToken)
         {
-            Sprite.Texture = textures.Get(url) ?? textures.Get(fallback_texture_name);
+            Sprite.Texture = await textures.GetAsync(url, cancellationToken).ConfigureAwait(true) ??
+                             await textures.GetAsync(fallback_texture_name, cancellationToken).ConfigureAwait(true);
         }
 
         public override bool Equals(Background other)

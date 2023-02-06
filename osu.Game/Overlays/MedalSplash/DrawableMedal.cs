@@ -4,6 +4,8 @@
 #nullable disable
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using osu.Framework;
 using osuTK;
 using osu.Framework.Allocation;
@@ -120,10 +122,10 @@ namespace osu.Game.Overlays.MedalSplash
         }
 
         [BackgroundDependencyLoader]
-        private void load(OsuColour colours, TextureStore textures, LargeTextureStore largeTextures)
+        private async Task load(OsuColour colours, TextureStore textures, LargeTextureStore largeTextures, CancellationToken cancellationToken)
         {
-            medalSprite.Texture = largeTextures.Get(medal.ImageUrl);
-            medalGlow.Texture = textures.Get(@"MedalSplash/medal-glow");
+            medalSprite.Texture = await largeTextures.GetAsync(medal.ImageUrl, cancellationToken).ConfigureAwait(true);
+            medalGlow.Texture = await textures.GetAsync(@"MedalSplash/medal-glow", cancellationToken).ConfigureAwait(true);
             description.Colour = colours.BlueLight;
         }
 

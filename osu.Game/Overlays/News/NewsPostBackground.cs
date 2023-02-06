@@ -3,6 +3,8 @@
 
 #nullable disable
 
+using System.Threading;
+using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
@@ -21,9 +23,9 @@ namespace osu.Game.Overlays.News
         }
 
         [BackgroundDependencyLoader]
-        private void load(LargeTextureStore store)
+        private async Task load(LargeTextureStore textures, CancellationToken cancellationToken)
         {
-            Texture = store.Get(createUrl(sourceUrl));
+            Texture = await textures.GetAsync(createUrl(sourceUrl), cancellationToken).ConfigureAwait(true);
         }
 
         protected override void LoadComplete()
