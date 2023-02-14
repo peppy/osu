@@ -14,7 +14,8 @@ namespace osu.Game.Skinning
     {
         private SkinnableTargetComponentsContainer? content;
 
-        public SkinnableTarget Target { get; }
+        public GlobalSkinComponentLookup.LookupType Target { get; }
+
         public Ruleset? Ruleset { get; }
 
         public IBindableList<ISkinnableDrawable> Components => components;
@@ -27,7 +28,7 @@ namespace osu.Game.Skinning
 
         private CancellationTokenSource? cancellationSource;
 
-        public SkinnableTargetContainer(SkinnableTarget target, Ruleset? ruleset = null)
+        public SkinnableTargetContainer(GlobalSkinComponentLookup.LookupType target, Ruleset? ruleset = null)
         {
             if (ruleset == null && target.RequiresRuleset())
                 throw new InvalidOperationException($"Attempting to create a container for target \"{target}\" without any ruleset provided.");
@@ -45,7 +46,7 @@ namespace osu.Game.Skinning
             components.Clear();
             ComponentsLoaded = false;
 
-            content = CurrentSkin.GetDrawableComponent(new SkinnableTargetComponent(Target, Ruleset)) as SkinnableTargetComponentsContainer;
+            content = CurrentSkin.GetDrawableComponent(new GlobalSkinComponentLookup(Target, Ruleset)) as SkinnableTargetComponentsContainer;
 
             cancellationSource?.Cancel();
             cancellationSource = null;

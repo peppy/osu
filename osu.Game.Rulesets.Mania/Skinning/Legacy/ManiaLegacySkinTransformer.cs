@@ -75,11 +75,11 @@ namespace osu.Game.Rulesets.Mania.Skinning.Legacy
 
         public override Drawable GetDrawableComponent(ISkinComponent component)
         {
-            if (component is SkinnableTargetComponent targetComponent && targetComponent.Ruleset is ManiaRuleset)
+            if (component is GlobalSkinComponentLookup targetComponent && targetComponent.Ruleset is ManiaRuleset)
             {
-                switch (targetComponent.Target)
+                switch (targetComponent.Lookup)
                 {
-                    case SkinnableTarget.RulesetHUDComponents:
+                    case GlobalSkinComponentLookup.LookupType.RulesetHUDComponents:
                         var components = (SkinnableTargetComponentsContainer)base.GetDrawableComponent(targetComponent);
                         if (components != null)
                             return components;

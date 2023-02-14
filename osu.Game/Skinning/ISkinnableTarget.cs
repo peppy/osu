@@ -19,7 +19,7 @@ namespace osu.Game.Skinning
         /// <summary>
         /// The definition of this target.
         /// </summary>
-        SkinnableTarget Target { get; }
+        GlobalSkinComponentLookup.LookupType Target { get; }
 
         /// <summary>
         /// The ruleset which this target should load components for, or null if there's no specific ruleset for this target.

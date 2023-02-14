@@ -24,11 +24,11 @@ namespace osu.Game.Rulesets.Taiko.Skinning.Legacy
 
         public override Drawable? GetDrawableComponent(ISkinComponent component)
         {
-            if (component is SkinnableTargetComponent targetComponent && targetComponent.Ruleset is TaikoRuleset)
+            if (component is GlobalSkinComponentLookup targetComponent && targetComponent.Ruleset is TaikoRuleset)
             {
-                switch (targetComponent.Target)
+                switch (targetComponent.Lookup)
                 {
-                    case SkinnableTarget.RulesetHUDComponents:
+                    case GlobalSkinComponentLookup.LookupType.RulesetHUDComponents:
                         var components = (SkinnableTargetComponentsContainer?)base.GetDrawableComponent(targetComponent);
                         if (components != null)
                             return components;

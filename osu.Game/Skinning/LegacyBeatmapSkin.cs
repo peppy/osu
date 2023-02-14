@@ -45,11 +45,11 @@ namespace osu.Game.Skinning
 
         public override Drawable? GetDrawableComponent(ISkinComponent component)
         {
-            if (component is SkinnableTargetComponent targetComponent)
+            if (component is GlobalSkinComponentLookup targetComponent)
             {
-                switch (targetComponent.Target)
+                switch (targetComponent.Lookup)
                 {
-                    case SkinnableTarget.MainHUDComponents:
+                    case GlobalSkinComponentLookup.LookupType.MainHUDComponents:
                         // this should exist in LegacySkin instead, but there isn't a fallback skin for LegacySkins yet.
                         // therefore keep the check here until fallback default legacy skin is supported.
                         if (!this.HasFont(LegacyFont.Score))

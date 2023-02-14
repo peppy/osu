@@ -96,8 +96,8 @@ namespace osu.Game.Screens.Play
             Children = new Drawable[]
             {
                 CreateFailingLayer(),
-                mainComponents = new HUDComponentsContainer(SkinnableTarget.MainHUDComponents) { AlwaysPresent = true },
-                rulesetComponents = new HUDComponentsContainer(SkinnableTarget.RulesetHUDComponents, drawableRuleset.Ruleset) { AlwaysPresent = true },
+                mainComponents = new HUDComponentsContainer(GlobalSkinComponentLookup.LookupType.MainHUDComponents) { AlwaysPresent = true },
+                rulesetComponents = new HUDComponentsContainer(GlobalSkinComponentLookup.LookupType.RulesetHUDComponents, drawableRuleset.Ruleset) { AlwaysPresent = true },
                 topRightElements = new FillFlowContainer
                 {
                     Anchor = Anchor.TopRight,
@@ -381,7 +381,7 @@ namespace osu.Game.Screens.Play
             [Resolved]
             private OsuConfigManager config { get; set; }
 
-            public HUDComponentsContainer(SkinnableTarget target, [CanBeNull] Ruleset ruleset = null)
+            public HUDComponentsContainer(GlobalSkinComponentLookup.LookupType target, [CanBeNull] Ruleset ruleset = null)
                 : base(target, ruleset)
             {
                 RelativeSizeAxes = Axes.Both;
