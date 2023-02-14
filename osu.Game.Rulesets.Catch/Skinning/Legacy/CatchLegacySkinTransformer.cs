@@ -43,6 +43,17 @@ namespace osu.Game.Rulesets.Catch.Skinning.Legacy
                         }
 
                         return components;
+
+                    case GlobalSkinComponentLookup.LookupType.RulesetHUDComponents when targetComponent.Ruleset is CatchRuleset:
+                        components = (SkinnableTargetComponentsContainer?)base.GetDrawableComponent(targetComponent);
+
+                        if (components != null)
+                            return components;
+
+                        if (!this.HasFont(LegacyFont.Score))
+                            return null;
+
+                        return new SkinnableTargetComponentsContainer();
                 }
             }
 

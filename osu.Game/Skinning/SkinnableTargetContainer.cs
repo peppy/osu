@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Game.Rulesets;
 using osu.Game.Screens.Play.HUD;
 
 namespace osu.Game.Skinning
@@ -16,6 +17,8 @@ namespace osu.Game.Skinning
         private SkinnableTargetComponentsContainer? content;
 
         public GlobalSkinComponentLookup.LookupType Target { get; }
+
+        public Ruleset? Ruleset { get; }
 
         public IBindableList<ISkinnableDrawable> Components => components;
 
@@ -27,9 +30,13 @@ namespace osu.Game.Skinning
 
         private CancellationTokenSource? cancellationSource;
 
-        public SkinnableTargetContainer(GlobalSkinComponentLookup.LookupType target)
+        public SkinnableTargetContainer(GlobalSkinComponentLookup.LookupType target, Ruleset? ruleset = null)
         {
+            if (ruleset == null && target == GlobalSkinComponentLookup.LookupType.RulesetHUDComponents) // todo: move to extension method
+                throw new InvalidOperationException($"Attempting to create a container for target \"{target}\" without any ruleset provided.");
+
             Target = target;
+            Ruleset = ruleset;
         }
 
         public void Reload(SkinnableInfo[] skinnableInfo)
@@ -45,7 +52,7 @@ namespace osu.Game.Skinning
             });
         }
 
-        public void Reload() => Reload(CurrentSkin.GetDrawableComponent(new GlobalSkinComponentLookup(Target)) as SkinnableTargetComponentsContainer);
+        public void Reload() => Reload(CurrentSkin.GetDrawableComponent(new GlobalSkinComponentLookup(Target, Ruleset)) as SkinnableTargetComponentsContainer);
 
         public void Reload(SkinnableTargetComponentsContainer? componentsContainer)
         {

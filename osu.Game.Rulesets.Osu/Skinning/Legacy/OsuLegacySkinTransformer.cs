@@ -30,6 +30,22 @@ namespace osu.Game.Rulesets.Osu.Skinning.Legacy
 
         public override Drawable? GetDrawableComponent(ISkinComponentLookup lookup)
         {
+            if (lookup is GlobalSkinComponentLookup targetComponent && targetComponent.Ruleset is OsuRuleset)
+            {
+                switch (targetComponent.Lookup)
+                {
+                    case GlobalSkinComponentLookup.LookupType.RulesetHUDComponents:
+                        var components = (SkinnableTargetComponentsContainer?)base.GetDrawableComponent(targetComponent);
+                        if (components != null)
+                            return components;
+
+                        if (!this.HasFont(LegacyFont.Score))
+                            return null;
+
+                        return new SkinnableTargetComponentsContainer();
+                }
+            }
+
             if (lookup is OsuSkinComponentLookup osuComponent)
             {
                 switch (osuComponent.Component)

@@ -29,6 +29,22 @@ namespace osu.Game.Rulesets.Taiko.Skinning.Legacy
 
         public override Drawable? GetDrawableComponent(ISkinComponentLookup lookup)
         {
+            if (lookup is GlobalSkinComponentLookup targetComponent && targetComponent.Ruleset is TaikoRuleset)
+            {
+                switch (targetComponent.Lookup)
+                {
+                    case GlobalSkinComponentLookup.LookupType.RulesetHUDComponents:
+                        var components = (SkinnableTargetComponentsContainer?)base.GetDrawableComponent(targetComponent);
+                        if (components != null)
+                            return components;
+
+                        if (!this.HasFont(LegacyFont.Score))
+                            return null;
+
+                        return new SkinnableTargetComponentsContainer();
+                }
+            }
+
             if (lookup is GameplaySkinComponentLookup<HitResult>)
             {
                 // if a taiko skin is providing explosion sprites, hide the judgements completely

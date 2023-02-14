@@ -271,10 +271,13 @@ namespace osu.Game.Overlays.SkinEditor
 
                 content.Child = new SkinBlueprintContainer(targetScreen);
 
-                componentsSidebar.Child = new SkinComponentToolbox(getFirstTarget() as CompositeDrawable)
+                foreach (var target in availableTargets)
                 {
-                    RequestPlacement = placeComponent
-                };
+                    componentsSidebar.Add(new SkinComponentToolbox(target)
+                    {
+                        RequestPlacement = t => placeComponent(t, target)
+                    });
+                }
             }
         }
 
@@ -300,19 +303,17 @@ namespace osu.Game.Overlays.SkinEditor
             hasBegunMutating = true;
         }
 
-        private void placeComponent(Type type)
+        private void placeComponent(Type type, ISkinnableTarget target)
         {
             if (!(Activator.CreateInstance(type) is ISkinnableDrawable component))
                 throw new InvalidOperationException($"Attempted to instantiate a component for placement which was not an {typeof(ISkinnableDrawable)}.");
 
-            placeComponent(component);
+            placeComponent(component, target);
         }
 
-        private void placeComponent(ISkinnableDrawable component, bool applyDefaults = true)
+        private void placeComponent(ISkinnableDrawable component, ISkinnableTarget? target, bool applyDefaults = true)
         {
-            var targetContainer = getFirstTarget();
-
-            if (targetContainer == null)
+            if (target == null)
                 return;
 
             var drawableComponent = (Drawable)component;
@@ -322,10 +323,10 @@ namespace osu.Game.Overlays.SkinEditor
                 // give newly added components a sane starting location.
                 drawableComponent.Origin = Anchor.TopCentre;
                 drawableComponent.Anchor = Anchor.TopCentre;
-                drawableComponent.Y = targetContainer.DrawSize.Y / 2;
+                drawableComponent.Y = target.DrawSize.Y / 2;
             }
 
-            targetContainer.Add(component);
+            target.Add(component);
 
             SelectedComponents.Clear();
             SelectedComponents.Add(component);
@@ -440,7 +441,7 @@ namespace osu.Game.Overlays.SkinEditor
                     Position = skinnableTarget.ToLocalSpace(GetContainingInputManager().CurrentState.Mouse.Position),
                 };
 
-                placeComponent(sprite, false);
+                placeComponent(sprite, getFirstTarget(), false);
 
                 SkinSelectionHandler.ApplyClosestAnchor(sprite);
             });

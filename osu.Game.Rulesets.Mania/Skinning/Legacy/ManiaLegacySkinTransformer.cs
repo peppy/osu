@@ -11,6 +11,7 @@ using osu.Framework.Graphics;
 using osu.Game.Audio;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Mania.Beatmaps;
+using osu.Game.Rulesets.Mania.Skinning.Default;
 using osu.Game.Rulesets.Objects.Legacy;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Skinning;
@@ -76,6 +77,32 @@ namespace osu.Game.Rulesets.Mania.Skinning.Legacy
 
         public override Drawable GetDrawableComponent(ISkinComponentLookup lookup)
         {
+            if (lookup is GlobalSkinComponentLookup targetComponent && targetComponent.Ruleset is ManiaRuleset)
+            {
+                switch (targetComponent.Lookup)
+                {
+                    case GlobalSkinComponentLookup.LookupType.RulesetHUDComponents:
+                        var components = (SkinnableTargetComponentsContainer)base.GetDrawableComponent(targetComponent);
+                        if (components != null)
+                            return components;
+
+                        if (!this.HasFont(LegacyFont.Score))
+                            return null;
+
+                        return new SkinnableTargetComponentsContainer
+                        {
+                            Children = new Drawable[]
+                            {
+                                new DefaultManiaComboCounter
+                                {
+                                    Anchor = Anchor.Centre,
+                                    Origin = Anchor.Centre,
+                                }
+                            }
+                        };
+                }
+            }
+
             switch (lookup)
             {
                 case GameplaySkinComponentLookup<HitResult> resultComponent:

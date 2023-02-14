@@ -17,7 +17,6 @@ using osu.Framework.Logging;
 using osu.Game.Audio;
 using osu.Game.Database;
 using osu.Game.IO;
-using osu.Game.Screens.Play.HUD;
 
 namespace osu.Game.Skinning
 {
@@ -37,9 +36,9 @@ namespace osu.Game.Skinning
 
         public SkinConfiguration Configuration { get; set; }
 
-        public IDictionary<GlobalSkinComponentLookup.LookupType, SkinnableInfo[]> DrawableComponentInfo => drawableComponentInfo;
+        public IReadOnlyDictionary<GlobalSkinComponentLookup.LookupType, SkinnableTargetInfo> DrawableComponentInfo => drawableComponentInfo;
 
-        private readonly Dictionary<GlobalSkinComponentLookup.LookupType, SkinnableInfo[]> drawableComponentInfo = new Dictionary<GlobalSkinComponentLookup.LookupType, SkinnableInfo[]>();
+        private readonly Dictionary<GlobalSkinComponentLookup.LookupType, SkinnableTargetInfo> drawableComponentInfo = new Dictionary<GlobalSkinComponentLookup.LookupType, SkinnableTargetInfo>();
 
         public abstract ISample? GetSample(ISampleInfo sampleInfo);
 
@@ -119,12 +118,12 @@ namespace osu.Game.Skinning
                     jsonContent = jsonContent.Replace(@"osu.Game.Screens.Play.SongProgress", @"osu.Game.Screens.Play.HUD.DefaultSongProgress");
                     jsonContent = jsonContent.Replace(@"osu.Game.Screens.Play.HUD.LegacyComboCounter", @"osu.Game.Skinning.LegacyComboCounter");
 
-                    var deserializedContent = JsonConvert.DeserializeObject<IEnumerable<SkinnableInfo>>(jsonContent);
+                    var deserializedContent = JsonConvert.DeserializeObject<SkinnableTargetInfo>(jsonContent);
 
                     if (deserializedContent == null)
                         continue;
 
-                    DrawableComponentInfo[skinnableTarget] = deserializedContent.ToArray();
+                    drawableComponentInfo[skinnableTarget] = deserializedContent;
                 }
                 catch (Exception ex)
                 {
@@ -145,7 +144,7 @@ namespace osu.Game.Skinning
         /// <param name="targetContainer">The target container to reset.</param>
         public void ResetDrawableTarget(ISkinnableTarget targetContainer)
         {
-            DrawableComponentInfo.Remove(targetContainer.Target);
+            drawableComponentInfo.Remove(targetContainer.Target);
         }
 
         /// <summary>
@@ -154,7 +153,10 @@ namespace osu.Game.Skinning
         /// <param name="targetContainer">The target container to serialise to this skin.</param>
         public void UpdateDrawableTarget(ISkinnableTarget targetContainer)
         {
-            DrawableComponentInfo[targetContainer.Target] = targetContainer.CreateSkinnableInfo().ToArray();
+            if (!drawableComponentInfo.TryGetValue(targetContainer.Target, out var target))
+                drawableComponentInfo[targetContainer.Target] = target = new SkinnableTargetInfo();
+
+            target.Update(targetContainer.Ruleset, targetContainer.CreateSkinnableInfo().ToArray());
         }
 
         public virtual Drawable? GetDrawableComponent(ISkinComponentLookup lookup)
@@ -166,8 +168,10 @@ namespace osu.Game.Skinning
                     return this.GetAnimation(sprite.LookupName, false, false);
 
                 case GlobalSkinComponentLookup target:
-                    if (!DrawableComponentInfo.TryGetValue(target.Lookup, out var skinnableInfo))
+                    if (!DrawableComponentInfo.TryGetValue(target.Lookup, out var info) || !info.TryGetComponents(target.Ruleset, out var skinnableInfo))
                         return null;
+
+                    Debug.Assert(skinnableInfo != null);
 
                     var components = new List<Drawable>();
 
