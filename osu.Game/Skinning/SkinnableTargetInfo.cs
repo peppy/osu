@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using osu.Game.Rulesets;
-using osu.Game.Screens.Play.HUD;
 
 namespace osu.Game.Skinning
 {
