@@ -38,7 +38,7 @@ namespace osu.Game.Skinning
             Ruleset = ruleset;
         }
 
-        public void Reload(SkinnableInfo[] skinnableInfo)
+        public void Reload(SkinnableDrawableInfo[] skinnableInfo)
         {
             var drawables = new List<Drawable>();
 

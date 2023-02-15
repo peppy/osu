@@ -12,19 +12,19 @@ namespace osu.Game.Skinning
     [Serializable]
     public class SkinnableTargetInfo
     {
-        public IEnumerable<SkinnableInfo> AllComponents => DrawableComponentInfo.Values.SelectMany(i => i);
+        public IEnumerable<SkinnableDrawableInfo> AllComponents => DrawableComponentInfo.Values.SelectMany(i => i);
 
         [JsonProperty]
-        public Dictionary<string, SkinnableInfo[]> DrawableComponentInfo { get; set; } = new Dictionary<string, SkinnableInfo[]>();
+        public Dictionary<string, SkinnableDrawableInfo[]> DrawableComponentInfo { get; set; } = new Dictionary<string, SkinnableDrawableInfo[]>();
 
-        public bool TryGetComponents(Ruleset? ruleset, out SkinnableInfo[]? components) => DrawableComponentInfo.TryGetValue(ruleset?.ShortName ?? string.Empty, out components);
+        public bool TryGetComponents(Ruleset? ruleset, out SkinnableDrawableInfo[]? components) => DrawableComponentInfo.TryGetValue(ruleset?.ShortName ?? string.Empty, out components);
 
         public void Reset(Ruleset? ruleset)
         {
             DrawableComponentInfo.Remove(ruleset?.ShortName ?? string.Empty);
         }
 
-        public void Update(Ruleset? ruleset, SkinnableInfo[] components)
+        public void Update(Ruleset? ruleset, SkinnableDrawableInfo[] components)
         {
             DrawableComponentInfo[ruleset?.ShortName ?? string.Empty] = components;
         }

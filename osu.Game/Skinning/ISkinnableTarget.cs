@@ -31,10 +31,10 @@ namespace osu.Game.Skinning
         IBindableList<ISkinnableDrawable> Components { get; }
 
         /// <summary>
-        /// Serialise non-ruleset-specific children as <see cref="SkinnableInfo"/>.
+        /// Serialise non-ruleset-specific children as <see cref="SkinnableDrawableInfo"/>.
         /// </summary>
         /// <returns>The serialised content.</returns>
-        IEnumerable<SkinnableInfo> CreateSkinnableInfo() => Components.Select(d => ((Drawable)d).CreateSkinnableInfo());
+        IEnumerable<SkinnableDrawableInfo> CreateSkinnableInfo() => Components.Select(d => ((Drawable)d).CreateSkinnableInfo());
 
         /// <summary>
         /// Reload this target from the current skin.
@@ -44,7 +44,7 @@ namespace osu.Game.Skinning
         /// <summary>
         /// Reload this target from the provided skinnable information.
         /// </summary>
-        void Reload(SkinnableInfo[] skinnableInfo);
+        void Reload(SkinnableDrawableInfo[] skinnableInfo);
 
         /// <summary>
         /// Add a new skinnable component to this target.
