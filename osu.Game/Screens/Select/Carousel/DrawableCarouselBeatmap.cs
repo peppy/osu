@@ -64,6 +64,9 @@ namespace osu.Game.Screens.Select.Carousel
         private BeatmapDifficultyCache difficultyCache { get; set; } = null!;
 
         [Resolved]
+        private BeatmapManager? beatmapManager { get; set; }
+
+        [Resolved]
         private ManageCollectionsDialog? manageCollectionsDialog { get; set; }
 
         [Resolved]
@@ -72,6 +75,8 @@ namespace osu.Game.Screens.Select.Carousel
         private IBindable<StarDifficulty?> starDifficultyBindable = null!;
         private CancellationTokenSource? starDifficultyCancellationSource;
 
+        private OsuSpriteText difficultyText = null!;
+
         public DrawableCarouselBeatmap(CarouselBeatmap panel)
         {
             beatmapInfo = panel.BeatmapInfo;
@@ -79,7 +84,7 @@ namespace osu.Game.Screens.Select.Carousel
         }
 
         [BackgroundDependencyLoader]
-        private void load(BeatmapManager? manager, SongSelect? songSelect)
+        private void load(SongSelect? songSelect)
         {
             Header.Height = height;
 
@@ -89,8 +94,8 @@ namespace osu.Game.Screens.Select.Carousel
                 selectRequested = b => songSelect.FinaliseSelection(b);
             }
 
-            if (manager != null)
-                hideRequested = manager.Hide;
+            if (beatmapManager != null)
+                hideRequested = beatmapManager.Hide;
 
             Header.Children = new Drawable[]
             {
@@ -133,7 +138,7 @@ namespace osu.Game.Screens.Select.Carousel
                                     AutoSizeAxes = Axes.Both,
                                     Children = new[]
                                     {
-                                        new OsuSpriteText
+                                        difficultyText = new OsuSpriteText
                                         {
                                             Text = beatmapInfo.DifficultyName,
                                             Font = OsuFont.GetFont(size: 20),
@@ -215,6 +220,18 @@ namespace osu.Game.Screens.Select.Carousel
                     starCounter.Current = (float)(d.NewValue?.Stars ?? 0);
                     if (d.NewValue != null)
                         difficultyIcon.Current.Value = d.NewValue.Value;
+
+                    // We know at this point that the beatmap has been loaded, so let's use that knowledge to query the variant quickly.
+                    if (beatmapManager != null)
+                    {
+                        var ruleset = beatmapInfo.Ruleset.CreateInstance();
+                        var beatmap = beatmapManager.GetWorkingBeatmap(beatmapInfo).GetPlayableBeatmap(ruleset.RulesetInfo);
+
+                        string variant = ruleset.GetVariantName(beatmap);
+
+                        if (!string.IsNullOrEmpty(variant))
+                            difficultyText.Text = $"{beatmapInfo.DifficultyName} ({variant})";
+                    }
                 }, true);
             }
 
