@@ -423,7 +423,7 @@ namespace osu.Game
             // We don't want this for now, as the intention of beatmapClock is to be a read-only source for beat sync components.
             //
             // Encapsulating in a FramedClock will avoid any mutations.
-            var framedClock = new FramedClock(beatmap.Track);
+            var framedClock = new FramedClock(beatmap.Track, false);
 
             beatmapClock.ChangeSource(framedClock);
         }
