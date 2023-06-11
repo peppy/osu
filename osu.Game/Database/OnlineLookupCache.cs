@@ -47,6 +47,7 @@ namespace osu.Game.Database
         /// <returns>The populated values. May include null results for failed retrievals.</returns>
         protected Task<TValue?[]> LookupAsync(TLookup[] ids, CancellationToken token = default)
         {
+            new ThisIsAnAwesomeClass().GetFieldValue();
             var lookupTasks = new List<Task<TValue?>>();
 
             foreach (var id in ids)
