@@ -35,7 +35,7 @@ namespace osu.Game.Rulesets.Edit
     public abstract partial class DistancedHitObjectComposer<TObject> : HitObjectComposer<TObject>, IDistanceSnapProvider, IScrollBindingHandler<GlobalAction>
         where TObject : HitObject
     {
-        private const float adjust_step = 0.1f;
+        private const float adjust_step = 0.01f;
 
         public BindableDouble DistanceSpacingMultiplier { get; } = new BindableDouble(1.0)
         {
@@ -206,7 +206,7 @@ namespace osu.Game.Rulesets.Edit
             {
                 case GlobalAction.EditorIncreaseDistanceSpacing:
                 case GlobalAction.EditorDecreaseDistanceSpacing:
-                    return AdjustDistanceSpacing(e.Action, adjust_step);
+                    return AdjustDistanceSpacing(e);
             }
 
             return false;
@@ -222,21 +222,35 @@ namespace osu.Game.Rulesets.Edit
             {
                 case GlobalAction.EditorIncreaseDistanceSpacing:
                 case GlobalAction.EditorDecreaseDistanceSpacing:
-                    return AdjustDistanceSpacing(e.Action, e.ScrollAmount * adjust_step);
+                    return AdjustDistanceSpacing(e);
             }
 
             return false;
         }
 
-        protected virtual bool AdjustDistanceSpacing(GlobalAction action, float amount)
+        protected virtual bool AdjustDistanceSpacing(KeyBindingEvent<GlobalAction> keyBindingEvent)
         {
             if (DistanceSpacingMultiplier.Disabled)
                 return false;
 
-            if (action == GlobalAction.EditorIncreaseDistanceSpacing)
-                DistanceSpacingMultiplier.Value += amount;
-            else if (action == GlobalAction.EditorDecreaseDistanceSpacing)
-                DistanceSpacingMultiplier.Value -= amount;
+            float amount = adjust_step;
+
+            if (keyBindingEvent is KeyBindingScrollEvent<GlobalAction> scrollEvent)
+                amount *= scrollEvent.ScrollAmount;
+
+            if (keyBindingEvent.ShiftPressed)
+                amount *= 10;
+
+            switch (keyBindingEvent.Action)
+            {
+                case GlobalAction.EditorIncreaseDistanceSpacing:
+                    DistanceSpacingMultiplier.Value += amount;
+                    break;
+
+                case GlobalAction.EditorDecreaseDistanceSpacing:
+                    DistanceSpacingMultiplier.Value -= amount;
+                    break;
+            }
 
             DistanceSnapToggle.Value = TernaryState.True;
             return true;
