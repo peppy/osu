@@ -131,10 +131,7 @@ namespace osu.Game.Screens.Ranking.Statistics
 
                 InternalChild = new GridContainer
                 {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
                     RelativeSizeAxes = Axes.Both,
-                    Width = 0.8f,
                     Content = new[]
                     {
                         new Drawable[]
