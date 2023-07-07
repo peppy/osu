@@ -127,7 +127,7 @@ namespace osu.Game.Screens.Ranking.Statistics
 
                 Container axisFlow;
 
-                const float axis_font_size = 12;
+                Padding = new MarginPadding { Horizontal = 5 };
 
                 InternalChild = new GridContainer
                 {
@@ -147,7 +147,7 @@ namespace osu.Game.Screens.Ranking.Statistics
                             axisFlow = new Container
                             {
                                 RelativeSizeAxes = Axes.X,
-                                Height = axis_font_size,
+                                Height = StatisticItem.FONT_SIZE,
                             }
                         },
                     },
@@ -167,7 +167,7 @@ namespace osu.Game.Screens.Ranking.Statistics
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
                     Text = "0",
-                    Font = OsuFont.GetFont(size: axis_font_size, weight: FontWeight.SemiBold)
+                    Font = OsuFont.GetFont(size: StatisticItem.FONT_SIZE, weight: FontWeight.SemiBold)
                 });
 
                 for (int i = 1; i <= axis_points; i++)
@@ -184,7 +184,7 @@ namespace osu.Game.Screens.Ranking.Statistics
                         X = -position / 2,
                         Alpha = alpha,
                         Text = axisValue.ToString("-0"),
-                        Font = OsuFont.GetFont(size: axis_font_size, weight: FontWeight.SemiBold)
+                        Font = OsuFont.GetFont(size: StatisticItem.FONT_SIZE, weight: FontWeight.SemiBold)
                     });
 
                     axisFlow.Add(new OsuSpriteText
@@ -195,7 +195,7 @@ namespace osu.Game.Screens.Ranking.Statistics
                         X = position / 2,
                         Alpha = alpha,
                         Text = axisValue.ToString("+0"),
-                        Font = OsuFont.GetFont(size: axis_font_size, weight: FontWeight.SemiBold)
+                        Font = OsuFont.GetFont(size: StatisticItem.FONT_SIZE, weight: FontWeight.SemiBold)
                     });
                 }
             }
