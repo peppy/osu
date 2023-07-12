@@ -117,6 +117,9 @@ namespace osu.Game.Rulesets.Taiko
 
             if (mods.HasFlagFast(LegacyMods.Random))
                 yield return new TaikoModRandom();
+
+            if (mods.HasFlagFast(LegacyMods.ScoreV2))
+                yield return new ModScoreV2();
         }
 
         public override LegacyMods ConvertToLegacyMods(Mod[] mods)
@@ -175,6 +178,12 @@ namespace osu.Game.Rulesets.Taiko
                         new MultiMod(new ModWindUp(), new ModWindDown()),
                         new TaikoModMuted(),
                         new ModAdaptiveSpeed()
+                    };
+
+                case ModType.System:
+                    return new Mod[]
+                    {
+                        new ModScoreV2(),
                     };
 
                 default:

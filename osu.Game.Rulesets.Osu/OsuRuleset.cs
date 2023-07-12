@@ -114,6 +114,9 @@ namespace osu.Game.Rulesets.Osu
 
             if (mods.HasFlagFast(LegacyMods.TouchDevice))
                 yield return new OsuModTouchDevice();
+
+            if (mods.HasFlagFast(LegacyMods.ScoreV2))
+                yield return new ModScoreV2();
         }
 
         public override LegacyMods ConvertToLegacyMods(Mod[] mods)
@@ -213,6 +216,7 @@ namespace osu.Game.Rulesets.Osu
                     return new Mod[]
                     {
                         new OsuModTouchDevice(),
+                        new ModScoreV2(),
                     };
 
                 default:
