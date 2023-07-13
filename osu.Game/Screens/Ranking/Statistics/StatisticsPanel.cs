@@ -130,6 +130,8 @@ namespace osu.Game.Screens.Ranking.Statistics
                         RelativeSizeAxes = Axes.Both,
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
+                        Masking = false,
+                        ScrollbarOverlapsContent = false,
                         Alpha = 0,
                         Children = new[]
                         {
@@ -153,7 +155,7 @@ namespace osu.Game.Screens.Ranking.Statistics
                             continue;
                         }
 
-                        flow.Add(new StatisticContainer(item)
+                        flow.Add(new StatisticItemContainer(item)
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
