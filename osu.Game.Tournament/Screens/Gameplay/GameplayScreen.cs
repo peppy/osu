@@ -3,6 +3,8 @@
 
 #nullable disable
 
+using System.Collections.Specialized;
+using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -10,7 +12,9 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Threading;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Online.Rooms;
 using osu.Game.Overlays.Settings;
+using osu.Game.Screens.OnlinePlay.Multiplayer;
 using osu.Game.Tournament.Components;
 using osu.Game.Tournament.IPC;
 using osu.Game.Tournament.Models;
@@ -36,6 +40,15 @@ namespace osu.Game.Tournament.Screens.Gameplay
         private TournamentMatchChatDisplay chat { get; set; }
 
         private Drawable chroma;
+
+        private TournamentMatchScoreDisplay scoreDisplay;
+
+        private TourneyState lastState;
+        private MatchHeader header;
+        private SettingsTextBox roomNameFilter;
+
+        private MultiplayerRoomManager roomManager;
+        private SettingsDropdown<Room> rooms;
 
         [BackgroundDependencyLoader]
         private void load(LadderInfo ladder, MatchIPCInfo ipc)
@@ -120,10 +133,18 @@ namespace osu.Game.Tournament.Screens.Gameplay
                             LabelText = "Players per team",
                             Current = LadderInfo.PlayersPerTeam,
                             KeyboardStep = 1,
-                        }
+                        },
+                        roomNameFilter = new SettingsTextBox
+                        {
+                            LabelText = "Room name filter",
+                        },
+                        rooms = new SettingsDropdown<Room>()
                     }
-                }
+                },
+                roomManager = new MultiplayerRoomManager(),
             });
+
+            roomManager.Rooms.BindCollectionChanged(roomsChanged, true);
 
             ladder.ChromaKeyWidth.BindValueChanged(width => chroma.Width = width.NewValue, true);
 
@@ -132,6 +153,11 @@ namespace osu.Game.Tournament.Screens.Gameplay
                 warmupButton.Alpha = !w.NewValue ? 0.5f : 1;
                 header.ShowScores = !w.NewValue;
             }, true);
+        }
+
+        private void roomsChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            rooms.Items = roomManager.Rooms.Where(r => r.Name.Value.Contains(roomNameFilter.Current.Value)).ToArray();
         }
 
         protected override void LoadComplete()
@@ -155,11 +181,6 @@ namespace osu.Game.Tournament.Screens.Gameplay
 
         private ScheduledDelegate scheduledScreenChange;
         private ScheduledDelegate scheduledContract;
-
-        private TournamentMatchScoreDisplay scoreDisplay;
-
-        private TourneyState lastState;
-        private MatchHeader header;
 
         private void contract()
         {

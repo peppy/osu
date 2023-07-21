@@ -14,6 +14,8 @@ using osu.Framework.Testing;
 using osu.Framework.Threading;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Screens;
+using osu.Game.Screens.OnlinePlay.Multiplayer;
 using osu.Game.Tournament.Components;
 using osu.Game.Tournament.Screens;
 using osu.Game.Tournament.Screens.Drawings;
@@ -104,7 +106,8 @@ namespace osu.Game.Tournament
                                 new SeedingScreen(),
                                 new DrawingsScreen(),
                                 new GameplayScreen(),
-                                new TeamWinScreen()
+                                new TeamWinScreen(),
+                                new TourneyMultiplayer()
                             }
                         },
                         chatContainer = new Container
@@ -147,6 +150,7 @@ namespace osu.Game.Tournament
                                 new Separator(),
                                 new ScreenButton(typeof(MapPoolScreen), Key.M) { Text = "Map Pool", RequestSelection = SetScreen },
                                 new ScreenButton(typeof(GameplayScreen), Key.G) { Text = "Gameplay", RequestSelection = SetScreen },
+                                new ScreenButton(typeof(TourneyMultiplayer), Key.L) { Text = "Lazer Gameplay", RequestSelection = SetScreen },
                                 new Separator(),
                                 new ScreenButton(typeof(TeamWinScreen), Key.W) { Text = "Win", RequestSelection = SetScreen },
                                 new Separator(),
@@ -318,6 +322,21 @@ namespace osu.Game.Tournament
                     BackgroundColour = isSelected ? Color4.SkyBlue : OsuColour.Gray(0.2f);
                     SpriteText.Colour = isSelected ? Color4.Black : Color4.White;
                 }
+            }
+        }
+
+        public partial class TourneyMultiplayer : TournamentScreen
+        {
+            private OsuScreenStack stack;
+
+            [BackgroundDependencyLoader]
+            private void load()
+            {
+                RelativeSizeAxes = Axes.Both;
+
+                AddInternal(stack = new OsuScreenStack());
+
+                stack.Push(new Multiplayer());
             }
         }
     }
