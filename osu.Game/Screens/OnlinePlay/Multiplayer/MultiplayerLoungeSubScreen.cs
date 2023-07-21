@@ -5,9 +5,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using osu.Framework.Allocation;
-using osu.Framework.Bindables;
 using osu.Framework.Logging;
 using osu.Framework.Screens;
 using osu.Framework.Graphics;
@@ -88,38 +86,6 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
             }
 
             base.OpenNewRoom(room);
-        }
-
-        private partial class MultiplayerListingPollingComponent : ListingPollingComponent
-        {
-            [Resolved]
-            private MultiplayerClient client { get; set; }
-
-            private readonly IBindable<bool> isConnected = new Bindable<bool>();
-
-            [BackgroundDependencyLoader]
-            private void load()
-            {
-                isConnected.BindTo(client.IsConnected);
-                isConnected.BindValueChanged(_ => Scheduler.AddOnce(poll), true);
-            }
-
-            private void poll()
-            {
-                if (isConnected.Value && IsLoaded)
-                    PollImmediately();
-            }
-
-            protected override Task Poll()
-            {
-                if (!isConnected.Value)
-                    return Task.CompletedTask;
-
-                if (client.Room != null)
-                    return Task.CompletedTask;
-
-                return base.Poll();
-            }
         }
     }
 }
