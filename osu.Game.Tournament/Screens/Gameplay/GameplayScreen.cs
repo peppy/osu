@@ -14,6 +14,8 @@ using osu.Framework.Threading;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Online.Rooms;
 using osu.Game.Overlays.Settings;
+using osu.Game.Screens.OnlinePlay;
+using osu.Game.Screens.OnlinePlay.Lounge.Components;
 using osu.Game.Screens.OnlinePlay.Multiplayer;
 using osu.Game.Tournament.Components;
 using osu.Game.Tournament.IPC;
@@ -47,8 +49,12 @@ namespace osu.Game.Tournament.Screens.Gameplay
         private MatchHeader header;
         private SettingsTextBox roomNameFilter;
 
-        private MultiplayerRoomManager roomManager;
+        [Cached(typeof(IRoomManager))]
+        private MultiplayerRoomManager roomManager = new MultiplayerRoomManager();
+
         private SettingsDropdown<Room> rooms;
+
+        private MultiplayerListingPollingComponent pollingComponent;
 
         [BackgroundDependencyLoader]
         private void load(LadderInfo ladder, MatchIPCInfo ipc)
@@ -141,7 +147,21 @@ namespace osu.Game.Tournament.Screens.Gameplay
                         rooms = new SettingsDropdown<Room>()
                     }
                 },
-                roomManager = new MultiplayerRoomManager(),
+                roomManager,
+                pollingComponent = new MultiplayerListingPollingComponent
+                {
+                    TimeBetweenPolls = { Value = 1000 },
+                    Filter = { Value = new FilterCriteria() }
+                }
+            });
+
+            roomNameFilter.Current.BindValueChanged(textFilter =>
+            {
+                pollingComponent.Filter.Value = new FilterCriteria
+                {
+                    Category = "realtime",
+                    SearchString = textFilter.NewValue,
+                };
             });
 
             roomManager.Rooms.BindCollectionChanged(roomsChanged, true);
