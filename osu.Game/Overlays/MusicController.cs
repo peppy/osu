@@ -138,6 +138,7 @@ namespace osu.Game.Overlays
             if (restart)
                 CurrentTrack.RestartAsync();
             else if (!IsPlaying)
+
                 CurrentTrack.StartAsync();
 
             return true;
