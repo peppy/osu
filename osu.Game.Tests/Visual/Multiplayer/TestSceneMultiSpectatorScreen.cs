@@ -79,6 +79,18 @@ namespace osu.Game.Tests.Visual.Multiplayer
         }
 
         [Test]
+        public void TestGeneral()
+        {
+            int[] userIds = getPlayerIds(4);
+
+            start(userIds);
+            loadSpectateScreen();
+
+            sendFrames(userIds, 1000);
+            AddWaitStep("wait a bit", 2000);
+        }
+
+        [Test]
         public void TestDelayedStart()
         {
             AddStep("start players silently", () =>
