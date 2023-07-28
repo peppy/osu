@@ -12,8 +12,11 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
 using osu.Framework.Testing;
 using osu.Framework.Threading;
+using osu.Game.Configuration;
 using osu.Game.Graphics;
+using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Overlays.SkinEditor;
 using osu.Game.Tournament.Components;
 using osu.Game.Tournament.Screens;
 using osu.Game.Tournament.Screens.Drawings;
@@ -35,7 +38,8 @@ namespace osu.Game.Tournament
     [Cached]
     public partial class TournamentSceneManager : CompositeDrawable
     {
-        private Container screens;
+        public ScalingContainer ScreenContainer { get; private set; }
+
         private TourneyVideo video;
 
         public const int CONTROL_AREA_WIDTH = 200;
@@ -52,6 +56,8 @@ namespace osu.Game.Tournament
 
         private Container chatContainer;
         private FillFlowContainer buttons;
+
+        private SkinEditorOverlay skinEditor;
 
         public TournamentSceneManager()
         {
@@ -87,7 +93,7 @@ namespace osu.Game.Tournament
                             Loop = true,
                             RelativeSizeAxes = Axes.Both,
                         },
-                        screens = new Container
+                        ScreenContainer = new ScalingContainer(ScalingMode.ExcludeOverlays)
                         {
                             RelativeSizeAxes = Axes.Both,
                             Children = new Drawable[]
@@ -107,6 +113,7 @@ namespace osu.Game.Tournament
                                 new TeamWinScreen()
                             }
                         },
+                        skinEditor = new SkinEditorOverlay(ScreenContainer),
                         chatContainer = new Container
                         {
                             RelativeSizeAxes = Axes.Both,
@@ -134,6 +141,7 @@ namespace osu.Game.Tournament
                             Children = new Drawable[]
                             {
                                 new ScreenButton(typeof(SetupScreen)) { Text = "Setup", RequestSelection = SetScreen },
+                                new ScreenButton(typeof(SkinEditorOverlay)) { Text = "Edit layout", RequestSelection = _ => skinEditor.ToggleVisibility() },
                                 new Separator(),
                                 new ScreenButton(typeof(TeamEditorScreen)) { Text = "Team Editor", RequestSelection = SetScreen },
                                 new ScreenButton(typeof(RoundEditorScreen)) { Text = "Rounds Editor", RequestSelection = SetScreen },
@@ -158,7 +166,7 @@ namespace osu.Game.Tournament
                 },
             };
 
-            foreach (var drawable in screens)
+            foreach (var drawable in ScreenContainer)
                 drawable.Hide();
 
             SetScreen(typeof(SetupScreen));
@@ -176,16 +184,18 @@ namespace osu.Game.Tournament
             currentScreen?.Hide();
             currentScreen = null;
 
-            screens.Add(temporaryScreen = screen);
+            ScreenContainer.Add(temporaryScreen = screen);
         }
 
         public void SetScreen(Type screenType)
         {
             temporaryScreen?.Expire();
 
-            var target = screens.FirstOrDefault(s => s.GetType() == screenType);
+            var target = ScreenContainer.FirstOrDefault(s => s.GetType() == screenType);
 
             if (target == null || currentScreen == target) return;
+
+            skinEditor.SetTarget(target);
 
             if (scheduledHide?.Completed == false)
             {
@@ -210,7 +220,7 @@ namespace osu.Game.Tournament
                 video.Show();
             }
 
-            screens.ChangeChildDepth(currentScreen, depth--);
+            ScreenContainer.ChangeChildDepth(currentScreen, depth--);
             currentScreen.Show();
 
             switch (currentScreen)

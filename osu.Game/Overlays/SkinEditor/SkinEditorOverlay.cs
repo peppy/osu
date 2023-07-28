@@ -35,9 +35,9 @@ namespace osu.Game.Overlays.SkinEditor
         public readonly EditorClipboard Clipboard = new EditorClipboard();
 
         [Resolved]
-        private OsuGame game { get; set; } = null!;
+        private OsuGameBase game { get; set; } = null!;
 
-        private OsuScreen? lastTargetScreen;
+        private Drawable? lastTargetScreen;
 
         private Vector2 lastDrawSize;
 
@@ -142,15 +142,15 @@ namespace osu.Game.Overlays.SkinEditor
             {
                 Scheduler.AddOnce(updateScreenSizing);
 
-                game.Toolbar.Hide();
-                game.CloseAllOverlays();
+                (game as OsuGame)?.Toolbar.Hide();
+                (game as OsuGame)?.CloseAllOverlays();
             }
             else
             {
                 scalingContainer.SetCustomRect(null);
 
-                if (lastTargetScreen?.HideOverlaysOnEnter != true)
-                    game.Toolbar.Show();
+                if ((lastTargetScreen as OsuScreen)?.HideOverlaysOnEnter != true)
+                    (game as OsuGame)?.Toolbar.Show();
             }
         }
 
@@ -161,7 +161,7 @@ namespace osu.Game.Overlays.SkinEditor
         /// <summary>
         /// Set a new target screen which will be used to find skinnable components.
         /// </summary>
-        public void SetTarget(OsuScreen screen)
+        public void SetTarget(Drawable screen)
         {
             lastTargetScreen = screen;
 
@@ -174,7 +174,7 @@ namespace osu.Game.Overlays.SkinEditor
             Scheduler.AddOnce(setTarget, screen);
         }
 
-        private void setTarget(OsuScreen? target)
+        private void setTarget(Drawable? target)
         {
             if (target == null)
                 return;
