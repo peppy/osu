@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Game.Skinning;
 using osuTK;
 using osuTK.Graphics;
 
@@ -14,7 +15,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
     /// <summary>
     /// A grid of players playing the multiplayer match.
     /// </summary>
-    public partial class PlayerGrid : CompositeDrawable
+    public partial class PlayerGrid : CompositeDrawable, ISerialisableDrawable
     {
         public const float ANIMATION_DELAY = 400;
 
@@ -190,5 +191,9 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
                 Origin = Anchor.Centre;
             }
         }
+
+        public bool UsesFixedAnchor { get; set; }
+
+        public bool IsEditable => false;
     }
 }

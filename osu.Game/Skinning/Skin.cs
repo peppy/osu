@@ -18,6 +18,8 @@ using osu.Framework.Logging;
 using osu.Game.Audio;
 using osu.Game.Database;
 using osu.Game.IO;
+using osu.Game.Online.Multiplayer;
+using osu.Game.Screens.OnlinePlay.Multiplayer.Spectate;
 
 namespace osu.Game.Skinning
 {
@@ -194,16 +196,37 @@ namespace osu.Game.Skinning
 
                 case SkinComponentsContainerLookup containerLookup:
 
-                    // It is important to return null if the user has not configured this yet.
-                    // This allows skin transformers the opportunity to provide default components.
-                    if (!LayoutInfos.TryGetValue(containerLookup.Target, out var layoutInfo)) return null;
-                    if (!layoutInfo.TryGetDrawableInfo(containerLookup.Ruleset, out var drawableInfos)) return null;
+                    if (!LayoutInfos.TryGetValue(containerLookup.Target, out var layoutInfo)) return getDefault(containerLookup.Target);
+                    if (!layoutInfo.TryGetDrawableInfo(containerLookup.Ruleset, out var drawableInfos)) return getDefault(containerLookup.Target);
 
                     return new Container
                     {
                         RelativeSizeAxes = Axes.Both,
                         ChildrenEnumerable = drawableInfos.Select(i => i.CreateInstance())
                     };
+            }
+
+            return null;
+        }
+
+        private Drawable? getDefault(SkinComponentsContainerLookup.TargetArea target)
+        {
+            // It is important to return null if the user has not configured this yet.
+            // This allows skin transformers the opportunity to provide default components.
+            //
+            // The only exceptions are target areas which are considered "game-wide" and never have skin defaults.
+
+            switch (target)
+            {
+                case SkinComponentsContainerLookup.TargetArea.MultiplayerSpectator:
+                    return new DefaultSkinComponentsContainer(container =>
+                    {
+                        container.Children = new Drawable[]
+                        {
+                            new MultiSpectatorLeaderboard(Array.Empty<MultiplayerRoomUser>()),
+                            new PlayerGrid()
+                        };
+                    });
             }
 
             return null;

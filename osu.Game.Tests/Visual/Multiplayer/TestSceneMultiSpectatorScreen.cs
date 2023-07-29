@@ -17,8 +17,11 @@ using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Multiplayer.MatchTypes.TeamVersus;
+using osu.Game.Overlays;
+using osu.Game.Overlays.SkinEditor;
 using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.UI;
+using osu.Game.Screens.Edit;
 using osu.Game.Screens.OnlinePlay.Multiplayer.Spectate;
 using osu.Game.Screens.Play;
 using osu.Game.Screens.Play.HUD;
@@ -32,6 +35,12 @@ namespace osu.Game.Tests.Visual.Multiplayer
 {
     public partial class TestSceneMultiSpectatorScreen : MultiplayerTestScene
     {
+        [Cached]
+        public readonly EditorClipboard Clipboard = new EditorClipboard();
+
+        [Cached]
+        private readonly OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Blue);
+
         [Resolved]
         private OsuGameBase game { get; set; } = null!;
 
@@ -76,6 +85,24 @@ namespace osu.Game.Tests.Visual.Multiplayer
 
             sendFrames(userIds, 1000);
             AddWaitStep("wait a bit", 20);
+        }
+
+        [Test]
+        public void TestSkinning()
+        {
+            int[] userIds = getPlayerIds(4);
+
+            start(userIds);
+            loadSpectateScreen();
+
+            AddStep("load skin editor", () =>
+            {
+                spectatorScreen.ScaleTo(0.4f);
+                LoadComponentAsync(new SkinEditor(spectatorScreen), Add);
+            });
+
+            sendFrames(userIds, 1000);
+            AddWaitStep("wait a bit", 2000);
         }
 
         [Test]

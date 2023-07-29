@@ -2,21 +2,20 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Collections.Specialized;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
 using osu.Game.Graphics;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Rooms;
 using osu.Game.Online.Spectator;
 using osu.Game.Screens.Play;
-using osu.Game.Screens.Play.HUD;
 using osu.Game.Screens.Spectate;
+using osu.Game.Skinning;
 using osu.Game.Users;
-using osuTK;
 
 namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
 {
@@ -48,15 +47,15 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
 
         private IAggregateAudioAdjustment? boundAdjustments;
 
-        private readonly PlayerArea[] instances;
+        private readonly PlayerArea?[] instances;
         private MasterGameplayClockContainer masterClockContainer = null!;
         private SpectatorSyncManager syncManager = null!;
-        private PlayerGrid grid = null!;
-        private MultiSpectatorLeaderboard leaderboard = null!;
         private PlayerArea? currentAudioSource;
 
         private readonly Room room;
         private readonly MultiplayerRoomUser[] users;
+
+        private SkinComponentsContainer skinComponents = null!;
 
         /// <summary>
         /// Creates a new <see cref="MultiSpectatorScreen"/>.
@@ -75,52 +74,14 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
         [BackgroundDependencyLoader]
         private void load()
         {
-            FillFlowContainer leaderboardFlow;
-            Container scoreDisplayContainer;
-
             InternalChildren = new Drawable[]
             {
                 masterClockContainer = new MasterGameplayClockContainer(Beatmap.Value, 0)
                 {
-                    Child = new GridContainer
+                    Child = skinComponents = new SkinComponentsContainer(new SkinComponentsContainerLookup(SkinComponentsContainerLookup.TargetArea.MultiplayerSpectator))
                     {
                         RelativeSizeAxes = Axes.Both,
-                        RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
-                        Content = new[]
-                        {
-                            new Drawable[]
-                            {
-                                scoreDisplayContainer = new Container
-                                {
-                                    RelativeSizeAxes = Axes.X,
-                                    AutoSizeAxes = Axes.Y
-                                },
-                            },
-                            new Drawable[]
-                            {
-                                new GridContainer
-                                {
-                                    RelativeSizeAxes = Axes.Both,
-                                    ColumnDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
-                                    Content = new[]
-                                    {
-                                        new Drawable[]
-                                        {
-                                            leaderboardFlow = new FillFlowContainer
-                                            {
-                                                Anchor = Anchor.CentreLeft,
-                                                Origin = Anchor.CentreLeft,
-                                                AutoSizeAxes = Axes.Both,
-                                                Direction = FillDirection.Vertical,
-                                                Spacing = new Vector2(5)
-                                            },
-                                            grid = new PlayerGrid { RelativeSizeAxes = Axes.Both }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    },
                 },
                 syncManager = new SpectatorSyncManager(masterClockContainer)
                 {
@@ -128,33 +89,86 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
                 }
             };
 
-            for (int i = 0; i < Users.Count; i++)
-                grid.Add(instances[i] = new PlayerArea(Users[i], syncManager.CreateManagedClock()));
+            skinComponents.Components.BindCollectionChanged(componentsChanged, true);
 
-            LoadComponentAsync(leaderboard = new MultiSpectatorLeaderboard(users)
+            // Child = new GridContainer
+            // {
+            //     RelativeSizeAxes = Axes.Both,
+            //     RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
+            //     Content = new[]
+            //     {
+            //         new Drawable[]
+            //         {
+            //             scoreDisplayContainer = new Container
+            //             {
+            //                 RelativeSizeAxes = Axes.X,
+            //                 AutoSizeAxes = Axes.Y
+            //             },
+            //         },
+            //         new Drawable[]
+            //         {
+            //             new GridContainer
+            //             {
+            //                 RelativeSizeAxes = Axes.Both,
+            //                 ColumnDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
+            //                 Content = new[]
+            //                 {
+            //                     new Drawable[]
+            //                     {
+            //                         leaderboardFlow = new FillFlowContainer
+            //                         {
+            //                             Anchor = Anchor.CentreLeft,
+            //                             Origin = Anchor.CentreLeft,
+            //                             AutoSizeAxes = Axes.Both,
+            //                             Direction = FillDirection.Vertical,
+            //                             Spacing = new Vector2(5)
+            //                         },
+            //                         grid = new PlayerGrid { RelativeSizeAxes = Axes.Both }
+            //                     }
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
+            //};
+
+            // LoadComponentAsync(leaderboard = new MultiSpectatorLeaderboard(users)
+            // {
+            //     Expanded = { Value = true },
+            // }, _ =>
+            // {
+            //     foreach (var instance in instances)
+            //         leaderboard.AddClock(instance.UserId, instance.SpectatorPlayerClock);
+            //
+            //     leaderboardFlow.Insert(0, leaderboard);
+            //
+            //     if (leaderboard.TeamScores.Count == 2)
+            //     {
+            //         LoadComponentAsync(new MatchScoreDisplay
+            //         {
+            //             Team1Score = { BindTarget = leaderboard.TeamScores.First().Value },
+            //             Team2Score = { BindTarget = leaderboard.TeamScores.Last().Value },
+            //         }, scoreDisplayContainer.Add);
+            //     }
+            // });
+            //
+            // LoadComponentAsync(new GameplayChatDisplay(room)
+            // {
+            //     Expanded = { Value = true },
+            // }, chat => leaderboardFlow.Insert(1, chat));
+        }
+
+        private void componentsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            var grid = skinComponents.Components.OfType<PlayerGrid>().SingleOrDefault();
+
+            if (grid != null)
             {
-                Expanded = { Value = true },
-            }, _ =>
-            {
-                foreach (var instance in instances)
-                    leaderboard.AddClock(instance.UserId, instance.SpectatorPlayerClock);
+                for (int i = 0; i < Users.Count; i++)
+                    grid.Add(instances[i] = new PlayerArea(Users[i], syncManager.CreateManagedClock()));
 
-                leaderboardFlow.Insert(0, leaderboard);
-
-                if (leaderboard.TeamScores.Count == 2)
-                {
-                    LoadComponentAsync(new MatchScoreDisplay
-                    {
-                        Team1Score = { BindTarget = leaderboard.TeamScores.First().Value },
-                        Team2Score = { BindTarget = leaderboard.TeamScores.Last().Value },
-                    }, scoreDisplayContainer.Add);
-                }
-            });
-
-            LoadComponentAsync(new GameplayChatDisplay(room)
-            {
-                Expanded = { Value = true },
-            }, chat => leaderboardFlow.Insert(1, chat));
+                bindAudioAdjustments(instances.First()!);
+            }
         }
 
         protected override void LoadComplete()
@@ -164,7 +178,6 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
             masterClockContainer.Reset();
 
             // Start with adjustments from the first player to keep a sane state.
-            bindAudioAdjustments(instances.First());
         }
 
         protected override void Update()
@@ -173,14 +186,14 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
 
             if (!isCandidateAudioSource(currentAudioSource?.SpectatorPlayerClock))
             {
-                currentAudioSource = instances.Where(i => isCandidateAudioSource(i.SpectatorPlayerClock)).MinBy(i => Math.Abs(i.SpectatorPlayerClock.CurrentTime - syncManager.CurrentMasterTime));
+                currentAudioSource = instances.Where(i => isCandidateAudioSource(i?.SpectatorPlayerClock)).MinBy(i => Math.Abs(i!.SpectatorPlayerClock.CurrentTime - syncManager.CurrentMasterTime));
 
                 // Only bind adjustments if there's actually a valid source, else just use the previous ones to ensure no sudden changes to audio.
                 if (currentAudioSource != null)
                     bindAudioAdjustments(currentAudioSource);
 
                 foreach (var instance in instances)
-                    instance.Mute = instance != currentAudioSource;
+                    instance!.Mute = instance != currentAudioSource;
             }
         }
 

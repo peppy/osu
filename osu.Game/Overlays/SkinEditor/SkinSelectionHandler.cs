@@ -159,7 +159,7 @@ namespace osu.Game.Overlays.SkinEditor
         }
 
         protected override void DeleteItems(IEnumerable<ISerialisableDrawable> items) =>
-            skinEditor.DeleteItems(items.ToArray());
+            skinEditor.DeleteItems(items.Where(i => i.IsEditable).ToArray());
 
         protected override IEnumerable<MenuItem> GetContextMenuItemsForSelection(IEnumerable<SelectionBlueprint<ISerialisableDrawable>> selection)
         {

@@ -5,14 +5,16 @@ using System;
 using osu.Framework.Timing;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Screens.Play.HUD;
+using osu.Game.Skinning;
 
 namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
 {
-    public partial class MultiSpectatorLeaderboard : MultiplayerGameplayLeaderboard
+    public partial class MultiSpectatorLeaderboard : MultiplayerGameplayLeaderboard, ISerialisableDrawable
     {
         public MultiSpectatorLeaderboard(MultiplayerRoomUser[] users)
             : base(users)
         {
+            Expanded.Value = true;
         }
 
         public void AddClock(int userId, IClock clock)
@@ -30,5 +32,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
             foreach (var (_, data) in UserScores)
                 data.ScoreProcessor.UpdateScore();
         }
+
+        public bool UsesFixedAnchor { get; set; }
     }
 }
