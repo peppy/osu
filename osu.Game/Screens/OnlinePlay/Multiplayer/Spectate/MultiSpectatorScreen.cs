@@ -14,7 +14,6 @@ using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Rooms;
 using osu.Game.Online.Spectator;
 using osu.Game.Screens.Play;
-using osu.Game.Screens.Play.HUD;
 using osu.Game.Screens.Spectate;
 using osu.Game.Users;
 using osuTK;
@@ -53,8 +52,6 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
         private MasterGameplayClockContainer masterClockContainer = null!;
         private SpectatorSyncManager syncManager = null!;
         private PlayerGrid grid = null!;
-
-        private MultiSpectatorLeaderboard leaderboard = null!;
 
         private PlayerArea? currentAudioSource;
 
@@ -125,6 +122,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
                                     Direction = FillDirection.Vertical,
                                     Children = new Drawable[]
                                     {
+                                        new SpectatorScoreBar(room, users, instances),
                                         new SpectatorSongBar
                                         {
                                             Beatmap = Beatmap.Value.BeatmapInfo,
@@ -143,25 +141,6 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
             for (int i = 0; i < Users.Count; i++)
                 grid.Add(instances[i] = new PlayerArea(Users[i], syncManager.CreateManagedClock()));
 
-            LoadComponentAsync(leaderboard = new MultiSpectatorLeaderboard(users)
-            {
-                Expanded = { Value = true },
-            }, _ =>
-            {
-                foreach (var instance in instances)
-                    leaderboard.AddClock(instance.UserId, instance.SpectatorPlayerClock);
-
-                leaderboardFlow.Insert(0, leaderboard);
-
-                if (leaderboard.TeamScores.Count == 2)
-                {
-                    LoadComponentAsync(new MatchScoreDisplay
-                    {
-                        Team1Score = { BindTarget = leaderboard.TeamScores.First().Value },
-                        Team2Score = { BindTarget = leaderboard.TeamScores.Last().Value },
-                    }, d => barArea.Insert(0, d));
-                }
-            });
             LoadComponentAsync(new GameplayChatDisplay(room)
             {
                 Expanded = { Value = true },
