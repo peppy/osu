@@ -79,7 +79,6 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
         private void load()
         {
             FillFlowContainer leaderboardFlow;
-            Container scoreDisplayContainer;
 
             InternalChildren = new Drawable[]
             {
@@ -92,7 +91,6 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
                         {
                             new Dimension(),
                             new Dimension(GridSizeMode.AutoSize),
-                            new Dimension(GridSizeMode.AutoSize)
                         },
                         Content = new[]
                         {
@@ -118,20 +116,13 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
                             },
                             new Drawable[]
                             {
-                                scoreDisplayContainer = new Container
+                                new FillFlowContainer
                                 {
                                     RelativeSizeAxes = Axes.X,
                                     AutoSizeAxes = Axes.Y,
-                                    Padding = new MarginPadding(10),
-                                }
-                            },
-                            new Drawable[]
-                            {
-                                new Container
-                                {
-                                    RelativeSizeAxes = Axes.X,
-                                    AutoSizeAxes = Axes.Y,
-                                    Padding = new MarginPadding(10),
+                                    Spacing = new Vector2(5),
+                                    Padding = new MarginPadding(5) { Top = 0 },
+                                    Direction = FillDirection.Vertical,
                                     Children = new Drawable[]
                                     {
                                         new SpectatorSongBar
@@ -139,8 +130,8 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
                                             Beatmap = Beatmap.Value.BeatmapInfo,
                                         }
                                     }
-                                }
-                            }
+                                },
+                            },
                         }
                     }
                 },
@@ -168,7 +159,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
                     {
                         Team1Score = { BindTarget = leaderboard.TeamScores.First().Value },
                         Team2Score = { BindTarget = leaderboard.TeamScores.Last().Value },
-                    }, scoreDisplayContainer.Add);
+                    }, d => barArea.Insert(0, d));
                 }
             });
             LoadComponentAsync(new GameplayChatDisplay(room)
