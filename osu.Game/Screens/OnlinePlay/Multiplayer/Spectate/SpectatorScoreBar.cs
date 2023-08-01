@@ -10,7 +10,6 @@ using osu.Game.Graphics;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Rooms;
 using osu.Game.Screens.Play.HUD;
-using osuTK;
 
 namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
 {
@@ -54,11 +53,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
                 }
             };
 
-            LoadComponentAsync(leaderboard = new MultiSpectatorLeaderboard(users)
-            {
-                Scale = new Vector2(0.5f),
-                Expanded = { Value = true },
-            }, _ =>
+            LoadComponentAsync(leaderboard = new MultiSpectatorLeaderboard(users), _ =>
             {
                 foreach (var instance in instances)
                     leaderboard.AddClock(instance.UserId, instance.SpectatorPlayerClock);
