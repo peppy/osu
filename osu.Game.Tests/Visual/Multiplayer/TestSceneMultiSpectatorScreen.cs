@@ -76,6 +76,38 @@ namespace osu.Game.Tests.Visual.Multiplayer
             loadSpectateScreen();
 
             sendFrames(userIds, 1000);
+            AddWaitStep("wait a bit", 200);
+        }
+
+        [Test]
+        public void TestTeamDisplay()
+        {
+            AddStep("start players", () =>
+            {
+                var player1 = OnlinePlayDependencies.MultiplayerClient.AddUser(new APIUser { Id = PLAYER_1_ID }, true);
+                player1.MatchState = new TeamVersusUserState
+                {
+                    TeamID = 0,
+                };
+
+                var player2 = OnlinePlayDependencies.MultiplayerClient.AddUser(new APIUser { Id = PLAYER_2_ID }, true);
+                player2.MatchState = new TeamVersusUserState
+                {
+                    TeamID = 1,
+                };
+
+                SpectatorClient.SendStartPlay(player1.UserID, importedBeatmapId);
+                SpectatorClient.SendStartPlay(player2.UserID, importedBeatmapId);
+
+                playingUsers.Add(player1);
+                playingUsers.Add(player2);
+            });
+
+            loadSpectateScreen();
+
+            sendFrames(PLAYER_1_ID, 1000);
+            sendFrames(PLAYER_2_ID, 1000);
+
             AddWaitStep("wait a bit", 20);
         }
 
@@ -140,38 +172,6 @@ namespace osu.Game.Tests.Visual.Multiplayer
                 p.ChildrenOfType<ArgonSongProgressBar>().SingleOrDefault()?.Interactive == false));
 
             AddStep("restore config hud visibility", () => config.SetValue(OsuSetting.HUDVisibilityMode, originalConfigValue));
-        }
-
-        [Test]
-        public void TestTeamDisplay()
-        {
-            AddStep("start players", () =>
-            {
-                var player1 = OnlinePlayDependencies.MultiplayerClient.AddUser(new APIUser { Id = PLAYER_1_ID }, true);
-                player1.MatchState = new TeamVersusUserState
-                {
-                    TeamID = 0,
-                };
-
-                var player2 = OnlinePlayDependencies.MultiplayerClient.AddUser(new APIUser { Id = PLAYER_2_ID }, true);
-                player2.MatchState = new TeamVersusUserState
-                {
-                    TeamID = 1,
-                };
-
-                SpectatorClient.SendStartPlay(player1.UserID, importedBeatmapId);
-                SpectatorClient.SendStartPlay(player2.UserID, importedBeatmapId);
-
-                playingUsers.Add(player1);
-                playingUsers.Add(player2);
-            });
-
-            loadSpectateScreen();
-
-            sendFrames(PLAYER_1_ID, 1000);
-            sendFrames(PLAYER_2_ID, 1000);
-
-            AddWaitStep("wait a bit", 20);
         }
 
         [Test]
