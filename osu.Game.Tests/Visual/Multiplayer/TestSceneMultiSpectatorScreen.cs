@@ -79,36 +79,17 @@ namespace osu.Game.Tests.Visual.Multiplayer
             AddWaitStep("wait a bit", 200);
         }
 
-        [Test]
-        public void TestTeamDisplay()
+        [TestCase(2)]
+        [TestCase(16)]
+        public void TestTeams(int count)
         {
-            AddStep("start players", () =>
-            {
-                var player1 = OnlinePlayDependencies.MultiplayerClient.AddUser(new APIUser { Id = PLAYER_1_ID }, true);
-                player1.MatchState = new TeamVersusUserState
-                {
-                    TeamID = 0,
-                };
+            int[] userIds = getPlayerIds(count);
 
-                var player2 = OnlinePlayDependencies.MultiplayerClient.AddUser(new APIUser { Id = PLAYER_2_ID }, true);
-                player2.MatchState = new TeamVersusUserState
-                {
-                    TeamID = 1,
-                };
-
-                SpectatorClient.SendStartPlay(player1.UserID, importedBeatmapId);
-                SpectatorClient.SendStartPlay(player2.UserID, importedBeatmapId);
-
-                playingUsers.Add(player1);
-                playingUsers.Add(player2);
-            });
-
+            start(userIds, teams: true);
             loadSpectateScreen();
 
-            sendFrames(PLAYER_1_ID, 1000);
-            sendFrames(PLAYER_2_ID, 1000);
-
-            AddWaitStep("wait a bit", 20);
+            sendFrames(userIds, 1000);
+            AddWaitStep("wait a bit", 200);
         }
 
         [Test]
@@ -450,16 +431,18 @@ namespace osu.Game.Tests.Visual.Multiplayer
 
         private void start(int userId, int? beatmapId = null) => start(new[] { userId }, beatmapId);
 
-        private void start(int[] userIds, int? beatmapId = null, APIMod[]? mods = null)
+        private void start(int[] userIds, int? beatmapId = null, APIMod[]? mods = null, bool teams = false)
         {
             AddStep("start play", () =>
             {
-                foreach (int id in userIds)
+                for (int i = 0; i < userIds.Length; i++)
                 {
+                    int id = userIds[i];
                     var user = new MultiplayerRoomUser(id)
                     {
                         User = new APIUser { Id = id },
                         Mods = mods ?? Array.Empty<APIMod>(),
+                        MatchState = teams ? new TeamVersusUserState { TeamID = i % 2 } : null,
                     };
 
                     OnlinePlayDependencies.MultiplayerClient.AddUser(user, true);
