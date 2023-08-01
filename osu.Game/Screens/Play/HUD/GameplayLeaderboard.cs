@@ -31,12 +31,14 @@ namespace osu.Game.Screens.Play.HUD
 
         private const int max_panels = 8;
 
+        protected virtual float PanelHeight => DefaultGameplayLeaderboardScore.PANEL_HEIGHT;
+
         /// <summary>
         /// Create a new leaderboard.
         /// </summary>
         protected GameplayLeaderboard()
         {
-            Width = GameplayLeaderboardScore.EXTENDED_WIDTH + GameplayLeaderboardScore.SHEAR_WIDTH;
+            Width = DefaultGameplayLeaderboardScore.EXTENDED_WIDTH + DefaultGameplayLeaderboardScore.SHEAR_WIDTH;
 
             InternalChildren = new Drawable[]
             {
@@ -47,7 +49,7 @@ namespace osu.Game.Screens.Play.HUD
                     Child = Flow = new FillFlowContainer<GameplayLeaderboardScore>
                     {
                         RelativeSizeAxes = Axes.X,
-                        X = GameplayLeaderboardScore.SHEAR_WIDTH,
+                        X = DefaultGameplayLeaderboardScore.SHEAR_WIDTH,
                         AutoSizeAxes = Axes.Y,
                         Direction = FillDirection.Vertical,
                         Spacing = new Vector2(2.5f),
@@ -92,7 +94,7 @@ namespace osu.Game.Screens.Play.HUD
             drawable.DisplayOrder.BindValueChanged(_ => sorting.Invalidate(), true);
 
             int displayCount = Math.Min(Flow.Count, max_panels);
-            Height = displayCount * (GameplayLeaderboardScore.PANEL_HEIGHT + Flow.Spacing.Y);
+            Height = displayCount * (PanelHeight + Flow.Spacing.Y);
             requiresScroll = displayCount != Flow.Count;
 
             return drawable;
@@ -106,7 +108,7 @@ namespace osu.Game.Screens.Play.HUD
         }
 
         protected virtual GameplayLeaderboardScore CreateLeaderboardScoreDrawable(IUser? user, bool isTracked) =>
-            new GameplayLeaderboardScore(user, isTracked);
+            new DefaultGameplayLeaderboardScore(user, isTracked);
 
         protected override void Update()
         {
@@ -119,40 +121,38 @@ namespace osu.Game.Screens.Play.HUD
                 scroll.ScrollTo(scrollTarget);
             }
 
-            const float panel_height = GameplayLeaderboardScore.PANEL_HEIGHT;
-
             float fadeBottom = scroll.Current + scroll.DrawHeight;
-            float fadeTop = scroll.Current + panel_height;
+            float fadeTop = scroll.Current + PanelHeight;
 
-            if (scroll.IsScrolledToStart()) fadeTop -= panel_height;
-            if (!scroll.IsScrolledToEnd()) fadeBottom -= panel_height;
+            if (scroll.IsScrolledToStart()) fadeTop -= PanelHeight;
+            if (!scroll.IsScrolledToEnd()) fadeBottom -= PanelHeight;
 
             // logic is mostly shared with Leaderboard, copied here for simplicity.
             foreach (var c in Flow.Children)
             {
                 float topY = c.ToSpaceOfOtherDrawable(Vector2.Zero, Flow).Y;
-                float bottomY = topY + panel_height;
+                float bottomY = topY + PanelHeight;
 
                 bool requireTopFade = requiresScroll && topY <= fadeTop;
                 bool requireBottomFade = requiresScroll && bottomY >= fadeBottom;
 
                 if (!requireTopFade && !requireBottomFade)
                     c.Colour = Color4.White;
-                else if (topY > fadeBottom + panel_height || bottomY < fadeTop - panel_height)
+                else if (topY > fadeBottom + PanelHeight || bottomY < fadeTop - PanelHeight)
                     c.Colour = Color4.Transparent;
                 else
                 {
                     if (requireBottomFade)
                     {
                         c.Colour = ColourInfo.GradientVertical(
-                            Color4.White.Opacity(Math.Min(1 - (topY - fadeBottom) / panel_height, 1)),
-                            Color4.White.Opacity(Math.Min(1 - (bottomY - fadeBottom) / panel_height, 1)));
+                            Color4.White.Opacity(Math.Min(1 - (topY - fadeBottom) / PanelHeight, 1)),
+                            Color4.White.Opacity(Math.Min(1 - (bottomY - fadeBottom) / PanelHeight, 1)));
                     }
                     else if (requiresScroll)
                     {
                         c.Colour = ColourInfo.GradientVertical(
-                            Color4.White.Opacity(Math.Min(1 - (fadeTop - topY) / panel_height, 1)),
-                            Color4.White.Opacity(Math.Min(1 - (fadeTop - bottomY) / panel_height, 1)));
+                            Color4.White.Opacity(Math.Min(1 - (fadeTop - topY) / PanelHeight, 1)),
+                            Color4.White.Opacity(Math.Min(1 - (fadeTop - bottomY) / PanelHeight, 1)));
                     }
                 }
             }
