@@ -139,7 +139,7 @@ namespace osu.Game.Tests.Visual.Gameplay
             checkHeight(8);
 
             void checkHeight(int panelCount)
-                => AddAssert($"leaderboard height is {panelCount} panels high", () => leaderboard.DrawHeight == (GameplayLeaderboardScore.PANEL_HEIGHT + leaderboard.Spacing) * panelCount);
+                => AddAssert($"leaderboard height is {panelCount} panels high", () => leaderboard.DrawHeight == (DefaultGameplayLeaderboardScore.PANEL_HEIGHT + leaderboard.Spacing) * panelCount);
         }
 
         [Test]
