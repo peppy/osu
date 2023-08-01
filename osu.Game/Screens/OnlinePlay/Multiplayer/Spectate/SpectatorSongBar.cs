@@ -1,0 +1,355 @@
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
+using osu.Framework.Allocation;
+using osu.Framework.Bindables;
+using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
+using osu.Framework.Graphics.Sprites;
+using osu.Framework.Localisation;
+using osu.Game.Beatmaps;
+using osu.Game.Beatmaps.Drawables;
+using osu.Game.Beatmaps.Legacy;
+using osu.Game.Extensions;
+using osu.Game.Graphics;
+using osu.Game.Graphics.Sprites;
+using osu.Game.Rulesets;
+using osu.Game.Screens.Menu;
+using osu.Game.Screens.Play.HUD;
+using osuTK;
+using osuTK.Graphics;
+
+namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
+{
+    public partial class SpectatorSongBar : CompositeDrawable
+    {
+        private IBeatmapInfo? beatmap;
+
+        public const float HEIGHT = 145 / 2f;
+
+        [Resolved]
+        private IBindable<RulesetInfo> ruleset { get; set; } = null!;
+
+        public IBeatmapInfo Beatmap
+        {
+            set
+            {
+                if (beatmap == value)
+                    return;
+
+                beatmap = value;
+                Scheduler.AddOnce(refreshContent);
+            }
+        }
+
+        private LegacyMods mods;
+
+        public LegacyMods Mods
+        {
+            get => mods;
+            set
+            {
+                mods = value;
+                Scheduler.AddOnce(refreshContent);
+            }
+        }
+
+        private Container content = null!;
+
+        [BackgroundDependencyLoader]
+        private void load(OsuColour colours)
+        {
+            RelativeSizeAxes = Axes.X;
+            Height = HEIGHT;
+
+            Masking = true;
+            CornerRadius = 5;
+
+            InternalChildren = new Drawable[]
+            {
+                new Box
+                {
+                    Colour = colours.Gray3,
+                    RelativeSizeAxes = Axes.Both,
+                },
+                content = new Container
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Anchor = Anchor.BottomRight,
+                    Origin = Anchor.BottomRight,
+                }
+            };
+        }
+
+        private void refreshContent()
+        {
+            if (beatmap == null)
+            {
+                content.Clear();
+                return;
+            }
+
+            double bpm = beatmap.BPM;
+            double length = beatmap.Length;
+            string hardRockExtra = "";
+            string srExtra = "";
+
+            float ar = beatmap.Difficulty.ApproachRate;
+
+            if ((mods & LegacyMods.HardRock) > 0)
+            {
+                hardRockExtra = "*";
+                srExtra = "*";
+            }
+
+            if ((mods & LegacyMods.DoubleTime) > 0)
+            {
+                // temporary local calculation (taken from OsuDifficultyCalculator)
+                double preempt = (int)IBeatmapDifficultyInfo.DifficultyRange(ar, 1800, 1200, 450) / 1.5;
+                ar = (float)(preempt > 1200 ? (1800 - preempt) / 120 : (1200 - preempt) / 150 + 5);
+
+                bpm *= 1.5f;
+                length /= 1.5f;
+                srExtra = "*";
+            }
+
+            (string heading, string content)[] stats;
+
+            switch (ruleset.Value.OnlineID)
+            {
+                default:
+                    stats = new (string heading, string content)[]
+                    {
+                        ("CS", $"{beatmap.Difficulty.CircleSize:0.#}{hardRockExtra}"),
+                        ("AR", $"{ar:0.#}{hardRockExtra}"),
+                        ("OD", $"{beatmap.Difficulty.OverallDifficulty:0.#}{hardRockExtra}"),
+                    };
+                    break;
+
+                case 1:
+                case 3:
+                    stats = new (string heading, string content)[]
+                    {
+                        ("OD", $"{beatmap.Difficulty.OverallDifficulty:0.#}{hardRockExtra}"),
+                        ("HP", $"{beatmap.Difficulty.DrainRate:0.#}{hardRockExtra}")
+                    };
+                    break;
+
+                case 2:
+                    stats = new (string heading, string content)[]
+                    {
+                        ("CS", $"{beatmap.Difficulty.CircleSize:0.#}{hardRockExtra}"),
+                        ("AR", $"{ar:0.#}"),
+                    };
+                    break;
+            }
+
+            content.Children = new Drawable[]
+            {
+                new Container
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Width = 0.5f,
+                    Anchor = Anchor.BottomRight,
+                    Origin = Anchor.BottomRight,
+                    Children = new Drawable[]
+                    {
+                        new GridContainer
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Content = new[]
+                            {
+                                new Drawable[]
+                                {
+                                    new FillFlowContainer
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Anchor = Anchor.Centre,
+                                        Origin = Anchor.Centre,
+                                        Direction = FillDirection.Vertical,
+                                        Children = new Drawable[]
+                                        {
+                                            new DiffPiece(stats),
+                                            new DiffPiece(("Star Rating", $"{beatmap.StarRating:0.00}{srExtra}"))
+                                        }
+                                    },
+                                    new FillFlowContainer
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Anchor = Anchor.Centre,
+                                        Origin = Anchor.Centre,
+                                        Direction = FillDirection.Vertical,
+                                        Children = new Drawable[]
+                                        {
+                                            new DiffPiece(("Length", length.ToFormattedDuration().ToString())),
+                                            new DiffPiece(("BPM", $"{bpm:0.#}")),
+                                        }
+                                    },
+                                    new Container
+                                    {
+                                        RelativeSizeAxes = Axes.Both,
+                                        Children = new Drawable[]
+                                        {
+                                            new Box
+                                            {
+                                                Colour = Color4.Black,
+                                                RelativeSizeAxes = Axes.Both,
+                                                Alpha = 0.1f,
+                                            },
+                                            new OsuLogo
+                                            {
+                                                Triangles = false,
+                                                Scale = new Vector2(0.08f),
+                                                Margin = new MarginPadding(50),
+                                                X = -10,
+                                                Anchor = Anchor.CentreRight,
+                                                Origin = Anchor.CentreRight,
+                                            },
+                                        }
+                                    },
+                                },
+                            }
+                        }
+                    }
+                },
+                new BeatmapInfoPanel(beatmap)
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Size = new Vector2(0.5f, 1),
+                    Anchor = Anchor.BottomLeft,
+                    Origin = Anchor.BottomLeft,
+                }
+            };
+        }
+
+        public partial class DiffPiece : TextFlowContainer
+        {
+            public DiffPiece(params (string heading, string content)[] tuples)
+            {
+                Margin = new MarginPadding { Horizontal = 15, Vertical = 1 };
+                AutoSizeAxes = Axes.Both;
+
+                static void cp(SpriteText s, bool bold)
+                {
+                    s.Font = OsuFont.Torus.With(weight: bold ? FontWeight.Bold : FontWeight.Regular, size: 15);
+                }
+
+                for (int i = 0; i < tuples.Length; i++)
+                {
+                    (string heading, string content) = tuples[i];
+
+                    if (i > 0)
+                    {
+                        AddText(" / ", s =>
+                        {
+                            cp(s, false);
+                            s.Spacing = new Vector2(-2, 0);
+                        });
+                    }
+
+                    AddText(new OsuSpriteText { Text = heading }, s => cp(s, false));
+                    AddText(" ", s => cp(s, false));
+                    AddText(new OsuSpriteText { Text = content }, s => cp(s, true));
+                }
+            }
+        }
+
+        public partial class BeatmapInfoPanel : CompositeDrawable
+        {
+            public readonly IBeatmapInfo Beatmap;
+
+            private Box flash = null!;
+
+            public BeatmapInfoPanel(IBeatmapInfo beatmap)
+            {
+                Beatmap = beatmap;
+
+                Width = 400;
+                Height = 50;
+            }
+
+            [BackgroundDependencyLoader]
+            private void load()
+            {
+                AddRangeInternal(new Drawable[]
+                {
+                    new Box
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Colour = Color4.Black,
+                    },
+                    new UpdateableBeatmapBackgroundSprite
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Colour = OsuColour.Gray(0.5f),
+                        Beatmap = { Value = Beatmap },
+                    },
+                    new FillFlowContainer
+                    {
+                        AutoSizeAxes = Axes.Both,
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
+                        Padding = new MarginPadding(15),
+                        Direction = FillDirection.Vertical,
+                        Children = new Drawable[]
+                        {
+                            new OsuSpriteText
+                            {
+                                Text = Beatmap?.GetDisplayTitleRomanisable(false, false) ?? (LocalisableString)@"unknown",
+                                Font = OsuFont.Torus.With(weight: FontWeight.Bold),
+                            },
+                            new FillFlowContainer
+                            {
+                                AutoSizeAxes = Axes.Both,
+                                Direction = FillDirection.Horizontal,
+                                Children = new Drawable[]
+                                {
+                                    new OsuSpriteText
+                                    {
+                                        Text = "mapper",
+                                        Padding = new MarginPadding { Right = 5 },
+                                        Font = OsuFont.Torus.With(weight: FontWeight.Regular, size: 14)
+                                    },
+                                    new OsuSpriteText
+                                    {
+                                        Text = Beatmap?.Metadata.Author.Username ?? "unknown",
+                                        Padding = new MarginPadding { Right = 20 },
+                                        Font = OsuFont.Torus.With(weight: FontWeight.Bold, size: 14)
+                                    },
+                                    new OsuSpriteText
+                                    {
+                                        Text = "difficulty",
+                                        Padding = new MarginPadding { Right = 5 },
+                                        Font = OsuFont.Torus.With(weight: FontWeight.Regular, size: 14)
+                                    },
+                                    new OsuSpriteText
+                                    {
+                                        Text = Beatmap?.DifficultyName ?? "unknown",
+                                        Font = OsuFont.Torus.With(weight: FontWeight.Bold, size: 14)
+                                    },
+                                }
+                            }
+                        },
+                    },
+                    flash = new Box
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Colour = Color4.Gray,
+                        Blending = BlendingParameters.Additive,
+                        Alpha = 0,
+                    },
+                });
+
+                AddInternal(new ModDisplay
+                {
+                    Anchor = Anchor.CentreRight,
+                    Origin = Anchor.CentreRight,
+                    Margin = new MarginPadding(10),
+                });
+            }
+        }
+    }
+}
