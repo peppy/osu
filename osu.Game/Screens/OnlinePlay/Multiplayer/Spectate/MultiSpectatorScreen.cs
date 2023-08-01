@@ -53,7 +53,9 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
         private MasterGameplayClockContainer masterClockContainer = null!;
         private SpectatorSyncManager syncManager = null!;
         private PlayerGrid grid = null!;
+
         private MultiSpectatorLeaderboard leaderboard = null!;
+
         private PlayerArea? currentAudioSource;
 
         private readonly Room room;
@@ -86,36 +88,55 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
                     Child = new GridContainer
                     {
                         RelativeSizeAxes = Axes.Both,
-                        RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
+                        RowDimensions = new[]
+                        {
+                            new Dimension(),
+                            new Dimension(GridSizeMode.AutoSize),
+                            new Dimension(GridSizeMode.AutoSize)
+                        },
                         Content = new[]
                         {
+                            new Drawable[]
+                            {
+                                new Container
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                    Children = new Drawable[]
+                                    {
+                                        grid = new PlayerGrid { RelativeSizeAxes = Axes.Both },
+                                        leaderboardFlow = new FillFlowContainer
+                                        {
+                                            Anchor = Anchor.CentreLeft,
+                                            Origin = Anchor.CentreLeft,
+                                            AutoSizeAxes = Axes.Y,
+                                            Width = 400,
+                                            Direction = FillDirection.Vertical,
+                                            Spacing = new Vector2(5)
+                                        },
+                                    }
+                                },
+                            },
                             new Drawable[]
                             {
                                 scoreDisplayContainer = new Container
                                 {
                                     RelativeSizeAxes = Axes.X,
-                                    AutoSizeAxes = Axes.Y
-                                },
+                                    AutoSizeAxes = Axes.Y,
+                                    Padding = new MarginPadding(10),
+                                }
                             },
                             new Drawable[]
                             {
-                                new GridContainer
+                                new Container
                                 {
-                                    RelativeSizeAxes = Axes.Both,
-                                    ColumnDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
-                                    Content = new[]
+                                    RelativeSizeAxes = Axes.X,
+                                    AutoSizeAxes = Axes.Y,
+                                    Padding = new MarginPadding(10),
+                                    Children = new Drawable[]
                                     {
-                                        new Drawable[]
+                                        new SpectatorSongBar
                                         {
-                                            leaderboardFlow = new FillFlowContainer
-                                            {
-                                                Anchor = Anchor.CentreLeft,
-                                                Origin = Anchor.CentreLeft,
-                                                AutoSizeAxes = Axes.Both,
-                                                Direction = FillDirection.Vertical,
-                                                Spacing = new Vector2(5)
-                                            },
-                                            grid = new PlayerGrid { RelativeSizeAxes = Axes.Both }
+                                            Beatmap = Beatmap.Value.BeatmapInfo,
                                         }
                                     }
                                 }
@@ -128,7 +149,6 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
                     ReadyToStart = performInitialSeek,
                 }
             };
-
             for (int i = 0; i < Users.Count; i++)
                 grid.Add(instances[i] = new PlayerArea(Users[i], syncManager.CreateManagedClock()));
 
@@ -151,7 +171,6 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
                     }, scoreDisplayContainer.Add);
                 }
             });
-
             LoadComponentAsync(new GameplayChatDisplay(room)
             {
                 Expanded = { Value = true },
