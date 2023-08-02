@@ -243,6 +243,8 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
             syncManager.RemoveManagedClock(instance.SpectatorPlayerClock);
         }
 
+        public override bool AllowBackButton => false;
+
         public override bool OnBackButton()
         {
             if (multiplayerClient.Room == null)
