@@ -159,6 +159,7 @@ namespace osu.Game.Screens.Play
                 StartTime = time.Value;
 
             Seek(StartTime);
+            (SourceClock as IAdjustableClock)?.Seek(StartTime);
 
             if (!wasPaused || startClock)
                 Start();
