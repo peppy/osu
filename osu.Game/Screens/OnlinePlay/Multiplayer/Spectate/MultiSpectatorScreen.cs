@@ -141,10 +141,10 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
             for (int i = 0; i < Users.Count; i++)
                 grid.Add(instances[i] = new PlayerArea(Users[i], syncManager.CreateManagedClock()));
 
-            LoadComponentAsync(new GameplayChatDisplay(room)
-            {
-                Expanded = { Value = true },
-            }, chat => leaderboardFlow.Insert(1, chat));
+            // LoadComponentAsync(new GameplayChatDisplay(room)
+            // {
+            //     Expanded = { Value = true },
+            // }, chat => leaderboardFlow.Insert(1, chat));
         }
 
         protected override void LoadComplete()
