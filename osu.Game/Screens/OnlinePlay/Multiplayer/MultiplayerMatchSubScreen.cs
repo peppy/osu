@@ -61,6 +61,13 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
             Activity.Value = new UserActivity.InLobby(room);
         }
 
+        [BackgroundDependencyLoader]
+        private void load(OsuConfigManager config)
+        {
+            automaticDownload = config.GetBindable<bool>(OsuSetting.AutomaticallyDownloadWhenSpectating);
+            automaticDownload.BindValueChanged(_ => checkForAutomaticDownload());
+        }
+
         protected override void LoadComplete()
         {
             base.LoadComplete();
@@ -389,7 +396,10 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
                 return;
 
             if (BeatmapAvailability.Value.State != DownloadState.LocallyAvailable)
+            {
+                checkForAutomaticDownload();
                 return;
+            }
 
             StartPlay();
         }
@@ -428,6 +438,37 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
             // Re-run PresentBeatmap now that we've pushed a song select that can handle it.
             game?.PresentBeatmap(beatmap.BeatmapSetInfo, b => b.ID == beatmap.BeatmapInfo.ID);
         }
+
+        #region Spectator automatic downloading
+
+        [Resolved]
+        private BeatmapManager beatmaps { get; set; }
+
+        [Resolved]
+        private BeatmapModelDownloader beatmapDownloader { get; set; }
+
+        private Bindable<bool> automaticDownload;
+
+        private void checkForAutomaticDownload()
+        {
+            if (client.LocalUser?.State != MultiplayerUserState.Spectating)
+                return;
+
+            if (!automaticDownload.Value)
+                return;
+
+            var beatmapSet = SelectedItem.Value.Beatmap.BeatmapSet;
+
+            if (beatmapSet == null)
+                return;
+
+            if (beatmaps.IsAvailableLocally(new BeatmapSetInfo { OnlineID = beatmapSet.OnlineID }))
+                return;
+
+            beatmapDownloader.Download(beatmapSet);
+        }
+
+        #endregion
 
         protected override void Dispose(bool isDisposing)
         {
