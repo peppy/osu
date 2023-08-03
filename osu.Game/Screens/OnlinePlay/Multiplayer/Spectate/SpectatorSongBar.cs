@@ -1,35 +1,35 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#nullable disable
-
-using JetBrains.Annotations;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Primitives;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Localisation;
 using osu.Game.Beatmaps;
+using osu.Game.Beatmaps.Drawables;
 using osu.Game.Beatmaps.Legacy;
 using osu.Game.Extensions;
 using osu.Game.Graphics;
+using osu.Game.Graphics.Sprites;
 using osu.Game.Rulesets;
 using osu.Game.Screens.Menu;
+using osu.Game.Screens.Play.HUD;
 using osuTK;
 using osuTK.Graphics;
 
-namespace osu.Game.Tournament.Components
+namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
 {
-    public partial class SongBar : CompositeDrawable
+    public partial class SpectatorSongBar : CompositeDrawable
     {
-        private IBeatmapInfo beatmap;
+        private IBeatmapInfo? beatmap;
 
         public const float HEIGHT = 145 / 2f;
 
         [Resolved]
-        private IBindable<RulesetInfo> ruleset { get; set; }
+        private IBindable<RulesetInfo> ruleset { get; set; } = null!;
 
         public IBeatmapInfo Beatmap
         {
@@ -39,7 +39,7 @@ namespace osu.Game.Tournament.Components
                     return;
 
                 beatmap = value;
-                refreshContent();
+                Scheduler.AddOnce(refreshContent);
             }
         }
 
@@ -51,32 +51,17 @@ namespace osu.Game.Tournament.Components
             set
             {
                 mods = value;
-                refreshContent();
+                Scheduler.AddOnce(refreshContent);
             }
         }
 
-        private FillFlowContainer flow;
-
-        private bool expanded;
-
-        public bool Expanded
-        {
-            get => expanded;
-            set
-            {
-                expanded = value;
-                flow.Direction = expanded ? FillDirection.Full : FillDirection.Vertical;
-            }
-        }
-
-        // Todo: This is a hack for https://github.com/ppy/osu-framework/issues/3617 since this container is at the very edge of the screen and potentially initially masked away.
-        protected override bool ComputeIsMaskedAway(RectangleF maskingBounds) => false;
+        private Container content = null!;
 
         [BackgroundDependencyLoader]
         private void load(OsuColour colours)
         {
             RelativeSizeAxes = Axes.X;
-            AutoSizeAxes = Axes.Y;
+            Height = HEIGHT;
 
             Masking = true;
             CornerRadius = 5;
@@ -88,24 +73,20 @@ namespace osu.Game.Tournament.Components
                     Colour = colours.Gray3,
                     RelativeSizeAxes = Axes.Both,
                 },
-                flow = new FillFlowContainer
+                content = new Container
                 {
-                    RelativeSizeAxes = Axes.X,
-                    AutoSizeAxes = Axes.Y,
-                    Direction = FillDirection.Full,
+                    RelativeSizeAxes = Axes.Both,
                     Anchor = Anchor.BottomRight,
                     Origin = Anchor.BottomRight,
                 }
             };
-
-            Expanded = true;
         }
 
         private void refreshContent()
         {
             if (beatmap == null)
             {
-                flow.Clear();
+                content.Clear();
                 return;
             }
 
@@ -164,22 +145,19 @@ namespace osu.Game.Tournament.Components
                     break;
             }
 
-            flow.Children = new Drawable[]
+            content.Children = new Drawable[]
             {
                 new Container
                 {
-                    RelativeSizeAxes = Axes.X,
-                    Height = HEIGHT,
+                    RelativeSizeAxes = Axes.Both,
                     Width = 0.5f,
                     Anchor = Anchor.BottomRight,
                     Origin = Anchor.BottomRight,
-
                     Children = new Drawable[]
                     {
                         new GridContainer
                         {
                             RelativeSizeAxes = Axes.Both,
-
                             Content = new[]
                             {
                                 new Drawable[]
@@ -237,13 +215,12 @@ namespace osu.Game.Tournament.Components
                         }
                     }
                 },
-                new UnmaskedTournamentBeatmapPanel(beatmap)
+                new BeatmapInfoPanel(beatmap)
                 {
-                    RelativeSizeAxes = Axes.X,
-                    Width = 0.5f,
-                    Height = HEIGHT,
-                    Anchor = Anchor.BottomRight,
-                    Origin = Anchor.BottomRight,
+                    RelativeSizeAxes = Axes.Both,
+                    Size = new Vector2(0.5f, 1),
+                    Anchor = Anchor.BottomLeft,
+                    Origin = Anchor.BottomLeft,
                 }
             };
         }
@@ -273,25 +250,106 @@ namespace osu.Game.Tournament.Components
                         });
                     }
 
-                    AddText(new TournamentSpriteText { Text = heading }, s => cp(s, false));
+                    AddText(new OsuSpriteText { Text = heading }, s => cp(s, false));
                     AddText(" ", s => cp(s, false));
-                    AddText(new TournamentSpriteText { Text = content }, s => cp(s, true));
+                    AddText(new OsuSpriteText { Text = content }, s => cp(s, true));
                 }
             }
         }
-    }
 
-    internal partial class UnmaskedTournamentBeatmapPanel : TournamentBeatmapPanel
-    {
-        public UnmaskedTournamentBeatmapPanel([CanBeNull] IBeatmapInfo beatmap, [NotNull] string mod = "")
-            : base(beatmap, mod)
+        public partial class BeatmapInfoPanel : CompositeDrawable
         {
-        }
+            public readonly IBeatmapInfo Beatmap;
 
-        [BackgroundDependencyLoader]
-        private void load()
-        {
-            Masking = false;
+            private Box flash = null!;
+
+            public BeatmapInfoPanel(IBeatmapInfo beatmap)
+            {
+                Beatmap = beatmap;
+
+                Width = 400;
+                Height = 50;
+            }
+
+            [BackgroundDependencyLoader]
+            private void load()
+            {
+                AddRangeInternal(new Drawable[]
+                {
+                    new Box
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Colour = Color4.Black,
+                    },
+                    new UpdateableBeatmapBackgroundSprite
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Colour = OsuColour.Gray(0.5f),
+                        Beatmap = { Value = Beatmap },
+                    },
+                    new FillFlowContainer
+                    {
+                        AutoSizeAxes = Axes.Both,
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
+                        Padding = new MarginPadding(15),
+                        Direction = FillDirection.Vertical,
+                        Children = new Drawable[]
+                        {
+                            new OsuSpriteText
+                            {
+                                Text = Beatmap?.GetDisplayTitleRomanisable(false, false) ?? (LocalisableString)@"unknown",
+                                Font = OsuFont.Torus.With(weight: FontWeight.Bold),
+                            },
+                            new FillFlowContainer
+                            {
+                                AutoSizeAxes = Axes.Both,
+                                Direction = FillDirection.Horizontal,
+                                Children = new Drawable[]
+                                {
+                                    new OsuSpriteText
+                                    {
+                                        Text = "mapper",
+                                        Padding = new MarginPadding { Right = 5 },
+                                        Font = OsuFont.Torus.With(weight: FontWeight.Regular, size: 14)
+                                    },
+                                    new OsuSpriteText
+                                    {
+                                        Text = Beatmap?.Metadata.Author.Username ?? "unknown",
+                                        Padding = new MarginPadding { Right = 20 },
+                                        Font = OsuFont.Torus.With(weight: FontWeight.Bold, size: 14)
+                                    },
+                                    new OsuSpriteText
+                                    {
+                                        Text = "difficulty",
+                                        Padding = new MarginPadding { Right = 5 },
+                                        Font = OsuFont.Torus.With(weight: FontWeight.Regular, size: 14)
+                                    },
+                                    new OsuSpriteText
+                                    {
+                                        Text = Beatmap?.DifficultyName ?? "unknown",
+                                        Font = OsuFont.Torus.With(weight: FontWeight.Bold, size: 14)
+                                    },
+                                }
+                            }
+                        },
+                    },
+                    flash = new Box
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Colour = Color4.Gray,
+                        Blending = BlendingParameters.Additive,
+                        Alpha = 0,
+                    },
+                });
+
+                AddInternal(new ModDisplay
+                {
+                    Anchor = Anchor.CentreRight,
+                    Origin = Anchor.CentreRight,
+                    Margin = new MarginPadding(10),
+                });
+            }
         }
     }
 }

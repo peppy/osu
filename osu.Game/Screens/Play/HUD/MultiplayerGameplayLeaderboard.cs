@@ -28,7 +28,7 @@ namespace osu.Game.Screens.Play.HUD
     [LongRunningLoad]
     public partial class MultiplayerGameplayLeaderboard : GameplayLeaderboard
     {
-        protected readonly Dictionary<int, TrackedUserData> UserScores = new Dictionary<int, TrackedUserData>();
+        public readonly Dictionary<int, TrackedUserData> UserScores = new Dictionary<int, TrackedUserData>();
 
         public readonly SortedDictionary<int, BindableLong> TeamScores = new SortedDictionary<int, BindableLong>();
 
@@ -202,7 +202,7 @@ namespace osu.Game.Screens.Play.HUD
             }
         }
 
-        protected class TrackedUserData
+        public class TrackedUserData
         {
             public readonly MultiplayerRoomUser User;
             public readonly SpectatorScoreProcessor ScoreProcessor;
