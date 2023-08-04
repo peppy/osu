@@ -8,8 +8,12 @@ using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Input.Bindings;
+using osu.Framework.Input.Events;
 using osu.Framework.Logging;
+using osu.Framework.Screens;
 using osu.Game.Graphics;
+using osu.Game.Input.Bindings;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Rooms;
 using osu.Game.Online.Spectator;
@@ -23,7 +27,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
     /// <summary>
     /// A <see cref="SpectatorScreen"/> that spectates multiple users in a match.
     /// </summary>
-    public partial class MultiSpectatorScreen : SpectatorScreen
+    public partial class MultiSpectatorScreen : SpectatorScreen, IKeyBindingHandler<GlobalAction>
     {
         // Isolates beatmap/ruleset to this screen.
         public override bool DisallowExternalBeatmapRulesetChanges => true;
@@ -212,6 +216,8 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
             masterClockContainer.Reset(startTime, true);
             Logger.Log($"Multiplayer spectator seeking to initial time of {startTime}");
         }
+
+        public override bool CursorVisible => false;
 
         public bool OnPressed(KeyBindingPressEvent<GlobalAction> e)
         {
