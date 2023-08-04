@@ -213,6 +213,22 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
             Logger.Log($"Multiplayer spectator seeking to initial time of {startTime}");
         }
 
+        public bool OnPressed(KeyBindingPressEvent<GlobalAction> e)
+        {
+            switch (e.Action)
+            {
+                case GlobalAction.Back:
+                    this.Exit();
+                    return true;
+            }
+
+            return false;
+        }
+
+        public void OnReleased(KeyBindingReleaseEvent<GlobalAction> e)
+        {
+        }
+
         protected override void OnNewPlayingUserState(int userId, SpectatorState spectatorState)
         {
         }

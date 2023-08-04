@@ -4,10 +4,13 @@
 using System.Threading;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
+using osu.Framework.Input.Events;
+using osu.Framework.Screens;
 using osu.Game.Beatmaps;
 using osu.Game.Scoring;
 using osu.Game.Screens.Play;
 using osu.Game.Screens.Ranking;
+using osuTK.Input;
 
 namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
 {
@@ -44,6 +47,17 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
 
             HUDOverlay.PlayerSettingsOverlay.Expire();
             HUDOverlay.HoldToQuit.Expire();
+        }
+
+        protected override bool OnKeyDown(KeyDownEvent e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                this.Exit();
+                return true;
+            }
+
+            return base.OnKeyDown(e);
         }
 
         protected override void Update()
