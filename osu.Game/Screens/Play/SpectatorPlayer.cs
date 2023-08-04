@@ -5,11 +5,8 @@
 
 using System.Diagnostics;
 using osu.Framework.Allocation;
-using osu.Framework.Graphics;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
-using osu.Game.Graphics;
-using osu.Game.Graphics.Sprites;
 using osu.Game.Online.Spectator;
 using osu.Game.Rulesets.Replays;
 using osu.Game.Rulesets.Replays.Types;
@@ -31,19 +28,6 @@ namespace osu.Game.Screens.Play
             : base(configuration)
         {
             this.score = score;
-        }
-
-        [BackgroundDependencyLoader]
-        private void load()
-        {
-            AddInternal(new OsuSpriteText
-            {
-                Text = $"Watching {score.ScoreInfo.User.Username} playing live!",
-                Font = OsuFont.Default.With(size: 30),
-                Y = 100,
-                Anchor = Anchor.TopCentre,
-                Origin = Anchor.TopCentre,
-            });
         }
 
         protected override void LoadComplete()
