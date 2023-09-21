@@ -142,6 +142,7 @@ namespace osu.Game.Screens.Edit
         private EditorScreen currentScreen;
 
         private readonly BindableBeatDivisor beatDivisor = new BindableBeatDivisor();
+
         private EditorClock clock;
 
         private IBeatmap playableBeatmap;
@@ -234,14 +235,11 @@ namespace osu.Game.Screens.Edit
                 return;
             }
 
-            // Todo: should probably be done at a DrawableRuleset level to share logic with Player.
-            clock = new EditorClock(playableBeatmap, beatDivisor);
-            clock.ChangeSource(loadableBeatmap.Track);
-
+            AddInternal(clock = new EditorClock(playableBeatmap, beatDivisor));
             dependencies.CacheAs(clock);
-            AddInternal(clock);
 
             clock.SeekingOrStopped.BindValueChanged(_ => updateSampleDisabledState());
+            clock.Stop();
 
             // todo: remove caching of this and consume via editorBeatmap?
             dependencies.Cache(beatDivisor);

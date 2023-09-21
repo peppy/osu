@@ -51,7 +51,8 @@ namespace osu.Game.Screens.Play
         /// The adjustable source clock used for gameplay. Should be used for seeks and clock control.
         /// This is the final source exposed to gameplay components <see cref="IGameplayClock"/> via delegation in this class.
         /// </summary>
-        protected readonly FramedBeatmapClock GameplayClock;
+        [Resolved]
+        protected FramedBeatmapClock GameplayClock { get; private set; } = null!;
 
         protected override Container<Drawable> Content { get; } = new Container { RelativeSizeAxes = Axes.Both };
 
@@ -68,7 +69,6 @@ namespace osu.Game.Screens.Play
 
             InternalChildren = new Drawable[]
             {
-                GameplayClock = new FramedBeatmapClock(applyOffsets),
                 Content
             };
         }

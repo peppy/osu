@@ -17,6 +17,7 @@ using osu.Framework.Screens;
 using osu.Framework.Threading;
 using osu.Game.Audio;
 using osu.Game.Audio.Effects;
+using osu.Game.Beatmaps;
 using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
@@ -150,6 +151,9 @@ namespace osu.Game.Screens.Play
 
         [Resolved]
         private BatteryInfo? batteryInfo { get; set; }
+
+        [Resolved]
+        private FramedBeatmapClock framedBeatmapClock { get; set; } = null!;
 
         public PlayerLoader(Func<Player> createPlayer)
         {
@@ -285,8 +289,9 @@ namespace osu.Game.Screens.Play
 
             // we're moving to player, so a period of silence is upcoming.
             // stop the track before removing adjustment to avoid a volume spike.
-            Beatmap.Value.Track.Stop();
-            Beatmap.Value.Track.RemoveAdjustment(AdjustableProperty.Volume, volumeAdjustment);
+            framedBeatmapClock.Stop();
+            (framedBeatmapClock.Source as IAdjustableAudioComponent)?.RemoveAdjustment(AdjustableProperty.Volume, volumeAdjustment);
+
             lowPassFilter.CutoffTo(AudioFilter.MAX_LOWPASS_CUTOFF);
             highPassFilter.CutoffTo(0);
         }
