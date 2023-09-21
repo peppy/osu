@@ -216,7 +216,7 @@ namespace osu.Game
         /// Going forward, it could potentially be used as the single source-of-truth for beatmap timing.
         /// </summary>
         [Cached]
-        private readonly FramedBeatmapClock beatmapClock = new FramedBeatmapClock(true);
+        private readonly FramedBeatmapClock beatmapClock = new FramedBeatmapClock();
 
         protected override Container<Drawable> Content => content;
 

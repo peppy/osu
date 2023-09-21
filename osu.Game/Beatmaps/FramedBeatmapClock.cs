@@ -26,8 +26,6 @@ namespace osu.Game.Beatmaps
     /// </summary>
     public partial class FramedBeatmapClock : Component, IFrameBasedClock, IAdjustableClock, ISourceChangeableClock
     {
-        private readonly bool applyOffsets;
-
         /// <summary>
         /// The length of the underlying beatmap track. Will default to 60 seconds if unavailable.
         /// </summary>
@@ -66,54 +64,42 @@ namespace osu.Game.Beatmaps
 
         public bool IsRewinding { get; private set; }
 
-        public FramedBeatmapClock(bool applyOffsets = false)
+        public FramedBeatmapClock()
         {
-            this.applyOffsets = applyOffsets;
-
             // A decoupled clock is used to ensure precise time values even when the host audio subsystem is not reporting
             // high precision times (on windows there's generally only 5-10ms reporting intervals, as an example).
             decoupledTrack = new DecouplingClock();
 
             var interpolatedTrack = new InterpolatingFramedClock(decoupledTrack);
 
-            if (applyOffsets)
-            {
-                // Audio timings in general with newer BASS versions don't match stable.
-                // This only seems to be required on windows. We need to eventually figure out why, with a bit of luck.
-                platformOffsetClock = new OffsetCorrectionClock(interpolatedTrack, ExternalPauseFrequencyAdjust) { Offset = RuntimeInfo.OS == RuntimeInfo.Platform.Windows ? 15 : 0 };
+            // Audio timings in general with newer BASS versions don't match stable.
+            // This only seems to be required on windows. We need to eventually figure out why, with a bit of luck.
+            platformOffsetClock = new OffsetCorrectionClock(interpolatedTrack, ExternalPauseFrequencyAdjust) { Offset = RuntimeInfo.OS == RuntimeInfo.Platform.Windows ? 15 : 0 };
 
-                // User global offset (set in settings) should also be applied.
-                userGlobalOffsetClock = new OffsetCorrectionClock(platformOffsetClock, ExternalPauseFrequencyAdjust);
+            // User global offset (set in settings) should also be applied.
+            userGlobalOffsetClock = new OffsetCorrectionClock(platformOffsetClock, ExternalPauseFrequencyAdjust);
 
-                // User per-beatmap offset will be applied to this final clock.
-                finalClockSource = userBeatmapOffsetClock = new OffsetCorrectionClock(userGlobalOffsetClock, ExternalPauseFrequencyAdjust);
-            }
-            else
-            {
-                finalClockSource = new InterpolatingFramedClock(interpolatedTrack);
-            }
+            // User per-beatmap offset will be applied to this final clock.
+            finalClockSource = userBeatmapOffsetClock = new OffsetCorrectionClock(userGlobalOffsetClock, ExternalPauseFrequencyAdjust);
         }
 
         protected override void LoadComplete()
         {
             base.LoadComplete();
 
-            if (applyOffsets)
-            {
-                Debug.Assert(userBeatmapOffsetClock != null);
-                Debug.Assert(userGlobalOffsetClock != null);
+            Debug.Assert(userBeatmapOffsetClock != null);
+            Debug.Assert(userGlobalOffsetClock != null);
 
-                userAudioOffset = config.GetBindable<double>(OsuSetting.AudioOffset);
-                userAudioOffset.BindValueChanged(offset => userGlobalOffsetClock.Offset = offset.NewValue, true);
+            userAudioOffset = config.GetBindable<double>(OsuSetting.AudioOffset);
+            userAudioOffset.BindValueChanged(offset => userGlobalOffsetClock.Offset = offset.NewValue, true);
 
-                beatmapOffsetSubscription = realm.SubscribeToPropertyChanged(
-                    r => r.Find<BeatmapInfo>(beatmap.Value.BeatmapInfo.ID)?.UserSettings,
-                    settings => settings.Offset,
-                    val =>
-                    {
-                        userBeatmapOffsetClock.Offset = val;
-                    });
-            }
+            beatmapOffsetSubscription = realm.SubscribeToPropertyChanged(
+                r => r.Find<BeatmapInfo>(beatmap.Value.BeatmapInfo.ID)?.UserSettings,
+                settings => settings.Offset,
+                val =>
+                {
+                    userBeatmapOffsetClock.Offset = val;
+                });
         }
 
         protected override void Update()
@@ -139,9 +125,6 @@ namespace osu.Game.Beatmaps
         {
             get
             {
-                if (!applyOffsets)
-                    return 0;
-
                 Debug.Assert(userGlobalOffsetClock != null);
                 Debug.Assert(userBeatmapOffsetClock != null);
                 Debug.Assert(platformOffsetClock != null);
