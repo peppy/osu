@@ -192,7 +192,7 @@ namespace osu.Game.Screens.Play
         }
 
         [BackgroundDependencyLoader(true)]
-        private void load(OsuConfigManager config, OsuGameBase game, CancellationToken cancellationToken)
+        private void load(FramedBeatmapClock beatmapClock, OsuConfigManager config, OsuGameBase game, CancellationToken cancellationToken)
         {
             var gameplayMods = Mods.Value.Select(m => m.DeepClone()).ToArray();
 
@@ -232,7 +232,7 @@ namespace osu.Game.Screens.Play
 
             dependencies.CacheAs(HealthProcessor);
 
-            InternalChild = GameplayClockContainer = CreateGameplayClockContainer(Beatmap.Value, DrawableRuleset.GameplayStartTime);
+            InternalChild = GameplayClockContainer = CreateGameplayClockContainer(Beatmap.Value, beatmapClock, DrawableRuleset.GameplayStartTime);
 
             AddInternal(screenSuspension = new ScreenSuspensionHandler(GameplayClockContainer));
 
@@ -379,7 +379,7 @@ namespace osu.Game.Screens.Play
             loadLeaderboard();
         }
 
-        protected virtual GameplayClockContainer CreateGameplayClockContainer(WorkingBeatmap beatmap, double gameplayStart) => new MasterGameplayClockContainer(beatmap, gameplayStart);
+        protected virtual GameplayClockContainer CreateGameplayClockContainer(WorkingBeatmap beatmap, FramedBeatmapClock beatmapClock, double gameplayStart) => new MasterGameplayClockContainer(beatmap, beatmapClock, gameplayStart);
 
         private Drawable createUnderlayComponents() =>
             DimmableStoryboard = new DimmableStoryboard(Beatmap.Value.Storyboard, GameplayState.Mods) { RelativeSizeAxes = Axes.Both };

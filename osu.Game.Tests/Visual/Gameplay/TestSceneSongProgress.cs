@@ -10,6 +10,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Testing;
 using osu.Framework.Utils;
+using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.UI;
 using osu.Game.Screens.Play;
@@ -43,7 +44,7 @@ namespace osu.Game.Tests.Visual.Gameplay
                     RelativeSizeAxes = Axes.Both,
                     Depth = float.MaxValue
                 },
-                gameplayClockContainer = new MasterGameplayClockContainer(Beatmap.Value, skip_target_time)
+                gameplayClockContainer = new MasterGameplayClockContainer(Beatmap.Value, new FramedBeatmapClock(Beatmap.Value), skip_target_time)
                 {
                     Child = frameStabilityContainer = new FrameStabilityContainer
                     {

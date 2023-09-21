@@ -28,9 +28,9 @@ namespace osu.Game.Screens.Edit.GameplayTest
             editorState = editor.GetState();
         }
 
-        protected override GameplayClockContainer CreateGameplayClockContainer(WorkingBeatmap beatmap, double gameplayStart)
+        protected override GameplayClockContainer CreateGameplayClockContainer(WorkingBeatmap beatmap, FramedBeatmapClock beatmapClock, double gameplayStart)
         {
-            var masterGameplayClockContainer = new MasterGameplayClockContainer(beatmap, gameplayStart);
+            var masterGameplayClockContainer = new MasterGameplayClockContainer(beatmap, beatmapClock, gameplayStart);
 
             // Only reset the time to the current point if the editor is later than the normal start time (and the first object).
             // This allows more sane test playing from the start of the beatmap (ie. correctly adding lead-in time).

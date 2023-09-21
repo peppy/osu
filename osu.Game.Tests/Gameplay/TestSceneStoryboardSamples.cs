@@ -17,6 +17,7 @@ using osu.Framework.IO.Stores;
 using osu.Framework.Platform;
 using osu.Framework.Testing;
 using osu.Game.Audio;
+using osu.Game.Beatmaps;
 using osu.Game.Configuration;
 using osu.Game.Database;
 using osu.Game.IO;
@@ -75,7 +76,7 @@ namespace osu.Game.Tests.Gameplay
             {
                 var working = CreateWorkingBeatmap(new OsuRuleset().RulesetInfo);
 
-                Add(gameplayContainer = new MasterGameplayClockContainer(working, 0)
+                Add(gameplayContainer = new MasterGameplayClockContainer(working, new FramedBeatmapClock(working), 0)
                 {
                     Child = new FrameStabilityContainer
                     {
@@ -105,7 +106,7 @@ namespace osu.Game.Tests.Gameplay
 
                 const double start_time = 1000;
 
-                Add(gameplayContainer = new MasterGameplayClockContainer(working, start_time)
+                Add(gameplayContainer = new MasterGameplayClockContainer(working, new FramedBeatmapClock(working), start_time)
                 {
                     Child = new FrameStabilityContainer
                     {
@@ -136,7 +137,7 @@ namespace osu.Game.Tests.Gameplay
 
                 var beatmapSkinSourceContainer = new BeatmapSkinProvidingContainer(Beatmap.Value.Skin);
 
-                Add(gameplayContainer = new MasterGameplayClockContainer(Beatmap.Value, 0)
+                Add(gameplayContainer = new MasterGameplayClockContainer(Beatmap.Value, new FramedBeatmapClock(Beatmap.Value), 0)
                 {
                     Child = beatmapSkinSourceContainer
                 });

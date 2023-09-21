@@ -9,6 +9,7 @@ using osu.Framework.Audio;
 using osu.Framework.Bindables;
 using osu.Framework.Testing;
 using osu.Framework.Timing;
+using osu.Game.Beatmaps;
 using osu.Game.Configuration;
 using osu.Game.Rulesets.Osu;
 using osu.Game.Screens.Play;
@@ -41,7 +42,7 @@ namespace osu.Game.Tests.Gameplay
             AddStep("create container", () =>
             {
                 var working = CreateWorkingBeatmap(new OsuRuleset().RulesetInfo);
-                Child = gameplayClockContainer = new MasterGameplayClockContainer(working, 0);
+                Child = gameplayClockContainer = new MasterGameplayClockContainer(working, new FramedBeatmapClock(working), 0);
             });
 
             AddStep("start clock", () => gameplayClockContainer.Start());
@@ -56,7 +57,7 @@ namespace osu.Game.Tests.Gameplay
             AddStep("create container", () =>
             {
                 var working = CreateWorkingBeatmap(new OsuRuleset().RulesetInfo);
-                Child = gameplayClockContainer = new MasterGameplayClockContainer(working, 0);
+                Child = gameplayClockContainer = new MasterGameplayClockContainer(working, new FramedBeatmapClock(working), 0);
             });
 
             AddStep("start clock", () => gameplayClockContainer.Start());
@@ -91,7 +92,7 @@ namespace osu.Game.Tests.Gameplay
             AddStep("create container", () =>
             {
                 working = new ClockBackedTestWorkingBeatmap(new OsuRuleset().RulesetInfo, new FramedClock(new ManualClock()), Audio);
-                Child = gameplayClockContainer = new MasterGameplayClockContainer(working, 0);
+                Child = gameplayClockContainer = new MasterGameplayClockContainer(working, new FramedBeatmapClock(working), 0);
 
                 gameplayClockContainer.Reset(startClock: !whileStopped);
             });

@@ -7,6 +7,7 @@ using NUnit.Framework;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Timing;
+using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Osu;
 using osu.Game.Screens.Play;
 using osuTK;
@@ -34,7 +35,7 @@ namespace osu.Game.Tests.Visual.Gameplay
 
             var working = CreateWorkingBeatmap(CreateBeatmap(new OsuRuleset().RulesetInfo));
 
-            Child = gameplayClockContainer = new MasterGameplayClockContainer(working, 0)
+            Child = gameplayClockContainer = new MasterGameplayClockContainer(working, new FramedBeatmapClock(working), 0)
             {
                 RelativeSizeAxes = Axes.Both,
                 Children = new Drawable[]

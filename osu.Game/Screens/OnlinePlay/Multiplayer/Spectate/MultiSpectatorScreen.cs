@@ -9,6 +9,7 @@ using osu.Framework.Audio;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Logging;
+using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Rooms;
@@ -73,6 +74,9 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
             instances = new PlayerArea[Users.Count];
         }
 
+        [Resolved]
+        private FramedBeatmapClock framedBeatmapClock { get; set; } = null!;
+
         [BackgroundDependencyLoader]
         private void load()
         {
@@ -81,7 +85,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
 
             InternalChildren = new Drawable[]
             {
-                masterClockContainer = new MasterGameplayClockContainer(Beatmap.Value, 0)
+                masterClockContainer = new MasterGameplayClockContainer(Beatmap.Value, framedBeatmapClock, 0)
                 {
                     Child = new GridContainer
                     {

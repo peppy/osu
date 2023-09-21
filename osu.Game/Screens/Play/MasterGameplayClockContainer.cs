@@ -41,7 +41,7 @@ namespace osu.Game.Screens.Play
 
         private readonly WorkingBeatmap beatmap;
 
-        private readonly Track track;
+        private Track track;
 
         private readonly double skipTargetTime;
 
@@ -63,9 +63,10 @@ namespace osu.Game.Screens.Play
         /// Create a new master gameplay clock container.
         /// </summary>
         /// <param name="beatmap">The beatmap to be used for time and metadata references.</param>
+        /// <param name="beatmapClock">The beatmap's framed clock. General global to the game.</param>
         /// <param name="skipTargetTime">The latest time which should be used when introducing gameplay. Will be used when skipping forward.</param>
-        public MasterGameplayClockContainer(WorkingBeatmap beatmap, double skipTargetTime)
-            : base(beatmap.Track, true)
+        public MasterGameplayClockContainer(WorkingBeatmap beatmap, FramedBeatmapClock beatmapClock, double skipTargetTime)
+            : base(beatmapClock, true)
         {
             this.beatmap = beatmap;
             this.skipTargetTime = skipTargetTime;
@@ -187,7 +188,8 @@ namespace osu.Game.Screens.Play
         public void StopUsingBeatmapClock()
         {
             removeSourceClockAdjustments();
-            ChangeSource(new TrackVirtual(beatmap.Track.Length));
+            track = new TrackVirtual(beatmap.Track.Length);
+            GameplayClock = new FramedBeatmapClock();
             addSourceClockAdjustments();
         }
 
@@ -228,6 +230,6 @@ namespace osu.Game.Screens.Play
         ControlPointInfo IBeatSyncProvider.ControlPoints => beatmap.Beatmap.ControlPointInfo;
         IClock IBeatSyncProvider.Clock => this;
 
-        ChannelAmplitudes IHasAmplitudes.CurrentAmplitudes => beatmap.TrackLoaded ? beatmap.Track.CurrentAmplitudes : ChannelAmplitudes.Empty;
+        ChannelAmplitudes IHasAmplitudes.CurrentAmplitudes => beatmap.TrackLoaded ? track.CurrentAmplitudes : ChannelAmplitudes.Empty;
     }
 }

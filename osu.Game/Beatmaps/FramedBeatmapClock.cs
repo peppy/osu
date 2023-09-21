@@ -24,7 +24,7 @@ namespace osu.Game.Beatmaps
     ///  - Exposes track length.
     ///  - Allows changing the source to a new track (for cases like editor track updating).
     /// </summary>
-    public partial class FramedBeatmapClock : Component, IFrameBasedClock, IAdjustableClock, ISourceChangeableClock
+    public partial class FramedBeatmapClock : Component, IFrameBasedClock, IAdjustableClock
     {
         /// <summary>
         /// The length of the underlying beatmap track. Will default to 60 seconds if unavailable.
@@ -53,18 +53,17 @@ namespace osu.Game.Beatmaps
 
         private readonly DecouplingClock decoupledTrack;
 
+        private WorkingBeatmap? beatmap;
+
         [Resolved]
         private OsuConfigManager config { get; set; } = null!;
 
         [Resolved]
         private RealmAccess realm { get; set; } = null!;
 
-        [Resolved]
-        private IBindable<WorkingBeatmap> beatmap { get; set; } = null!;
-
         public bool IsRewinding { get; private set; }
 
-        public FramedBeatmapClock()
+        public FramedBeatmapClock(WorkingBeatmap? beatmap = null)
         {
             // A decoupled clock is used to ensure precise time values even when the host audio subsystem is not reporting
             // high precision times (on windows there's generally only 5-10ms reporting intervals, as an example).
@@ -81,6 +80,9 @@ namespace osu.Game.Beatmaps
 
             // User per-beatmap offset will be applied to this final clock.
             finalClockSource = userBeatmapOffsetClock = new OffsetCorrectionClock(userGlobalOffsetClock, ExternalPauseFrequencyAdjust);
+
+            if (beatmap != null)
+                ChangeBeatmap(beatmap);
         }
 
         protected override void LoadComplete()
@@ -93,13 +95,7 @@ namespace osu.Game.Beatmaps
             userAudioOffset = config.GetBindable<double>(OsuSetting.AudioOffset);
             userAudioOffset.BindValueChanged(offset => userGlobalOffsetClock.Offset = offset.NewValue, true);
 
-            beatmapOffsetSubscription = realm.SubscribeToPropertyChanged(
-                r => r.Find<BeatmapInfo>(beatmap.Value.BeatmapInfo.ID)?.UserSettings,
-                settings => settings.Offset,
-                val =>
-                {
-                    userBeatmapOffsetClock.Offset = val;
-                });
+            subscribeToOffset();
         }
 
         protected override void Update()
@@ -135,10 +131,25 @@ namespace osu.Game.Beatmaps
 
         #region Delegation of IAdjustableClock / ISourceChangeableClock to decoupled clock.
 
-        public void ChangeSource(IClock? source)
+        public void ChangeBeatmap(WorkingBeatmap beatmap)
         {
-            Track = source as Track ?? new TrackVirtual(60000);
+            this.beatmap = beatmap;
+            Track = beatmap.Track;
             decoupledTrack.ChangeSource(Track);
+
+            subscribeToOffset();
+        }
+
+        private void subscribeToOffset()
+        {
+            if (!IsLoaded || beatmap == null)
+                return;
+
+            beatmapOffsetSubscription?.Dispose();
+            beatmapOffsetSubscription = realm.SubscribeToPropertyChanged(
+                r => r.Find<BeatmapInfo>(beatmap.BeatmapInfo.ID)?.UserSettings,
+                settings => settings.Offset,
+                val => userBeatmapOffsetClock!.Offset = val);
         }
 
         public IClock Source => decoupledTrack.Source;

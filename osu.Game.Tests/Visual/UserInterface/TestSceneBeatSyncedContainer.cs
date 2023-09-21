@@ -14,6 +14,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Testing;
 using osu.Framework.Utils;
+using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
@@ -43,7 +44,7 @@ namespace osu.Game.Tests.Visual.UserInterface
             {
                 Children = new Drawable[]
                 {
-                    gameplayClockContainer = new MasterGameplayClockContainer(Beatmap.Value, 0)
+                    gameplayClockContainer = new MasterGameplayClockContainer(Beatmap.Value, new FramedBeatmapClock(Beatmap.Value), 0)
                     {
                         Child = beatContainer = new TestBeatSyncedContainer
                         {
