@@ -6,6 +6,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using osu.Framework.Allocation;
 using osu.Framework.Audio.Track;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -15,13 +16,14 @@ using osu.Framework.Timing;
 using osu.Framework.Utils;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.ControlPoints;
+using osu.Game.Overlays;
 
 namespace osu.Game.Screens.Edit
 {
     /// <summary>
     /// A decoupled clock which adds editor-specific functionality, such as snapping to a user-defined beat divisor.
     /// </summary>
-    public partial class EditorClock : CompositeComponent, IFrameBasedClock, IAdjustableClock, ISourceChangeableClock
+    public partial class EditorClock : CompositeComponent, IFrameBasedClock, IAdjustableClock
     {
         public IBindable<Track> Track => track;
 
@@ -35,7 +37,14 @@ namespace osu.Game.Screens.Edit
 
         private readonly BindableBeatDivisor beatDivisor;
 
-        private readonly FramedBeatmapClock underlyingClock;
+        [Resolved]
+        private FramedBeatmapClock beatmapClock { get; set; }
+
+        [Resolved]
+        private MusicController musicController { get; set; }
+
+        [Resolved]
+        private IBindable<WorkingBeatmap> workingBeatmap { get; set; } = null!;
 
         private bool playbackFinished;
 
@@ -53,10 +62,25 @@ namespace osu.Game.Screens.Edit
             Beatmap = beatmap ?? new Beatmap();
 
             this.beatDivisor = beatDivisor ?? new BindableBeatDivisor();
-
-            underlyingClock = new FramedBeatmapClock(applyOffsets: true);
-            AddInternal(underlyingClock);
         }
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            // This is a bit weird, but `musicController` doesn't expose its Track..
+            track.Value = workingBeatmap.Value.Track;
+            musicController.TrackChanged += onTrackChanged;
+        }
+
+        protected override void Dispose(bool isDisposing)
+        {
+            base.Dispose(isDisposing);
+
+            musicController.TrackChanged -= onTrackChanged;
+        }
+
+        private void onTrackChanged(WorkingBeatmap working, TrackChangeDirection direction) => track.Value = working.Track;
 
         /// <summary>
         /// Seek to the closest snappable beat from a time.
@@ -156,14 +180,14 @@ namespace osu.Game.Screens.Edit
         public double CurrentTimeAccurate =>
             Transforms.OfType<TransformSeek>().FirstOrDefault()?.EndValue ?? CurrentTime;
 
-        public double CurrentTime => underlyingClock.CurrentTime;
+        public double CurrentTime => beatmapClock.CurrentTime;
 
-        public double TotalAppliedOffset => underlyingClock.TotalAppliedOffset;
+        public double TotalAppliedOffset => beatmapClock.TotalAppliedOffset;
 
         public void Reset()
         {
             ClearTransforms();
-            underlyingClock.Reset();
+            beatmapClock.Reset();
         }
 
         public void Start()
@@ -171,15 +195,15 @@ namespace osu.Game.Screens.Edit
             ClearTransforms();
 
             if (playbackFinished)
-                underlyingClock.Seek(0);
+                beatmapClock.Seek(0);
 
-            underlyingClock.Start();
+            beatmapClock.Start();
         }
 
         public void Stop()
         {
             seekingOrStopped.Value = true;
-            underlyingClock.Stop();
+            beatmapClock.Stop();
         }
 
         public bool Seek(double position)
@@ -190,7 +214,7 @@ namespace osu.Game.Screens.Edit
 
             // Ensure the sought point is within the boundaries
             position = Math.Clamp(position, 0, TrackLength);
-            return underlyingClock.Seek(position);
+            return beatmapClock.Seek(position);
         }
 
         /// <summary>
@@ -210,34 +234,28 @@ namespace osu.Game.Screens.Edit
             }
         }
 
-        public void ResetSpeedAdjustments() => underlyingClock.ResetSpeedAdjustments();
+        public void ResetSpeedAdjustments() => beatmapClock.ResetSpeedAdjustments();
 
         double IAdjustableClock.Rate
         {
-            get => underlyingClock.Rate;
-            set => underlyingClock.Rate = value;
+            get => beatmapClock.Rate;
+            set => beatmapClock.Rate = value;
         }
 
-        double IClock.Rate => underlyingClock.Rate;
+        double IClock.Rate => beatmapClock.Rate;
 
-        public bool IsRunning => underlyingClock.IsRunning;
+        public bool IsRunning => beatmapClock.IsRunning;
 
         public void ProcessFrame()
         {
             // Noop to ensure an external consumer doesn't process the internal clock an extra time.
         }
 
-        public double ElapsedFrameTime => underlyingClock.ElapsedFrameTime;
+        public double ElapsedFrameTime => beatmapClock.ElapsedFrameTime;
 
-        public double FramesPerSecond => underlyingClock.FramesPerSecond;
+        public double FramesPerSecond => beatmapClock.FramesPerSecond;
 
-        public void ChangeSource(IClock source)
-        {
-            track.Value = source as Track;
-            underlyingClock.ChangeSource(source);
-        }
-
-        public IClock Source => underlyingClock.Source;
+        public IClock Source => beatmapClock.Source;
 
         private const double transform_time = 300;
 
@@ -246,17 +264,17 @@ namespace osu.Game.Screens.Edit
             base.Update();
 
             // EditorClock wasn't being added in many places. This gives us more certainty that it is.
-            Debug.Assert(underlyingClock.LoadState > LoadState.NotLoaded);
+            Debug.Assert(beatmapClock.LoadState > LoadState.NotLoaded);
 
             playbackFinished = CurrentTime >= TrackLength;
 
             if (playbackFinished)
             {
                 if (IsRunning)
-                    underlyingClock.Stop();
+                    beatmapClock.Stop();
 
                 if (CurrentTime > TrackLength)
-                    underlyingClock.Seek(TrackLength);
+                    beatmapClock.Seek(TrackLength);
             }
 
             updateSeekingState();
@@ -287,8 +305,8 @@ namespace osu.Game.Screens.Edit
 
         private double currentTime
         {
-            get => underlyingClock.CurrentTime;
-            set => underlyingClock.Seek(value);
+            get => beatmapClock.CurrentTime;
+            set => beatmapClock.Seek(value);
         }
 
         private class TransformSeek : Transform<double, EditorClock>

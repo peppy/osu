@@ -373,9 +373,6 @@ namespace osu.Game.Screens.Edit
             editorBackgroundDim.BindValueChanged(_ => dimBackground());
         }
 
-        [Resolved]
-        private MusicController musicController { get; set; }
-
         protected override void LoadComplete()
         {
             base.LoadComplete();
@@ -383,18 +380,7 @@ namespace osu.Game.Screens.Edit
 
             Mode.Value = isNewBeatmap ? EditorScreenMode.SongSetup : EditorScreenMode.Compose;
             Mode.BindValueChanged(onModeChanged, true);
-
-            musicController.TrackChanged += onTrackChanged;
         }
-
-        protected override void Dispose(bool isDisposing)
-        {
-            base.Dispose(isDisposing);
-
-            musicController.TrackChanged -= onTrackChanged;
-        }
-
-        private void onTrackChanged(WorkingBeatmap working, TrackChangeDirection direction) => clock.ChangeSource(working.Track);
 
         /// <summary>
         /// Creates an <see cref="EditorState"/> instance representing the current state of the editor.

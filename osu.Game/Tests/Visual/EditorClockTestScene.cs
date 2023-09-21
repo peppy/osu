@@ -72,7 +72,6 @@ namespace osu.Game.Tests.Visual
         {
             e.OldValue?.Track.RemoveAdjustment(AdjustableProperty.Frequency, frequencyAdjustment);
             e.NewValue.Track.AddAdjustment(AdjustableProperty.Frequency, frequencyAdjustment);
-            EditorClock.ChangeSource(e.NewValue.Track);
         }
 
         protected override bool OnScroll(ScrollEvent e)
