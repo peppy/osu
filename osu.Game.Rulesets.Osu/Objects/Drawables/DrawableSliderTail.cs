@@ -129,9 +129,9 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             if (userTriggered)
                 return;
 
-            if (timeOffset >= 0 && Tracking)
+            if (timeOffset >= SliderEventGenerator.TAIL_LENIENCY && Tracking)
                 ApplyResult(r => r.Type = r.Judgement.MaxResult);
-            else if (timeOffset >= -SliderEventGenerator.LAST_TICK_OFFSET)
+            else if (timeOffset >= 0)
                 ApplyResult(r => r.Type = r.Judgement.MinResult);
         }
 
