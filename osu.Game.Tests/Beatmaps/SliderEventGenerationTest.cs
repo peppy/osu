@@ -78,8 +78,8 @@ namespace osu.Game.Tests.Beatmaps
             Assert.That(events[7].Type, Is.EqualTo(SliderEventType.Tick));
             Assert.That(events[7].Time, Is.EqualTo(1700));
 
-            Assert.That(events[9].Type, Is.EqualTo(SliderEventType.Tail));
-            Assert.That(events[9].Time, Is.EqualTo(2 * span_duration));
+            Assert.That(events[8].Type, Is.EqualTo(SliderEventType.Tail));
+            Assert.That(events[8].Time, Is.EqualTo(2 * span_duration));
         }
 
         [Test]
@@ -87,8 +87,8 @@ namespace osu.Game.Tests.Beatmaps
         {
             var events = SliderEventGenerator.Generate(start_time, span_duration, 1, span_duration / 2, span_duration, 1).ToArray();
 
-            Assert.That(events[2].Type, Is.EqualTo(SliderEventType.LegacyLastTick));
-            Assert.That(events[2].Time, Is.EqualTo(span_duration + SliderEventGenerator.TAIL_LENIENCY));
+            Assert.That(events[2].Type, Is.EqualTo(SliderEventType.Tail));
+            Assert.That(events[2].Time, Is.EqualTo(span_duration));
         }
 
         [Test]

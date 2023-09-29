@@ -17,9 +17,6 @@ namespace osu.Game.Rulesets.Objects
         ///
         /// After discussion on how this should be handled going forward, players have unanimously stated that this lenience should remain in some way.
         /// These days, this is implemented in the drawable implementation of Slider in the osu! ruleset.
-        ///
-        /// We need to keep the <see cref="SliderEventType.LegacyLastTick"/> *only* for osu!catch conversion, which relies on it to generate tiny ticks
-        /// correctly.
         /// </summary>
         public const double TAIL_LENIENCY = -36;
 
@@ -77,37 +74,14 @@ namespace osu.Game.Rulesets.Objects
             }
 
             double totalDuration = spanCount * spanDuration;
-
-            // Okay, I'll level with you. I made a mistake. It was 2007.
-            // Times were simpler. osu! was but in its infancy and sliders were a new concept.
-            // A hack was made, which has unfortunately lived through until this day.
-            //
-            // This legacy tick is used for some calculations and judgements where audio output is not required.
-            // Generally we are keeping this around just for difficulty compatibility.
-            // Optimistically we do not want to ever use this for anything user-facing going forwards.
-
             int finalSpanIndex = spanCount - 1;
             double finalSpanStartTime = startTime + finalSpanIndex * spanDuration;
-            double finalSpanEndTime = Math.Max(startTime + totalDuration / 2, (finalSpanStartTime + spanDuration) + TAIL_LENIENCY);
-            double finalProgress = (finalSpanEndTime - finalSpanStartTime) / spanDuration;
-
-            if (spanCount % 2 == 0) finalProgress = 1 - finalProgress;
-
-            yield return new SliderEventDescriptor
-            {
-                Type = SliderEventType.LegacyLastTick,
-                SpanIndex = finalSpanIndex,
-                SpanStartTime = finalSpanStartTime,
-                Time = finalSpanEndTime,
-                PathProgress = finalProgress,
-            };
-
             yield return new SliderEventDescriptor
             {
                 Type = SliderEventType.Tail,
-                SpanIndex = finalSpanIndex,
+                SpanIndex = spanCount - 1,
                 SpanStartTime = startTime + (spanCount - 1) * spanDuration,
-                Time = startTime + totalDuration,
+                Time = startTime + spanCount * spanDuration,
                 PathProgress = spanCount % 2,
             };
         }
@@ -185,12 +159,6 @@ namespace osu.Game.Rulesets.Objects
     public enum SliderEventType
     {
         Tick,
-
-        /// <summary>
-        /// Occurs just before the tail. See <see cref="SliderEventGenerator.TAIL_LENIENCY"/>.
-        /// Should generally be ignored.
-        /// </summary>
-        LegacyLastTick,
         Head,
         Tail,
         Repeat

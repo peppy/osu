@@ -77,7 +77,16 @@ namespace osu.Game.Rulesets.Catch.Objects
             int nodeIndex = 0;
             SliderEventDescriptor? lastEvent = null;
 
-            foreach (var e in SliderEventGenerator.Generate(StartTime, SpanDuration, Velocity, TickDistance, Path.Distance, this.SpanCount(), cancellationToken))
+            var sliderEvents = SliderEventGenerator.Generate(StartTime, SpanDuration, Velocity, TickDistance, Path.Distance, this.SpanCount(), cancellationToken).ToList();
+
+            // TODO: port over removed logic from SliderEventGenerator.
+            sliderEvents.Insert(sliderEvents.Count - 1, sliderEvents.Last() with
+            {
+                Type = SliderEventType.Tick,
+                Time = EndTime + SliderEventGenerator.TAIL_LENIENCY,
+            });
+
+            foreach (var e in sliderEvents)
             {
                 // generate tiny droplets since the last point
                 if (lastEvent != null)
