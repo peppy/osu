@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using osu.Framework.Logging;
 
 namespace osu.Game.Rulesets.Osu.Objects.Drawables
 {
@@ -28,7 +26,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         /// <remarks>
         /// This is the final scoring value.
         /// </remarks>
-        public float TotalRotation { get; private set; }
+        public float TotalRotation => 360 * segments.Count + currentMaxRotation;
 
         /// <summary>
         /// The list of all segments where either:
@@ -39,15 +37,10 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         /// </summary>
         private readonly Stack<SpinSegment> segments = new Stack<SpinSegment>();
 
-        /// <summary>
-        /// The current partial spin - the maximum absolute rotation among all segments since the last spin.
-        /// </summary>
-        private float currentMaxRotation;
+        private float totalRotation;
 
-        /// <summary>
-        /// The current segment.
-        /// </summary>
-        private SpinSegment currentSpinSegment;
+        private float currentRotation;
+        private float currentMaxRotation;
 
         private double lastReportTime = double.NegativeInfinity;
 
@@ -55,13 +48,15 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         /// Report a delta update based on user input.
         /// </summary>
         /// <param name="currentTime">The current time.</param>
-        /// <param name="deltaAngle">The delta of the angle moved through since the last report.</param>
-        public void ReportDelta(double currentTime, float deltaAngle)
+        /// <param name="delta">The delta of the angle moved through since the last report.</param>
+        public void ReportDelta(double currentTime, float delta)
         {
+            totalRotation += delta;
+
             if (currentTime >= lastReportTime)
-                addDelta(currentTime, deltaAngle);
+                addDelta(currentTime, delta);
             else
-                rewindDelta(currentTime, deltaAngle);
+                rewindDelta(currentTime, delta);
 
             lastReportTime = currentTime;
         }
@@ -71,94 +66,30 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             if (delta == 0)
                 return;
 
-            int direction = Math.Sign(delta);
+            currentRotation += delta;
+            currentMaxRotation = Math.Max(currentMaxRotation, Math.Abs(currentRotation));
 
-            // Start a new segment if this is the first delta, to track the correct direction.
-            if (currentSpinSegment.Direction == 0)
-                beginNewSegment(double.NegativeInfinity, direction);
-
-            // Start a new segment if we've changed direction.
-            if (currentSpinSegment.Direction != direction)
-                beginNewSegment(currentTime, direction);
-
-            currentSpinSegment.CurrentRotation += delta;
-
-            float rotation = Math.Abs(currentSpinSegment.CurrentRotation);
-
-            TotalRotation += Math.Max(0, rotation - currentMaxRotation);
-
-            // Start a new segment if we've completed a spin.
-            while (rotation >= 360)
+            if (currentMaxRotation >= 360)
             {
-                rotation -= 360;
+                int direction = Math.Sign(currentRotation);
 
-                // Make sure the current segment doesn't exceed a full spin.
-                currentSpinSegment.CurrentRotation = Math.Clamp(currentSpinSegment.CurrentRotation, -360, 360);
-                Debug.Assert(MathF.Abs(currentSpinSegment.CurrentRotation) == 360);
+                currentRotation -= direction * 360;
+                currentMaxRotation = Math.Abs(currentRotation);
 
-                beginNewSegment(currentTime, direction);
-
-                // The new segment should be in the same direction and with the excess of the previous segment.
-                currentSpinSegment.CurrentRotation = rotation * direction;
-                currentMaxRotation = 0;
+                segments.Push(new SpinSegment(currentTime, direction));
             }
-
-            currentMaxRotation = Math.Max(currentMaxRotation, rotation);
-
-            Logger.Log($"ADD | Time: {currentTime} Delta: {delta}, Segment: {currentSpinSegment.CurrentRotation}, Total: {TotalRotation}");
         }
 
         private void rewindDelta(double currentTime, float delta)
         {
-            Debug.Assert(currentSpinSegment.Direction != 0);
-
-            // The current, absolute (i.e. 0-to-360) rotation.
-            float currentPosAbsolute = (currentSpinSegment.CurrentRotation + delta) % 360;
-            if (Math.Sign(currentPosAbsolute) < 0)
-                currentPosAbsolute += 360;
-
-            // Exclude any segments that we've rewound past.
-            while (segments.Count > 0 && currentTime <= currentSpinSegment.StartTime)
-                currentSpinSegment = segments.Pop();
-
-            // Compute the rotation for the current segment based on the absolute rotatiobn.
-            currentSpinSegment.CurrentRotation = currentSpinSegment.Direction < 0
-                ? Math.Min(0, currentPosAbsolute - 360)
-                : Math.Max(0, currentPosAbsolute);
-
-            // Check if we've rewound exactly onto a complete spin, and insert a new segment.
-            if (currentSpinSegment.IsCompleteSpin)
+            while (segments.TryPeek(out var segment) && segment.StartTime > currentTime)
             {
-                // The direction doesn't really matter here - a new segment will be inserted during following forward playback if incorrect.
-                beginNewSegment(currentTime, currentSpinSegment.Direction);
-                currentSpinSegment.CurrentRotation = 0;
+                totalRotation -= 360 * segment.Direction;
+                segments.Pop();
             }
 
-            // Note: Enumerating through a stack is already reverse order.
-            IEnumerable<SpinSegment> allSegments = segments.Prepend(currentSpinSegment);
-
-            currentMaxRotation = allSegments
-                                 .TakeWhile(t => !t.IsCompleteSpin)
-                                 .Select(t => Math.Abs(t.CurrentRotation))
-                                 .Max();
-
-            TotalRotation = 360 * allSegments.Count(t => t.IsCompleteSpin)
-                            + currentMaxRotation;
-
-            Logger.Log($"REMOVE | Time: {currentTime} Delta: {delta}, Segment: {currentSpinSegment.CurrentRotation}, Total: {TotalRotation}");
-        }
-
-        /// <summary>
-        /// Finishes the current segment and starts a new one from its end point.
-        /// </summary>
-        /// <param name="currentTime">The start time of the new segment.</param>
-        /// <param name="direction">The segment's direction.</param>
-        private void beginNewSegment(double currentTime, int direction)
-        {
-            if (currentSpinSegment.Direction != 0)
-                segments.Push(currentSpinSegment);
-
-            currentSpinSegment = new SpinSegment(currentTime, direction, currentSpinSegment.CurrentRotation);
+            currentRotation = totalRotation;
+            currentMaxRotation = Math.Abs(currentRotation);
         }
 
         /// <summary>
@@ -169,7 +100,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         /// A segment stores the current absolute angle of rotation. Generally this would be either -360 or 360 for a completed spin, or
         /// a number representing the last incomplete spin.
         /// </remarks>
-        private struct SpinSegment
+        private class SpinSegment
         {
             /// <summary>
             /// The start time of this segment, when the direction change occurred.
@@ -181,27 +112,12 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             /// </summary>
             public readonly int Direction;
 
-            /// <summary>
-            /// The current rotation at the last known point in this segment.
-            /// </summary>
-            /// <remarks>
-            /// - In the case of a completed spin, this is either -360 or 360.
-            /// - For the final (or ongoing) segment, this is a value representing how close to completing the spin we are.
-            /// </remarks>
-            public float CurrentRotation;
-
-            /// <summary>
-            /// Whether this segment represents a complete spin.
-            /// </summary>
-            public bool IsCompleteSpin => CurrentRotation == -360 || CurrentRotation == 360;
-
-            public SpinSegment(double startTime, int direction, float currentRotation)
+            public SpinSegment(double startTime, int direction)
             {
                 Debug.Assert(direction == -1 || direction == 1);
 
                 StartTime = startTime;
                 Direction = direction;
-                CurrentRotation = currentRotation;
             }
         }
     }

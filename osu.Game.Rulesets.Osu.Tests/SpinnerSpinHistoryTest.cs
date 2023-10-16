@@ -110,6 +110,9 @@ namespace osu.Game.Rulesets.Osu.Tests
         {
             history.ReportDelta(500, 360);
             history.ReportDelta(1000, 720);
+
+            Assert.That(history.TotalRotation, Is.EqualTo(1080));
+
             history.ReportDelta(250, -180);
 
             Assert.That(history.TotalRotation, Is.EqualTo(180));
