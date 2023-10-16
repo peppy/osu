@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace osu.Game.Rulesets.Osu.Objects.Drawables
 {
@@ -26,7 +27,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         /// <remarks>
         /// This is the final scoring value.
         /// </remarks>
-        public float TotalRotation => 360 * segments.Count + currentMaxRotation;
+        public float TotalRotation => 360 * segments.Count(s => Math.Abs(s.LocalMax) == 360) + currentMaxRotation;
 
         /// <summary>
         /// The list of all segments where either:
@@ -61,6 +62,8 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             lastReportTime = currentTime;
         }
 
+        int currentDirection;
+
         private void addDelta(double currentTime, float delta)
         {
             if (delta == 0)
@@ -69,14 +72,20 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             currentRotation += delta;
             currentMaxRotation = Math.Max(currentMaxRotation, Math.Abs(currentRotation));
 
-            if (currentMaxRotation >= 360)
+            int direction = Math.Sign(delta);
+
+            while (currentMaxRotation >= 360)
             {
-                int direction = Math.Sign(currentRotation);
+                segments.Push(new SpinSegment(currentTime, direction, direction * 360));
 
                 currentRotation -= direction * 360;
                 currentMaxRotation = Math.Abs(currentRotation);
+            }
 
-                segments.Push(new SpinSegment(currentTime, direction));
+            if (currentDirection != direction)
+            {
+                segments.Push(new SpinSegment(currentTime, direction, currentMaxRotation));
+                currentDirection = direction;
             }
         }
 
@@ -85,11 +94,12 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             while (segments.TryPeek(out var segment) && segment.StartTime > currentTime)
             {
                 totalRotation -= 360 * segment.Direction;
+                currentMaxRotation = segment.LocalMax;
                 segments.Pop();
             }
 
-            currentRotation = totalRotation;
-            currentMaxRotation = Math.Abs(currentRotation);
+            currentRotation = totalRotation % 360;
+            currentMaxRotation = Math.Max(currentMaxRotation, Math.Abs(currentRotation));
         }
 
         /// <summary>
@@ -112,12 +122,15 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             /// </summary>
             public readonly int Direction;
 
-            public SpinSegment(double startTime, int direction)
+            public readonly float LocalMax;
+
+            public SpinSegment(double startTime, int direction, float localMax)
             {
                 Debug.Assert(direction == -1 || direction == 1);
 
                 StartTime = startTime;
                 Direction = direction;
+                LocalMax = localMax;
             }
         }
     }
