@@ -113,20 +113,49 @@ namespace osu.Game.Rulesets.Osu.Tests
 
             Assert.That(history.TotalRotation, Is.EqualTo(1080));
 
-            history.ReportDelta(250, -180);
+            history.ReportDelta(250, -900);
 
             Assert.That(history.TotalRotation, Is.EqualTo(180));
+        }
+
+        [Test]
+        public void TestRewindIntoSegmentThatHasNotCrossedZeroSplit()
+        {
+            history.ReportDelta(1000, -180);
+            Assert.That(history.TotalRotation, Is.EqualTo(180));
+            history.ReportDelta(1500, 90);
+            Assert.That(history.TotalRotation, Is.EqualTo(180));
+            history.ReportDelta(1600, 90);
+            history.ReportDelta(1700, 90);
+            history.ReportDelta(1800, 90);
+            history.ReportDelta(1900, 90);
+            history.ReportDelta(2000, 90);
+            Assert.That(history.TotalRotation, Is.EqualTo(360));
+
+            history.ReportDelta(2000, 0);
+            Assert.That(history.TotalRotation, Is.EqualTo(360));
+
+            history.ReportDelta(1900, -90);
+            Assert.That(history.TotalRotation, Is.EqualTo(270));
+            history.ReportDelta(1800, -90);
+            Assert.That(history.TotalRotation, Is.EqualTo(180));
+            history.ReportDelta(1750, -45);
+            Assert.That(history.TotalRotation, Is.EqualTo(135));
+            history.ReportDelta(1700, -45);
+            Assert.That(history.TotalRotation, Is.EqualTo(90));
         }
 
         [Test]
         public void TestRewindIntoSegmentThatHasNotCrossedZero()
         {
             history.ReportDelta(1000, -180);
-            history.ReportDelta(1500, 90);
-            history.ReportDelta(2000, 450);
-            history.ReportDelta(1750, -45);
-
             Assert.That(history.TotalRotation, Is.EqualTo(180));
+            history.ReportDelta(1500, 90);
+            Assert.That(history.TotalRotation, Is.EqualTo(180));
+            history.ReportDelta(2000, 450);
+            Assert.That(history.TotalRotation, Is.EqualTo(360));
+            history.ReportDelta(1750, -45);
+            Assert.That(history.TotalRotation, Is.EqualTo(315));
         }
     }
 }

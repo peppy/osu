@@ -97,9 +97,13 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         private void rewindDelta(double currentTime, float delta)
         {
             while (segments.TryPeek(out var segment) && segment.StartTime > currentTime)
+            {
                 segments.Pop();
+                lastCompletionAbsoluteRotation -= segment.Direction * 360;
+                currentMaxRotation = Math.Abs(currentRotation);
+            }
 
-            currentMaxRotation = Math.Max(currentMaxRotation, Math.Abs(currentRotation));
+            currentMaxRotation = Math.Abs(currentRotation);
         }
 
         /// <summary>
