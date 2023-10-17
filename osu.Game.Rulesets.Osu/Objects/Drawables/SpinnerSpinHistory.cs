@@ -26,23 +26,16 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         /// <remarks>
         /// This is the final scoring value.
         /// </remarks>
-        public float TotalRotation => 360 * segments.Count + currentMaxRotation;
+        public float TotalRotation => 360 * completedSpins.Count + currentMaxRotation;
 
-        /// <summary>
-        /// The list of all segments where either:
-        /// <list type="bullet">
-        /// <item>The spinning direction was changed.</item>
-        /// <item>A full spin of 360 degrees was performed in either direction.</item>
-        /// </list>
-        /// </summary>
-        private readonly Stack<SpinSegment> segments = new Stack<SpinSegment>();
+        private readonly Stack<CompletedSpin> completedSpins = new Stack<CompletedSpin>();
 
         /// <summary>
         /// The total accumulated rotation.
         /// </summary>
-        private float currentAbsoluteRotation;
+        private float totalAbsoluteRotation;
 
-        private float lastCompletionAbsoluteRotation;
+        private float totalAbsoluteRotationAtLastCompletion;
 
         /// <summary>
         /// For the current spin, represents the maximum rotation (from 0..360) achieved by the user.
@@ -52,7 +45,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         /// <summary>
         /// The current spin, from -360..360.
         /// </summary>
-        private float currentRotation => currentAbsoluteRotation - lastCompletionAbsoluteRotation;
+        private float currentRotation => totalAbsoluteRotation - totalAbsoluteRotationAtLastCompletion;
 
         private double lastReportTime = double.NegativeInfinity;
 
@@ -63,43 +56,42 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         /// <param name="delta">The delta of the angle moved through since the last report.</param>
         public void ReportDelta(double currentTime, float delta)
         {
+            if (delta == 0)
+                return;
+
             // TODO: Debug.Assert(Math.Abs(delta) < 180);
             // This will require important frame guarantees.
 
-            currentAbsoluteRotation += delta;
+            totalAbsoluteRotation += delta;
 
             if (currentTime >= lastReportTime)
-                addDelta(currentTime, delta);
+                addDelta(currentTime);
             else
-                rewindDelta(currentTime, delta);
+                rewindDelta(currentTime);
 
             lastReportTime = currentTime;
         }
 
-        private void addDelta(double currentTime, float delta)
+        private void addDelta(double currentTime)
         {
-            if (delta == 0)
-                return;
-
             currentMaxRotation = Math.Max(currentMaxRotation, Math.Abs(currentRotation));
 
             while (currentMaxRotation >= 360)
             {
                 int direction = Math.Sign(currentRotation);
 
-                segments.Push(new SpinSegment(currentTime, direction));
-
-                lastCompletionAbsoluteRotation += direction * 360;
+                completedSpins.Push(new CompletedSpin(currentTime, direction));
+                totalAbsoluteRotationAtLastCompletion += direction * 360;
                 currentMaxRotation = Math.Abs(currentRotation);
             }
         }
 
-        private void rewindDelta(double currentTime, float delta)
+        private void rewindDelta(double currentTime)
         {
-            while (segments.TryPeek(out var segment) && segment.StartTime > currentTime)
+            while (completedSpins.TryPeek(out var segment) && segment.CompletionTime > currentTime)
             {
-                segments.Pop();
-                lastCompletionAbsoluteRotation -= segment.Direction * 360;
+                completedSpins.Pop();
+                totalAbsoluteRotationAtLastCompletion -= segment.Direction * 360;
                 currentMaxRotation = Math.Abs(currentRotation);
             }
 
@@ -107,30 +99,25 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         }
 
         /// <summary>
-        /// Represents a single segment of history.
+        /// Represents a single completed spin.
         /// </summary>
-        /// <remarks>
-        /// Each time the player changes direction, a new segment is recorded.
-        /// A segment stores the current absolute angle of rotation. Generally this would be either -360 or 360 for a completed spin, or
-        /// a number representing the last incomplete spin.
-        /// </remarks>
-        private class SpinSegment
+        private class CompletedSpin
         {
             /// <summary>
-            /// The start time of this segment, when the direction change occurred.
+            /// The time at which this spin completion occurred.
             /// </summary>
-            public readonly double StartTime;
+            public readonly double CompletionTime;
 
             /// <summary>
-            /// The direction this segment started in.
+            /// The direction this spin completed in.
             /// </summary>
             public readonly int Direction;
 
-            public SpinSegment(double startTime, int direction)
+            public CompletedSpin(double completionTime, int direction)
             {
                 Debug.Assert(direction == -1 || direction == 1);
 
-                StartTime = startTime;
+                CompletionTime = completionTime;
                 Direction = direction;
             }
         }
