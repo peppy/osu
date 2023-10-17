@@ -37,13 +37,22 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         /// </summary>
         private readonly Stack<SpinSegment> segments = new Stack<SpinSegment>();
 
+        /// <summary>
+        /// The total accumulated rotation.
+        /// </summary>
         private float currentAbsoluteRotation;
 
         private float lastCompletionAbsoluteRotation;
 
+        /// <summary>
+        /// For the current spin, represents the maximum rotation (from 0..360) achieved by the user.
+        /// </summary>
         private float currentMaxRotation;
 
-        private float currentRotation;
+        /// <summary>
+        /// The current spin, from -360..360.
+        /// </summary>
+        private float currentRotation => currentAbsoluteRotation - lastCompletionAbsoluteRotation;
 
         private double lastReportTime = double.NegativeInfinity;
 
@@ -72,30 +81,23 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             if (delta == 0)
                 return;
 
-            currentRotation += delta;
             currentMaxRotation = Math.Max(currentMaxRotation, Math.Abs(currentRotation));
 
-            if (currentMaxRotation >= 360)
+            while (currentMaxRotation >= 360)
             {
-                lastCompletionAbsoluteRotation = currentAbsoluteRotation;
-
                 int direction = Math.Sign(currentRotation);
 
-                currentRotation -= 360 * direction;
-                currentMaxRotation = Math.Abs(currentRotation);
-
                 segments.Push(new SpinSegment(currentTime, direction));
+
+                lastCompletionAbsoluteRotation += direction * 360;
+                currentMaxRotation = Math.Abs(currentRotation);
             }
         }
 
         private void rewindDelta(double currentTime, float delta)
         {
             while (segments.TryPeek(out var segment) && segment.StartTime > currentTime)
-            {
-                currentAbsoluteRotation -= 360 * segment.Direction;
-                currentMaxRotation = Math.Abs(currentAbsoluteRotation % 360);
                 segments.Pop();
-            }
 
             currentMaxRotation = Math.Max(currentMaxRotation, Math.Abs(currentRotation));
         }
