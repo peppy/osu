@@ -37,12 +37,13 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         /// </summary>
         private readonly Stack<SpinSegment> segments = new Stack<SpinSegment>();
 
-        private float lastAbsoluteRotation;
         private float currentAbsoluteRotation;
+
+        private float lastCompletionAbsoluteRotation;
 
         private float currentMaxRotation;
 
-        private float currentRotation => currentAbsoluteRotation % 360;
+        private float currentRotation;
 
         private double lastReportTime = double.NegativeInfinity;
 
@@ -53,7 +54,9 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         /// <param name="delta">The delta of the angle moved through since the last report.</param>
         public void ReportDelta(double currentTime, float delta)
         {
-            lastAbsoluteRotation = currentAbsoluteRotation;
+            // TODO: Debug.Assert(Math.Abs(delta) < 180);
+            // This will require important frame guarantees.
+
             currentAbsoluteRotation += delta;
 
             if (currentTime >= lastReportTime)
@@ -66,17 +69,19 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
         private void addDelta(double currentTime, float delta)
         {
-            Debug.Assert(Math.Abs(delta) <= 360);
-
             if (delta == 0)
                 return;
 
+            currentRotation += delta;
             currentMaxRotation = Math.Max(currentMaxRotation, Math.Abs(currentRotation));
 
             if (currentMaxRotation >= 360)
             {
+                lastCompletionAbsoluteRotation = currentAbsoluteRotation;
+
                 int direction = Math.Sign(currentRotation);
 
+                currentRotation -= 360 * direction;
                 currentMaxRotation = Math.Abs(currentRotation);
 
                 segments.Push(new SpinSegment(currentTime, direction));
