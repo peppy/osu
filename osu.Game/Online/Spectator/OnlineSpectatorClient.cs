@@ -84,7 +84,7 @@ namespace osu.Game.Online.Spectator
             return connection.SendAsync(nameof(ISpectatorServer.SendFrameData), bundle);
         }
 
-        protected override Task EndPlayingInternal(SpectatorState state)
+        protected override Task EndPlayingInternal(long? scoreId, SpectatorState state)
         {
             if (!IsConnected.Value)
                 return Task.CompletedTask;

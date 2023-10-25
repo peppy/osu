@@ -218,7 +218,7 @@ namespace osu.Game.Online.Spectator
                 purgePendingFrames();
         });
 
-        public void EndPlaying(GameplayState state)
+        public void EndPlaying(long? scoreId, GameplayState state)
         {
             // This method is most commonly called via Dispose(), which is can be asynchronous (via the AsyncDisposalQueue).
             // We probably need to find a better way to handle this...
@@ -245,7 +245,7 @@ namespace osu.Game.Online.Spectator
                 else
                     currentState.State = SpectatedUserState.Quit;
 
-                EndPlayingInternal(currentState);
+                EndPlayingInternal(scoreId, currentState);
             });
         }
 
@@ -285,7 +285,7 @@ namespace osu.Game.Online.Spectator
 
         protected abstract Task SendFramesInternal(FrameDataBundle bundle);
 
-        protected abstract Task EndPlayingInternal(SpectatorState state);
+        protected abstract Task EndPlayingInternal(long? scoreId, SpectatorState state);
 
         protected abstract Task WatchUserInternal(int userId);
 

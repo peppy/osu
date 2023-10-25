@@ -156,7 +156,7 @@ namespace osu.Game.Tests.Visual.Spectator
             return ((ISpectatorClient)this).UserSentFrames(api.LocalUser.Value.Id, bundle);
         }
 
-        protected override Task EndPlayingInternal(SpectatorState state) => ((ISpectatorClient)this).UserFinishedPlaying(api.LocalUser.Value.Id, state);
+        protected override Task EndPlayingInternal(long? scoreId, SpectatorState state) => ((ISpectatorClient)this).UserFinishedPlaying(api.LocalUser.Value.Id, state);
 
         protected override Task WatchUserInternal(int userId)
         {

@@ -131,7 +131,7 @@ namespace osu.Game.Screens.Play
             score.ScoreInfo.Date = DateTimeOffset.Now;
 
             await submitScore(score).ConfigureAwait(false);
-            spectatorClient.EndPlaying(GameplayState);
+            spectatorClient.EndPlaying(score.ScoreInfo.OnlineID, GameplayState);
         }
 
         [Resolved]
@@ -161,8 +161,9 @@ namespace osu.Game.Screens.Play
             {
                 Task.Run(async () =>
                 {
-                    await submitScore(Score.DeepClone()).ConfigureAwait(false);
-                    spectatorClient.EndPlaying(GameplayState);
+                    var score = Score.DeepClone();
+                    await submitScore(score).ConfigureAwait(false);
+                    spectatorClient.EndPlaying(score.ScoreInfo.OnlineID, GameplayState);
                 }).FireAndForget();
             }
 
