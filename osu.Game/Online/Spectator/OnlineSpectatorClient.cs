@@ -91,7 +91,7 @@ namespace osu.Game.Online.Spectator
 
             Debug.Assert(connection != null);
 
-            return connection.InvokeAsync(nameof(ISpectatorServer.EndPlaySession), state);
+            return connection.InvokeAsync(nameof(ISpectatorServer.EndPlaySession), scoreId, state);
         }
 
         protected override Task WatchUserInternal(int userId)

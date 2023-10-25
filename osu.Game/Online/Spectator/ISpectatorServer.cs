@@ -26,8 +26,9 @@ namespace osu.Game.Online.Spectator
         /// <summary>
         /// Signal the end of a play session.
         /// </summary>
+        /// <param name="scoreId">The final score id, if resolved by the client.</param>
         /// <param name="state">The state of gameplay.</param>
-        Task EndPlaySession(SpectatorState state);
+        Task EndPlaySession(long? scoreId, SpectatorState state);
 
         /// <summary>
         /// Request spectating data for the specified user. May be called on multiple users and offline users.
