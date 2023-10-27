@@ -49,13 +49,8 @@ namespace osu.Game.Rulesets.Osu.Objects
             set
             {
                 path.ControlPoints.Clear();
-                path.ExpectedDistance.Value = null;
-
-                if (value != null)
-                {
-                    path.ControlPoints.AddRange(value.ControlPoints.Select(c => new PathControlPoint(c.Position, c.Type)));
-                    path.ExpectedDistance.Value = value.ExpectedDistance.Value;
-                }
+                path.ControlPoints.AddRange(value.ControlPoints.Select(c => new PathControlPoint(c.Position, c.Type)));
+                path.ExpectedDistance.Value = value.ExpectedDistance.Value;
             }
         }
 
