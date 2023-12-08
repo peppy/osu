@@ -123,6 +123,7 @@ namespace osu.Game.Online.API.Requests.Responses
         public bool ShouldSerializePP() => false;
         public bool ShouldSerializeOnlineID() => false;
         public bool ShouldSerializeHasReplay() => false;
+        public bool ShouldSerializeRuleset() => false;
 
         // These fields only need to be serialised if they hold values.
         // Generally this is required because this model may be used by server-side components, but
