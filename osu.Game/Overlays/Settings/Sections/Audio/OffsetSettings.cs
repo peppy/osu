@@ -6,9 +6,12 @@ using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Localisation;
+using osu.Framework.Screens;
 using osu.Game.Configuration;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Localisation;
+using osu.Game.Screens;
+using osu.Game.Screens.Utility;
 
 namespace osu.Game.Overlays.Settings.Sections.Audio
 {
@@ -19,7 +22,7 @@ namespace osu.Game.Overlays.Settings.Sections.Audio
         public override IEnumerable<LocalisableString> FilterTerms => base.FilterTerms.Concat(new LocalisableString[] { "universal", "uo", "timing", "delay", "latency" });
 
         [BackgroundDependencyLoader]
-        private void load(OsuConfigManager config)
+        private void load(OsuConfigManager config, IPerformFromScreenRunner? performer)
         {
             Children = new Drawable[]
             {
@@ -31,7 +34,8 @@ namespace osu.Game.Overlays.Settings.Sections.Audio
                 },
                 new SettingsButton
                 {
-                    Text = AudioSettingsStrings.OffsetWizard
+                    Text = AudioSettingsStrings.OffsetWizard,
+                    Action = () => performer?.PerformFromScreen(menu => menu.Push(new OffsetCalibrationScreen()))
                 }
             };
         }
