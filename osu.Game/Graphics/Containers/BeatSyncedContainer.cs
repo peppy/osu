@@ -36,10 +36,11 @@ namespace osu.Game.Graphics.Containers
         protected double EarlyActivationMilliseconds;
 
         /// <summary>
-        /// While this container automatically applied an animation delay (meaning any animations inside a <see cref="OnNewBeat"/> implementation will
-        /// always be correctly timed), the event itself can potentially fire away from the related beat.
+        /// When set to <c>true</c>, this container automatically applies an animation delay (meaning any animations inside a <see cref="OnNewBeat"/> implementation will
+        /// always be correctly timed), but the event itself can potentially fire away from the related beat.
         ///
-        /// By setting this to false, cases where the event is to be fired more than <see cref="MISTIMED_ALLOWANCE"/> from the related beat will be skipped.
+        /// By setting this to <c>false</c>, the firing of the event will be as precise as possible, but an event may not fire if <see cref="MISTIMED_ALLOWANCE"/> is exceeded
+        /// due to the game running slow or seeking.
         /// </summary>
         protected bool AllowMistimedEventFiring = true;
 
@@ -128,10 +129,14 @@ namespace osu.Game.Graphics.Containers
 
             // as this event is sometimes used for sound triggers where `BeginDelayedSequence` has no effect, avoid firing it if too far away from the beat.
             // this can happen after a seek operation.
-            if (AllowMistimedEventFiring || Math.Abs(TimeSinceLastBeat) < MISTIMED_ALLOWANCE)
+            if (AllowMistimedEventFiring)
             {
                 using (BeginDelayedSequence(-TimeSinceLastBeat))
                     OnNewBeat(beatIndex, timingPoint, effectPoint, BeatSyncSource.CurrentAmplitudes);
+            }
+            else if (Math.Abs(TimeSinceLastBeat) < MISTIMED_ALLOWANCE)
+            {
+                OnNewBeat(beatIndex, timingPoint, effectPoint, BeatSyncSource.CurrentAmplitudes);
             }
 
             lastBeat = beatIndex;
