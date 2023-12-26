@@ -47,7 +47,7 @@ namespace osu.Game.Overlays
             [BackgroundDependencyLoader]
             private void load()
             {
-                Size = new Vector2(SettingsSidebar.DEFAULT_WIDTH);
+                Size = new Vector2(SettingsSidebar.EXPANDED_WIDTH);
 
                 AddRange(new Drawable[]
                 {

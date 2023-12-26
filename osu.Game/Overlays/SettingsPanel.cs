@@ -33,8 +33,6 @@ namespace osu.Game.Overlays
 
         public const float TRANSITION_LENGTH = 600;
 
-        private const float sidebar_width = SettingsSidebar.DEFAULT_WIDTH;
-
         /// <summary>
         /// The width of the settings panel content, excluding the sidebar.
         /// </summary>
@@ -43,7 +41,7 @@ namespace osu.Game.Overlays
         /// <summary>
         /// The full width of the settings panel, including the sidebar.
         /// </summary>
-        public const float WIDTH = sidebar_width + PANEL_WIDTH;
+        public const float WIDTH = SettingsSidebar.EXPANDED_WIDTH + PANEL_WIDTH;
 
         protected Container<Drawable> ContentContainer;
 
@@ -148,7 +146,7 @@ namespace osu.Game.Overlays
 
             if (showSidebar)
             {
-                AddInternal(Sidebar = new SettingsSidebar { Width = sidebar_width });
+                AddInternal(Sidebar = new SettingsSidebar());
             }
 
             CreateSections()?.ForEach(AddSection);
@@ -195,7 +193,7 @@ namespace osu.Game.Overlays
             SectionsContainer.FadeEdgeEffectTo(0, WaveContainer.DISAPPEAR_DURATION, Easing.In);
             ContentContainer.MoveToX(-WIDTH + ExpandedPosition, TRANSITION_LENGTH, Easing.OutQuint);
 
-            Sidebar?.MoveToX(-sidebar_width, TRANSITION_LENGTH, Easing.OutQuint);
+            Sidebar?.MoveToX(-SettingsSidebar.EXPANDED_WIDTH, TRANSITION_LENGTH, Easing.OutQuint);
             this.FadeTo(0, TRANSITION_LENGTH, Easing.OutQuint);
 
             searchTextBox.HoldFocus = false;
@@ -285,7 +283,6 @@ namespace osu.Game.Overlays
                             return;
 
                         SectionsContainer.ScrollTo(section);
-                        Sidebar.Expanded.Value = false;
                     },
                 };
             }
