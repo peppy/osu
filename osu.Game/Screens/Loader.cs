@@ -35,13 +35,7 @@ namespace osu.Game.Screens
         private LoadingSpinner spinner;
         private ScheduledDelegate spinnerShow;
 
-        protected virtual OsuScreen CreateLoadableScreen()
-        {
-            if (showDisclaimer)
-                return new Disclaimer(getIntroSequence());
-
-            return getIntroSequence();
-        }
+        protected virtual OsuScreen CreateLoadableScreen() => getIntroSequence();
 
         private IntroScreen getIntroSequence()
         {
