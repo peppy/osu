@@ -56,6 +56,15 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
         private double lastReportTime = double.NegativeInfinity;
 
+        public void Reset()
+        {
+            totalAccumulatedRotation = 0;
+            totalAccumulatedRotationAtLastCompletion = 0;
+            currentSpinMaxRotation = 0;
+            lastReportTime = double.NegativeInfinity;
+            completedSpins.Clear();
+        }
+
         /// <summary>
         /// Report a delta update based on user input.
         /// </summary>

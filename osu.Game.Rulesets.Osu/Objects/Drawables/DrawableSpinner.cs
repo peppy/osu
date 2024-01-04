@@ -275,6 +275,10 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         {
             base.Update();
 
+            // For sanity in non-frame-stable scenarios, like the editor.
+            if (Time.Current < HitObject.StartTime)
+                Result.History.Reset();
+
             if (HandleUserInput)
             {
                 bool isValidSpinningTime = Time.Current >= HitObject.StartTime && Time.Current <= HitObject.EndTime;
