@@ -38,6 +38,19 @@ namespace osu.Game.Rulesets.Replays
 
             return Beatmap.HitObjects[currentIndex + 1];
         }
+
+        protected virtual double CalculateReleaseTime(HitObject currentObject, HitObject? nextObject)
+        {
+            if (nextObject == null)
+                return KEY_UP_DELAY;
+
+            double endTime = currentObject.GetEndTime();
+
+            if (nextObject.StartTime > endTime)
+                return endTime + KEY_UP_DELAY;
+
+            return endTime + (nextObject.StartTime - endTime) * 0.9;
+        }
     }
 
     public abstract class AutoGenerator<TFrame> : AutoGenerator

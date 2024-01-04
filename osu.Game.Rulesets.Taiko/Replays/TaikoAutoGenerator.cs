@@ -3,7 +3,6 @@
 
 using System;
 using System.Linq;
-using osu.Framework.Extensions.ObjectExtensions;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Taiko.Objects;
 using osu.Game.Rulesets.Replays;
@@ -116,10 +115,9 @@ namespace osu.Game.Rulesets.Taiko.Replays
                 }
 
                 var nextHitObject = GetNextObject(i); // Get the next object that requires pressing the same button
+                double releaseTime = CalculateReleaseTime(h, nextHitObject);
 
-                bool canDelayKeyUp = nextHitObject == null || nextHitObject.StartTime > endTime + KEY_UP_DELAY;
-                double calculatedDelay = canDelayKeyUp ? KEY_UP_DELAY : (nextHitObject.AsNonNull().StartTime - endTime) * 0.9;
-                Frames.Add(new TaikoReplayFrame(endTime + calculatedDelay));
+                Frames.Add(new TaikoReplayFrame(releaseTime));
 
                 hitButton = !hitButton;
             }

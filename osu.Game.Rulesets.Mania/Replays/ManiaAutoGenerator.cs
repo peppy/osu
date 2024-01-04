@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using osu.Framework.Extensions.ObjectExtensions;
 using osu.Game.Rulesets.Mania.Beatmaps;
 using osu.Game.Rulesets.Mania.Objects;
 using osu.Game.Rulesets.Objects;
@@ -13,8 +12,6 @@ namespace osu.Game.Rulesets.Mania.Replays
 {
     internal class ManiaAutoGenerator : AutoGenerator<ManiaReplayFrame>
     {
-        public const double RELEASE_DELAY = 20;
-
         public new ManiaBeatmap Beatmap => (ManiaBeatmap)base.Beatmap;
 
         private readonly ManiaAction[] columnActions;
@@ -76,7 +73,7 @@ namespace osu.Game.Rulesets.Mania.Replays
             {
                 var currentObject = Beatmap.HitObjects[i];
                 var nextObjectInColumn = GetNextObject(i); // Get the next object that requires pressing the same button
-                double releaseTime = calculateReleaseTime(currentObject, nextObjectInColumn);
+                double releaseTime = CalculateReleaseTime(currentObject, nextObjectInColumn);
 
                 yield return new HitPoint { Time = currentObject.StartTime, Column = currentObject.Column };
 
@@ -84,25 +81,19 @@ namespace osu.Game.Rulesets.Mania.Replays
             }
         }
 
-        private double calculateReleaseTime(HitObject currentObject, HitObject? nextObject)
+        protected override double CalculateReleaseTime(HitObject currentObject, HitObject? nextObject)
         {
-            double endTime = currentObject.GetEndTime();
-            double releaseDelay = RELEASE_DELAY;
-
             if (currentObject is HoldNote hold)
             {
                 if (hold.Duration > 0)
                     // hold note releases must be timed exactly.
-                    return endTime;
+                    return currentObject.GetEndTime();
 
                 // Special case for super short hold notes
-                releaseDelay = 1;
+                return currentObject.GetEndTime() + 1;
             }
 
-            bool canDelayKeyUpFully = nextObject == null ||
-                                      nextObject.StartTime > endTime + releaseDelay;
-
-            return endTime + (canDelayKeyUpFully ? releaseDelay : (nextObject.AsNonNull().StartTime - endTime) * 0.9);
+            return base.CalculateReleaseTime(currentObject, nextObject);
         }
 
         protected override HitObject? GetNextObject(int currentIndex)

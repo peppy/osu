@@ -83,7 +83,7 @@ namespace osu.Game.Rulesets.Osu.Replays
                     addDelayedMovements(h, prev);
                 }
 
-                addHitObjectReplay(h);
+                addHitObjectReplay(h, GetNextObject(i));
             }
 
             return Replay;
@@ -139,7 +139,7 @@ namespace osu.Game.Rulesets.Osu.Replays
             }
         }
 
-        private void addHitObjectReplay(OsuHitObject h)
+        private void addHitObjectReplay(OsuHitObject h, HitObject? hNext)
         {
             // Default values for circles/sliders
             Vector2 startPosition = h.StackedPosition;
@@ -173,7 +173,7 @@ namespace osu.Game.Rulesets.Osu.Replays
             }
 
             // Add frames to click the hitobject
-            addHitObjectClickFrames(h, startPosition, spinnerDirection);
+            addHitObjectClickFrames(h, hNext, startPosition, spinnerDirection);
         }
 
         #endregion
@@ -281,7 +281,7 @@ namespace osu.Game.Rulesets.Osu.Replays
         private double getReactionTime(double timeInstant) => ApplyModsToRate(timeInstant, 100);
 
         // Add frames to click the hitobject
-        private void addHitObjectClickFrames(OsuHitObject h, Vector2 startPosition, float spinnerDirection)
+        private void addHitObjectClickFrames(OsuHitObject h, HitObject? hNext, Vector2 startPosition, float spinnerDirection)
         {
             // Time to insert the first frame which clicks the object
             // Here we mainly need to determine which button to use
@@ -290,7 +290,8 @@ namespace osu.Game.Rulesets.Osu.Replays
             var startFrame = new OsuReplayFrame(h.StartTime, new Vector2(startPosition.X, startPosition.Y), action);
 
             // TODO: Why do we delay 1 ms if the object is a spinner? There already is KEY_UP_DELAY from hEndTime.
-            double hEndTime = h.GetEndTime() + KEY_UP_DELAY;
+
+            double hEndTime = CalculateReleaseTime(h, hNext);
             int endDelay = h is Spinner ? 1 : 0;
             var endFrame = new OsuKeyUpReplayFrame(hEndTime + endDelay, new Vector2(h.StackedEndPosition.X, h.StackedEndPosition.Y));
 
