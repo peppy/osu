@@ -9,7 +9,7 @@ namespace osu.Game.Rulesets.Scoring
     /// </summary>
     public partial class AccumulatingHealthProcessor : HealthProcessor
     {
-        protected override bool DefaultFailCondition => JudgedHits == MaxHits && Health.Value < requiredHealth;
+        protected override bool DefaultFailCondition => JudgedHits == MaxHits && Health < requiredHealth;
 
         private readonly double requiredHealth;
 
@@ -26,7 +26,7 @@ namespace osu.Game.Rulesets.Scoring
         {
             base.Reset(storeResults);
 
-            Health.Value = 0;
+            Health = 0;
         }
     }
 }

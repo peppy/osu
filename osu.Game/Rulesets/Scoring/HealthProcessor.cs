@@ -2,7 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
-using osu.Framework.Bindables;
 using osu.Framework.Utils;
 using osu.Game.Rulesets.Judgements;
 
@@ -24,7 +23,7 @@ namespace osu.Game.Rulesets.Scoring
         /// <summary>
         /// The current health.
         /// </summary>
-        public readonly BindableDouble Health = new BindableDouble(1) { MinValue = 0, MaxValue = 1 };
+        public double Health { get; set; }
 
         /// <summary>
         /// Whether this ScoreProcessor has already triggered the failed state.
@@ -42,13 +41,13 @@ namespace osu.Game.Rulesets.Scoring
 
         protected override void ApplyResultInternal(JudgementResult result)
         {
-            result.HealthAtJudgement = Health.Value;
+            result.HealthAtJudgement = Health;
             result.FailedAtJudgement = HasFailed;
 
             if (HasFailed)
                 return;
 
-            Health.Value += GetHealthIncreaseFor(result);
+            Health += GetHealthIncreaseFor(result);
 
             if (meetsAnyFailCondition(result))
                 TriggerFailure();
@@ -56,7 +55,7 @@ namespace osu.Game.Rulesets.Scoring
 
         protected override void RevertResultInternal(JudgementResult result)
         {
-            Health.Value = result.HealthAtJudgement;
+            Health = result.HealthAtJudgement;
 
             // Todo: Revert HasFailed state with proper player support
         }
@@ -71,7 +70,7 @@ namespace osu.Game.Rulesets.Scoring
         /// <summary>
         /// The default conditions for failing.
         /// </summary>
-        protected virtual bool DefaultFailCondition => Precision.AlmostBigger(Health.MinValue, Health.Value);
+        protected virtual bool DefaultFailCondition => Precision.AlmostBigger(0, Health);
 
         /// <summary>
         /// Whether the current state of <see cref="HealthProcessor"/> or the provided <paramref name="result"/> meets any fail condition.
@@ -99,7 +98,7 @@ namespace osu.Game.Rulesets.Scoring
         {
             base.Reset(storeResults);
 
-            Health.Value = 1;
+            Health = 1;
             HasFailed = false;
         }
     }

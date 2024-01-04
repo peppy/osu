@@ -94,7 +94,7 @@ namespace osu.Game.Rulesets.Scoring
             double currentGameplayTime = Math.Clamp(Time.Current, DrainStartTime, gameplayEndTime);
 
             if (DrainLenience < 1)
-                Health.Value -= DrainRate * (currentGameplayTime - lastGameplayTime);
+                Health -= DrainRate * (currentGameplayTime - lastGameplayTime);
         }
 
         public override void ApplyBeatmap(IBeatmap beatmap)

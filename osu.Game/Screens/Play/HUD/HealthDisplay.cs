@@ -34,8 +34,6 @@ namespace osu.Game.Screens.Play.HUD
             Precision = 0.001,
         };
 
-        private BindableNumber<double> health = null!;
-
         private ScheduledDelegate? initialIncrease;
 
         /// <summary>
@@ -59,10 +57,6 @@ namespace osu.Game.Screens.Play.HUD
             health = HealthProcessor.Health.GetBoundCopy();
             health.BindValueChanged(h =>
             {
-                if (initialIncrease != null)
-                    FinishInitialAnimation(h.OldValue);
-
-                Current.Value = h.NewValue;
             });
 
             if (hudOverlay != null)
