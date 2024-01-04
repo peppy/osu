@@ -30,7 +30,8 @@ namespace osu.Game.Screens.Play.HUD
         public Bindable<double> Current { get; } = new BindableDouble
         {
             MinValue = 0,
-            MaxValue = 1
+            MaxValue = 1,
+            Precision = 0.001,
         };
 
         private BindableNumber<double> health = null!;
