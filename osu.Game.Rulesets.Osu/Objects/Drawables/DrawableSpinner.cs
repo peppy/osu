@@ -135,8 +135,8 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         {
             base.OnFree();
 
-            spinningSample.ClearSamples();
-            maxBonusSample.ClearSamples();
+            spinningSample.Stop();
+            maxBonusSample.Stop();
         }
 
         protected override void LoadSamples()

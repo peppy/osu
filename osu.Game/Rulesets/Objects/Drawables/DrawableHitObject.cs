@@ -337,9 +337,6 @@ namespace osu.Game.Rulesets.Objects.Drawables
             // In order to stop this needless update, the event is unbound and re-bound as late as possible in Apply().
             samplesBindable.CollectionChanged -= onSamplesChanged;
 
-            // Release the samples for other hitobjects to use.
-            Samples?.ClearSamples();
-
             foreach (var obj in nestedHitObjects)
             {
                 obj.OnNewResult -= onNewResult;

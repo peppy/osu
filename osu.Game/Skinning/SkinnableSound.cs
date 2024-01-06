@@ -89,14 +89,15 @@ namespace osu.Game.Skinning
                 if (samples == value)
                     return;
 
+                if (samples.SequenceEqual(value))
+                    return;
+
                 samples = value;
 
                 if (LoadState >= LoadState.Ready)
                     updateSamples();
             }
         }
-
-        public void ClearSamples() => Samples = Array.Empty<ISampleInfo>();
 
         private bool looping;
 
@@ -154,18 +155,31 @@ namespace osu.Game.Skinning
         {
             bool wasPlaying = IsPlaying;
 
-            // Remove all pooled samples (return them to the pool), and dispose the rest.
-            samplesContainer.RemoveAll(s => s.IsInPool, false);
-            samplesContainer.Clear();
+            HashSet<PoolableSkinnableSample> previousSamples = new HashSet<PoolableSkinnableSample>(samplesContainer);
 
+            // bindable reattachment of samples in an audio container is expensive.
+            // it shouldn't be, but for now it is so let's try to avoid that.
             foreach (var s in samples)
             {
-                var sample = samplePool?.GetPooledSample(s) ?? new PoolableSkinnableSample(s);
+                var sample = previousSamples.FirstOrDefault(d => EqualityComparer<ISampleInfo>.Default.Equals(d.SampleInfo, s));
+
+                if (sample != null)
+                {
+                    previousSamples.Remove(sample);
+                }
+                else
+                {
+                    sample = samplePool?.GetPooledSample(s) ?? new PoolableSkinnableSample(s);
+                    samplesContainer.Add(sample);
+                }
+
                 sample.Looping = Looping;
                 sample.Volume.Value = Math.Max(s.Volume, MinimumSampleVolume) / 100.0;
-
-                samplesContainer.Add(sample);
             }
+
+            // Remove all unused samples
+            foreach (var s in previousSamples)
+                samplesContainer.Remove(s, !s.IsInPool);
 
             if (wasPlaying && Looping)
                 Play();

@@ -27,8 +27,10 @@ namespace osu.Game.Skinning
         [CanBeNull]
         public DrawableSample Sample { get; private set; }
 
+        public ISampleInfo SampleInfo { get; private set; }
+
         private readonly AudioContainer<DrawableSample> sampleContainer;
-        private ISampleInfo sampleInfo;
+
         private SampleChannel activeChannel;
 
         /// <summary>
@@ -58,10 +60,10 @@ namespace osu.Game.Skinning
         /// <exception cref="InvalidOperationException">If an <see cref="ISampleInfo"/> has already been applied to this <see cref="PoolableSkinnableSample"/>.</exception>
         public void Apply(ISampleInfo sampleInfo)
         {
-            if (this.sampleInfo != null)
+            if (SampleInfo != null)
                 throw new InvalidOperationException($"A {nameof(PoolableSkinnableSample)} cannot be applied multiple {nameof(ISampleInfo)}s.");
 
-            this.sampleInfo = sampleInfo;
+            SampleInfo = sampleInfo;
 
             Volume.Value = sampleInfo.Volume / 100.0;
 
@@ -96,10 +98,10 @@ namespace osu.Game.Skinning
         {
             clearPreviousSamples();
 
-            if (sampleInfo == null)
+            if (SampleInfo == null)
                 return;
 
-            var sample = CurrentSkin.GetSample(sampleInfo);
+            var sample = CurrentSkin.GetSample(SampleInfo);
 
             if (sample == null)
                 return;

@@ -149,7 +149,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
             PathVersion.UnbindFrom(HitObject.Path.Version);
 
-            slidingSample?.ClearSamples();
+            slidingSample?.Stop();
         }
 
         protected override void LoadSamples()
