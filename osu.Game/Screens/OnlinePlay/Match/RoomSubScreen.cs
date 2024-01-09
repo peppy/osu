@@ -493,7 +493,7 @@ namespace osu.Game.Screens.OnlinePlay.Match
             cancelTrackLooping();
         }
 
-        private void applyLoopingToTrack(ValueChangedEvent<WorkingBeatmap> _ = null)
+        private void applyLoopingToTrack(ValueChangedEvent<WorkingBeatmap> _ = default)
         {
             if (!this.IsCurrentScreen())
                 return;
