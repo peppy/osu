@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using osu.Framework.Extensions;
 using osu.Framework.IO.Stores;
 using osu.Framework.Logging;
@@ -98,7 +99,9 @@ namespace osu.Game.Database
             realm.Write(r =>
             {
                 // TODO: consider using a realm native query to avoid iterating all files (https://github.com/realm/realm-dotnet/issues/2659#issuecomment-927823707)
-                foreach (var file in r.All<RealmFile>())
+                var files = r.All<RealmFile>().ToList();
+
+                foreach (var file in files)
                 {
                     totalFiles++;
 
