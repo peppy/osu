@@ -168,7 +168,7 @@ namespace osu.Game.Configuration
             SetDefault(OsuSetting.SafeAreaConsiderations, true);
             SetDefault(OsuSetting.ScalingBackgroundDim, 0.9f, 0.5f, 1f);
 
-            SetDefault(OsuSetting.ScalingSizeX, 0.8f, 0.2f, 1f);
+            SetDefault(OsuSetting.ScalingSizeX, 0.8f, 0.2f, 1f, 0.001f);
             SetDefault(OsuSetting.ScalingSizeY, 0.8f, 0.2f, 1f);
 
             SetDefault(OsuSetting.ScalingPositionX, 0.5f, 0f, 1f);
