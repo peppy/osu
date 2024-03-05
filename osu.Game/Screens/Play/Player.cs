@@ -334,23 +334,8 @@ namespace osu.Game.Screens.Play
                 BreakOverlay.Hide();
             }
 
-            DrawableRuleset.FrameStableClock.WaitingOnFrames.BindValueChanged(waiting =>
-            {
-                if (waiting.NewValue)
-                    GameplayClockContainer.Stop();
-                else
-                    GameplayClockContainer.Start();
-            });
-
-            DrawableRuleset.IsPaused.BindValueChanged(_ =>
-            {
-                updateGameplayState();
-                updateSampleDisabledState();
-            });
-
-            DrawableRuleset.FrameStableClock.IsCatchingUp.BindValueChanged(_ => updateSampleDisabledState());
-
-            DrawableRuleset.HasReplayLoaded.BindValueChanged(_ => updateGameplayState());
+            DrawableRuleset.IsPaused.BindValueChanged(_ => UpdateGameplayState());
+            DrawableRuleset.FrameStableClock.IsCatchingUp.BindValueChanged(_ => UpdateGameplayState());
 
             // bind clock into components that require it
             ((IBindable<bool>)DrawableRuleset.IsPaused).BindTo(GameplayClockContainer.IsPaused);
@@ -482,20 +467,16 @@ namespace osu.Game.Screens.Play
 
         private void onBreakTimeChanged(ValueChangedEvent<bool> isBreakTime)
         {
-            updateGameplayState();
+            UpdateGameplayState();
             updatePauseOnFocusLostState();
             HUDOverlay.InputCountController.IsCounting.Value = !isBreakTime.NewValue;
         }
 
-        private void updateGameplayState()
+        protected void UpdateGameplayState()
         {
             bool inGameplay = !DrawableRuleset.HasReplayLoaded.Value && !DrawableRuleset.IsPaused.Value && !breakTracker.IsBreakTime.Value && !GameplayState.HasFailed;
             OverlayActivationMode.Value = inGameplay ? OverlayActivation.Disabled : OverlayActivation.UserTriggered;
             localUserPlaying.Value = inGameplay;
-        }
-
-        private void updateSampleDisabledState()
-        {
             samplePlaybackDisabled.Value = DrawableRuleset.FrameStableClock.IsCatchingUp.Value || GameplayClockContainer.IsPaused.Value;
         }
 
@@ -634,8 +615,7 @@ namespace osu.Game.Screens.Play
 
             (GameplayClockContainer as MasterGameplayClockContainer)?.Skip();
 
-            // return samplePlaybackDisabled.Value to what is defined by the beatmap's current state
-            updateSampleDisabledState();
+            UpdateGameplayState();
         }
 
         /// <summary>
@@ -928,7 +908,7 @@ namespace osu.Game.Screens.Play
 
                 GameplayState.HasFailed = true;
 
-                updateGameplayState();
+                UpdateGameplayState();
 
                 // There is a chance that we could be in a paused state as the ruleset's internal clock (see FrameStabilityContainer)
                 // could process an extra frame after the GameplayClock is stopped.
@@ -1099,7 +1079,7 @@ namespace osu.Game.Screens.Play
             foreach (var mod in GameplayState.Mods.OfType<IApplicableToTrack>())
                 mod.ApplyToTrack(GameplayClockContainer.AdjustmentsFromMods);
 
-            updateGameplayState();
+            UpdateGameplayState();
 
             GameplayClockContainer.FadeInFromZero(750, Easing.OutQuint);
 

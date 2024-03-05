@@ -71,6 +71,16 @@ namespace osu.Game.Screens.Play
                 playbackSettings.UserPlaybackRate.BindTo(master.UserPlaybackRate);
 
             HUDOverlay.PlayerSettingsOverlay.AddAtStart(playbackSettings);
+
+            DrawableRuleset.FrameStableClock.WaitingOnFrames.BindValueChanged(waiting =>
+            {
+                if (waiting.NewValue)
+                    GameplayClockContainer.Stop();
+                else
+                    GameplayClockContainer.Start();
+            });
+
+            DrawableRuleset.HasReplayLoaded.BindValueChanged(_ => UpdateGameplayState());
         }
 
         protected override void PrepareReplay()
