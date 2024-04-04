@@ -65,7 +65,7 @@ namespace osu.Game.Rulesets.Mania.UI
             RelativeSizeAxes = Axes.Y;
             AutoSizeAxes = Axes.X;
 
-            AddRangeInternal(new[]
+            AddRangeInternal(new Drawable[]
             {
                 playfieldGrid = new GridContainer
                 {
@@ -73,6 +73,10 @@ namespace osu.Game.Rulesets.Mania.UI
                     AutoSizeAxes = Axes.X,
                     Content = new[] { new Drawable[stageDefinitions.Count] },
                     ColumnDimensions = Enumerable.Range(0, stageDefinitions.Count).Select(_ => new Dimension(GridSizeMode.AutoSize)).ToArray()
+                },
+                new ManiaTouchInputOverlay
+                {
+                    RelativeSizeAxes = Axes.Both,
                 }
             });
 
