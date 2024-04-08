@@ -19,6 +19,7 @@ namespace osu.Game.Skinning
         public override void Reload()
         {
             Reload(content());
+            // TODO: apply configuration
         }
     }
 }
