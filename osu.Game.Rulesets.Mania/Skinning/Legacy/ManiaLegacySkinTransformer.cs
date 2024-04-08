@@ -122,7 +122,7 @@ namespace osu.Game.Rulesets.Mania.Skinning.Legacy
                         case ManiaSkinComponents.BarLine:
                             return null; // Not yet implemented.
 
-                        case ManiaSkinComponents.Stage:
+                        case ManiaSkinComponents.StageConfiguration:
                             return new LegacyStageConfiguration();
 
                         default:

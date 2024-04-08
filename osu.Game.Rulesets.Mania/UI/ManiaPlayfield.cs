@@ -28,7 +28,7 @@ namespace osu.Game.Rulesets.Mania.UI
         private readonly List<Stage> stages = new List<Stage>();
 
         private readonly Drawable stageContainer;
-        private readonly SkinnableDrawable skinnableConfiguration;
+        private SkinnableDrawable skinnableConfiguration;
 
         public override Quad SkinnableComponentScreenSpaceDrawQuad
         {
@@ -83,10 +83,21 @@ namespace osu.Game.Rulesets.Mania.UI
                         }
                     }
                 },
-                skinnableConfiguration = new SkinnableDrawable(new ManiaSkinComponentLookup(ManiaSkinComponents.Stage), _ => new DefaultStageConfiguration())
+                new PredefinedSkinComponentsContainer(new PredefinedSkinComponentsContainerLookup("Stage", new ManiaRuleset().RulesetInfo), () =>
+                    new Container
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Children = new Drawable[]
+                        {
+                            skinnableConfiguration = new SkinnableDrawable(new ManiaSkinComponentLookup(ManiaSkinComponents.StageConfiguration), _ => new DefaultStageConfiguration())
+                            {
+                                CentreComponent = false,
+                                RelativeSizeAxes = Axes.Both
+                            }
+                        }
+                    })
                 {
-                    CentreComponent = false,
-                    RelativeSizeAxes = Axes.Both
+                    RelativeSizeAxes = Axes.Both,
                 }
             });
 

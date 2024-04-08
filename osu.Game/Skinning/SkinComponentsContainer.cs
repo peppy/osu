@@ -2,12 +2,11 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Testing;
 
 namespace osu.Game.Skinning
 {
@@ -36,14 +35,14 @@ namespace osu.Game.Skinning
 
         private CancellationTokenSource? cancellationSource;
 
-        public SkinComponentsContainer(SkinComponentsContainerLookup lookup)
+        public SkinComponentsContainer(ISkinComponentLookup lookup)
         {
             Lookup = lookup;
         }
 
-        public void Reload() => Reload(CurrentSkin.GetDrawableComponent(Lookup) as Container);
+        public virtual void Reload() => Reload(CurrentSkin.GetDrawableComponent(Lookup) as Container);
 
-        public void Reload(Container? componentsContainer)
+        protected void Reload(Container? componentsContainer)
         {
             ClearInternal();
             components.Clear();
@@ -60,7 +59,7 @@ namespace osu.Game.Skinning
             LoadComponentAsync(content, wrapper =>
             {
                 AddInternal(wrapper);
-                components.AddRange(wrapper.Children.OfType<ISerialisableDrawable>());
+                components.AddRange(wrapper.ChildrenOfType<ISerialisableDrawable>());
                 ComponentsLoaded = true;
             }, (cancellationSource = new CancellationTokenSource()).Token);
         }
