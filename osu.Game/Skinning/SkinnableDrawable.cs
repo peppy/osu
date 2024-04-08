@@ -2,7 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
-using System.Linq;
 using osu.Framework.Bindables;
 using osu.Framework.Caching;
 using osu.Framework.Graphics;
@@ -14,7 +13,7 @@ namespace osu.Game.Skinning
     /// <summary>
     /// A drawable which can be skinned via an <see cref="ISkinSource"/>.
     /// </summary>
-    public partial class SkinnableDrawable : SkinReloadableDrawable, ISerialisableDrawableContainer
+    public partial class SkinnableDrawable : SkinReloadableDrawable
     {
         /// <summary>
         /// The displayed component.
@@ -80,7 +79,31 @@ namespace osu.Game.Skinning
         /// </summary>
         protected virtual bool ApplySizeRestrictionsToDefault => false;
 
-        protected override void SkinChanged(ISkinSource skin) => ((ISerialisableDrawableContainer)this).Reload();
+        protected override void SkinChanged(ISkinSource skin)
+        {
+            var retrieved = skin.GetDrawableComponent(Lookup);
+
+            if (retrieved == null)
+            {
+                Drawable = CreateDefault(Lookup);
+                isDefault = true;
+            }
+            else
+            {
+                Drawable = retrieved;
+                isDefault = false;
+            }
+
+            scaling.Invalidate();
+
+            if (CentreComponent)
+            {
+                Drawable.Origin = Anchor.Centre;
+                Drawable.Anchor = Anchor.Centre;
+            }
+
+            InternalChild = Drawable;
+        }
 
         protected override void Update()
         {
@@ -111,68 +134,6 @@ namespace osu.Game.Skinning
                 }
             }
         }
-
-        void ISerialisableDrawableContainer.Reload() => reload(CurrentSkin.GetDrawableComponent(Lookup));
-
-        private void reload(Drawable? newComponent)
-        {
-            components.Clear();
-
-            if (newComponent == null)
-            {
-                Drawable = CreateDefault(Lookup);
-                isDefault = true;
-            }
-            else
-            {
-                Drawable = newComponent;
-                isDefault = false;
-            }
-
-            scaling.Invalidate();
-
-            if (Drawable is ISerialisableDrawable serialisable)
-            {
-                // Anchoring controlled by the skin/component.
-                components.Add(serialisable);
-            }
-            else
-            {
-                if (CentreComponent)
-                {
-                    Drawable.Origin = Anchor.Centre;
-                    Drawable.Anchor = Anchor.Centre;
-                }
-            }
-
-            InternalChild = Drawable;
-            ComponentsLoaded = true;
-        }
-
-        void ISerialisableDrawableContainer.Reload(SerialisedDrawableInfo[] skinnableInfo) => reload(skinnableInfo.FirstOrDefault()?.CreateInstance());
-
-        // Only to be used during skin editor undo-redo.
-        void ISerialisableDrawableContainer.Add(ISerialisableDrawable component)
-        {
-            if (!(component is Drawable drawable))
-                throw new ArgumentException($"Provided argument must be of type {nameof(Drawable)}.", nameof(component));
-
-            AddInternal(drawable);
-            components.Add(component);
-        }
-
-        // Only to be used during skin editor undo-redo.
-        void ISerialisableDrawableContainer.Remove(ISerialisableDrawable component, bool disposeImmediately)
-        {
-            if (!(component is Drawable drawable))
-                throw new ArgumentException($"Provided argument must be of type {nameof(Drawable)}.", nameof(component));
-
-            RemoveInternal(drawable, disposeImmediately);
-            components.Remove(component);
-        }
-
-        public virtual bool IsEditable => (Drawable as ISerialisableDrawable)?.IsEditable == true;
-        public bool ContentsMutable => false;
     }
 
     public enum ConfineMode
