@@ -113,6 +113,17 @@ namespace osu.Game.Skinning
             }
         }
 
+        public void ConfigureComponent(ISerialisableDrawable drawable)
+        {
+            foreach (var (_, lookupWrapper) in skinSources)
+                lookupWrapper.ConfigureComponent(drawable);
+
+            if (!AllowFallingBackToParent)
+                return;
+
+            ParentSource?.ConfigureComponent(drawable);
+        }
+
         public Drawable? GetDrawableComponent(ISkinComponentLookup lookup)
         {
             foreach (var (_, lookupWrapper) in skinSources)
@@ -260,6 +271,8 @@ namespace osu.Game.Skinning
 
                 return null;
             }
+
+            public void ConfigureComponent(ISerialisableDrawable drawable) => skin.ConfigureComponent(drawable);
 
             public Texture? GetTexture(string componentName, WrapMode wrapModeS, WrapMode wrapModeT)
             {
