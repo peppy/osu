@@ -457,6 +457,7 @@ namespace osu.Game.Overlays.SkinEditor
             }
 
             SelectedComponents.Add(component);
+            SkinSelectionHandler.ApplyClosestAnchor(drawableComponent);
             return true;
         }
 
@@ -690,8 +691,6 @@ namespace osu.Game.Overlays.SkinEditor
 
                 SelectedComponents.Clear();
                 placeComponent(sprite, false);
-
-                SkinSelectionHandler.ApplyClosestAnchor(sprite);
             });
 
             return Task.CompletedTask;
