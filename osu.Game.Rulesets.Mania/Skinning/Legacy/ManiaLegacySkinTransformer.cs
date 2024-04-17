@@ -11,9 +11,11 @@ using osu.Framework.Graphics;
 using osu.Game.Audio;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Mania.Beatmaps;
+using osu.Game.Rulesets.Mania.Skinning.Default;
 using osu.Game.Rulesets.Objects.Legacy;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Skinning;
+using osuTK;
 
 namespace osu.Game.Rulesets.Mania.Skinning.Legacy
 {
@@ -72,6 +74,14 @@ namespace osu.Game.Rulesets.Mania.Skinning.Legacy
                 string keyImage = this.GetManiaSkinConfig<string>(LegacyManiaSkinConfigurationLookups.KeyImage, 0)?.Value ?? "mania-key1";
                 return this.GetAnimation(keyImage, true, true) != null;
             });
+        }
+
+        public override void ConfigureComponent(ISerialisableDrawable drawable)
+        {
+            base.ConfigureComponent(drawable);
+
+            if (drawable is DefaultStageConfiguration stage)
+                stage.Position = new Vector2(Skin.GetManiaSkinConfig<float>(LegacyManiaSkinConfigurationLookups.ColumnStart)?.Value ?? 0, 0) / 1024;
         }
 
         public override Drawable GetDrawableComponent(ISkinComponentLookup lookup)

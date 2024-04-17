@@ -27,7 +27,7 @@ namespace osu.Game.Skinning
         }
 
         public virtual Drawable? GetDrawableComponent(ISkinComponentLookup lookup) => Skin.GetDrawableComponent(lookup);
-        public void ConfigureComponent(ISerialisableDrawable drawable) => Skin.ConfigureComponent(drawable);
+        public virtual void ConfigureComponent(ISerialisableDrawable drawable) => Skin.ConfigureComponent(drawable);
 
         public virtual Texture? GetTexture(string componentName) => GetTexture(componentName, default, default);
 
