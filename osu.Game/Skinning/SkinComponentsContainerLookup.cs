@@ -71,7 +71,11 @@ namespace osu.Game.Skinning
             SongSelect,
 
             [Description("Playfield")]
-            Playfield
+            Playfield,
+
+            // All non-user-placed configurable components' data is stored here.
+            [Description("Configuration")]
+            Configuration,
         }
     }
 }
