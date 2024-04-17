@@ -337,6 +337,8 @@ namespace osu.Game.Skinning
             {
             }
 
+            // TODO: For the case of `PredefinedSkinComponentsContainerLookup` where a ruleset can specify arbitrary target names,
+            // filename needs to have ruleset prefix or something similar to avoid potential conflicts.
             public string Filename => $"{Target}.json";
         }
     }
