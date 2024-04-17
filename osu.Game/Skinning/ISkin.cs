@@ -22,6 +22,11 @@ namespace osu.Game.Skinning
         Drawable? GetDrawableComponent(ISkinComponentLookup lookup);
 
         /// <summary>
+        /// Given a drawable, apply any user configuration to it (and track changes against the skin).
+        /// </summary>
+        void ConfigureComponent(ISerialisableDrawable drawable);
+
+        /// <summary>
         /// Retrieve a <see cref="Texture"/>.
         /// </summary>
         /// <param name="componentName">The requested texture.</param>
