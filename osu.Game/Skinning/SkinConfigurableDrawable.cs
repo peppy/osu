@@ -6,6 +6,10 @@ using osu.Framework.Graphics;
 
 namespace osu.Game.Skinning
 {
+    /// <summary>
+    /// TODO: Use an interface instead and rely on an external component for skin reloading?
+    /// See SkinConfigurationApplier commentary for example.
+    /// </summary>
     public partial class SkinConfigurableDrawable : SkinReloadableDrawable
     {
         private readonly Action<Drawable> applyDefaults;
@@ -13,13 +17,7 @@ namespace osu.Game.Skinning
         /// <summary>
         /// The displayed component.
         /// </summary>
-        public ISerialisableDrawable Drawable { get; private set; }
-
-        public new Axes AutoSizeAxes
-        {
-            get => base.AutoSizeAxes;
-            set => base.AutoSizeAxes = value;
-        }
+        public ISerialisableDrawable Drawable { get; }
 
         /// <summary>
         /// Create a new skinnable drawable.
