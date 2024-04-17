@@ -607,6 +607,10 @@ namespace osu.Game.Rulesets.UI
         public abstract void CancelResume();
     }
 
+    /// <summary>
+    /// TODO: This currently exists only to show the components in the skin editor.
+    /// It could not exist here and be moved local to the skin editor (likely more appealing).
+    /// </summary>
     public partial class SkinConfigurationApplier : SkinReloadableDrawable, ISerialisableDrawableContainer
     {
         public SkinComponentsContainerLookup Lookup { get; }
@@ -630,8 +634,17 @@ namespace osu.Game.Rulesets.UI
         {
             base.SkinChanged(skin);
 
-            foreach (var c in components)
-                skin.ConfigureComponent(c);
+            // TODO: this doesn't need to exist because it's already being handled by SkinConfigurableDrawable.
+            //
+            // But by uncommenting this, we could have configuration with zero overhead – add ISerialisableDrawable to any drawable
+            // and it would just-work. Caveats being that providing special behaviour (like defaults) gets a bit more tricky. We'd
+            // probably want to define a new interface.
+            //
+            // But it does mean we could do something like ManiaPlayfield : IConfigurableDrawable and literally call it a day.
+            // Might be a good direction?
+
+            // foreach (var c in components)
+            //     skin.ConfigureComponent(c);
         }
 
         public void Reload()
