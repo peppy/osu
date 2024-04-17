@@ -206,7 +206,7 @@ namespace osu.Game.Skinning
             layoutInfo.Update(targetContainer.Lookup.Ruleset, targetContainer.CreateSerialisedInfo().ToArray());
         }
 
-        public void ConfigureComponent(ISerialisableDrawable drawable)
+        public virtual void ConfigureComponent(ISerialisableDrawable drawable)
         {
             if (!LayoutInfos.TryGetValue(SkinComponentsContainerLookup.TargetArea.Configuration, out var layoutInfo)) return;
 
