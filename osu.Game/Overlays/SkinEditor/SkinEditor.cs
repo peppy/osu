@@ -348,7 +348,7 @@ namespace osu.Game.Overlays.SkinEditor
                 return;
             }
 
-            changeHandler = new SkinEditorChangeHandler(skinComponentsContainer);
+            changeHandler = new SkinEditorChangeHandler((Drawable)skinComponentsContainer);
             changeHandler.CanUndo.BindValueChanged(v => undoMenuItem.Action.Disabled = !v.NewValue, true);
             changeHandler.CanRedo.BindValueChanged(v => redoMenuItem.Action.Disabled = !v.NewValue, true);
 
@@ -419,7 +419,7 @@ namespace osu.Game.Overlays.SkinEditor
             var targetContainer = getTarget(selectedTarget.Value);
 
             if (targetContainer != null)
-                changeHandler = new SkinEditorChangeHandler(targetContainer);
+                changeHandler = new SkinEditorChangeHandler((Drawable)targetContainer);
             hasBegunMutating = true;
         }
 
@@ -469,18 +469,18 @@ namespace osu.Game.Overlays.SkinEditor
                 settingsSidebar.Add(new SkinSettingsToolbox(component));
         }
 
-        private IEnumerable<SkinComponentsContainer> availableTargets => targetScreen.ChildrenOfType<SkinComponentsContainer>();
+        private IEnumerable<ISerialisableDrawableContainer> availableTargets => targetScreen.ChildrenOfType<ISerialisableDrawableContainer>();
 
-        private SkinComponentsContainer? getFirstTarget() => availableTargets.FirstOrDefault();
+        private ISerialisableDrawableContainer? getFirstTarget() => availableTargets.FirstOrDefault();
 
-        private SkinComponentsContainer? getTarget(SkinComponentsContainerLookup? target)
+        private ISerialisableDrawableContainer? getTarget(SkinComponentsContainerLookup? target)
         {
             return availableTargets.FirstOrDefault(c => c.Lookup.Equals(target));
         }
 
         private void revert()
         {
-            SkinComponentsContainer[] targetContainers = availableTargets.ToArray();
+            ISerialisableDrawableContainer[] targetContainers = availableTargets.ToArray();
 
             foreach (var t in targetContainers)
             {
@@ -550,7 +550,7 @@ namespace osu.Game.Overlays.SkinEditor
             if (targetScreen?.IsLoaded != true)
                 return;
 
-            SkinComponentsContainer[] targetContainers = availableTargets.ToArray();
+            ISerialisableDrawableContainer[] targetContainers = availableTargets.ToArray();
 
             if (!targetContainers.All(c => c.ComponentsLoaded))
                 return;
@@ -595,7 +595,7 @@ namespace osu.Game.Overlays.SkinEditor
 
         public void BringSelectionToFront()
         {
-            if (getTarget(selectedTarget.Value) is not SkinComponentsContainer target)
+            if (getTarget(selectedTarget.Value) is not ISerialisableDrawableContainer target)
                 return;
 
             changeHandler?.BeginChange();
@@ -619,7 +619,7 @@ namespace osu.Game.Overlays.SkinEditor
 
         public void SendSelectionToBack()
         {
-            if (getTarget(selectedTarget.Value) is not SkinComponentsContainer target)
+            if (getTarget(selectedTarget.Value) is not ISerialisableDrawableContainer target)
                 return;
 
             changeHandler?.BeginChange();
