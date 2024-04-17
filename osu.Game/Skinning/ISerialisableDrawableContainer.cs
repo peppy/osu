@@ -15,9 +15,18 @@ namespace osu.Game.Skinning
     public interface ISerialisableDrawableContainer : IDrawable
     {
         /// <summary>
+        /// The lookup criteria which will be used to retrieve components from the active skin.
+        /// </summary>
+        SkinComponentsContainerLookup Lookup { get; }
+
+        bool ComponentsLoaded { get; }
+
+        /// <summary>
         /// A bindable list of components which are being tracked by this skinnable target.
         /// </summary>
         IBindableList<ISerialisableDrawable> Components { get; }
+
+        bool AcceptsUserDrawables { get; }
 
         /// <summary>
         /// Serialise all children as <see cref="SerialisedDrawableInfo"/>.

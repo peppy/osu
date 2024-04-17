@@ -189,7 +189,7 @@ namespace osu.Game.Skinning
         /// Remove all stored customisations for the provided target.
         /// </summary>
         /// <param name="targetContainer">The target container to reset.</param>
-        public void ResetDrawableTarget(SkinComponentsContainer targetContainer)
+        public void ResetDrawableTarget(ISerialisableDrawableContainer targetContainer)
         {
             LayoutInfos.Remove(targetContainer.Lookup.Target);
         }
@@ -198,7 +198,7 @@ namespace osu.Game.Skinning
         /// Update serialised information for the provided target.
         /// </summary>
         /// <param name="targetContainer">The target container to serialise to this skin.</param>
-        public void UpdateDrawableTarget(SkinComponentsContainer targetContainer)
+        public void UpdateDrawableTarget(ISerialisableDrawableContainer targetContainer)
         {
             if (!LayoutInfos.TryGetValue(targetContainer.Lookup.Target, out var layoutInfo))
                 layoutInfos[targetContainer.Lookup.Target] = layoutInfo = new SkinLayoutInfo();
