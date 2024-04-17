@@ -83,7 +83,13 @@ namespace osu.Game.Rulesets.Mania.UI
                         }
                     }
                 },
-                skinnableConfiguration = new SkinConfigurableDrawable(new DefaultStageConfiguration())
+                skinnableConfiguration = new SkinConfigurableDrawable(new DefaultStageConfiguration(), d =>
+                {
+                    d.Position = Vector2.Zero;
+                    d.Anchor = Anchor.Centre;
+                    d.Origin = Anchor.Centre;
+                    d.RelativeSizeAxes = Axes.Y;
+                })
                 {
                     RelativeSizeAxes = Axes.Both
                 }
