@@ -17,6 +17,7 @@ using osu.Game.Overlays;
 using osu.Game.Overlays.Settings;
 using osu.Game.Overlays.SkinEditor;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Mania;
 using osu.Game.Rulesets.Osu;
 using osu.Game.Screens.Edit;
 using osu.Game.Screens.Play.HUD.HitErrorMeters;
@@ -399,7 +400,7 @@ namespace osu.Game.Tests.Visual.Gameplay
             AddUntilStep("skinnable drawable selected", () => skinEditor.SelectedComponents.Single(), () => Is.EqualTo(localScreen.ChildrenOfType<BigBlackBox>().Single()));
         }
 
-        protected override Ruleset CreatePlayerRuleset() => new OsuRuleset();
+        protected override Ruleset CreatePlayerRuleset() => new ManiaRuleset();
 
         private class TestSkinComponentLookup : ISkinComponentLookup
         {
