@@ -21,6 +21,7 @@ using osu.Framework.Logging;
 using osu.Game.Audio;
 using osu.Game.Database;
 using osu.Game.IO;
+using Drawable = osu.Framework.Graphics.Drawable;
 
 namespace osu.Game.Skinning
 {
@@ -202,7 +203,17 @@ namespace osu.Game.Skinning
             if (!LayoutInfos.TryGetValue(targetContainer.Lookup.Target, out var layoutInfo))
                 layoutInfos[targetContainer.Lookup.Target] = layoutInfo = new SkinLayoutInfo();
 
-            layoutInfo.Update(targetContainer.Lookup.Ruleset, ((ISerialisableDrawableContainer)targetContainer).CreateSerialisedInfo().ToArray());
+            layoutInfo.Update(targetContainer.Lookup.Ruleset, targetContainer.CreateSerialisedInfo().ToArray());
+        }
+
+        public void ConfigureComponent(ISerialisableDrawable drawable)
+        {
+            if (!LayoutInfos.TryGetValue(SkinComponentsContainerLookup.TargetArea.Configuration, out var layoutInfo)) return;
+
+            var config = layoutInfo.AllDrawables.FirstOrDefault(d => d.Type == drawable.GetType());
+
+            if (config != null)
+                ((Drawable)drawable).ApplySerialisedInfo(config);
         }
 
         public virtual Drawable? GetDrawableComponent(ISkinComponentLookup lookup)

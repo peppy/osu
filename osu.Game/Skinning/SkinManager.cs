@@ -226,6 +226,12 @@ namespace osu.Game.Skinning
 
         public Drawable GetDrawableComponent(ISkinComponentLookup lookup) => lookupWithFallback(s => s.GetDrawableComponent(lookup));
 
+        public void ConfigureComponent(ISerialisableDrawable drawable)
+        {
+            foreach (var source in AllSources)
+                source.ConfigureComponent(drawable);
+        }
+
         public Texture GetTexture(string componentName, WrapMode wrapModeS, WrapMode wrapModeT) => lookupWithFallback(s => s.GetTexture(componentName, wrapModeS, wrapModeT));
 
         public ISample GetSample(ISampleInfo sampleInfo) => lookupWithFallback(s => s.GetSample(sampleInfo));
