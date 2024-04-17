@@ -7,7 +7,8 @@ using osu.Game.Rulesets;
 namespace osu.Game.Skinning
 {
     /// <summary>
-    /// TODO
+    /// A container type which houses drawables that can have skin configuration applied.
+    /// Actual drawables are decided ahead of time and cannot be added to by a user.
     /// </summary>
     public class PredefinedSkinComponentsContainerLookup : ISkinComponentLookup, IEquatable<PredefinedSkinComponentsContainerLookup>
     {

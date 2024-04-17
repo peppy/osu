@@ -150,6 +150,19 @@ namespace osu.Game.Skinning
             layoutInfo.Update(targetContainer.Lookup.Ruleset, targetContainer.CreateSerialisedInfo().ToArray());
         }
 
+        public SkinLayoutInfo? GetLayoutInfo(ISkinComponentLookup lookup)
+        {
+            // It is important to return null if the user has not configured this yet.
+            // This allows skin transformers the opportunity to provide default components.
+            SkinLayoutInfo? layoutInfo = loadConfiguration(new LayoutLookupKey(lookup));
+            if (layoutInfo == null)
+                return null;
+            if (!layoutInfo.TryGetDrawableInfo(lookup.Ruleset, out var drawableInfos))
+                return null;
+
+            return layoutInfo;
+        }
+
         public virtual Drawable? GetDrawableComponent(ISkinComponentLookup lookup)
         {
             switch (lookup)

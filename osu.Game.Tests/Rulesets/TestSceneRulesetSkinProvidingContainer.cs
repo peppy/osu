@@ -79,6 +79,7 @@ namespace osu.Game.Tests.Rulesets
             }
 
             public Drawable GetDrawableComponent(ISkinComponentLookup lookup) => skin.GetDrawableComponent(lookup);
+            public SkinLayoutInfo GetLayoutInfo(ISkinComponentLookup lookup) => skin.GetLayoutInfo(lookup);
 
             public Texture GetTexture(string componentName, WrapMode wrapModeS = default, WrapMode wrapModeT = default) => skin.GetTexture(componentName);
 

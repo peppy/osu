@@ -113,6 +113,21 @@ namespace osu.Game.Skinning
             }
         }
 
+        public SkinLayoutInfo? GetLayoutInfo(ISkinComponentLookup lookup)
+        {
+            foreach (var (_, lookupWrapper) in skinSources)
+            {
+                SkinLayoutInfo? sourceDrawable;
+                if ((sourceDrawable = lookupWrapper.GetLayoutInfo(lookup)) != null)
+                    return sourceDrawable;
+            }
+
+            if (!AllowFallingBackToParent)
+                return null;
+
+            return ParentSource?.GetLayoutInfo(lookup);
+        }
+
         public Drawable? GetDrawableComponent(ISkinComponentLookup lookup)
         {
             foreach (var (_, lookupWrapper) in skinSources)
@@ -257,6 +272,14 @@ namespace osu.Game.Skinning
             {
                 if (provider.AllowDrawableLookup(lookup))
                     return skin.GetDrawableComponent(lookup);
+
+                return null;
+            }
+
+            public SkinLayoutInfo? GetLayoutInfo(ISkinComponentLookup lookup)
+            {
+                if (provider.AllowDrawableLookup(lookup))
+                    return skin.GetLayoutInfo(lookup);
 
                 return null;
             }

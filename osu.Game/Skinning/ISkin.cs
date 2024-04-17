@@ -22,6 +22,14 @@ namespace osu.Game.Skinning
         Drawable? GetDrawableComponent(ISkinComponentLookup lookup);
 
         /// <summary>
+        /// Retrieve <see cref="SkinLayoutInfo"/> for a specified lookup.
+        /// Lookup should generally be of a <see cref="PredefinedSkinComponentsContainerLookup"/> or <see cref="SkinComponentsContainerLookup"/>.
+        /// </summary>
+        /// <param name="lookup"></param>
+        /// <returns></returns>
+        SkinLayoutInfo? GetLayoutInfo(ISkinComponentLookup lookup);
+
+        /// <summary>
         /// Retrieve a <see cref="Texture"/>.
         /// </summary>
         /// <param name="componentName">The requested texture.</param>

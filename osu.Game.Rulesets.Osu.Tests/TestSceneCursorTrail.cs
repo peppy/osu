@@ -98,6 +98,8 @@ namespace osu.Game.Rulesets.Osu.Tests
 
             public Drawable GetDrawableComponent(ISkinComponentLookup lookup) => null;
 
+            public SkinLayoutInfo GetLayoutInfo(ISkinComponentLookup lookup) => null;
+
             public Texture GetTexture(string componentName, WrapMode wrapModeS, WrapMode wrapModeT)
             {
                 switch (componentName)

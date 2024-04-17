@@ -298,6 +298,8 @@ namespace osu.Game.Tests.Visual.Gameplay
                     }
                     : null;
 
+            public SkinLayoutInfo GetLayoutInfo(ISkinComponentLookup lookup) => throw new NotImplementedException();
+
             public Texture GetTexture(string componentName, WrapMode wrapModeS, WrapMode wrapModeT) => throw new NotImplementedException();
 
             public ISample GetSample(ISampleInfo sampleInfo) => throw new NotImplementedException();
@@ -308,6 +310,8 @@ namespace osu.Game.Tests.Visual.Gameplay
         private class SecondarySource : ISkin
         {
             public Drawable GetDrawableComponent(ISkinComponentLookup componentLookupName) => new SecondarySourceBox();
+
+            public SkinLayoutInfo GetLayoutInfo(ISkinComponentLookup lookup) => throw new NotImplementedException();
 
             public Texture GetTexture(string componentName, WrapMode wrapModeS, WrapMode wrapModeT) => throw new NotImplementedException();
 
@@ -320,6 +324,7 @@ namespace osu.Game.Tests.Visual.Gameplay
         private partial class SkinSourceContainer : Container, ISkinSource
         {
             public Drawable GetDrawableComponent(ISkinComponentLookup componentLookupName) => new BaseSourceBox();
+            public SkinLayoutInfo GetLayoutInfo(ISkinComponentLookup lookup) => throw new NotImplementedException();
 
             public Texture GetTexture(string componentName, WrapMode wrapModeS, WrapMode wrapModeT) => throw new NotImplementedException();
 
