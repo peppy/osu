@@ -7,13 +7,16 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics.Primitives;
 using osu.Game.Rulesets.Mania.Beatmaps;
 using osu.Game.Rulesets.Mania.Objects;
+using osu.Game.Rulesets.Mania.Skinning.Default;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.UI.Scrolling;
+using osu.Game.Skinning;
 using osuTK;
 
 namespace osu.Game.Rulesets.Mania.UI
@@ -22,8 +25,10 @@ namespace osu.Game.Rulesets.Mania.UI
     public partial class ManiaPlayfield : ScrollingPlayfield
     {
         public IReadOnlyList<Stage> Stages => stages;
-
         private readonly List<Stage> stages = new List<Stage>();
+
+        private readonly Drawable stageContainer;
+        private readonly SkinConfigurableDrawable skinnableConfiguration;
 
         public override Quad SkinnableComponentScreenSpaceDrawQuad
         {
@@ -60,10 +65,28 @@ namespace osu.Game.Rulesets.Mania.UI
                 throw new ArgumentException("Can't have zero or fewer stages.");
 
             GridContainer playfieldGrid;
-            AddInternal(playfieldGrid = new GridContainer
+
+            AddRangeInternal(new[]
             {
-                RelativeSizeAxes = Axes.Both,
-                Content = new[] { new Drawable[stageDefinitions.Count] }
+                stageContainer = new Container
+                {
+                    RelativeSizeAxes = Axes.Y,
+                    AutoSizeAxes = Axes.X,
+                    Children = new Drawable[]
+                    {
+                        playfieldGrid = new GridContainer
+                        {
+                            RelativeSizeAxes = Axes.Y,
+                            AutoSizeAxes = Axes.X,
+                            Content = new[] { new Drawable[stageDefinitions.Count] },
+                            ColumnDimensions = Enumerable.Range(0, stageDefinitions.Count).Select(_ => new Dimension(GridSizeMode.AutoSize)).ToArray()
+                        }
+                    }
+                },
+                skinnableConfiguration = new SkinConfigurableDrawable(new DefaultStageConfiguration())
+                {
+                    RelativeSizeAxes = Axes.Both
+                }
             });
 
             var normalColumnAction = ManiaAction.Key1;
@@ -81,6 +104,20 @@ namespace osu.Game.Rulesets.Mania.UI
 
                 firstColumnIndex += newStage.Columns.Length;
             }
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+
+            Drawable config = (Drawable)skinnableConfiguration.Drawable;
+            config.Size = stageContainer.Size;
+            stageContainer.Anchor = config.Anchor;
+            stageContainer.Origin = config.Origin;
+            stageContainer.RelativePositionAxes = config.RelativePositionAxes;
+            stageContainer.Position = config.Position;
+            stageContainer.Scale = config.Scale;
+            stageContainer.Rotation = config.Rotation;
         }
 
         public override void Add(HitObject hitObject) => getStageByColumn(((ManiaHitObject)hitObject).Column).Add(hitObject);
