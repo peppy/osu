@@ -3,12 +3,12 @@
 
 #nullable disable
 
-using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Primitives;
 using osu.Game.Rulesets.Mania.Beatmaps;
 using osu.Game.Rulesets.Mania.Objects;
@@ -21,7 +21,7 @@ using osuTK;
 namespace osu.Game.Rulesets.Mania.UI
 {
     [Cached]
-    public partial class ManiaPlayfield : ScrollingPlayfield
+    public partial class ManiaPlayfield : ScrollingPlayfield, IConfigurableDrawable
     {
         public IReadOnlyList<Stage> Stages => stages;
         private readonly List<Stage> stages = new List<Stage>();
@@ -62,29 +62,18 @@ namespace osu.Game.Rulesets.Mania.UI
 
             GridContainer playfieldGrid;
 
+            RelativeSizeAxes = Axes.Y;
+            AutoSizeAxes = Axes.X;
+
             AddRangeInternal(new[]
             {
-                new SkinConfigurableDrawable(new ManiaStageConfigurationContainer
+                playfieldGrid = new GridContainer
                 {
                     RelativeSizeAxes = Axes.Y,
                     AutoSizeAxes = Axes.X,
-                    Children = new Drawable[]
-                    {
-                        playfieldGrid = new GridContainer
-                        {
-                            RelativeSizeAxes = Axes.Y,
-                            AutoSizeAxes = Axes.X,
-                            Content = new[] { new Drawable[stageDefinitions.Count] },
-                            ColumnDimensions = Enumerable.Range(0, stageDefinitions.Count).Select(_ => new Dimension(GridSizeMode.AutoSize)).ToArray()
-                        }
-                    }
-                }, d =>
-                {
-                    d.Position = Vector2.Zero;
-                    d.Anchor = Anchor.Centre;
-                    d.Origin = Anchor.Centre;
-                    d.RelativeSizeAxes = Axes.Y;
-                }),
+                    Content = new[] { new Drawable[stageDefinitions.Count] },
+                    ColumnDimensions = Enumerable.Range(0, stageDefinitions.Count).Select(_ => new Dimension(GridSizeMode.AutoSize)).ToArray()
+                }
             });
 
             var normalColumnAction = ManiaAction.Key1;
@@ -194,6 +183,16 @@ namespace osu.Game.Rulesets.Mania.UI
             }
 
             return null;
+        }
+
+        public bool UsesFixedAnchor { get; set; }
+
+        public void ApplyDefaults()
+        {
+            Anchor = Anchor.Centre;
+            Origin = Anchor.Centre;
+            Position = Vector2.Zero;
+            Rotation = 0;
         }
     }
 }

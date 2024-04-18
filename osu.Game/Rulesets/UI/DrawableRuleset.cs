@@ -16,7 +16,6 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Input;
 using osu.Framework.Input.Events;
-using osu.Framework.Testing;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
 using osu.Game.Graphics.Cursor;
@@ -33,7 +32,6 @@ using osu.Game.Scoring;
 using osu.Game.Screens.Play;
 using osu.Game.Screens.Play.HUD;
 using osu.Game.Screens.Play.HUD.ClicksPerSecond;
-using osu.Game.Skinning;
 using osuTK;
 
 namespace osu.Game.Rulesets.UI
@@ -605,63 +603,6 @@ namespace osu.Game.Rulesets.UI
         /// Invoked when the user requests to pause while the resume overlay is active.
         /// </summary>
         public abstract void CancelResume();
-    }
-
-    /// <summary>
-    /// TODO: This currently exists only to show the components in the skin editor.
-    /// It could not exist here and be moved local to the skin editor (likely more appealing).
-    /// </summary>
-    public partial class SkinConfigurationApplier : SkinReloadableDrawable, ISerialisableDrawableContainer
-    {
-        public SkinComponentsContainerLookup Lookup { get; }
-
-        public IBindableList<ISerialisableDrawable> Components => components;
-
-        private readonly BindableList<ISerialisableDrawable> components = new BindableList<ISerialisableDrawable>();
-
-        public SkinConfigurationApplier(DrawableRuleset target)
-        {
-            Lookup = new SkinComponentsContainerLookup(SkinComponentsContainerLookup.TargetArea.Configuration, target.Ruleset.RulesetInfo);
-
-            foreach (var d in target.ChildrenOfType<ISerialisableDrawable>())
-                components.Add(d);
-        }
-
-        public bool ComponentsLoaded => true;
-        public bool AcceptsUserDrawables => false;
-
-        protected override void SkinChanged(ISkinSource skin)
-        {
-            base.SkinChanged(skin);
-
-            // TODO: this doesn't need to exist because it's already being handled by SkinConfigurableDrawable.
-            //
-            // But by uncommenting this, we could have configuration with zero overhead – add ISerialisableDrawable to any drawable
-            // and it would just-work. Caveats being that providing special behaviour (like defaults) gets a bit more tricky. We'd
-            // probably want to define a new interface.
-            //
-            // But it does mean we could do something like ManiaPlayfield : IConfigurableDrawable and literally call it a day.
-            // Might be a good direction?
-
-            // foreach (var c in components)
-            //     skin.ConfigureComponent(c);
-        }
-
-        public void Reload()
-        {
-        }
-
-        public void Reload(SerialisedDrawableInfo[] skinnableInfo)
-        {
-        }
-
-        public void Add(ISerialisableDrawable drawable)
-        {
-        }
-
-        public void Remove(ISerialisableDrawable component, bool disposeImmediately)
-        {
-        }
     }
 
     public class BeatmapInvalidForRulesetException : ArgumentException
