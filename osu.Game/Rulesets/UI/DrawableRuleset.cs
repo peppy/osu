@@ -501,13 +501,6 @@ namespace osu.Game.Rulesets.UI
             Ruleset = ruleset;
         }
 
-        protected override void LoadComplete()
-        {
-            base.LoadComplete();
-
-            AddInternal(new SkinConfigurationApplier(this));
-        }
-
         /// <summary>
         /// All the converted hit objects contained by this hit renderer.
         /// </summary>

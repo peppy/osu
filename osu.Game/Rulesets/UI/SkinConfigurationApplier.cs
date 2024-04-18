@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Bindables;
+using osu.Framework.Graphics;
 using osu.Framework.Testing;
 using osu.Game.Skinning;
 
@@ -23,6 +24,14 @@ namespace osu.Game.Rulesets.UI
         {
             Lookup = new SkinComponentsContainerLookup(SkinComponentsContainerLookup.TargetArea.Configuration, target.Ruleset.RulesetInfo);
 
+            if (target.IsLoaded)
+                iterateDrawables(target);
+            else
+                target.OnLoadComplete += iterateDrawables;
+        }
+
+        private void iterateDrawables(Drawable target)
+        {
             foreach (var d in target.ChildrenOfType<ISerialisableDrawable>())
                 components.Add(d);
         }
