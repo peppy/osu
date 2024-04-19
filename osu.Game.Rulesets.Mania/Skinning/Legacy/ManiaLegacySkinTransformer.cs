@@ -11,7 +11,7 @@ using osu.Framework.Graphics;
 using osu.Game.Audio;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Mania.Beatmaps;
-using osu.Game.Rulesets.Mania.Skinning.Default;
+using osu.Game.Rulesets.Mania.UI;
 using osu.Game.Rulesets.Objects.Legacy;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Skinning;
@@ -80,8 +80,8 @@ namespace osu.Game.Rulesets.Mania.Skinning.Legacy
         {
             base.ConfigureComponent(drawable);
 
-            if (drawable is DefaultStageConfiguration stage)
-                stage.Position = new Vector2(Skin.GetManiaSkinConfig<float>(LegacyManiaSkinConfigurationLookups.ColumnStart)?.Value ?? 0, 0) / 1024;
+            if (drawable is ManiaPlayfield playfield)
+                playfield.Position = new Vector2(Skin.GetManiaSkinConfig<float>(LegacyManiaSkinConfigurationLookups.ColumnStart)?.Value ?? 0, 0) / 1024;
         }
 
         public override Drawable GetDrawableComponent(ISkinComponentLookup lookup)
