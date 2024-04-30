@@ -17,7 +17,6 @@ using osu.Game.Beatmaps;
 using osu.Game.Configuration;
 using osu.Game.Graphics.Backgrounds;
 using osu.Game.Online.API;
-using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Skinning;
 
 namespace osu.Game.Screens.Backgrounds
@@ -28,11 +27,14 @@ namespace osu.Game.Screens.Backgrounds
 
         private int currentDisplay;
         private const int background_count = 8;
-        private IBindable<APIUser> user;
+        private IBindable<APIState> apiState;
         private Bindable<Skin> skin;
         private Bindable<BackgroundSource> source;
         private Bindable<IntroSequence> introSequence;
         private readonly SeasonalBackgroundLoader seasonalBackgroundLoader = new SeasonalBackgroundLoader();
+
+        [Resolved]
+        private IAPIProvider api { get; set; }
 
         [Resolved]
         private IBindable<WorkingBeatmap> beatmap { get; set; }
@@ -48,9 +50,9 @@ namespace osu.Game.Screens.Backgrounds
         }
 
         [BackgroundDependencyLoader]
-        private void load(IAPIProvider api, SkinManager skinManager, OsuConfigManager config)
+        private void load(SkinManager skinManager, OsuConfigManager config)
         {
-            user = api.LocalUser.GetBoundCopy();
+            apiState = api.State.GetBoundCopy();
             skin = skinManager.CurrentSkin.GetBoundCopy();
             source = config.GetBindable<BackgroundSource>(OsuSetting.MenuBackgroundSource);
             introSequence = config.GetBindable<IntroSequence>(OsuSetting.IntroSequence);
@@ -66,7 +68,11 @@ namespace osu.Game.Screens.Backgrounds
         {
             base.LoadComplete();
 
-            user.ValueChanged += _ => Scheduler.AddOnce(next);
+            apiState.ValueChanged += s =>
+            {
+                if (s.NewValue == APIState.Online)
+                    Scheduler.AddOnce(next);
+            };
             skin.ValueChanged += _ => Scheduler.AddOnce(next);
             source.ValueChanged += _ => Scheduler.AddOnce(next);
             beatmap.ValueChanged += _ => Scheduler.AddOnce(next);
@@ -149,7 +155,7 @@ namespace osu.Game.Screens.Backgrounds
             // seasonal background loading gets highest priority.
             Background newBackground = seasonalBackgroundLoader.LoadNextBackground();
 
-            if (newBackground == null && user.Value?.IsSupporter == true)
+            if (newBackground == null && api.LocalUser.Value?.IsSupporter == true)
             {
                 switch (source.Value)
                 {
