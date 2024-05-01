@@ -1162,6 +1162,7 @@ namespace osu.Game.Screens.Select
         private class CarouselBoundsItem : CarouselItem
         {
             public override DrawableCarouselItem CreateDrawableRepresentation() => throw new NotImplementedException();
+            public override void Filter(FilterCriteria criteria) => throw new NotImplementedException();
         }
 
         private class CarouselRoot : CarouselGroupEagerSelect

@@ -43,9 +43,7 @@ namespace osu.Game.Screens.Select.Carousel
         /// </summary>
         public abstract DrawableCarouselItem? CreateDrawableRepresentation();
 
-        public virtual void Filter(FilterCriteria criteria)
-        {
-        }
+        public abstract void Filter(FilterCriteria criteria);
 
         public virtual int CompareTo(FilterCriteria criteria, CarouselItem other) => ItemID.CompareTo(other.ItemID);
 

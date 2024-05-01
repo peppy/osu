@@ -92,8 +92,6 @@ namespace osu.Game.Screens.Select.Carousel
 
         public override void Filter(FilterCriteria criteria)
         {
-            base.Filter(criteria);
-
             TotalItemsNotFiltered = 0;
 
             foreach (var c in items)
