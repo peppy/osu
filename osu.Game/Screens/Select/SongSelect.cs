@@ -164,7 +164,7 @@ namespace osu.Game.Screens.Select
                 RelativeSizeAxes = Axes.Both,
                 BleedTop = FilterControl.HEIGHT,
                 BleedBottom = Footer.HEIGHT,
-                SelectionChanged = updateSelectedBeatmap,
+                SelectionChanged = carouselSelectionChanged,
                 BeatmapSetsChanged = carouselBeatmapsLoaded,
                 FilterApplied = () => Scheduler.AddOnce(updateVisibleBeatmapCount),
                 GetRecommendedBeatmap = s => recommender?.GetRecommendedBeatmap(s),
@@ -528,12 +528,12 @@ namespace osu.Game.Screens.Select
         private BeatmapInfo? beatmapInfoNoDebounce;
         private RulesetInfo? rulesetNoDebounce;
 
-        private void updateSelectedBeatmap(BeatmapInfo? beatmapInfo)
+        private void carouselSelectionChanged(BeatmapInfo? beatmapInfo)
         {
-            if (beatmapInfo == null && beatmapInfoNoDebounce == null)
+            if (beatmapInfo == null)
                 return;
 
-            if (beatmapInfo?.Equals(beatmapInfoNoDebounce) == true)
+            if (beatmapInfo.Equals(beatmapInfoNoDebounce))
                 return;
 
             beatmapInfoNoDebounce = beatmapInfo;
