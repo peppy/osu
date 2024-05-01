@@ -906,22 +906,13 @@ namespace osu.Game.Screens.Select
             // Attempt to select the current beatmap on the carousel, if it is valid to be selected.
             if (!Beatmap.IsDefault && Beatmap.Value.BeatmapSetInfo?.DeletePending == false && Beatmap.Value.BeatmapSetInfo?.Protected == false)
             {
-                if (Carousel.SelectBeatmap(Beatmap.Value.BeatmapInfo, false))
+                if (Carousel.SelectBeatmap(Beatmap.Value.BeatmapInfo))
                     return;
 
                 // prefer not changing ruleset at this point, so look for another difficulty in the currently playing beatmap
                 var found = Beatmap.Value.BeatmapSetInfo.Beatmaps.FirstOrDefault(b => b.Ruleset.Equals(decoupledRuleset.Value));
 
-                if (found != null && Carousel.SelectBeatmap(found, false))
-                    return;
-            }
-
-            // If the current active beatmap could not be selected, select a new random beatmap.
-            if (!Carousel.SelectNextRandom())
-            {
-                // in the case random selection failed, we want to trigger selectionChanged
-                // to show the dummy beatmap (we have nothing else to display).
-                performUpdateSelected();
+                Carousel.SelectBeatmap(found);
             }
         }
 
