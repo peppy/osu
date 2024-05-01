@@ -463,10 +463,6 @@ namespace osu.Game.Screens.Select
             // the user could have changed a filter, and we want to ensure we are 100% up-to-date and consistent here.
             Carousel.FlushPendingFilterOperations();
 
-            // avoid attempting to continue before a selection has been obtained.
-            // this could happen via a user interaction while the carousel is still in a loading state.
-            if (Carousel.SelectedBeatmapInfo == null) return;
-
             if (beatmapInfo != null)
                 Carousel.SelectBeatmap(beatmapInfo);
 
@@ -501,7 +497,7 @@ namespace osu.Game.Screens.Select
 
             Logger.Log($"Song select working beatmap updated to {beatmap}");
 
-            if (!Carousel.SelectBeatmap(beatmap.BeatmapInfo, false))
+            if (!Carousel.SelectBeatmap(beatmap.BeatmapInfo))
             {
                 // A selection may not have been possible with filters applied.
 
@@ -600,11 +596,7 @@ namespace osu.Game.Screens.Select
 
                 if (transferRulesetValue())
                 {
-                    // transferRulesetValue() may trigger a re-filter. If the current selection does not match the new ruleset, we want to switch away from it.
-                    // The default logic on WorkingBeatmap change is to switch to a matching ruleset (see workingBeatmapChanged()), but we don't want that here.
-                    // We perform an early selection attempt and clear out the beatmap selection to avoid a second ruleset change (revert).
-                    if (beatmap != null && !Carousel.SelectBeatmap(beatmap, false))
-                        beatmap = null;
+                    Carousel.SelectBeatmap(beatmap, false);
                 }
 
                 if (selectionChangedDebounce != null)
