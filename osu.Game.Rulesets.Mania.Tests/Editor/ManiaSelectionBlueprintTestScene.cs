@@ -37,10 +37,7 @@ namespace osu.Game.Rulesets.Mania.Tests.Editor
                 RelativeSizeAxes = Axes.Both,
                 Children = new Drawable[]
                 {
-                    Playfield = new ManiaPlayfield(stageDefinitions)
-                    {
-                        RelativeSizeAxes = Axes.Both,
-                    },
+                    Playfield = new ManiaPlayfield(stageDefinitions),
                     blueprints = new Container
                     {
                         RelativeSizeAxes = Axes.Both

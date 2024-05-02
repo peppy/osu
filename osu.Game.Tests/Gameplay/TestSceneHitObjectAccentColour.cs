@@ -137,6 +137,8 @@ namespace osu.Game.Tests.Gameplay
 
             public Drawable GetDrawableComponent(ISkinComponentLookup lookup) => throw new NotImplementedException();
 
+            public void ConfigureComponent(ISerialisableDrawable drawable) => throw new NotImplementedException();
+
             public Texture GetTexture(string componentName, WrapMode wrapModeS, WrapMode wrapModeT) => throw new NotImplementedException();
 
             public ISample GetSample(ISampleInfo sampleInfo) => throw new NotImplementedException();
