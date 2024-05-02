@@ -34,6 +34,8 @@ namespace osu.Game.Rulesets.UI
         {
             foreach (var d in target.ChildrenOfType<ISerialisableDrawable>())
                 components.Add(d);
+
+            reconfigureComponents();
         }
 
         public bool ComponentsLoaded => true;
@@ -43,10 +45,15 @@ namespace osu.Game.Rulesets.UI
         {
             base.SkinChanged(skin);
 
+            reconfigureComponents();
+        }
+
+        private void reconfigureComponents()
+        {
             foreach (var c in components)
             {
                 (c as IConfigurableDrawable)?.ApplyDefaults();
-                skin.ConfigureComponent(c);
+                CurrentSkin.ConfigureComponent(c);
             }
         }
 
