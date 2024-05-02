@@ -471,7 +471,7 @@ namespace osu.Game.Overlays.SkinEditor
 
         private IEnumerable<ISerialisableDrawableContainer> availableTargets => targetScreen.ChildrenOfType<ISerialisableDrawableContainer>();
 
-        private ISerialisableDrawableContainer? getFirstTarget() => availableTargets.FirstOrDefault();
+        private ISerialisableDrawableContainer? getFirstTarget() => availableTargets.FirstOrDefault(t => t.AcceptsUserDrawables);
 
         private ISerialisableDrawableContainer? getTarget(SkinComponentsContainerLookup? target)
         {

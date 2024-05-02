@@ -49,7 +49,6 @@ namespace osu.Game.Rulesets.Mania.Tests.Skinning
                     Child = new ManiaPlayfield(stageDefinitions)
                     {
                         // bit of a hack to make sure the dual stages fit on screen without overlapping each other.
-                        Size = new Vector2(1.5f),
                         Scale = new Vector2(1 / 1.5f)
                     }
                 });
