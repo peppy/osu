@@ -88,6 +88,7 @@ namespace osu.Game.Tests.Skins
             }
 
             public Drawable GetDrawableComponent(ISkinComponentLookup lookup) => throw new System.NotImplementedException();
+            public void ConfigureComponent(ISerialisableDrawable drawable) => throw new System.NotImplementedException();
 
             public Texture GetTexture(string componentName, WrapMode wrapModeS, WrapMode wrapModeT)
             {

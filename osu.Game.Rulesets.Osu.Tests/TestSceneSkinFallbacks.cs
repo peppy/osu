@@ -164,6 +164,8 @@ namespace osu.Game.Rulesets.Osu.Tests
                 };
             }
 
+            public void ConfigureComponent(ISerialisableDrawable drawable) { }
+
             public Texture GetTexture(string componentName, WrapMode wrapModeS, WrapMode wrapModeT) => null;
 
             public ISample GetSample(ISampleInfo sampleInfo) => null;

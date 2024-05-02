@@ -100,6 +100,8 @@ namespace osu.Game.Tests.Skins
 
             public Drawable GetDrawableComponent(ISkinComponentLookup lookup) => skin.GetDrawableComponent(lookup);
 
+            public void ConfigureComponent(ISerialisableDrawable drawable) { }
+
             public Texture GetTexture(string componentName, WrapMode wrapModeS, WrapMode wrapModeT) => skin.GetTexture(componentName, wrapModeS, wrapModeT);
 
             public ISample GetSample(ISampleInfo sampleInfo) => skin.GetSample(sampleInfo);
