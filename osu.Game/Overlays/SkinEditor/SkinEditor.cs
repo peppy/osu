@@ -28,10 +28,10 @@ using osu.Game.Graphics.UserInterface;
 using osu.Game.Localisation;
 using osu.Game.Overlays.Dialog;
 using osu.Game.Overlays.OSD;
-using osu.Game.Overlays.Settings;
 using osu.Game.Screens.Edit;
 using osu.Game.Screens.Edit.Components;
 using osu.Game.Screens.Edit.Components.Menus;
+using osu.Game.Screens.Play;
 using osu.Game.Skinning;
 
 namespace osu.Game.Overlays.SkinEditor
@@ -71,8 +71,6 @@ namespace osu.Game.Overlays.SkinEditor
 
         [Cached]
         private readonly OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Blue);
-
-        private readonly Bindable<SkinComponentsContainerLookup?> selectedTarget = new Bindable<SkinComponentsContainerLookup?>();
 
         private bool hasBegunMutating;
 
@@ -265,8 +263,6 @@ namespace osu.Game.Overlays.SkinEditor
             }, true);
 
             SelectedComponents.BindCollectionChanged((_, _) => Scheduler.AddOnce(populateSettings), true);
-
-            selectedTarget.BindValueChanged(targetChanged, true);
         }
 
         public bool OnPressed(KeyBindingPressEvent<PlatformAction> e)
@@ -318,19 +314,11 @@ namespace osu.Game.Overlays.SkinEditor
             if (content?.Child is SkinBlueprintContainer)
                 content.Clear();
 
-            Scheduler.AddOnce(loadBlueprintContainer);
+            Scheduler.AddOnce(reloadTargets);
             Scheduler.AddOnce(populateSettings);
-
-            void loadBlueprintContainer()
-            {
-                selectedTarget.Default = getFirstTarget()?.Lookup;
-
-                if (!availableTargets.Any(t => t.Lookup.Equals(selectedTarget.Value)))
-                    selectedTarget.SetDefault();
-            }
         }
 
-        private void targetChanged(ValueChangedEvent<SkinComponentsContainerLookup?> target)
+        private void reloadTargets()
         {
             foreach (var toolbox in componentsSidebar.OfType<SkinComponentToolbox>())
                 toolbox.Expire();
@@ -340,46 +328,34 @@ namespace osu.Game.Overlays.SkinEditor
 
             Debug.Assert(content != null);
 
-            var skinComponentsContainer = getTarget(target.NewValue);
+            content.Clear();
 
-            if (target.NewValue == null || skinComponentsContainer == null)
+            if (!availableTargets.Any())
             {
                 content.Child = new NonSkinnableScreenPlaceholder();
                 return;
             }
 
-            changeHandler = new SkinEditorChangeHandler(skinComponentsContainer);
-            changeHandler.CanUndo.BindValueChanged(v => undoMenuItem.Action.Disabled = !v.NewValue, true);
-            changeHandler.CanRedo.BindValueChanged(v => redoMenuItem.Action.Disabled = !v.NewValue, true);
-
-            content.Child = new SkinBlueprintContainer(skinComponentsContainer);
-
-            componentsSidebar.Children = new[]
+            foreach (var skinComponentsContainer in availableTargets)
             {
-                new EditorSidebarSection("Current working layer")
-                {
-                    Children = new Drawable[]
-                    {
-                        new SettingsDropdown<SkinComponentsContainerLookup?>
-                        {
-                            Items = availableTargets.Select(t => t.Lookup).Distinct(),
-                            Current = selectedTarget,
-                        }
-                    }
-                },
-            };
+                changeHandler = new SkinEditorChangeHandler(skinComponentsContainer);
+                changeHandler.CanUndo.BindValueChanged(v => undoMenuItem.Action.Disabled = !v.NewValue, true);
+                changeHandler.CanRedo.BindValueChanged(v => redoMenuItem.Action.Disabled = !v.NewValue, true);
 
-            // If the new target has a ruleset, let's show ruleset-specific items at the top, and the rest below.
-            if (target.NewValue.Ruleset != null)
+                content.Add(new SkinBlueprintContainer(skinComponentsContainer));
+            }
+
+            // If we're at a screen which may want per-ruleset skinnables, show them.
+            if (targetScreen is Player player)
             {
-                componentsSidebar.Add(new SkinComponentToolbox(skinComponentsContainer, target.NewValue.Ruleset)
+                componentsSidebar.Add(new SkinComponentToolbox(availableTargets.First(), player.Ruleset.Value)
                 {
                     RequestPlacement = requestPlacement
                 });
             }
 
             // Remove the ruleset from the lookup to get base components.
-            componentsSidebar.Add(new SkinComponentToolbox(skinComponentsContainer, null)
+            componentsSidebar.Add(new SkinComponentToolbox(availableTargets.First(), null)
             {
                 RequestPlacement = requestPlacement
             });
@@ -416,10 +392,10 @@ namespace osu.Game.Overlays.SkinEditor
 
             skins.EnsureMutableSkin();
 
-            var targetContainer = getTarget(selectedTarget.Value);
+            // TODO: fix
+            // if (targetContainer != null)
+            //     changeHandler = new SkinEditorChangeHandler(targetContainer);
 
-            if (targetContainer != null)
-                changeHandler = new SkinEditorChangeHandler(targetContainer);
             hasBegunMutating = true;
         }
 
@@ -431,34 +407,34 @@ namespace osu.Game.Overlays.SkinEditor
         /// <returns>Whether placement succeeded. Could fail if no target is available, or if the current target has missing dependency requirements for the component.</returns>
         private bool placeComponent(ISerialisableDrawable component, bool applyDefaults = true)
         {
-            var targetContainer = getTarget(selectedTarget.Value);
-
-            if (targetContainer == null)
-                return false;
-
-            var drawableComponent = (Drawable)component;
-
-            if (applyDefaults)
+            foreach (var targetContainer in availableTargets)
             {
-                // give newly added components a sane starting location.
-                drawableComponent.Origin = Anchor.TopCentre;
-                drawableComponent.Anchor = Anchor.TopCentre;
-                drawableComponent.Y = targetContainer.DrawSize.Y / 2;
+                var drawableComponent = (Drawable)component;
+
+                if (applyDefaults)
+                {
+                    // give newly added components a sane starting location.
+                    drawableComponent.Origin = Anchor.TopCentre;
+                    drawableComponent.Anchor = Anchor.TopCentre;
+                    drawableComponent.Y = targetContainer.DrawSize.Y / 2;
+                }
+
+                try
+                {
+                    targetContainer.Add(component);
+                }
+                catch
+                {
+                    // May fail if dependencies are not available, for instance.
+                    continue;
+                }
+
+                SelectedComponents.Add(component);
+                SkinSelectionHandler.ApplyClosestAnchorOrigin(drawableComponent);
+                return true;
             }
 
-            try
-            {
-                targetContainer.Add(component);
-            }
-            catch
-            {
-                // May fail if dependencies are not available, for instance.
-                return false;
-            }
-
-            SelectedComponents.Add(component);
-            SkinSelectionHandler.ApplyClosestAnchorOrigin(drawableComponent);
-            return true;
+            return false;
         }
 
         private void populateSettings()
@@ -595,7 +571,10 @@ namespace osu.Game.Overlays.SkinEditor
 
         public void BringSelectionToFront()
         {
-            if (getTarget(selectedTarget.Value) is not SkinComponentsContainer target)
+            // TODO: fix for multiple targets in selection
+            var target = ((Drawable?)SelectedComponents.FirstOrDefault())?.FindClosestParent<SkinComponentsContainer>();
+
+            if (target == null)
                 return;
 
             changeHandler?.BeginChange();
@@ -619,7 +598,10 @@ namespace osu.Game.Overlays.SkinEditor
 
         public void SendSelectionToBack()
         {
-            if (getTarget(selectedTarget.Value) is not SkinComponentsContainer target)
+            // TODO: fix for multiple targets in selection
+            var target = ((Drawable?)SelectedComponents.FirstOrDefault())?.FindClosestParent<SkinComponentsContainer>();
+
+            if (target == null)
                 return;
 
             changeHandler?.BeginChange();
