@@ -69,14 +69,14 @@ namespace osu.Game.Skinning
 
             switch (lookup)
             {
-                case SkinComponentsContainerLookup containerLookup:
+                case SkinComponentsLookup containerLookup:
                     // Only handle global level defaults for now.
                     if (containerLookup.Ruleset != null)
                         return null;
 
                     switch (containerLookup.Target)
                     {
-                        case SkinComponentsContainerLookup.TargetArea.SongSelect:
+                        case SkinComponentsLookup.TargetArea.SongSelect:
                             var songSelectComponents = new DefaultSkinComponentsContainer(_ =>
                             {
                                 // do stuff when we need to.
@@ -84,7 +84,7 @@ namespace osu.Game.Skinning
 
                             return songSelectComponents;
 
-                        case SkinComponentsContainerLookup.TargetArea.MainHUDComponents:
+                        case SkinComponentsLookup.TargetArea.MainHUDComponents:
                             var skinnableTargetWrapper = new DefaultSkinComponentsContainer(container =>
                             {
                                 var score = container.OfType<DefaultScoreCounter>().FirstOrDefault();

@@ -132,7 +132,7 @@ namespace osu.Game.Screens.Play
                     ? (rulesetComponents = new HUDComponentsContainer(drawableRuleset.Ruleset.RulesetInfo) { AlwaysPresent = true, })
                     : Empty(),
                 PlayfieldSkinLayer = drawableRuleset != null
-                    ? new SkinComponentsContainer(new SkinComponentsContainerLookup(SkinComponentsContainerLookup.TargetArea.Playfield, drawableRuleset.Ruleset.RulesetInfo)) { AlwaysPresent = true, }
+                    ? new SkinComponentsContainer(new SkinComponentsLookup(SkinComponentsLookup.TargetArea.Playfield, drawableRuleset.Ruleset.RulesetInfo)) { AlwaysPresent = true, }
                     : Empty(),
                 topRightElements = new FillFlowContainer
                 {
@@ -448,7 +448,7 @@ namespace osu.Game.Screens.Play
             private OsuConfigManager config { get; set; }
 
             public HUDComponentsContainer([CanBeNull] RulesetInfo ruleset = null)
-                : base(new SkinComponentsContainerLookup(SkinComponentsContainerLookup.TargetArea.MainHUDComponents, ruleset))
+                : base(new SkinComponentsLookup(SkinComponentsLookup.TargetArea.MainHUDComponents, ruleset))
             {
                 RelativeSizeAxes = Axes.Both;
             }

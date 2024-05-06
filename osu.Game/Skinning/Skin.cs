@@ -41,10 +41,10 @@ namespace osu.Game.Skinning
 
         public SkinConfiguration Configuration { get; set; }
 
-        public IDictionary<SkinComponentsContainerLookup.TargetArea, SkinLayoutInfo> LayoutInfos => layoutInfos;
+        public IDictionary<SkinComponentsLookup.TargetArea, SkinLayoutInfo> LayoutInfos => layoutInfos;
 
-        private readonly Dictionary<SkinComponentsContainerLookup.TargetArea, SkinLayoutInfo> layoutInfos =
-            new Dictionary<SkinComponentsContainerLookup.TargetArea, SkinLayoutInfo>();
+        private readonly Dictionary<SkinComponentsLookup.TargetArea, SkinLayoutInfo> layoutInfos =
+            new Dictionary<SkinComponentsLookup.TargetArea, SkinLayoutInfo>();
 
         public abstract ISample? GetSample(ISampleInfo sampleInfo);
 
@@ -119,7 +119,7 @@ namespace osu.Game.Skinning
             }
 
             // skininfo files may be null for default skin.
-            foreach (SkinComponentsContainerLookup.TargetArea skinnableTarget in Enum.GetValues<SkinComponentsContainerLookup.TargetArea>())
+            foreach (SkinComponentsLookup.TargetArea skinnableTarget in Enum.GetValues<SkinComponentsLookup.TargetArea>())
             {
                 string filename = $"{skinnableTarget}.json";
 
@@ -208,7 +208,7 @@ namespace osu.Game.Skinning
 
         public virtual void ConfigureComponent(ISerialisableDrawable drawable)
         {
-            if (!LayoutInfos.TryGetValue(SkinComponentsContainerLookup.TargetArea.Ungrouped, out var layoutInfo)) return;
+            if (!LayoutInfos.TryGetValue(SkinComponentsLookup.TargetArea.Ungrouped, out var layoutInfo)) return;
 
             var config = layoutInfo.AllDrawables.FirstOrDefault(d => d.Type == drawable.GetType());
 
@@ -224,7 +224,7 @@ namespace osu.Game.Skinning
                 case SkinnableSprite.SpriteComponentLookup sprite:
                     return this.GetAnimation(sprite.LookupName, false, false, maxSize: sprite.MaxSize);
 
-                case SkinComponentsContainerLookup containerLookup:
+                case SkinComponentsLookup containerLookup:
 
                     // It is important to return null if the user has not configured this yet.
                     // This allows skin transformers the opportunity to provide default components.
