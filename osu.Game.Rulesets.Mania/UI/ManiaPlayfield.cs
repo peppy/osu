@@ -21,7 +21,7 @@ using osuTK;
 namespace osu.Game.Rulesets.Mania.UI
 {
     [Cached]
-    public partial class ManiaPlayfield : ScrollingPlayfield, IConfigurableDrawable
+    public partial class ManiaPlayfield : ScrollingPlayfield, ISerialisableDrawable
     {
         public IReadOnlyList<Stage> Stages => stages;
         private readonly List<Stage> stages = new List<Stage>();
@@ -186,6 +186,8 @@ namespace osu.Game.Rulesets.Mania.UI
         }
 
         public bool UsesFixedAnchor { get; set; }
+
+        public bool IsPlaceable => false;
 
         public void ApplyDefaults()
         {

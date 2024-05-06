@@ -1,6 +1,7 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Linq;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Testing;
@@ -9,7 +10,7 @@ using osu.Game.Skinning;
 namespace osu.Game.Rulesets.UI
 {
     /// <summary>
-    /// Applies skin configuration to all <see cref="IConfigurableDrawable"/>s within a <see cref="DrawableRuleset"/>.
+    /// Applies skin configuration to all <see cref="ISerialisableDrawable"/>s within a <see cref="DrawableRuleset"/>.
     /// This also exposes the components to the skin editor as a <see cref="ISerialisableDrawableContainer"/>.
     /// </summary>
     public partial class SkinConfigurationApplier : SkinReloadableDrawable, ISerialisableDrawableContainer
@@ -50,10 +51,10 @@ namespace osu.Game.Rulesets.UI
 
         private void reconfigureComponents()
         {
-            foreach (var c in components)
+            foreach (ISerialisableDrawable d in components.OfType<ISerialisableDrawable>())
             {
-                (c as IConfigurableDrawable)?.ApplyDefaults();
-                CurrentSkin.ConfigureComponent(c);
+                d.ApplyDefaults();
+                CurrentSkin.ConfigureComponent(d);
             }
         }
 

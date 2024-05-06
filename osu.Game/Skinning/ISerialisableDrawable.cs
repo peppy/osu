@@ -39,6 +39,12 @@ namespace osu.Game.Skinning
         /// </summary>
         bool UsesFixedAnchor { get; set; }
 
+        /// <summary>
+        /// Apply any default layout which would subsequently be overridden by user modifications.
+        /// Will be called to restore a sane and known state.
+        /// </summary>
+        void ApplyDefaults() { }
+
         void CopyAdjustedSetting(IBindable target, object source)
         {
             if (source is IBindable sourceBindable)
