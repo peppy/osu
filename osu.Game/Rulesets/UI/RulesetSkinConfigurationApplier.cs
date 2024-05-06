@@ -13,7 +13,7 @@ namespace osu.Game.Rulesets.UI
     /// Applies skin configuration to all <see cref="ISerialisableDrawable"/>s within a <see cref="DrawableRuleset"/>.
     /// This also exposes the components to the skin editor as a <see cref="ISerialisableDrawableContainer"/>.
     /// </summary>
-    public partial class SkinConfigurationApplier : SkinReloadableDrawable, ISerialisableDrawableContainer
+    public partial class RulesetSkinConfigurationApplier : SkinReloadableDrawable, ISerialisableDrawableContainer
     {
         public SkinComponentsLookup Lookup { get; }
 
@@ -21,9 +21,9 @@ namespace osu.Game.Rulesets.UI
 
         private readonly BindableList<ISerialisableDrawable> components = new BindableList<ISerialisableDrawable>();
 
-        public SkinConfigurationApplier(DrawableRuleset target)
+        public RulesetSkinConfigurationApplier(DrawableRuleset target)
         {
-            Lookup = new SkinComponentsLookup(SkinComponentsLookup.TargetArea.Ungrouped, target.Ruleset.RulesetInfo);
+            Lookup = new SkinComponentsLookup(SkinComponentsLookup.TargetArea.Ruleset, target.Ruleset.RulesetInfo);
 
             if (target.IsLoaded)
                 iterateDrawables(target);
