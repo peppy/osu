@@ -74,10 +74,10 @@ namespace osu.Game.Skinning
             Playfield,
 
             /// <summary>
-            /// All components which store configuration but aren't inside a <see cref="SkinComponentsContainer"/> will be stored here.
+            /// All components which store configuration specific to a ruleset but aren't inside a <see cref="SkinComponentsContainer"/> will be stored here.
             /// </summary>
-            [Description("Ungrouped")]
-            Ungrouped,
+            [Description("Ruleset")]
+            Ruleset,
         }
     }
 }

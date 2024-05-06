@@ -208,7 +208,7 @@ namespace osu.Game.Skinning
 
         public virtual void ConfigureComponent(ISerialisableDrawable drawable)
         {
-            if (!LayoutInfos.TryGetValue(SkinComponentsLookup.TargetArea.Ungrouped, out var layoutInfo)) return;
+            if (!LayoutInfos.TryGetValue(SkinComponentsLookup.TargetArea.Ruleset, out var layoutInfo)) return;
 
             var config = layoutInfo.AllDrawables.FirstOrDefault(d => d.Type == drawable.GetType());
 

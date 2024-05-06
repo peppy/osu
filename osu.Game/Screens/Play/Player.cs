@@ -419,7 +419,7 @@ namespace osu.Game.Screens.Play
                             Breaks = working.Beatmap.Breaks
                         }
                     }),
-                new SkinConfigurationApplier(DrawableRuleset)
+                new RulesetSkinConfigurationApplier(DrawableRuleset)
             }
         };
 
