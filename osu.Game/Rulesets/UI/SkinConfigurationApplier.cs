@@ -15,7 +15,7 @@ namespace osu.Game.Rulesets.UI
     /// </summary>
     public partial class SkinConfigurationApplier : SkinReloadableDrawable, ISerialisableDrawableContainer
     {
-        public SkinComponentsContainerLookup Lookup { get; }
+        public SkinComponentsLookup Lookup { get; }
 
         public IBindableList<ISerialisableDrawable> Components => components;
 
@@ -23,7 +23,7 @@ namespace osu.Game.Rulesets.UI
 
         public SkinConfigurationApplier(DrawableRuleset target)
         {
-            Lookup = new SkinComponentsContainerLookup(SkinComponentsContainerLookup.TargetArea.Ungrouped, target.Ruleset.RulesetInfo);
+            Lookup = new SkinComponentsLookup(SkinComponentsLookup.TargetArea.Ungrouped, target.Ruleset.RulesetInfo);
 
             if (target.IsLoaded)
                 iterateDrawables(target);

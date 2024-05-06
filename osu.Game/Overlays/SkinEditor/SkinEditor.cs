@@ -72,7 +72,7 @@ namespace osu.Game.Overlays.SkinEditor
         [Cached]
         private readonly OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Blue);
 
-        private readonly Bindable<SkinComponentsContainerLookup?> selectedTarget = new Bindable<SkinComponentsContainerLookup?>();
+        private readonly Bindable<SkinComponentsLookup?> selectedTarget = new Bindable<SkinComponentsLookup?>();
 
         private bool hasBegunMutating;
 
@@ -330,7 +330,7 @@ namespace osu.Game.Overlays.SkinEditor
             }
         }
 
-        private void targetChanged(ValueChangedEvent<SkinComponentsContainerLookup?> target)
+        private void targetChanged(ValueChangedEvent<SkinComponentsLookup?> target)
         {
             foreach (var toolbox in componentsSidebar.OfType<SkinComponentToolbox>())
                 toolbox.Expire();
@@ -360,7 +360,7 @@ namespace osu.Game.Overlays.SkinEditor
                 {
                     Children = new Drawable[]
                     {
-                        new SettingsDropdown<SkinComponentsContainerLookup?>
+                        new SettingsDropdown<SkinComponentsLookup?>
                         {
                             Items = availableTargets.Select(t => t.Lookup).Distinct(),
                             Current = selectedTarget,
@@ -473,7 +473,7 @@ namespace osu.Game.Overlays.SkinEditor
 
         private ISerialisableDrawableContainer? getFirstTarget() => availableTargets.FirstOrDefault(t => t.AcceptsUserDrawables);
 
-        private ISerialisableDrawableContainer? getTarget(SkinComponentsContainerLookup? target)
+        private ISerialisableDrawableContainer? getTarget(SkinComponentsLookup? target)
         {
             return availableTargets.FirstOrDefault(c => c.Lookup.Equals(target));
         }

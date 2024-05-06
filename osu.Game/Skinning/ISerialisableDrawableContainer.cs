@@ -17,7 +17,7 @@ namespace osu.Game.Skinning
         /// <summary>
         /// The lookup criteria which will be used to retrieve components from the active skin.
         /// </summary>
-        SkinComponentsContainerLookup Lookup { get; }
+        SkinComponentsLookup Lookup { get; }
 
         bool ComponentsLoaded { get; }
 
