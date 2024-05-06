@@ -23,7 +23,7 @@ namespace osu.Game.Rulesets.UI
 
         public SkinConfigurationApplier(DrawableRuleset target)
         {
-            Lookup = new SkinComponentsContainerLookup(SkinComponentsContainerLookup.TargetArea.Configuration, target.Ruleset.RulesetInfo);
+            Lookup = new SkinComponentsContainerLookup(SkinComponentsContainerLookup.TargetArea.Ungrouped, target.Ruleset.RulesetInfo);
 
             if (target.IsLoaded)
                 iterateDrawables(target);
