@@ -73,9 +73,11 @@ namespace osu.Game.Skinning
             [Description("Playfield")]
             Playfield,
 
-            // All non-user-placed configurable components' data is stored here.
-            [Description("Configuration")]
-            Configuration,
+            /// <summary>
+            /// All components which store configuration but aren't inside a <see cref="SkinComponentsContainer"/> will be stored here.
+            /// </summary>
+            [Description("Ungrouped")]
+            Ungrouped,
         }
     }
 }
