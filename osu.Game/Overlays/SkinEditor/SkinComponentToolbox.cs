@@ -61,6 +61,7 @@ namespace osu.Game.Overlays.SkinEditor
             fill.Clear();
 
             var skinnableTypes = SerialisedDrawableInfo.GetAllAvailableDrawables(ruleset);
+
             foreach (var type in skinnableTypes)
                 attemptAddComponent(type);
         }
@@ -81,6 +82,10 @@ namespace osu.Game.Overlays.SkinEditor
                     RequestPlacement = t => RequestPlacement?.Invoke(t),
                     Expanding = contractOtherButtons,
                 });
+            }
+            catch (MissingMethodException)
+            {
+                // Some components may not have a primary constructure (ie. IConfigurableDrawables that aren't supposed to be placed by a user).
             }
             catch (DependencyNotRegisteredException)
             {

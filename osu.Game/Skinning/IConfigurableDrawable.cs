@@ -10,5 +10,7 @@ namespace osu.Game.Skinning
         /// Will be called to restore a sane and known state.
         /// </summary>
         void ApplyDefaults();
+
+        bool ISerialisableDrawable.IsPlaceable => false;
     }
 }
