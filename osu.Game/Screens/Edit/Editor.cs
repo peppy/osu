@@ -22,6 +22,7 @@ using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
 using osu.Framework.Logging;
+using osu.Framework.Platform;
 using osu.Framework.Screens;
 using osu.Framework.Testing;
 using osu.Framework.Threading;
@@ -113,6 +114,9 @@ namespace osu.Game.Screens.Edit
 
         [Resolved]
         private RealmAccess realm { get; set; }
+
+        [Resolved]
+        private Storage storage { get; set; }
 
         public readonly Bindable<EditorScreenMode> Mode = new Bindable<EditorScreenMode>();
 
@@ -1090,6 +1094,9 @@ namespace osu.Game.Screens.Edit
             lastSavedHash = changeHandler?.CurrentStateHash;
         }
 
+        private EditorMenuItem mountFilesItem;
+        private bool filesMounted;
+
         private IEnumerable<MenuItem> createFileMenuItems()
         {
             yield return createDifficultyCreationMenu();
@@ -1107,10 +1114,30 @@ namespace osu.Game.Screens.Edit
                 var export = createExportMenu();
                 saveRelatedMenuItems.AddRange(export.Items);
                 yield return export;
+
+                yield return mountFilesItem = new EditorMenuItem("Mount files", MenuItemType.Standard, mountFiles);
             }
 
             yield return new OsuMenuItemSpacer();
             yield return new EditorMenuItem(CommonStrings.Exit, MenuItemType.Standard, this.Exit);
+        }
+
+        private void mountFiles()
+        {
+            FileMounter fileMounter = new FileMounter(realm, storage);
+
+            if (filesMounted == false)
+            {
+                if (editorBeatmap.BeatmapInfo.BeatmapSet != null) fileMounter.MountBeatmapSet(editorBeatmap.BeatmapInfo.BeatmapSet);
+                mountFilesItem.Text.Value = "Dismount files";
+                filesMounted = true;
+            }
+            else if (mountFilesItem.Text.Value == "Dismount files")
+            {
+                if (editorBeatmap.BeatmapInfo.BeatmapSet != null) fileMounter.DismountBeatmapSet(editorBeatmap.BeatmapInfo.BeatmapSet);
+                mountFilesItem.Text.Value = "Mount files";
+                filesMounted = false;
+            }
         }
 
         private EditorMenuItem createExportMenu()
