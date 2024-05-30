@@ -79,7 +79,7 @@ namespace osu.Game.Database
                     using var stream = File.OpenRead(file);
                     new RealmFileStore(realmAccess, storage).Add(stream, realmAccess.Realm);
                 }
-                else if (fileHash == realmFile.File.Hash)
+                else if (fileHash != realmFile.File.Hash)
                 {
                     // This file has been modified. We should replace the local file with the modified one.
                     Logger.Log($"File {file} has been modified. Replacing local file with the modified one");
