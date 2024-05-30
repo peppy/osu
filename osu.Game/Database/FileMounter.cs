@@ -1,6 +1,7 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -9,6 +10,7 @@ using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Game.Beatmaps;
 using osu.Game.Extensions;
+using osu.Game.Models;
 
 namespace osu.Game.Database
 {
@@ -83,15 +85,29 @@ namespace osu.Game.Database
                 {
                     // This file has been modified. We should replace the local file with the modified one.
                     Logger.Log($"File {file} has been modified. Replacing local file with the modified one");
+                    Logger.Log("Old hash: " + realmFile.File.Hash);
 
-                    // Delete the current file from the storage
-                    storage.Delete(realmFile.File.GetStoragePath());
+                    RealmNamedFileUsage newRealmFile = new RealmNamedFileUsage(new RealmFile { Hash = fileHash }, filename);
 
-                    // Add the new file to the storage, but don't add it to realm yet
-                    using (var stream = File.OpenRead(file)) new RealmFileStore(realmAccess, storage).Add(stream, realmAccess.Realm, false);
+                    realmAccess.Write(realm =>
+                    {
+                        // Add the new file to the storage
+                        using (var stream = File.OpenRead(file)) new RealmFileStore(realmAccess, storage).Add(stream, realm);
 
-                    // Update the hash in the database to match the new file
-                    realmFile.File.Hash = fileHash;
+                        beatmapSetInfo.Files.Remove(realmFile);
+                        beatmapSetInfo.Files.Add(newRealmFile);
+
+                        if (filename.EndsWith(".osu", StringComparison.Ordinal))
+                        {
+                            var oldBeatmap = beatmapSetInfo.Beatmaps.FirstOrDefault(f => f.Hash == realmFile.File.Hash);
+
+                            if (oldBeatmap != null)
+                            {
+                                oldBeatmap.Hash = fileHash;
+                            }
+                        }
+                    });
+                    Logger.Log("New file hash: " + newRealmFile.File.Hash);
                 }
                 else
                 {
@@ -108,14 +124,12 @@ namespace osu.Game.Database
 
                 Logger.Log($"File {file.Filename} has been deleted. Removing from the database");
 
-                // Delete the local file from the storage
-                storage.Delete(file.File.GetStoragePath());
-
                 // Remove the file from the database
                 beatmapSetInfo.Files.Remove(file);
             }
 
             if (!deleteFolder) return;
+
             Directory.Delete(beatmapSetDirectory, true);
             Logger.Log("Beatmap set dismounted");
         }
