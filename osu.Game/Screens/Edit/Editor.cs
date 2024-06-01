@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -176,6 +177,8 @@ namespace osu.Game.Screens.Edit
         private IBeatmap playableBeatmap;
         private EditorBeatmap editorBeatmap;
 
+        private FileMounter fileMounter;
+
         private BottomBar bottomBar;
 
         [CanBeNull] // Should be non-null once it can support custom rulesets.
@@ -309,6 +312,8 @@ namespace osu.Game.Screens.Edit
                 Beatmap.Value = loadableBeatmap;
                 workingBeatmapUpdated = true;
             });
+
+            fileMounter = new FileMounter(realm, storage, beatmapManager);
 
             OsuMenuItem undoMenuItem;
             OsuMenuItem redoMenuItem;
@@ -823,6 +828,14 @@ namespace osu.Game.Screens.Edit
 
             resetTrack();
 
+            try
+            {
+                if (editorBeatmap.BeatmapInfo.BeatmapSet != null) fileMounter.DismountBeatmapSet(editorBeatmap.BeatmapInfo.BeatmapSet);
+            }
+            catch (DirectoryNotFoundException)
+            {
+            }
+
             refetchBeatmap();
 
             return base.OnExiting(e);
@@ -1124,10 +1137,9 @@ namespace osu.Game.Screens.Edit
 
         private void mountFiles()
         {
-            FileMounter fileMounter = new FileMounter(realm, storage);
-
             if (filesMounted == false)
             {
+                Save();
                 if (editorBeatmap.BeatmapInfo.BeatmapSet != null) fileMounter.MountBeatmapSet(editorBeatmap.BeatmapInfo.BeatmapSet);
                 mountFilesItem.Text.Value = "Dismount files";
                 filesMounted = true;
@@ -1137,6 +1149,7 @@ namespace osu.Game.Screens.Edit
                 if (editorBeatmap.BeatmapInfo.BeatmapSet != null) fileMounter.DismountBeatmapSet(editorBeatmap.BeatmapInfo.BeatmapSet);
                 mountFilesItem.Text.Value = "Mount files";
                 filesMounted = false;
+                this.Exit();
             }
         }
 
