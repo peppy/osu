@@ -10,7 +10,6 @@ using osu.Game.Rulesets.Mania.UI;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.UI;
 using osu.Game.Rulesets.UI.Scrolling;
-using osuTK;
 
 namespace osu.Game.Rulesets.Mania.Edit
 {
