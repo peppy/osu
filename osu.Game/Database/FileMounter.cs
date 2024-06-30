@@ -18,7 +18,7 @@ namespace osu.Game.Database
     public class FileMounter(RealmAccess realmAccess, Storage storage, BeatmapManager beatmapManager)
     {
         private readonly BeatmapManager beatmapManager = beatmapManager;
-        private readonly Storage storage = storage.GetStorageForDirectory(@"files");
+        private readonly Storage storage = storage;
         private readonly string tempDirectory = Path.GetTempPath();
 
         /// <summary>
@@ -32,9 +32,11 @@ namespace osu.Game.Database
             if (Directory.Exists(beatmapSetDirectory)) Directory.Delete(beatmapSetDirectory, true);
             Directory.CreateDirectory(beatmapSetDirectory);
 
+            var fileStorage = storage.GetStorageForDirectory("files");
+
             foreach (var realmFile in beatmapSetInfo.Files)
             {
-                string fullPath = storage.GetFullPath(realmFile.File.GetStoragePath());
+                string fullPath = fileStorage.GetFullPath(realmFile.File.GetStoragePath());
                 Logger.Log("Mounting file " + fullPath);
 
                 string destination = Path.Join(beatmapSetDirectory, realmFile.Filename);
