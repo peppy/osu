@@ -4,33 +4,39 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
+using System.Threading.Tasks;
+using osu.Framework.Allocation;
 using osu.Framework.Extensions;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Game.Beatmaps;
 using osu.Game.Extensions;
-using osu.Game.Models;
 using osu.Game.Overlays.Notifications;
 
 namespace osu.Game.Database
 {
-    public class FileMounter(RealmAccess realmAccess, Storage storage, BeatmapManager beatmapManager)
+    public class FileMounter
     {
-        private readonly BeatmapManager beatmapManager = beatmapManager;
-        private readonly Storage storage = storage;
-        private readonly string tempDirectory = Path.GetTempPath();
+        private readonly Storage storage;
+
+        private readonly RealmAccess realm;
+
+        public FileMounter(RealmAccess realmAccess, Storage storage)
+        {
+            realm = realmAccess;
+            this.storage = storage;
+        }
 
         /// <summary>
-        /// Mount all of the files for a <see cref="BeatmapSetInfo"/> to a temporary directory and open it in the native file explorer.
+        /// Mount all files for a <see cref="BeatmapSetInfo"/> to a temporary directory and open it in the native file explorer.
         /// </summary>
         /// <param name="beatmapSetInfo">The <see cref="BeatmapSetInfo"/> to mount</param>
-        public void MountBeatmapSet(BeatmapSetInfo beatmapSetInfo)
+        public IDisposable MountBeatmapSet(BeatmapSetInfo beatmapSetInfo)
         {
-            string beatmapSetDirectory = Path.Join(tempDirectory, beatmapSetInfo.Metadata.Title);
+            string mountedFolder = Path.Join(Path.GetTempPath(), beatmapSetInfo.Hash);
 
-            if (Directory.Exists(beatmapSetDirectory)) Directory.Delete(beatmapSetDirectory, true);
-            Directory.CreateDirectory(beatmapSetDirectory);
+            if (Directory.Exists(mountedFolder)) Directory.Delete(mountedFolder, true);
+            Directory.CreateDirectory(mountedFolder);
 
             var fileStorage = storage.GetStorageForDirectory("files");
 
@@ -39,7 +45,7 @@ namespace osu.Game.Database
                 string fullPath = fileStorage.GetFullPath(realmFile.File.GetStoragePath());
                 Logger.Log("Mounting file " + fullPath);
 
-                string destination = Path.Join(beatmapSetDirectory, realmFile.Filename);
+                string destination = Path.Join(mountedFolder, realmFile.Filename);
                 string? destinationDirectory = Path.GetDirectoryName(destination);
 
                 if (destinationDirectory != null)
@@ -50,39 +56,28 @@ namespace osu.Game.Database
             Logger.Log("Beatmap set mounted");
             Process.Start(new ProcessStartInfo
             {
-                FileName = beatmapSetDirectory,
+                FileName = mountedFolder,
                 UseShellExecute = true
             });
+
+            return new InvokeOnDisposal(() => dismountBeatmapSet(beatmapSetInfo, mountedFolder));
         }
 
-        /// <summary>
-        /// Alias for <see cref="SyncBeatmapSet(BeatmapSetInfo, string?, bool)"/> with deleteFolder set to <c>true</c>.
-        /// </summary>
-        /// <param name="beatmapSetInfo"></param>
-        public void DismountBeatmapSet(BeatmapSetInfo beatmapSetInfo) => SyncBeatmapSet(beatmapSetInfo, null, true);
-
-        /// <summary>
-        /// Replace the files in a <see cref="BeatmapSetInfo"/> with the files in a directory
-        /// </summary>
-        /// <param name="beatmapSetInfo">The <see cref="BeatmapSetInfo"/> to replace the files of</param>
-        /// <param name="beatmapSetDirectory">The directory with the new files</param>
-        /// <param name="deleteFolder">Delete <paramref name="beatmapSetDirectory"/> after syncing</param>
-        public void SyncBeatmapSet(BeatmapSetInfo beatmapSetInfo, string? beatmapSetDirectory, bool deleteFolder = false)
+        private void dismountBeatmapSet(BeatmapSetInfo beatmapSetInfo, string tempFolder)
         {
-            beatmapSetDirectory ??= Path.Join(tempDirectory, beatmapSetInfo.Metadata.Title);
-            if (!Directory.Exists(beatmapSetDirectory)) throw new DirectoryNotFoundException($"Directory {beatmapSetDirectory} does not exist");
+            if (!Directory.Exists(tempFolder))
+                return;
 
-            realmAccess.Write(async realm =>
+            Task.Factory.StartNew(async () =>
             {
-                BeatmapImporter beatmapImporter = new BeatmapImporter(storage, realmAccess);
+                BeatmapImporter beatmapImporter = new BeatmapImporter(storage, realm);
 
-                await beatmapImporter.ImportAsUpdate(new ProgressNotification(), new ImportTask(beatmapSetDirectory), beatmapSetInfo).ConfigureAwait(false);
+                await beatmapImporter.ImportAsUpdate(new ProgressNotification(), new ImportTask(tempFolder), beatmapSetInfo)
+                                     .ConfigureAwait(false);
 
-                if (!deleteFolder) return;
-
-                Directory.Delete(beatmapSetDirectory, true);
+                Directory.Delete(tempFolder, true);
                 Logger.Log("Beatmap set dismounted");
-            });
+            }, TaskCreationOptions.LongRunning).WaitSafely();
         }
     }
 }

@@ -5,7 +5,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -313,7 +312,7 @@ namespace osu.Game.Screens.Edit
                 workingBeatmapUpdated = true;
             });
 
-            fileMounter = new FileMounter(realm, storage, beatmapManager);
+            fileMounter = new FileMounter(realm, storage);
 
             OsuMenuItem undoMenuItem;
             OsuMenuItem redoMenuItem;
@@ -828,13 +827,8 @@ namespace osu.Game.Screens.Edit
 
             resetTrack();
 
-            try
-            {
-                if (editorBeatmap.BeatmapInfo.BeatmapSet != null) fileMounter.DismountBeatmapSet(editorBeatmap.BeatmapInfo.BeatmapSet);
-            }
-            catch (DirectoryNotFoundException)
-            {
-            }
+            fileMountOperation?.Dispose();
+            fileMountOperation = null;
 
             refetchBeatmap();
 
@@ -1108,7 +1102,9 @@ namespace osu.Game.Screens.Edit
         }
 
         private EditorMenuItem mountFilesItem;
-        private bool filesMounted;
+
+        [CanBeNull]
+        private IDisposable fileMountOperation;
 
         private IEnumerable<MenuItem> createFileMenuItems()
         {
@@ -1137,19 +1133,21 @@ namespace osu.Game.Screens.Edit
 
         private void mountFiles()
         {
-            if (filesMounted == false)
+            if (fileMountOperation == null)
             {
                 Save();
-                if (editorBeatmap.BeatmapInfo.BeatmapSet != null) fileMounter.MountBeatmapSet(editorBeatmap.BeatmapInfo.BeatmapSet);
+
+                fileMountOperation = fileMounter.MountBeatmapSet(editorBeatmap.BeatmapInfo.BeatmapSet!);
                 mountFilesItem.Text.Value = "Dismount files";
-                filesMounted = true;
             }
-            else if (mountFilesItem.Text.Value == "Dismount files")
+            else
             {
-                if (editorBeatmap.BeatmapInfo.BeatmapSet != null) fileMounter.DismountBeatmapSet(editorBeatmap.BeatmapInfo.BeatmapSet);
-                mountFilesItem.Text.Value = "Mount files";
-                filesMounted = false;
-                this.Exit();
+                fileMountOperation.Dispose();
+                fileMountOperation = null;
+
+                // reload editor without save.
+                // TODO: this isn't enough.
+                SwitchToDifficulty(editorBeatmap.BeatmapInfo);
             }
         }
 
