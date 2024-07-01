@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -13,6 +14,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Audio.Track;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
@@ -115,9 +117,6 @@ namespace osu.Game.Screens.Edit
         [Resolved]
         private RealmAccess realm { get; set; }
 
-        [Resolved]
-        private Storage storage { get; set; }
-
         public readonly Bindable<EditorScreenMode> Mode = new Bindable<EditorScreenMode>();
 
         public IBindable<bool> SamplePlaybackDisabled => samplePlaybackDisabled;
@@ -176,8 +175,6 @@ namespace osu.Game.Screens.Edit
         private IBeatmap playableBeatmap;
         private EditorBeatmap editorBeatmap;
 
-        private FileMounter fileMounter;
-
         private BottomBar bottomBar;
 
         [CanBeNull] // Should be non-null once it can support custom rulesets.
@@ -232,7 +229,7 @@ namespace osu.Game.Screens.Edit
         }
 
         [BackgroundDependencyLoader]
-        private void load(OsuConfigManager config)
+        private void load(OsuConfigManager config, GameHost host)
         {
             var loadableBeatmap = Beatmap.Value;
 
@@ -311,8 +308,6 @@ namespace osu.Game.Screens.Edit
                 Beatmap.Value = loadableBeatmap;
                 workingBeatmapUpdated = true;
             });
-
-            fileMounter = new FileMounter(realm, storage);
 
             OsuMenuItem undoMenuItem;
             OsuMenuItem redoMenuItem;
@@ -1131,14 +1126,20 @@ namespace osu.Game.Screens.Edit
             yield return new EditorMenuItem(CommonStrings.Exit, MenuItemType.Standard, this.Exit);
         }
 
+        [Resolved]
+        private GameHost gameHost { get; set; }
+
         private void mountFiles()
         {
             if (fileMountOperation == null)
             {
                 Save();
 
-                fileMountOperation = fileMounter.MountBeatmapSet(editorBeatmap.BeatmapInfo.BeatmapSet!);
+                fileMountOperation = beatmapManager.MountForExternalEditing(editorBeatmap.BeatmapInfo.BeatmapSet!, out string mountTarget);
                 mountFilesItem.Text.Value = "Dismount files";
+
+                // Ensure the trailing separator is present in order to show the folder contents.
+                gameHost.OpenFileExternally(mountTarget.TrimDirectorySeparator() + Path.DirectorySeparatorChar);
             }
             else
             {
