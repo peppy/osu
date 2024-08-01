@@ -28,7 +28,6 @@ using osu.Game.Graphics.UserInterface;
 using osu.Game.Localisation;
 using osu.Game.Overlays.Dialog;
 using osu.Game.Overlays.OSD;
-using osu.Game.Overlays.Settings;
 using osu.Game.Screens.Edit;
 using osu.Game.Screens.Edit.Components;
 using osu.Game.Screens.Edit.Components.Menus;
@@ -71,8 +70,6 @@ namespace osu.Game.Overlays.SkinEditor
 
         [Cached]
         private readonly OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Blue);
-
-        private readonly Bindable<SkinComponentsLookup?> selectedTarget = new Bindable<SkinComponentsLookup?>();
 
         private bool hasBegunMutating;
 
@@ -265,8 +262,6 @@ namespace osu.Game.Overlays.SkinEditor
             }, true);
 
             SelectedComponents.BindCollectionChanged((_, _) => Scheduler.AddOnce(populateSettings), true);
-
-            selectedTarget.BindValueChanged(targetChanged, true);
         }
 
         public bool OnPressed(KeyBindingPressEvent<PlatformAction> e)
@@ -315,23 +310,10 @@ namespace osu.Game.Overlays.SkinEditor
             changeHandler?.Dispose();
 
             // Immediately clear the previous blueprint container to ensure it doesn't try to interact with the old target.
-            if (content?.Child is SkinBlueprintContainer)
-                content.Clear();
+            content?.Clear();
 
-            Scheduler.AddOnce(loadBlueprintContainer);
             Scheduler.AddOnce(populateSettings);
 
-            void loadBlueprintContainer()
-            {
-                selectedTarget.Default = getFirstTarget()?.Lookup;
-
-                if (!availableTargets.Any(t => t.Lookup.Equals(selectedTarget.Value)))
-                    selectedTarget.SetDefault();
-            }
-        }
-
-        private void targetChanged(ValueChangedEvent<SkinComponentsLookup?> target)
-        {
             foreach (var toolbox in componentsSidebar.OfType<SkinComponentToolbox>())
                 toolbox.Expire();
 
@@ -340,39 +322,39 @@ namespace osu.Game.Overlays.SkinEditor
 
             Debug.Assert(content != null);
 
-            var skinComponentsContainer = getTarget(target.NewValue);
-
-            if (target.NewValue == null || skinComponentsContainer == null)
+            if (!availableTargets.Any())
             {
                 content.Child = new NonSkinnableScreenPlaceholder();
                 return;
             }
 
-            changeHandler = new SkinEditorChangeHandler((Drawable)skinComponentsContainer);
-            changeHandler.CanUndo.BindValueChanged(v => undoMenuItem.Action.Disabled = !v.NewValue, true);
-            changeHandler.CanRedo.BindValueChanged(v => redoMenuItem.Action.Disabled = !v.NewValue, true);
+            ISerialisableDrawableContainer skinComponentsContainer = getFirstTarget()!;
+
+            // changeHandler = new SkinEditorChangeHandler((Drawable)skinComponentsContainer);
+            // changeHandler.CanUndo.BindValueChanged(v => undoMenuItem.Action.Disabled = !v.NewValue, true);
+            // changeHandler.CanRedo.BindValueChanged(v => redoMenuItem.Action.Disabled = !v.NewValue, true);
 
             content.Child = new SkinBlueprintContainer(skinComponentsContainer);
 
-            componentsSidebar.Children = new[]
-            {
-                new EditorSidebarSection("Current working layer")
-                {
-                    Children = new Drawable[]
-                    {
-                        new SettingsDropdown<SkinComponentsLookup?>
-                        {
-                            Items = availableTargets.Select(t => t.Lookup).Distinct(),
-                            Current = selectedTarget,
-                        }
-                    }
-                },
-            };
+            // componentsSidebar.Children = new[]
+            // {
+            //     new EditorSidebarSection("Current working layer")
+            //     {
+            //         Children = new Drawable[]
+            //         {
+            //             new SettingsDropdown<SkinComponentsLookup?>
+            //             {
+            //                 Items = availableTargets.Select(t => t.Lookup).Distinct(),
+            //                 Current = selectedTarget,
+            //             }
+            //         }
+            //     },
+            // };
 
             // If the new target has a ruleset, let's show ruleset-specific items at the top, and the rest below.
-            if (target.NewValue.Ruleset != null)
+            if (skinComponentsContainer.Lookup.Ruleset != null)
             {
-                componentsSidebar.Add(new SkinComponentToolbox(skinComponentsContainer, target.NewValue.Ruleset)
+                componentsSidebar.Add(new SkinComponentToolbox(skinComponentsContainer, skinComponentsContainer.Lookup.Ruleset)
                 {
                     RequestPlacement = requestPlacement
                 });
@@ -416,10 +398,8 @@ namespace osu.Game.Overlays.SkinEditor
 
             skins.EnsureMutableSkin();
 
-            var targetContainer = getTarget(selectedTarget.Value);
-
-            if (targetContainer != null)
-                changeHandler = new SkinEditorChangeHandler((Drawable)targetContainer);
+            if (targetScreen != null)
+                changeHandler = new SkinEditorChangeHandler((Drawable)targetScreen);
             hasBegunMutating = true;
         }
 
@@ -431,7 +411,7 @@ namespace osu.Game.Overlays.SkinEditor
         /// <returns>Whether placement succeeded. Could fail if no target is available, or if the current target has missing dependency requirements for the component.</returns>
         private bool placeComponent(ISerialisableDrawable component, bool applyDefaults = true)
         {
-            var targetContainer = getTarget(selectedTarget.Value);
+            var targetContainer = availableTargets.FirstOrDefault();
 
             if (targetContainer == null)
                 return false;
@@ -597,45 +577,45 @@ namespace osu.Game.Overlays.SkinEditor
 
         public void BringSelectionToFront()
         {
-            if (getTarget(selectedTarget.Value) is not ISerialisableDrawableContainer target)
-                return;
-
-            changeHandler?.BeginChange();
-
-            // Iterating by target components order ensures we maintain the same order across selected components, regardless
-            // of the order they were selected in.
-            foreach (var d in target.Components.ToArray())
-            {
-                if (!SelectedComponents.Contains(d))
-                    continue;
-
-                target.Remove(d, false);
-
-                // Selection would be reset by the remove.
-                SelectedComponents.Add(d);
-                target.Add(d);
-            }
-
-            changeHandler?.EndChange();
+            // if (getTarget(selectedTarget.Value) is not ISerialisableDrawableContainer target)
+            //     return;
+            //
+            // changeHandler?.BeginChange();
+            //
+            // // Iterating by target components order ensures we maintain the same order across selected components, regardless
+            // // of the order they were selected in.
+            // foreach (var d in target.Components.ToArray())
+            // {
+            //     if (!SelectedComponents.Contains(d))
+            //         continue;
+            //
+            //     target.Remove(d, false);
+            //
+            //     // Selection would be reset by the remove.
+            //     SelectedComponents.Add(d);
+            //     target.Add(d);
+            // }
+            //
+            // changeHandler?.EndChange();
         }
 
         public void SendSelectionToBack()
         {
-            if (getTarget(selectedTarget.Value) is not ISerialisableDrawableContainer target)
-                return;
-
-            changeHandler?.BeginChange();
-
-            foreach (var d in target.Components.ToArray())
-            {
-                if (SelectedComponents.Contains(d))
-                    continue;
-
-                target.Remove(d, false);
-                target.Add(d);
-            }
-
-            changeHandler?.EndChange();
+            // if (getTarget(selectedTarget.Value) is not ISerialisableDrawableContainer target)
+            //     return;
+            //
+            // changeHandler?.BeginChange();
+            //
+            // foreach (var d in target.Components.ToArray())
+            // {
+            //     if (SelectedComponents.Contains(d))
+            //         continue;
+            //
+            //     target.Remove(d, false);
+            //     target.Add(d);
+            // }
+            //
+            // changeHandler?.EndChange();
         }
 
         #region Drag & drop import handling
