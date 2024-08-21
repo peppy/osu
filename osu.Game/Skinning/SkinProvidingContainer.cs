@@ -129,6 +129,21 @@ namespace osu.Game.Skinning
             return ParentSource?.GetDrawableComponent(lookup);
         }
 
+        public Drawable? GetDrawableComponent(ISkinComponentLookup lookup)
+        {
+            foreach (var (_, lookupWrapper) in skinSources)
+            {
+                Drawable? sourceDrawable;
+                if ((sourceDrawable = lookupWrapper.GetDrawableComponent(lookup)) != null)
+                    return sourceDrawable;
+            }
+
+            if (!AllowFallingBackToParent)
+                return null;
+
+            return ParentSource?.GetDrawableComponent(lookup);
+        }
+
         public Texture? GetTexture(string componentName, WrapMode wrapModeS, WrapMode wrapModeT)
         {
             foreach (var (_, lookupWrapper) in skinSources)

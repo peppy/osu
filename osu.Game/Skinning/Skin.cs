@@ -188,21 +188,27 @@ namespace osu.Game.Skinning
                     return this.GetAnimation(sprite.LookupName, false, false, maxSize: sprite.MaxSize);
 
                 case SkinComponentsContainerLookup containerLookup:
-
-                    // It is important to return null if the user has not configured this yet.
-                    // This allows skin transformers the opportunity to provide default components.
-                    if (!LayoutInfos.TryGetValue(containerLookup.Target, out var layoutInfo)) return null;
-                    if (!layoutInfo.TryGetDrawableInfo(containerLookup.Ruleset, out var drawableInfos)) return null;
-
-                    return new UserConfiguredLayoutContainer
-                    {
-                        RelativeSizeAxes = Axes.Both,
-                        ChildrenEnumerable = drawableInfos.Select(i => i.CreateInstance())
-                    };
+                    throw new InvalidOperationException($"Use {nameof(GetUserLayout)} instead.");
             }
 
             return null;
         }
+
+        public Drawable? GetUserLayout(SkinComponentsContainerLookup lookup)
+        {
+            // It is important to return null if the user has not configured this yet.
+            // This allows skin transformers the opportunity to provide default components.
+            if (!LayoutInfos.TryGetValue(lookup.Target, out var layoutInfo)) return null;
+            if (!layoutInfo.TryGetDrawableInfo(lookup.Ruleset, out var drawableInfos)) return null;
+
+            return new UserConfiguredLayoutContainer
+            {
+                RelativeSizeAxes = Axes.Both,
+                ChildrenEnumerable = drawableInfos.Select(i => i.CreateInstance())
+            };
+        }
+
+        public Drawable? GetDefaultLayout(SkinComponentsContainerLookup lookup) => null;
 
         #region Deserialisation & Migration
 

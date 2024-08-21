@@ -91,7 +91,7 @@ namespace osu.Game.Rulesets.Mania.Skinning.Legacy
 
                     // we don't have enough assets to display these components (this is especially the case on a "beatmap" skin).
                     if (!IsProvidingLegacyResources)
-                        return null;
+                        break;
 
                     switch (containerLookup.Target)
                     {
@@ -112,14 +112,14 @@ namespace osu.Game.Rulesets.Mania.Skinning.Legacy
                             };
                     }
 
-                    return null;
+                    break;
 
                 case GameplaySkinComponentLookup<HitResult> resultComponent:
                     return getResult(resultComponent.Component);
 
                 case ManiaSkinComponentLookup maniaComponent:
                     if (!isLegacySkin.Value || !hasKeyTexture.Value)
-                        return null;
+                        break;
 
                     switch (maniaComponent.Component)
                     {

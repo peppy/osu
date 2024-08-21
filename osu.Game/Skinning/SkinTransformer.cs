@@ -28,6 +28,10 @@ namespace osu.Game.Skinning
 
         public virtual Drawable? GetDrawableComponent(ISkinComponentLookup lookup) => Skin.GetDrawableComponent(lookup);
 
+        public Drawable? GetUserLayout(SkinComponentsContainerLookup lookup) => Skin.GetUserLayout(lookup);
+
+        public virtual Drawable? GetDefaultLayout(SkinComponentsContainerLookup lookup) => Skin.GetDefaultLayout(lookup);
+
         public virtual Texture? GetTexture(string componentName) => GetTexture(componentName, default, default);
 
         public virtual Texture? GetTexture(string componentName, WrapMode wrapModeS, WrapMode wrapModeT) => Skin.GetTexture(componentName, wrapModeS, wrapModeT);
