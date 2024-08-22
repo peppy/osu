@@ -43,10 +43,10 @@ namespace osu.Game.Skinning
 
         public SkinConfiguration Configuration { get; set; }
 
-        public IDictionary<SkinComponentsContainerLookup.TargetArea, SkinLayoutInfo> LayoutInfos => layoutInfos;
+        public IDictionary<GlobalSkinnableContainerLookup.GlobalSkinnableContainers, SkinLayoutInfo> LayoutInfos => layoutInfos;
 
-        private readonly Dictionary<SkinComponentsContainerLookup.TargetArea, SkinLayoutInfo> layoutInfos =
-            new Dictionary<SkinComponentsContainerLookup.TargetArea, SkinLayoutInfo>();
+        private readonly Dictionary<GlobalSkinnableContainerLookup.GlobalSkinnableContainers, SkinLayoutInfo> layoutInfos =
+            new Dictionary<GlobalSkinnableContainerLookup.GlobalSkinnableContainers, SkinLayoutInfo>();
 
         public abstract ISample? GetSample(ISampleInfo sampleInfo);
 
@@ -123,7 +123,7 @@ namespace osu.Game.Skinning
             }
 
             // skininfo files may be null for default skin.
-            foreach (SkinComponentsContainerLookup.TargetArea skinnableTarget in Enum.GetValues<SkinComponentsContainerLookup.TargetArea>())
+            foreach (GlobalSkinnableContainerLookup.GlobalSkinnableContainers skinnableTarget in Enum.GetValues<GlobalSkinnableContainerLookup.GlobalSkinnableContainers>())
             {
                 string filename = $"{skinnableTarget}.json";
 
@@ -187,18 +187,23 @@ namespace osu.Game.Skinning
                 case SkinnableSprite.SpriteComponentLookup sprite:
                     return this.GetAnimation(sprite.LookupName, false, false, maxSize: sprite.MaxSize);
 
-                case SkinComponentsContainerLookup containerLookup:
-
-                    // It is important to return null if the user has not configured this yet.
-                    // This allows skin transformers the opportunity to provide default components.
-                    if (!LayoutInfos.TryGetValue(containerLookup.Target, out var layoutInfo)) return null;
-                    if (!layoutInfo.TryGetDrawableInfo(containerLookup.Ruleset, out var drawableInfos)) return null;
-
-                    return new UserConfiguredLayoutContainer
+                case UserSkinLayoutLookup userLookup:
+                    switch (userLookup.Component)
                     {
-                        RelativeSizeAxes = Axes.Both,
-                        ChildrenEnumerable = drawableInfos.Select(i => i.CreateInstance())
-                    };
+                        case GlobalSkinnableContainerLookup containerLookup:
+                            // It is important to return null if the user has not configured this yet.
+                            // This allows skin transformers the opportunity to provide default components.
+                            if (!LayoutInfos.TryGetValue(containerLookup.Target, out var layoutInfo)) return null;
+                            if (!layoutInfo.TryGetDrawableInfo(containerLookup.Ruleset, out var drawableInfos)) return null;
+
+                            return new UserConfiguredLayoutContainer
+                            {
+                                RelativeSizeAxes = Axes.Both,
+                                ChildrenEnumerable = drawableInfos.Select(i => i.CreateInstance())
+                            };
+                    }
+
+                    break;
             }
 
             return null;
@@ -206,7 +211,7 @@ namespace osu.Game.Skinning
 
         #region Deserialisation & Migration
 
-        private SkinLayoutInfo? parseLayoutInfo(string jsonContent, SkinComponentsContainerLookup.TargetArea target)
+        private SkinLayoutInfo? parseLayoutInfo(string jsonContent, GlobalSkinnableContainerLookup.GlobalSkinnableContainers target)
         {
             SkinLayoutInfo? layout = null;
 
@@ -245,7 +250,7 @@ namespace osu.Game.Skinning
             return layout;
         }
 
-        private void applyMigration(SkinLayoutInfo layout, SkinComponentsContainerLookup.TargetArea target, int version)
+        private void applyMigration(SkinLayoutInfo layout, GlobalSkinnableContainerLookup.GlobalSkinnableContainers target, int version)
         {
             switch (version)
             {
@@ -253,7 +258,7 @@ namespace osu.Game.Skinning
                 {
                     // Combo counters were moved out of the global HUD components into per-ruleset.
                     // This is to allow some rulesets to customise further (ie. mania and catch moving the combo to within their play area).
-                    if (target != SkinComponentsContainerLookup.TargetArea.MainHUDComponents ||
+                    if (target != GlobalSkinnableContainerLookup.GlobalSkinnableContainers.MainHUDComponents ||
                         !layout.TryGetDrawableInfo(null, out var globalHUDComponents) ||
                         resources == null)
                         break;

@@ -9,24 +9,18 @@ using osu.Game.Rulesets;
 namespace osu.Game.Skinning
 {
     /// <summary>
-    /// Represents a lookup of a collection of elements that make up a particular skinnable <see cref="TargetArea"/> of the game.
+    /// Represents a lookup of a collection of elements that make up a particular skinnable <see cref="GlobalSkinnableContainers"/> of the game.
     /// </summary>
-    public class SkinComponentsContainerLookup : ISkinComponentLookup, IEquatable<SkinComponentsContainerLookup>
+    public class GlobalSkinnableContainerLookup : SkinComponentLookup<GlobalSkinnableContainerLookup.GlobalSkinnableContainers>, IEquatable<GlobalSkinnableContainerLookup>
     {
-        /// <summary>
-        /// The target area / layer of the game for which skin components will be returned.
-        /// </summary>
-        public readonly TargetArea Target;
-
-        /// <summary>
-        /// The ruleset for which skin components should be returned.
-        /// A <see langword="null"/> value means that returned components are global and should be applied for all rulesets.
-        /// </summary>
         public readonly RulesetInfo? Ruleset;
 
-        public SkinComponentsContainerLookup(TargetArea target, RulesetInfo? ruleset = null)
+        // TODO: remove maybe
+        public GlobalSkinnableContainers Target => Component;
+
+        public GlobalSkinnableContainerLookup(GlobalSkinnableContainers component, RulesetInfo? ruleset = null)
+            : base(component)
         {
-            Target = target;
             Ruleset = ruleset;
         }
 
@@ -37,7 +31,7 @@ namespace osu.Game.Skinning
             return $"{Target.GetDescription()} (\"{Ruleset.Name}\" only)";
         }
 
-        public bool Equals(SkinComponentsContainerLookup? other)
+        public bool Equals(GlobalSkinnableContainerLookup? other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -51,7 +45,7 @@ namespace osu.Game.Skinning
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
 
-            return Equals((SkinComponentsContainerLookup)obj);
+            return Equals((GlobalSkinnableContainerLookup)obj);
         }
 
         public override int GetHashCode()
@@ -62,7 +56,7 @@ namespace osu.Game.Skinning
         /// <summary>
         /// Represents a particular area or part of a game screen whose layout can be customised using the skin editor.
         /// </summary>
-        public enum TargetArea
+        public enum GlobalSkinnableContainers
         {
             [Description("HUD")]
             MainHUDComponents,

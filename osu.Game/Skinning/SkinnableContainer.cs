@@ -26,7 +26,7 @@ namespace osu.Game.Skinning
         /// <summary>
         /// The lookup criteria which will be used to retrieve components from the active skin.
         /// </summary>
-        public SkinComponentsContainerLookup Lookup { get; }
+        public GlobalSkinLayoutLookup Lookup { get; }
 
         public IBindableList<ISerialisableDrawable> Components => components;
 
@@ -38,12 +38,15 @@ namespace osu.Game.Skinning
 
         private CancellationTokenSource? cancellationSource;
 
-        public SkinnableContainer(SkinComponentsContainerLookup lookup)
+        public SkinnableContainer(GlobalSkinLayoutLookup lookup)
         {
             Lookup = lookup;
         }
 
-        public void Reload() => Reload(CurrentSkin.GetDrawableComponent(Lookup) as Container);
+        public void Reload() => Reload((
+                CurrentSkin.GetDrawableComponent(new UserSkinLayoutLookup(Lookup))
+                ?? CurrentSkin.GetDrawableComponent(Lookup))
+            as Container);
 
         public void Reload(Container? componentsContainer)
         {

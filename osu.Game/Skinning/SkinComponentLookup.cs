@@ -8,19 +8,19 @@ using osu.Game.Rulesets.Scoring;
 namespace osu.Game.Skinning
 {
     /// <summary>
-    /// A lookup type intended for use for skinnable gameplay components (not HUD level components).
+    /// A lookup type intended for use for skinnable components.
     /// </summary>
     /// <remarks>
     /// The most common usage of this class is for ruleset-specific skinning implementations, but it can also be used directly
     /// (see <see cref="DrawableJudgement"/>'s usage for <see cref="HitResult"/>) where ruleset-agnostic elements are required.
     /// </remarks>
     /// <typeparam name="T">An enum lookup type.</typeparam>
-    public class GameplaySkinComponentLookup<T> : ISkinComponentLookup
+    public class SkinComponentLookup<T> : ISkinComponentLookup
         where T : Enum
     {
         public readonly T Component;
 
-        public GameplaySkinComponentLookup(T component)
+        public SkinComponentLookup(T component)
         {
             Component = component;
         }
