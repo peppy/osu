@@ -868,8 +868,10 @@ namespace osu.Game.Screens.Select
 
             // Update externally controlled state of currently visible items (e.g. x-offset and opacity).
             // This is a per-frame update on all drawable panels.
-            foreach (DrawableCarouselItem item in Scroll)
+            for (int i = 0; i < Scroll.Children.Count; i++)
             {
+                var item = Scroll.Children[i];
+
                 updateItem(item);
 
                 Debug.Assert(item.Item != null);
