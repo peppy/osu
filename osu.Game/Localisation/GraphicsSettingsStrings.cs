@@ -115,6 +115,11 @@ namespace osu.Game.Localisation
         public static LocalisableString HitLighting => new TranslatableString(getKey(@"hit_lighting"), @"Hit lighting");
 
         /// <summary>
+        /// "Star fountains"
+        /// </summary>
+        public static LocalisableString StarFountains => new TranslatableString(getKey(@"star_fountains"), @"Star fountains");
+
+        /// <summary>
         /// "Screenshots"
         /// </summary>
         public static LocalisableString Screenshots => new TranslatableString(getKey(@"screenshots"), @"Screenshots");
@@ -152,7 +157,8 @@ namespace osu.Game.Localisation
         /// <summary>
         /// "In order to change the renderer, the game will close. Please open it again."
         /// </summary>
-        public static LocalisableString ChangeRendererConfirmation => new TranslatableString(getKey(@"change_renderer_configuration"), @"In order to change the renderer, the game will close. Please open it again.");
+        public static LocalisableString ChangeRendererConfirmation =>
+            new TranslatableString(getKey(@"change_renderer_configuration"), @"In order to change the renderer, the game will close. Please open it again.");
 
         /// <summary>
         /// "Minimise osu! when switching to another app"

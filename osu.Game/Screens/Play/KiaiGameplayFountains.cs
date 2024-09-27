@@ -1,13 +1,14 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#nullable disable
 using System;
 using osu.Framework.Allocation;
 using osu.Framework.Audio.Track;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Utils;
 using osu.Game.Beatmaps.ControlPoints;
+using osu.Game.Configuration;
 using osu.Game.Graphics.Containers;
 using osu.Game.Screens.Menu;
 
@@ -18,8 +19,10 @@ namespace osu.Game.Screens.Play
         private StarFountain leftFountain = null!;
         private StarFountain rightFountain = null!;
 
+        private Bindable<bool> configEnabled = null!;
+
         [BackgroundDependencyLoader]
-        private void load()
+        private void load(OsuConfigManager config)
         {
             RelativeSizeAxes = Axes.Both;
 
@@ -38,6 +41,13 @@ namespace osu.Game.Screens.Play
                     X = -75,
                 },
             };
+
+            configEnabled = config.GetBindable<bool>(OsuSetting.StarFountains);
+            configEnabled.BindValueChanged(enabled =>
+            {
+                leftFountain.FadeTo(enabled.NewValue ? 1 : 0, 100);
+                rightFountain.FadeTo(enabled.NewValue ? 1 : 0, 100);
+            }, true);
         }
 
         private bool isTriggered;
