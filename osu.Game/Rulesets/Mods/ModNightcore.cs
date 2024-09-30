@@ -70,11 +70,16 @@ namespace osu.Game.Rulesets.Mods
     {
         public void ApplyToDrawableRuleset(DrawableRuleset<TObject> drawableRuleset)
         {
-            drawableRuleset.Overlays.Add(new NightcoreBeatContainer());
+            // (in a perfect world) tick rates other than 2 imply there isn't a regular offbeat, so offbeat hats would stand out.
+            // only enable them if tick rate is a multiple of 2.
+            bool playHats = drawableRuleset.Beatmap.Difficulty.SliderTickRate == 2;
+
+            drawableRuleset.Overlays.Add(new NightcoreBeatContainer(playHats));
         }
 
         public partial class NightcoreBeatContainer : BeatSyncedContainer
         {
+            private readonly bool playHats;
             private PausableSkinnableSound? hatSample;
             private PausableSkinnableSound? clapSample;
             private PausableSkinnableSound? kickSample;
@@ -82,8 +87,9 @@ namespace osu.Game.Rulesets.Mods
 
             private int? firstBeat;
 
-            public NightcoreBeatContainer()
+            public NightcoreBeatContainer(bool playHats = true)
             {
+                this.playHats = playHats;
                 Divisor = 2;
             }
 
@@ -141,7 +147,8 @@ namespace osu.Game.Rulesets.Mods
                                 break;
 
                             default:
-                                hatSample?.Play();
+                                if (playHats)
+                                    hatSample?.Play();
                                 break;
                         }
 
@@ -159,7 +166,8 @@ namespace osu.Game.Rulesets.Mods
                                 break;
 
                             default:
-                                hatSample?.Play();
+                                if (playHats)
+                                    hatSample?.Play();
                                 break;
                         }
 
