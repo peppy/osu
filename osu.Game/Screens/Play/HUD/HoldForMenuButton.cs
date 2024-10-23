@@ -1,8 +1,6 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#nullable disable
-
 using System;
 using System.Linq;
 using osu.Framework.Allocation;
@@ -36,13 +34,13 @@ namespace osu.Game.Screens.Play.HUD
 
         public readonly Bindable<bool> ReplayLoaded = new Bindable<bool>();
 
-        private HoldButton button;
+        private HoldButton button = null!;
 
-        public Action Action { get; set; }
+        public Action? Action { get; set; }
 
-        private OsuSpriteText text;
+        private OsuSpriteText text = null!;
 
-        private Bindable<bool> alwaysShow;
+        private Bindable<bool> alwaysShow = null!;
 
         public HoldForMenuButton()
         {
@@ -53,8 +51,8 @@ namespace osu.Game.Screens.Play.HUD
             AlwaysPresent = true;
         }
 
-        [BackgroundDependencyLoader(true)]
-        private void load(Player player, OsuConfigManager config)
+        [BackgroundDependencyLoader]
+        private void load(Player? player, OsuConfigManager config)
         {
             Children = new Drawable[]
             {
@@ -70,7 +68,7 @@ namespace osu.Game.Screens.Play.HUD
                     HoverLost = () => text.FadeOut(500, Easing.OutQuint),
                     IsPaused = { BindTarget = IsPaused },
                     ReplayLoaded = { BindTarget = ReplayLoaded },
-                    Action = () => Action(),
+                    Action = () => Action?.Invoke(),
                 }
             };
 
@@ -80,9 +78,9 @@ namespace osu.Game.Screens.Play.HUD
         }
 
         [Resolved]
-        private SessionStatics sessionStatics { get; set; }
+        private SessionStatics sessionStatics { get; set; } = null!;
 
-        private Bindable<bool> touchActive;
+        private Bindable<bool> touchActive = null!;
 
         protected override void LoadComplete()
         {
@@ -144,9 +142,9 @@ namespace osu.Game.Screens.Play.HUD
 
         private partial class HoldButton : HoldToConfirmContainer, IKeyBindingHandler<GlobalAction>
         {
-            private SpriteIcon icon;
-            private CircularProgress circularProgress;
-            private Circle overlayCircle;
+            private SpriteIcon icon = null!;
+            private CircularProgress circularProgress = null!;
+            private Circle overlayCircle = null!;
 
             public readonly Bindable<bool> IsPaused = new Bindable<bool>();
 
@@ -154,13 +152,13 @@ namespace osu.Game.Screens.Play.HUD
 
             protected override bool AllowMultipleFires => true;
 
-            public Action HoverGained;
-            public Action HoverLost;
+            public Action? HoverGained;
+            public Action? HoverLost;
 
             private const double shake_duration = 20;
 
             private bool pendingAnimation;
-            private ScheduledDelegate shakeOperation;
+            private ScheduledDelegate? shakeOperation;
 
             public HoldButton(bool isDangerousAction)
                 : base(isDangerousAction)
