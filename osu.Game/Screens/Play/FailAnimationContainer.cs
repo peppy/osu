@@ -12,14 +12,17 @@ using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Screens;
 using osu.Framework.Utils;
 using osu.Game.Audio;
 using osu.Game.Audio.Effects;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
 using osu.Game.Graphics;
+using osu.Game.Graphics.Backgrounds;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.UI;
+using osu.Game.Screens.Backgrounds;
 using osu.Game.Skinning;
 using osuTK;
 using osuTK.Graphics;
@@ -56,6 +59,7 @@ namespace osu.Game.Screens.Play
 
         protected override Container<Drawable> Content { get; } = new Container
         {
+            Masking = true,
             Anchor = Anchor.Centre,
             Origin = Anchor.Centre,
             RelativeSizeAxes = Axes.Both,
@@ -73,8 +77,11 @@ namespace osu.Game.Screens.Play
             RelativeSizeAxes = Axes.Both;
         }
 
+        [Resolved]
+        private IBindable<WorkingBeatmap> beatmap { get; set; } = null!;
+
         [BackgroundDependencyLoader]
-        private void load(AudioManager audio, IBindable<WorkingBeatmap> beatmap)
+        private void load(AudioManager audio)
         {
             track = beatmap.Value.Track;
             AddInternal(failSample = new SkinnableSound(new SampleInfo("Gameplay/failsound")));
@@ -137,12 +144,13 @@ namespace osu.Game.Screens.Play
 
             Content.Masking = true;
 
-            Content.Add(new Box
+            Content.Add(new ScreenStack(new BackgroundScreenBeatmap(beatmap.Value)
             {
-                Colour = Color4.Black,
+                IgnoreUserSettings = { Value = false },
+                BlurAmount = { Value = 0 },
                 RelativeSizeAxes = Axes.Both,
                 Depth = float.MaxValue
-            });
+            }));
 
             Content.ScaleTo(0.85f, duration, Easing.OutQuart);
             Content.RotateTo(1, duration, Easing.OutQuart);

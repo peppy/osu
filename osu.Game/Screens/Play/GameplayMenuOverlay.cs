@@ -78,12 +78,6 @@ namespace osu.Game.Screens.Play
         {
             Children = new Drawable[]
             {
-                new Box
-                {
-                    RelativeSizeAxes = Axes.Both,
-                    Colour = Color4.Black,
-                    Alpha = background_alpha,
-                },
                 new FillFlowContainer
                 {
                     RelativeSizeAxes = Axes.X,
