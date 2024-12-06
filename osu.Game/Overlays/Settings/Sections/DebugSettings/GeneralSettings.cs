@@ -18,6 +18,7 @@ namespace osu.Game.Overlays.Settings.Sections.DebugSettings
             Children = new Drawable[]
             {
                 new SettingsCheckbox
+
                 {
                     LabelText = @"Show log overlay",
                     Current = frameworkConfig.GetBindable<bool>(FrameworkSetting.ShowLogOverlay)

@@ -7,6 +7,7 @@ using System;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Cursor;
 using osu.Game.Beatmaps;
 
 namespace osu.Game.Screens.Select
@@ -43,22 +44,29 @@ namespace osu.Game.Screens.Select
         {
             AddRangeInternal(new Drawable[]
             {
-                content = new Container
+                new PopoverContainer
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Padding = new MarginPadding { Top = BeatmapDetailAreaTabControl.HEIGHT },
-                    Child = Details = new BeatmapDetails
+                    Children = new Drawable[]
                     {
-                        RelativeSizeAxes = Axes.X,
-                        Alpha = 0,
-                        Margin = new MarginPadding { Top = details_padding },
-                    }
-                },
-                tabControl = new BeatmapDetailAreaTabControl
-                {
-                    RelativeSizeAxes = Axes.X,
-                    TabItems = CreateTabItems(),
-                    OnFilter = OnTabChanged,
+                        content = new Container
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Padding = new MarginPadding { Top = BeatmapDetailAreaTabControl.HEIGHT },
+                            Child = Details = new BeatmapDetails
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                Alpha = 0,
+                                Margin = new MarginPadding { Top = details_padding },
+                            }
+                        },
+                        tabControl = new BeatmapDetailAreaTabControl
+                        {
+                            RelativeSizeAxes = Axes.X,
+                            TabItems = CreateTabItems(),
+                            OnFilter = OnTabChanged,
+                        },
+                    },
                 },
             });
         }

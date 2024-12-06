@@ -8,16 +8,25 @@ using System.Collections.Generic;
 using osuTK.Graphics;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Configuration;
+using osu.Framework.Extensions;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Cursor;
 using osu.Game.Graphics;
 using osu.Game.Graphics.UserInterface;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Graphics.Sprites;
+using osu.Framework.Graphics.UserInterface;
+using osu.Game.Graphics.UserInterfaceV2;
+using osu.Game.Overlays;
+using osu.Game.Overlays.Settings;
+using osuTK;
 
 namespace osu.Game.Screens.Select
 {
-    public partial class BeatmapDetailAreaTabControl : Container
+    public partial class BeatmapDetailAreaTabControl : Container, IHasPopover
     {
         public const float HEIGHT = 24;
 
@@ -45,6 +54,8 @@ namespace osu.Game.Screens.Select
         private readonly OsuTabControl<BeatmapDetailAreaTabItem> tabs;
         private readonly Container tabsContainer;
 
+        private readonly IconButton button;
+
         public BeatmapDetailAreaTabControl()
         {
             Height = HEIGHT;
@@ -70,13 +81,22 @@ namespace osu.Game.Screens.Select
                         IsSwitchable = true,
                     },
                 },
-                modsCheckbox = new OsuTabControlCheckbox
+                button = new IconButton
                 {
-                    Anchor = Anchor.BottomRight,
-                    Origin = Anchor.BottomRight,
-                    Text = @"Selected Mods",
-                    Alpha = 0,
-                },
+                    Scale = new Vector2(0.7f),
+                    Icon = FontAwesome.Solid.Cog,
+                    Origin = Anchor.TopRight,
+                    Anchor = Anchor.TopRight,
+                    Action = this.ShowPopover,
+                }
+            };
+
+            modsCheckbox = new OsuTabControlCheckbox
+            {
+                Anchor = Anchor.BottomRight,
+                Origin = Anchor.BottomRight,
+                Text = @"Selected Mods",
+                Alpha = 0,
             };
 
             tabs.Current.ValueChanged += _ => invokeOnFilter();
@@ -102,6 +122,47 @@ namespace osu.Game.Screens.Select
             {
                 modsCheckbox.FadeTo(0, 200, Easing.OutQuint);
                 tabsContainer.Padding = new MarginPadding();
+            }
+        }
+
+        public Popover GetPopover() => new BeatmapLeaderboardSettingsPopover();
+
+        public partial class BeatmapLeaderboardSettingsPopover : OsuPopover
+        {
+            [Cached]
+            protected readonly OverlayColourProvider ColourProvider = new OverlayColourProvider(OverlayColourScheme.Purple);
+
+            public BeatmapLeaderboardSettingsPopover()
+                : base(false)
+            {
+            }
+
+            [BackgroundDependencyLoader]
+            private void load()
+            {
+                Width = 300;
+                AutoSizeAxes = Axes.Y;
+
+                Children = new Drawable[]
+                {
+                    new FillFlowContainer
+                    {
+                        Width = 300,
+                        AutoSizeAxes = Axes.Y,
+                        Direction = FillDirection.Vertical,
+                        Children = new Drawable[]
+                        {
+                            new FormCheckBox
+                            {
+                                Caption = @"Only show plays with same mod",
+                            },
+                            new FormCheckBox
+                            {
+                                Caption = @"Sort by PP instead of score",
+                            },
+                        }
+                    },
+                };
             }
         }
     }
