@@ -26,6 +26,26 @@ namespace osu.Game.Screens.SelectV2
 {
     public partial class BeatmapCarouselV2 : CompositeDrawable
     {
+        /// <summary>
+        /// Whether an asynchronous sort / group operation is currently underway.
+        /// </summary>
+        public bool IsSorting => !sortTask.IsCompleted;
+
+        /// <summary>
+        /// The number of displayable beatmap difficulties currently being tracked (before sorting).
+        /// </summary>
+        public int BeatmapsTracked => carouselItems.Count;
+
+        /// <summary>
+        /// The number of carousel items currently in rotation for display.
+        /// </summary>
+        public int DisplayableItems => displayCarouselItems?.Count ?? 0;
+
+        /// <summary>
+        /// The number of items currently actualised into drawables.
+        /// </summary>
+        public int VisibleItems => panels.Count;
+
         private IBindableList<BeatmapSetInfo> detachedBeatmaps = null!;
 
         private readonly List<CarouselItem> carouselItems = new List<CarouselItem>();
@@ -103,8 +123,6 @@ namespace osu.Game.Screens.SelectV2
             Criteria = criteria;
             runSortBackground();
         }
-
-        public bool IsSorting => !sortTask.IsCompleted;
 
         private Task sortTask = Task.CompletedTask;
         private CancellationTokenSource cancellationSource = new CancellationTokenSource();
