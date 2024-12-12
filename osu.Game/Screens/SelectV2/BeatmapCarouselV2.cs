@@ -179,6 +179,24 @@ namespace osu.Game.Screens.SelectV2
             await Task.Run(() =>
             {
                 // TODO: perform grouping based on FilterCriteria
+
+                CarouselItem? lastItem = null;
+
+                for (int i = 0; i < items.Count; i++)
+                {
+                    var item = items[i];
+
+                    if (item.Model is BeatmapInfo b1)
+                    {
+                        // Add set header
+                        if (lastItem == null || (lastItem.Model is BeatmapInfo b2 && b2.BeatmapSet!.OnlineID != b1.BeatmapSet!.OnlineID))
+                            insertItem(b1.BeatmapSet!);
+                    }
+
+                    lastItem = item;
+
+                    void insertItem(object model) => items.Insert(i++, new CarouselItem(model));
+                }
             }, cancellationToken).ConfigureAwait(false);
         }
 
@@ -217,20 +235,32 @@ namespace osu.Game.Screens.SelectV2
                 ID = (Model as IHasGuidPrimaryKey)?.ID ?? Guid.NewGuid();
             }
 
-            public override string? ToString() => Model.ToString();
+            public override string? ToString()
+            {
+                switch (Model)
+                {
+                    case BeatmapInfo bi:
+                        return $"Difficulty: {bi.DifficultyName} ({bi.StarRating}*)";
+
+                    case BeatmapSetInfo si:
+                        return $"{si.Metadata}";
+                }
+
+                return Model.ToString();
+            }
         }
 
         internal partial class CarouselPanel : CompositeDrawable
         {
             public CarouselPanel(CarouselItem item)
             {
-                Size = new Vector2(500, 80);
+                Size = new Vector2(500, item.Model is BeatmapInfo ? 40 : 80);
 
                 InternalChildren = new Drawable[]
                 {
                     new Box
                     {
-                        Colour = Color4.Yellow.Darken(5),
+                        Colour = (item.Model is BeatmapInfo ? Color4.Aqua : Color4.Yellow).Darken(5),
                         RelativeSizeAxes = Axes.Both,
                     },
                     new OsuSpriteText
