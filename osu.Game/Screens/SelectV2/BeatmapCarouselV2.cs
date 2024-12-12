@@ -4,8 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
@@ -16,10 +18,11 @@ using osu.Game.Beatmaps;
 using osu.Game.Database;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Screens.Select;
 using osuTK;
 using osuTK.Graphics;
 
-namespace osu.Game.Screens.Select
+namespace osu.Game.Screens.SelectV2
 {
     public partial class BeatmapCarouselV2 : CompositeDrawable
     {
@@ -27,14 +30,13 @@ namespace osu.Game.Screens.Select
 
         private readonly List<CarouselItem> carouselItems = new List<CarouselItem>();
 
+        private List<CarouselItem>? displayCarouselItems;
+
         private FillFlowContainer panels = null!;
 
         [BackgroundDependencyLoader]
         private void load(BeatmapStore beatmapStore, CancellationToken? cancellationToken)
         {
-            detachedBeatmaps = beatmapStore.GetBeatmapSets(cancellationToken);
-            detachedBeatmaps.BindCollectionChanged(beatmapSetsChanged, true);
-
             InternalChildren = new Drawable[]
             {
                 new Box
@@ -54,6 +56,9 @@ namespace osu.Game.Screens.Select
                     },
                 }
             };
+
+            detachedBeatmaps = beatmapStore.GetBeatmapSets(cancellationToken);
+            detachedBeatmaps.BindCollectionChanged(beatmapSetsChanged, true);
         }
 
         private void beatmapSetsChanged(object? beatmaps, NotifyCollectionChangedEventArgs changed)
@@ -88,28 +93,97 @@ namespace osu.Game.Screens.Select
                     break;
             }
 
-            sort();
-            group();
-            display();
+            runSortBackground();
         }
 
-        private void sort()
+        public FilterCriteria Criteria { get; private set; } = new FilterCriteria();
+
+        public void Filter(FilterCriteria criteria)
         {
+            Criteria = criteria;
+            runSortBackground();
         }
 
-        private void group()
+        public bool IsSorting => !sortTask.IsCompleted;
+
+        private Task sortTask = Task.CompletedTask;
+        private CancellationTokenSource cancellationSource = new CancellationTokenSource();
+
+        private void runSortBackground() => Scheduler.AddOnce(() =>
         {
+            // TODO: some kind of timed debounce for cases where a lot of beatmap store operations are running.
+            sortTask = performSortGroupDisplay();
+        });
+
+        private async Task performSortGroupDisplay()
+        {
+            // TODO: remove eventually
+            Debug.Assert(SynchronizationContext.Current != null);
+
+            var criteria = Criteria;
+            var cts = new CancellationTokenSource();
+
+            lock (this)
+            {
+                cancellationSource.Cancel();
+                cancellationSource = cts;
+            }
+
+            var items = new List<CarouselItem>(carouselItems);
+
+            await sort(items, criteria, cts.Token).ConfigureAwait(true);
+            await group(items, criteria, cts.Token).ConfigureAwait(true);
+
+            if (cts.Token.IsCancellationRequested)
+                return;
+
+            display(items);
         }
 
-        private void display()
+        private async Task sort(List<CarouselItem> items, FilterCriteria criteria, CancellationToken cancellationToken)
         {
-            foreach (var item in carouselItems)
-                panels.Add(new CarouselPanel(item));
+            await Task.Run(() =>
+            {
+                Thread.Sleep(1000);
+                items.Sort((a, b) =>
+                {
+                    if (a.Model is BeatmapInfo ab && b.Model is BeatmapInfo bb)
+                        return -1 * ab.OnlineID.CompareTo(bb.OnlineID);
+
+                    return a.ID.CompareTo(b.ID);
+                });
+                // TODO: perform sort based on FilterCriteria
+            }, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task group(List<CarouselItem> items, FilterCriteria criteria, CancellationToken cancellationToken)
+        {
+            await Task.Run(() =>
+            {
+                // TODO: perform grouping based on FilterCriteria
+            }, cancellationToken).ConfigureAwait(false);
+        }
+
+        private void display(List<CarouselItem> items)
+        {
+            displayCarouselItems = items;
+
+            panels.Clear();
+
+            foreach (var item in displayCarouselItems)
+            {
+                var carouselPanel = new CarouselPanel(item);
+
+                item.Drawable = carouselPanel;
+                panels.Add(carouselPanel);
+            }
         }
 
         internal class CarouselItem
         {
             public readonly object Model;
+
+            public readonly Guid ID;
 
             /// <summary>
             /// The current drawable representation of this item, if it's currently being displayed.
@@ -121,6 +195,8 @@ namespace osu.Game.Screens.Select
             public CarouselItem(object model)
             {
                 Model = model;
+
+                ID = (Model as IHasGuidPrimaryKey)?.ID ?? Guid.NewGuid();
             }
 
             public override string? ToString() => Model.ToString();
@@ -141,9 +217,10 @@ namespace osu.Game.Screens.Select
                     },
                     new OsuSpriteText
                     {
-                        Text = item?.ToString() ?? string.Empty,
-                        Anchor = Anchor.Centre,
-                        Origin = Anchor.Centre,
+                        Text = item.ToString() ?? string.Empty,
+                        Padding = new MarginPadding(5),
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
                     }
                 };
             }
