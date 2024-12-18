@@ -158,7 +158,7 @@ namespace osu.Game.Screens.SelectV2
             display(items);
         }
 
-        private async Task sort(List<CarouselItem> items, FilterCriteria criteria, CancellationToken cancellationToken)
+        private static async Task sort(List<CarouselItem> items, FilterCriteria criteria, CancellationToken cancellationToken)
         {
             await Task.Run(() =>
             {
@@ -174,7 +174,7 @@ namespace osu.Game.Screens.SelectV2
             }, cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task group(List<CarouselItem> items, FilterCriteria criteria, CancellationToken cancellationToken)
+        private static async Task group(List<CarouselItem> items, FilterCriteria criteria, CancellationToken cancellationToken)
         {
             await Task.Run(() =>
             {
