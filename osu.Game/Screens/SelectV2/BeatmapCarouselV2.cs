@@ -13,6 +13,7 @@ using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Pooling;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
@@ -54,11 +55,14 @@ namespace osu.Game.Screens.SelectV2
 
         private FillFlowContainer panels = null!;
 
+        private readonly DrawablePool<CarouselPanel> carouselPanelPool = new DrawablePool<CarouselPanel>(100);
+
         [BackgroundDependencyLoader]
         private void load(BeatmapStore beatmapStore, CancellationToken? cancellationToken)
         {
             InternalChildren = new Drawable[]
             {
+                carouselPanelPool,
                 new Box
                 {
                     Colour = Color4.Black,
@@ -208,7 +212,7 @@ namespace osu.Game.Screens.SelectV2
 
             foreach (var item in displayCarouselItems)
             {
-                var carouselPanel = new CarouselPanel(item);
+                var carouselPanel = carouselPanelPool.Get(panel => panel.Item = item);
 
                 item.Drawable = carouselPanel;
                 panels.Add(carouselPanel);
@@ -227,6 +231,8 @@ namespace osu.Game.Screens.SelectV2
             public Drawable? Drawable { get; set; }
 
             public readonly List<CarouselItem> Children = new List<CarouselItem>();
+
+            public double YPosition { get; set; }
 
             public CarouselItem(object model)
             {
@@ -250,27 +256,36 @@ namespace osu.Game.Screens.SelectV2
             }
         }
 
-        internal partial class CarouselPanel : CompositeDrawable
+        internal partial class CarouselPanel : PoolableDrawable
         {
-            public CarouselPanel(CarouselItem item)
-            {
-                Size = new Vector2(500, item.Model is BeatmapInfo ? 40 : 80);
+            private CarouselItem? item;
 
-                InternalChildren = new Drawable[]
+            public double YPosition => item?.YPosition ?? double.MinValue;
+
+            public CarouselItem Item
+            {
+                set
                 {
-                    new Box
+                    item = value;
+
+                    Size = new Vector2(500, item.Model is BeatmapInfo ? 40 : 80);
+
+                    InternalChildren = new Drawable[]
                     {
-                        Colour = (item.Model is BeatmapInfo ? Color4.Aqua : Color4.Yellow).Darken(5),
-                        RelativeSizeAxes = Axes.Both,
-                    },
-                    new OsuSpriteText
-                    {
-                        Text = item.ToString() ?? string.Empty,
-                        Padding = new MarginPadding(5),
-                        Anchor = Anchor.CentreLeft,
-                        Origin = Anchor.CentreLeft,
-                    }
-                };
+                        new Box
+                        {
+                            Colour = (item.Model is BeatmapInfo ? Color4.Aqua : Color4.Yellow).Darken(5),
+                            RelativeSizeAxes = Axes.Both,
+                        },
+                        new OsuSpriteText
+                        {
+                            Text = item.ToString() ?? string.Empty,
+                            Padding = new MarginPadding(5),
+                            Anchor = Anchor.CentreLeft,
+                            Origin = Anchor.CentreLeft,
+                        }
+                    };
+                }
             }
         }
     }
