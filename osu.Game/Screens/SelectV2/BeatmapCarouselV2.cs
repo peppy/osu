@@ -228,6 +228,8 @@ namespace osu.Game.Screens.SelectV2
 
             public readonly List<CarouselItem> Children = new List<CarouselItem>();
 
+            public double YPosition { get; set; }
+
             public CarouselItem(object model)
             {
                 Model = model;
@@ -252,8 +254,17 @@ namespace osu.Game.Screens.SelectV2
 
         internal partial class CarouselPanel : CompositeDrawable
         {
+            private readonly CarouselItem item;
+
+            public double YPosition
+            {
+                get => item.YPosition;
+                set => item.YPosition = value;
+            }
+
             public CarouselPanel(CarouselItem item)
             {
+                this.item = item;
                 Size = new Vector2(500, item.Model is BeatmapInfo ? 40 : 80);
 
                 InternalChildren = new Drawable[]
