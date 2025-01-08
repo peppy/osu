@@ -17,7 +17,6 @@ using osu.Framework.Graphics.Pooling;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
-using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Screens.Select;
 using osuTK;
@@ -45,7 +44,7 @@ namespace osu.Game.Screens.SelectV2
         /// <summary>
         /// The number of items currently actualised into drawables.
         /// </summary>
-        public int VisibleItems => panels.Count;
+        public int VisibleItems => panels.CountDisplayedPanels;
 
         private IBindableList<BeatmapSetInfo> detachedBeatmaps = null!;
 
@@ -53,7 +52,7 @@ namespace osu.Game.Screens.SelectV2
 
         private List<CarouselItem>? displayCarouselItems;
 
-        private FillFlowContainer panels = null!;
+        private DoubleScrollContainer panels = null!;
 
         private readonly DrawablePool<CarouselPanel> carouselPanelPool = new DrawablePool<CarouselPanel>(100);
 
@@ -68,16 +67,9 @@ namespace osu.Game.Screens.SelectV2
                     Colour = Color4.Black,
                     RelativeSizeAxes = Axes.Both,
                 },
-                new OsuScrollContainer(Direction.Vertical)
+                panels = new DoubleScrollContainer
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Child = panels = new FillFlowContainer
-                    {
-                        RelativeSizeAxes = Axes.X,
-                        Spacing = new Vector2(10),
-                        AutoSizeAxes = Axes.Y,
-                        Direction = FillDirection.Vertical,
-                    },
                 }
             };
 
@@ -159,7 +151,7 @@ namespace osu.Game.Screens.SelectV2
             if (cts.Token.IsCancellationRequested)
                 return;
 
-            display(items);
+            displayCarouselItems = items;
         }
 
         private static async Task sort(List<CarouselItem> items, FilterCriteria criteria, CancellationToken cancellationToken)
@@ -204,11 +196,17 @@ namespace osu.Game.Screens.SelectV2
             }, cancellationToken).ConfigureAwait(false);
         }
 
-        private void display(List<CarouselItem> items)
+        protected override void Update()
         {
-            displayCarouselItems = items;
+            base.Update();
 
-            panels.Clear();
+            panels.Clear(false);
+
+            if (displayCarouselItems == null)
+                return;
+
+            // TODO: call less often.
+            updateYPositions();
 
             foreach (var item in displayCarouselItems)
             {
@@ -216,6 +214,20 @@ namespace osu.Game.Screens.SelectV2
 
                 item.Drawable = carouselPanel;
                 panels.Add(carouselPanel);
+            }
+        }
+
+        private void updateYPositions()
+        {
+            Debug.Assert(displayCarouselItems != null);
+
+            const float spacing = 10;
+            float yPos = 0;
+
+            foreach (var item in displayCarouselItems)
+            {
+                item.YPosition = yPos;
+                yPos += item.DrawHeight + spacing;
             }
         }
 
@@ -233,6 +245,8 @@ namespace osu.Game.Screens.SelectV2
             public readonly List<CarouselItem> Children = new List<CarouselItem>();
 
             public double YPosition { get; set; }
+
+            public float DrawHeight => Model is BeatmapInfo ? 40 : 80;
 
             public CarouselItem(object model)
             {
@@ -268,7 +282,7 @@ namespace osu.Game.Screens.SelectV2
                 {
                     item = value;
 
-                    Size = new Vector2(500, item.Model is BeatmapInfo ? 40 : 80);
+                    Size = new Vector2(500, item.DrawHeight);
 
                     InternalChildren = new Drawable[]
                     {
@@ -286,6 +300,65 @@ namespace osu.Game.Screens.SelectV2
                         }
                     };
                 }
+            }
+        }
+
+        internal partial class DoubleScrollContainer : BasicScrollContainer
+        {
+            public int CountDisplayedPanels => layoutContent.Count;
+
+            private readonly Container<CarouselPanel> layoutContent;
+
+            public DoubleScrollContainer()
+            {
+                // Managing our own custom layout within ScrollContent causes feedback with internal ScrollContainer calculations,
+                // so we must maintain one level of separation from ScrollContent.
+                base.Add(layoutContent = new Container<CarouselPanel>
+                {
+                    Name = "Layout content",
+                    RelativeSizeAxes = Axes.X,
+                });
+            }
+
+            public override void Clear(bool disposeChildren)
+            {
+                layoutContent.Height = 0;
+                layoutContent.Clear(disposeChildren);
+            }
+
+            public override void Add(Drawable drawable)
+            {
+                if (drawable is not CarouselPanel panel)
+                    throw new InvalidOperationException();
+
+                Add(panel);
+            }
+
+            public void Add(CarouselPanel drawable)
+            {
+                if (drawable is not CarouselPanel panel)
+                    throw new InvalidOperationException();
+
+                layoutContent.Height = (float)Math.Max(layoutContent.Height, panel.YPosition + panel.DrawHeight);
+                layoutContent.Add(drawable);
+            }
+
+            public override double GetChildPosInContent(Drawable d, Vector2 offset)
+            {
+                if (d is not CarouselPanel panel)
+                    return base.GetChildPosInContent(d, offset);
+
+                return panel.YPosition + offset.X;
+            }
+
+            protected override void ApplyCurrentToContent()
+            {
+                Debug.Assert(ScrollDirection == Direction.Vertical);
+
+                double scrollableExtent = -Current + ScrollableExtent * ScrollContent.RelativeAnchorPosition.Y;
+
+                foreach (var d in layoutContent)
+                    d.Y = (float)(d.YPosition + scrollableExtent);
             }
         }
     }
