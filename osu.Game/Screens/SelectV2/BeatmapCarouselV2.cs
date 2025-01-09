@@ -10,7 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
-using osu.Framework.Development;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -202,7 +201,7 @@ namespace osu.Game.Screens.SelectV2
 
             foreach (var item in carouselItems)
             {
-                item.YPosition = yPos;
+                item.CarouselYPosition = yPos;
                 yPos += item.DrawHeight + spacing;
             }
         }, cancellationToken).ConfigureAwait(false);
@@ -211,21 +210,92 @@ namespace osu.Game.Screens.SelectV2
         {
             base.Update();
 
-            panels.Clear(false);
-
             if (displayCarouselItems == null)
-                return;
-
-            foreach (var item in displayCarouselItems)
             {
-                var carouselPanel = carouselPanelPool.Get(panel => panel.Item = item);
+                panels.Clear(false);
+                return;
+            }
 
-                item.Drawable = carouselPanel;
-                panels.Add(carouselPanel);
+            updateDisplayedRange();
+        }
+
+        #region Display range handling
+
+        /// <summary>
+        /// Height of the area above the carousel that should be treated as visible due to transparency of elements in front of it.
+        /// </summary>
+        public float BleedTop { get; set; }
+
+        /// <summary>
+        /// Height of the area below the carousel that should be treated as visible due to transparency of elements in front of it.
+        /// </summary>
+        public float BleedBottom { get; set; }
+
+        private (int first, int last) displayedRange;
+
+        private readonly CarouselItem carouselBoundsItem = new CarouselItem(null!);
+
+        /// <summary>
+        /// The position of the lower visible bound with respect to the current scroll position.
+        /// </summary>
+        private float visibleBottomBound => (float)(panels.Current + DrawHeight + BleedBottom);
+
+        /// <summary>
+        /// The position of the upper visible bound with respect to the current scroll position.
+        /// </summary>
+        private float visibleUpperBound => (float)(panels.Current - BleedTop);
+
+        /// <summary>
+        /// Extend the range to update positions / retrieve pooled drawables outside the visible range.
+        /// </summary>
+        private const float distance_offscreen_to_preload = 0; // 768
+
+        private void updateDisplayedRange()
+        {
+            Debug.Assert(displayCarouselItems != null);
+
+            var range = getDisplayRange();
+
+            if (range != displayedRange)
+            {
+                panels.Clear(false);
+                displayedRange = range;
+
+                for (int i = range.firstIndex; i <= range.lastIndex; i++)
+                {
+                    var item = displayCarouselItems[i];
+                    var carouselPanel = carouselPanelPool.Get(panel => panel.Item = item);
+
+                    item.Drawable = carouselPanel;
+                    panels.Add(carouselPanel);
+                }
             }
         }
 
-        internal class CarouselItem
+        private (int firstIndex, int lastIndex) getDisplayRange()
+        {
+            Debug.Assert(displayCarouselItems != null);
+
+            // Find index range of all items that should be on-screen
+            carouselBoundsItem.CarouselYPosition = visibleUpperBound - distance_offscreen_to_preload;
+            int firstIndex = displayCarouselItems.BinarySearch(carouselBoundsItem);
+            if (firstIndex < 0) firstIndex = ~firstIndex;
+
+            carouselBoundsItem.CarouselYPosition = visibleBottomBound + distance_offscreen_to_preload;
+            int lastIndex = displayCarouselItems.BinarySearch(carouselBoundsItem);
+            if (lastIndex < 0) lastIndex = ~lastIndex;
+
+            // as we can't be 100% sure on the size of individual carousel drawables,
+            // always play it safe and extend bounds by one.
+            firstIndex = Math.Max(0, firstIndex - 1);
+            lastIndex = Math.Clamp(lastIndex + 1, firstIndex, Math.Max(0, displayCarouselItems.Count - 1));
+
+            return (firstIndex, lastIndex);
+        }
+
+        #endregion
+
+        internal class CarouselItem : IComparable<CarouselItem>
         {
             public readonly object Model;
 
@@ -238,7 +308,7 @@ namespace osu.Game.Screens.SelectV2
 
             public readonly List<CarouselItem> Children = new List<CarouselItem>();
 
-            public double YPosition { get; set; }
+            public double CarouselYPosition { get; set; }
 
             public float DrawHeight => Model is BeatmapInfo ? 40 : 80;
 
@@ -262,13 +332,20 @@ namespace osu.Game.Screens.SelectV2
 
                 return Model.ToString();
             }
+
+            public int CompareTo(CarouselItem? other)
+            {
+                if (other == null) return 1;
+
+                return CarouselYPosition.CompareTo(other.CarouselYPosition);
+            }
         }
 
         internal partial class CarouselPanel : PoolableDrawable
         {
             private CarouselItem? item;
 
-            public double YPosition => item?.YPosition ?? double.MinValue;
+            public double YPosition => item?.CarouselYPosition ?? double.MinValue;
 
             public CarouselItem Item
             {
