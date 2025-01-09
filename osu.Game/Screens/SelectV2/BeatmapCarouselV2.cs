@@ -17,6 +17,7 @@ using osu.Framework.Graphics.Pooling;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
+using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Screens.Select;
 using osuTK;
@@ -27,6 +28,16 @@ namespace osu.Game.Screens.SelectV2
     public partial class BeatmapCarouselV2 : CompositeDrawable
     {
         /// <summary>
+        /// Height of the area above the carousel that should be treated as visible due to transparency of elements in front of it.
+        /// </summary>
+        public float BleedTop { get; set; }
+
+        /// <summary>
+        /// Height of the area below the carousel that should be treated as visible due to transparency of elements in front of it.
+        /// </summary>
+        public float BleedBottom { get; set; }
+
+        /// <summary>
         /// Whether an asynchronous sort / group operation is currently underway.
         /// </summary>
         public bool IsSorting => !sortTask.IsCompleted;
@@ -34,7 +45,7 @@ namespace osu.Game.Screens.SelectV2
         /// <summary>
         /// The number of displayable beatmap difficulties currently being tracked (before sorting).
         /// </summary>
-        public int BeatmapsTracked => carouselItems.Count;
+        public int BeatmapsTracked => rawCarouselItems.Count;
 
         /// <summary>
         /// The number of carousel items currently in rotation for display.
@@ -44,15 +55,15 @@ namespace osu.Game.Screens.SelectV2
         /// <summary>
         /// The number of items currently actualised into drawables.
         /// </summary>
-        public int VisibleItems => panels.CountDisplayedPanels;
+        public int VisibleItems => scroll.Panels.Count;
 
         private IBindableList<BeatmapSetInfo> detachedBeatmaps = null!;
 
-        private readonly List<CarouselItem> carouselItems = new List<CarouselItem>();
+        private readonly List<CarouselItem> rawCarouselItems = new List<CarouselItem>();
 
         private List<CarouselItem>? displayCarouselItems;
 
-        private DoubleScrollContainer panels = null!;
+        private DoubleScrollContainer scroll = null!;
 
         private readonly DrawablePool<CarouselPanel> carouselPanelPool = new DrawablePool<CarouselPanel>(100);
 
@@ -67,10 +78,10 @@ namespace osu.Game.Screens.SelectV2
                     Colour = Color4.Black,
                     RelativeSizeAxes = Axes.Both,
                 },
-                panels = new DoubleScrollContainer
+                scroll = new DoubleScrollContainer
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Masking = false, // TODO: remove
+                    Masking = false,
                 }
             };
 
@@ -88,7 +99,7 @@ namespace osu.Game.Screens.SelectV2
             switch (changed.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    carouselItems.AddRange(newBeatmapSets!.SelectMany(s => s.Beatmaps).Select(b => new CarouselItem(b)));
+                    rawCarouselItems.AddRange(newBeatmapSets!.SelectMany(s => s.Beatmaps).Select(b => new CarouselItem(b)));
                     break;
 
                 case NotifyCollectionChangedAction.Remove:
@@ -96,7 +107,7 @@ namespace osu.Game.Screens.SelectV2
                     foreach (var set in beatmapSetInfos!)
                     {
                         foreach (var beatmap in set.Beatmaps)
-                            carouselItems.RemoveAll(i => i.Model is BeatmapInfo bi && beatmap.Equals(bi));
+                            rawCarouselItems.RemoveAll(i => i.Model is BeatmapInfo bi && beatmap.Equals(bi));
                     }
 
                     break;
@@ -106,7 +117,7 @@ namespace osu.Game.Screens.SelectV2
                     throw new NotImplementedException();
 
                 case NotifyCollectionChangedAction.Reset:
-                    carouselItems.Clear();
+                    rawCarouselItems.Clear();
                     break;
             }
 
@@ -144,7 +155,7 @@ namespace osu.Game.Screens.SelectV2
                 cancellationSource = cts;
             }
 
-            var items = new List<CarouselItem>(carouselItems);
+            var items = new List<CarouselItem>(rawCarouselItems);
 
             await Task.Run(async () =>
             {
@@ -212,25 +223,12 @@ namespace osu.Game.Screens.SelectV2
             base.Update();
 
             if (displayCarouselItems == null)
-            {
-                panels.Clear(false);
                 return;
-            }
 
             updateDisplayedRange();
         }
 
         #region Display range handling
-
-        /// <summary>
-        /// Height of the area above the carousel that should be treated as visible due to transparency of elements in front of it.
-        /// </summary>
-        public float BleedTop { get; set; }
-
-        /// <summary>
-        /// Height of the area below the carousel that should be treated as visible due to transparency of elements in front of it.
-        /// </summary>
-        public float BleedBottom { get; set; }
 
         private (int first, int last) displayedRange;
 
@@ -239,17 +237,22 @@ namespace osu.Game.Screens.SelectV2
         /// <summary>
         /// The position of the lower visible bound with respect to the current scroll position.
         /// </summary>
-        private float visibleBottomBound => (float)(panels.Current + DrawHeight + BleedBottom);
+        private float visibleBottomBound => (float)(scroll.Current + DrawHeight + BleedBottom);
 
         /// <summary>
         /// The position of the upper visible bound with respect to the current scroll position.
         /// </summary>
-        private float visibleUpperBound => (float)(panels.Current - BleedTop);
+        private float visibleUpperBound => (float)(scroll.Current - BleedTop);
 
         /// <summary>
         /// Extend the range to update positions / retrieve pooled drawables outside the visible range.
         /// </summary>
         private const float distance_offscreen_to_preload = 0; // 768
+
+        /// <summary>
+        /// Extend the range to retain already loaded pooled drawables.
+        /// </summary>
+        private const float distance_offscreen_before_unload = 0; // 2048;
 
         private void updateDisplayedRange()
         {
@@ -259,23 +262,49 @@ namespace osu.Game.Screens.SelectV2
 
             if (range != displayedRange)
             {
-                panels.Clear(false);
                 displayedRange = range;
 
-                for (int i = range.firstIndex; i <= range.lastIndex; i++)
+                List<CarouselItem> toDisplay = displayCarouselItems.GetRange(displayedRange.first, displayedRange.last - displayedRange.first + 1);
+
+                foreach (var panel in scroll.Panels)
                 {
-                    var item = displayCarouselItems[i];
-                    var carouselPanel = carouselPanelPool.Get(panel => panel.Item = item);
+                    if (toDisplay.Remove(panel.Item))
+                    {
+                        // panel already displayed.
+                        continue;
+                    }
 
-                    carouselPanel.FlashColour(Color4.Red, 100);
+                    // panel loaded as drawable but not required by visible range.
+                    // remove but only if too far off-screen
+                    if (panel.Y + panel.DrawHeight < visibleUpperBound - distance_offscreen_before_unload ||
+                        panel.Y > visibleBottomBound + distance_offscreen_before_unload)
+                        expirePanelImmediately(panel);
+                }
 
-                    item.Drawable = carouselPanel;
-                    panels.Add(carouselPanel);
+                foreach (var item in toDisplay)
+                {
+                    var carouselPanel = carouselPanelPool.Get(panel =>
+                    {
+                        panel.Item = item;
+                        item.Drawable = panel;
+                    });
+
+                    scroll.Add(carouselPanel);
+
+                    carouselPanel.FlashColour(Color4.Red, 500);
                 }
 
                 var lastItem = displayCarouselItems[^1];
-                panels.SetLayoutHeight((float)(lastItem.CarouselYPosition + lastItem.DrawHeight));
+                scroll.SetLayoutHeight((float)(lastItem.CarouselYPosition + lastItem.DrawHeight));
             }
+        }
+
+        private static void expirePanelImmediately(CarouselPanel panel)
+        {
+            // TODO: double-check (copied from old implementation).
+            // may want a fade effect here (could be seen if a huge change happens, like a set with 20 difficulties becomes selected).
+            panel.FinishTransforms();
+            panel.Expire();
         }
 
         private (int firstIndex, int lastIndex) getDisplayRange()
@@ -312,8 +341,6 @@ namespace osu.Game.Screens.SelectV2
             /// </summary>
             public Drawable? Drawable { get; set; }
 
-            public readonly List<CarouselItem> Children = new List<CarouselItem>();
-
             public double CarouselYPosition { get; set; }
 
             public float DrawHeight => Model is BeatmapInfo ? 40 : 80;
@@ -330,7 +357,7 @@ namespace osu.Game.Screens.SelectV2
                 switch (Model)
                 {
                     case BeatmapInfo bi:
-                        return $"Difficulty: {bi.DifficultyName} ({bi.StarRating}*)";
+                        return $"Difficulty: {bi.DifficultyName} ({bi.StarRating:N1}*)";
 
                     case BeatmapSetInfo si:
                         return $"{si.Metadata}";
@@ -355,6 +382,7 @@ namespace osu.Game.Screens.SelectV2
 
             public CarouselItem Item
             {
+                get => item!;
                 set
                 {
                     item = value;
@@ -380,19 +408,17 @@ namespace osu.Game.Screens.SelectV2
             }
         }
 
-        internal partial class DoubleScrollContainer : BasicScrollContainer
+        internal partial class DoubleScrollContainer : OsuScrollContainer
         {
-            public int CountDisplayedPanels => layoutContent.Count;
+            public readonly Container<CarouselPanel> Panels;
 
-            private readonly Container<CarouselPanel> layoutContent;
-
-            public void SetLayoutHeight(float height) => layoutContent.Height = height;
+            public void SetLayoutHeight(float height) => Panels.Height = height;
 
             public DoubleScrollContainer()
             {
                 // Managing our own custom layout within ScrollContent causes feedback with internal ScrollContainer calculations,
                 // so we must maintain one level of separation from ScrollContent.
-                base.Add(layoutContent = new Container<CarouselPanel>
+                base.Add(Panels = new Container<CarouselPanel>
                 {
                     Name = "Layout content",
                     RelativeSizeAxes = Axes.X,
@@ -401,8 +427,8 @@ namespace osu.Game.Screens.SelectV2
 
             public override void Clear(bool disposeChildren)
             {
-                layoutContent.Height = 0;
-                layoutContent.Clear(disposeChildren);
+                Panels.Height = 0;
+                Panels.Clear(disposeChildren);
             }
 
             public override void Add(Drawable drawable)
@@ -418,7 +444,7 @@ namespace osu.Game.Screens.SelectV2
                 if (drawable is not CarouselPanel)
                     throw new InvalidOperationException();
 
-                layoutContent.Add(drawable);
+                Panels.Add(drawable);
             }
 
             public override double GetChildPosInContent(Drawable d, Vector2 offset)
@@ -435,7 +461,7 @@ namespace osu.Game.Screens.SelectV2
 
                 double scrollableExtent = -Current + ScrollableExtent * ScrollContent.RelativeAnchorPosition.Y;
 
-                foreach (var d in layoutContent)
+                foreach (var d in Panels)
                     d.Y = (float)(d.YPosition + scrollableExtent);
             }
         }
