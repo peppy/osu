@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Development;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -145,8 +146,12 @@ namespace osu.Game.Screens.SelectV2
 
             var items = new List<CarouselItem>(carouselItems);
 
-            await sort(items, criteria, cts.Token).ConfigureAwait(true);
-            await group(items, criteria, cts.Token).ConfigureAwait(true);
+            await Task.Run(async () =>
+            {
+                await sort(items, criteria, cts.Token).ConfigureAwait(false);
+                await group(items, criteria, cts.Token).ConfigureAwait(false);
+                await updateYPositions(items, cts.Token).ConfigureAwait(false);
+            }, cts.Token).ConfigureAwait(true);
 
             if (cts.Token.IsCancellationRequested)
                 return;
@@ -154,47 +159,53 @@ namespace osu.Game.Screens.SelectV2
             displayCarouselItems = items;
         }
 
-        private static async Task sort(List<CarouselItem> items, FilterCriteria criteria, CancellationToken cancellationToken)
+        private static async Task sort(List<CarouselItem> items, FilterCriteria criteria, CancellationToken cancellationToken) => await Task.Run(() =>
         {
-            await Task.Run(() =>
+            Thread.Sleep(1000);
+            items.Sort((a, b) =>
             {
-                Thread.Sleep(1000);
-                items.Sort((a, b) =>
-                {
-                    if (a.Model is BeatmapInfo ab && b.Model is BeatmapInfo bb)
-                        return -1 * ab.OnlineID.CompareTo(bb.OnlineID);
+                if (a.Model is BeatmapInfo ab && b.Model is BeatmapInfo bb)
+                    return -1 * ab.OnlineID.CompareTo(bb.OnlineID);
 
-                    return a.ID.CompareTo(b.ID);
-                });
-                // TODO: perform sort based on FilterCriteria
-            }, cancellationToken).ConfigureAwait(false);
-        }
+                return a.ID.CompareTo(b.ID);
+            });
+            // TODO: perform sort based on FilterCriteria
+        }, cancellationToken).ConfigureAwait(false);
 
-        private static async Task group(List<CarouselItem> items, FilterCriteria criteria, CancellationToken cancellationToken)
+        private static async Task group(List<CarouselItem> items, FilterCriteria criteria, CancellationToken cancellationToken) => await Task.Run(() =>
         {
-            await Task.Run(() =>
+            // TODO: perform grouping based on FilterCriteria
+
+            CarouselItem? lastItem = null;
+
+            for (int i = 0; i < items.Count; i++)
             {
-                // TODO: perform grouping based on FilterCriteria
+                var item = items[i];
 
-                CarouselItem? lastItem = null;
-
-                for (int i = 0; i < items.Count; i++)
+                if (item.Model is BeatmapInfo b1)
                 {
-                    var item = items[i];
-
-                    if (item.Model is BeatmapInfo b1)
-                    {
-                        // Add set header
-                        if (lastItem == null || (lastItem.Model is BeatmapInfo b2 && b2.BeatmapSet!.OnlineID != b1.BeatmapSet!.OnlineID))
-                            insertItem(b1.BeatmapSet!);
-                    }
-
-                    lastItem = item;
-
-                    void insertItem(object model) => items.Insert(i++, new CarouselItem(model));
+                    // Add set header
+                    if (lastItem == null || (lastItem.Model is BeatmapInfo b2 && b2.BeatmapSet!.OnlineID != b1.BeatmapSet!.OnlineID))
+                        insertItem(b1.BeatmapSet!);
                 }
-            }, cancellationToken).ConfigureAwait(false);
-        }
+
+                lastItem = item;
+
+                void insertItem(object model) => items.Insert(i++, new CarouselItem(model));
+            }
+        }, cancellationToken).ConfigureAwait(false);
+
+        private async Task updateYPositions(List<CarouselItem> carouselItems, CancellationToken cancellationToken) => await Task.Run(() =>
+        {
+            const float spacing = 10;
+            float yPos = 0;
+
+            foreach (var item in carouselItems)
+            {
+                item.YPosition = yPos;
+                yPos += item.DrawHeight + spacing;
+            }
+        }, cancellationToken).ConfigureAwait(false);
 
         protected override void Update()
         {
@@ -205,29 +216,12 @@ namespace osu.Game.Screens.SelectV2
             if (displayCarouselItems == null)
                 return;
 
-            // TODO: call less often.
-            updateYPositions();
-
             foreach (var item in displayCarouselItems)
             {
                 var carouselPanel = carouselPanelPool.Get(panel => panel.Item = item);
 
                 item.Drawable = carouselPanel;
                 panels.Add(carouselPanel);
-            }
-        }
-
-        private void updateYPositions()
-        {
-            Debug.Assert(displayCarouselItems != null);
-
-            const float spacing = 10;
-            float yPos = 0;
-
-            foreach (var item in displayCarouselItems)
-            {
-                item.YPosition = yPos;
-                yPos += item.DrawHeight + spacing;
             }
         }
 
