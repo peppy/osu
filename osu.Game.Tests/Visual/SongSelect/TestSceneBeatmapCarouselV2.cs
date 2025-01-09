@@ -7,6 +7,8 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
 using osu.Framework.Testing;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
@@ -15,6 +17,7 @@ using osu.Game.Screens.SelectV2;
 using osu.Game.Tests.Beatmaps;
 using osu.Game.Tests.Resources;
 using osuTK;
+using osuTK.Graphics;
 
 namespace osu.Game.Tests.Visual.SongSelect
 {
@@ -46,17 +49,50 @@ namespace osu.Game.Tests.Visual.SongSelect
             {
                 beatmaps.Clear();
 
+                Box topBox;
                 Children = new Drawable[]
                 {
                     stats = new OsuTextFlowContainer
                     {
                         Padding = new MarginPadding(10),
                     },
-                    carousel = new BeatmapCarouselV2
+                    new FillFlowContainer
                     {
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
-                        Size = new Vector2(500, 700),
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        Direction = FillDirection.Vertical,
+                        Children = new Drawable[]
+                        {
+                            topBox = new Box
+                            {
+                                Anchor = Anchor.Centre,
+                                Origin = Anchor.Centre,
+                                Colour = Color4.Cyan,
+                                RelativeSizeAxes = Axes.X,
+                                Alpha = 0.4f,
+                                Height = 50,
+                                Width = 2,
+                            },
+                            carousel = new BeatmapCarouselV2
+                            {
+                                Anchor = Anchor.Centre,
+                                Origin = Anchor.Centre,
+                                Size = new Vector2(500, 700),
+                            },
+                            new Box
+                            {
+                                Anchor = Anchor.Centre,
+                                Origin = Anchor.Centre,
+                                Colour = Color4.Cyan,
+                                RelativeSizeAxes = Axes.X,
+                                Alpha = 0.4f,
+                                Height = 50,
+                                Width = 2,
+                            },
+                            topBox.CreateProxy(),
+                        }
                     },
                 };
             });

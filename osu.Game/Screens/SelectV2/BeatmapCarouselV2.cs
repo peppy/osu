@@ -70,6 +70,7 @@ namespace osu.Game.Screens.SelectV2
                 panels = new DoubleScrollContainer
                 {
                     RelativeSizeAxes = Axes.Both,
+                    Masking = false, // TODO: remove
                 }
             };
 
@@ -265,6 +266,8 @@ namespace osu.Game.Screens.SelectV2
                 {
                     var item = displayCarouselItems[i];
                     var carouselPanel = carouselPanelPool.Get(panel => panel.Item = item);
+
+                    carouselPanel.FlashColour(Color4.Red, 100);
 
                     item.Drawable = carouselPanel;
                     panels.Add(carouselPanel);
