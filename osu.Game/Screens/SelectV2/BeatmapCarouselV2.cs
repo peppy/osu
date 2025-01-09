@@ -272,6 +272,9 @@ namespace osu.Game.Screens.SelectV2
                     item.Drawable = carouselPanel;
                     panels.Add(carouselPanel);
                 }
+
+                var lastItem = displayCarouselItems[^1];
+                panels.SetLayoutHeight((float)(lastItem.CarouselYPosition + lastItem.DrawHeight));
             }
         }
 
@@ -383,6 +386,8 @@ namespace osu.Game.Screens.SelectV2
 
             private readonly Container<CarouselPanel> layoutContent;
 
+            public void SetLayoutHeight(float height) => layoutContent.Height = height;
+
             public DoubleScrollContainer()
             {
                 // Managing our own custom layout within ScrollContent causes feedback with internal ScrollContainer calculations,
@@ -410,10 +415,9 @@ namespace osu.Game.Screens.SelectV2
 
             public void Add(CarouselPanel drawable)
             {
-                if (drawable is not CarouselPanel panel)
+                if (drawable is not CarouselPanel)
                     throw new InvalidOperationException();
 
-                layoutContent.Height = (float)Math.Max(layoutContent.Height, panel.YPosition + panel.DrawHeight);
                 layoutContent.Add(drawable);
             }
 
