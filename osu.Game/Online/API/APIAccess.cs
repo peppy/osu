@@ -316,9 +316,33 @@ namespace osu.Game.Online.API
 
                 default:
                 {
-                    var userReq = new GetMeRequest();
+                    var meRequest = new GetMeRequest();
+                    meRequest.Failure += handleFailedRequest;
 
-                    userReq.Failure += ex =>
+                    if (!handleRequest(meRequest) || meRequest.Response == null)
+                    {
+                        state.Value = APIState.Failing;
+                        return;
+                    }
+
+                    var friendsRequest = new GetFriendsRequest();
+                    friendsRequest.Failure += handleFailedRequest;
+
+                    if (!handleRequest(friendsRequest) || friendsRequest.Response == null)
+                    {
+                        state.Value = APIState.Failing;
+                        return;
+                    }
+
+                    var me = meRequest.Response!;
+                    me.Status.Value = configStatus.Value ?? UserStatus.Online;
+                    setLocalUser(me);
+
+                    state.Value = me.SessionVerified ? APIState.Online : APIState.RequiresSecondFactorAuth;
+                    failureCount = 0;
+                    break;
+
+                    void handleFailedRequest(Exception ex)
                     {
                         if (ex is APIException)
                         {
@@ -335,25 +359,7 @@ namespace osu.Game.Online.API
                         {
                             state.Value = APIState.Failing;
                         }
-                    };
-
-                    userReq.Success += me =>
-                    {
-                        me.Status.Value = configStatus.Value ?? UserStatus.Online;
-
-                        setLocalUser(me);
-
-                        state.Value = me.SessionVerified ? APIState.Online : APIState.RequiresSecondFactorAuth;
-                        failureCount = 0;
-                    };
-
-                    if (!handleRequest(userReq))
-                    {
-                        state.Value = APIState.Failing;
-                        return;
                     }
-
-                    break;
                 }
             }
 
