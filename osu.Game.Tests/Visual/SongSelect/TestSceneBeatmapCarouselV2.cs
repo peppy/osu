@@ -166,7 +166,7 @@ namespace osu.Game.Tests.Visual.SongSelect
                                           beatmaps: {beatmapCount}
                                         carousel:
                                           sorting: {carousel.IsSorting}
-                                          tracked: {carousel.BeatmapsTracked}
+                                          tracked: {carousel.ItemsTracked}
                                           displayable: {carousel.DisplayableItems}
                                           displayed: {carousel.VisibleItems}
                           """;
