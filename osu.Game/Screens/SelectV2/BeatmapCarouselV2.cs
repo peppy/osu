@@ -15,6 +15,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Pooling;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Logging;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
 using osu.Game.Graphics.Containers;
@@ -135,15 +136,10 @@ namespace osu.Game.Screens.SelectV2
         private Task sortTask = Task.CompletedTask;
         private CancellationTokenSource cancellationSource = new CancellationTokenSource();
 
-        private void runSortBackground() => Scheduler.AddOnce(() =>
-        {
-            // TODO: some kind of timed debounce for cases where a lot of beatmap store operations are running.
-            sortTask = performSortGroupDisplay();
-        });
+        private void runSortBackground() => Scheduler.AddOnce(() => sortTask = performSortGroupDisplay());
 
         private async Task performSortGroupDisplay()
         {
-            // TODO: remove eventually
             Debug.Assert(SynchronizationContext.Current != null);
 
             var criteria = Criteria;
@@ -155,24 +151,59 @@ namespace osu.Game.Screens.SelectV2
                 cancellationSource = cts;
             }
 
+            Stopwatch stopwatch = Stopwatch.StartNew();
             var items = new List<CarouselItem>(rawCarouselItems);
 
             await Task.Run(async () =>
             {
-                await sort(items, criteria, cts.Token).ConfigureAwait(false);
-                await group(items, criteria, cts.Token).ConfigureAwait(false);
-                await updateYPositions(items, cts.Token).ConfigureAwait(false);
+                try
+                {
+                    // debounce
+                    log("New changes to handle");
+                    await Task.Delay(500, cts.Token).ConfigureAwait(false);
+
+                    log("Performing sort");
+                    await sort(items, criteria, cts.Token).ConfigureAwait(false);
+
+                    log("Performing group");
+                    await group(items, criteria, cts.Token).ConfigureAwait(false);
+
+                    log("Updating Y positions");
+                    await updateYPositions(items, cts.Token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    log("Cancelled");
+                }
             }, cts.Token).ConfigureAwait(true);
 
             if (cts.Token.IsCancellationRequested)
                 return;
 
+            log("Items ready for display");
             displayCarouselItems = items;
+            displayedRange = default;
+
+            // As long as PanelItems are allowed to be generated arbitrarily in the async process,
+            // we need to ensure that they are reattached to active drawables to avoid reconstruction.
+            //
+            // Doing this here is the best way I can come up with, besides from creating a dictionary or
+            // other tracking method for these relationships.
+            //
+            // Is this an issue? Probably. It's adding a relatively expensive operation here that I'd like
+            // to be able to avoid.
+            foreach (var item in displayCarouselItems)
+            {
+                var existingPanel = scroll.Panels.FirstOrDefault(p => p.Item.Model == item.Model);
+                if (existingPanel != null)
+                    existingPanel.Item = item;
+            }
+
+            void log(string text) => Logger.Log($"Carousel[op {cts.GetHashCode().ToString().Substring(0, 5)}] {stopwatch.ElapsedMilliseconds} ms: {text}");
         }
 
         private static async Task sort(List<CarouselItem> items, FilterCriteria criteria, CancellationToken cancellationToken) => await Task.Run(() =>
         {
-            Thread.Sleep(1000);
             items.Sort((a, b) =>
             {
                 if (a.Model is BeatmapInfo ab && b.Model is BeatmapInfo bb)
@@ -191,6 +222,8 @@ namespace osu.Game.Screens.SelectV2
 
             for (int i = 0; i < items.Count; i++)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 var item = items[i];
 
                 if (item.Model is BeatmapInfo b1)
@@ -262,22 +295,39 @@ namespace osu.Game.Screens.SelectV2
 
             if (range != displayedRange)
             {
+                Logger.Log($"Updating displayed range of carousel from {displayedRange} to {range}");
+
                 displayedRange = range;
 
                 List<CarouselItem> toDisplay = displayCarouselItems.GetRange(displayedRange.first, displayedRange.last - displayedRange.first + 1);
 
+                // Iterate over all panels which are already displayed
                 foreach (var panel in scroll.Panels)
                 {
+                    // The case where we're intending to display this panel, but it's already displayed.
                     if (toDisplay.Remove(panel.Item))
-                    {
-                        // panel already displayed.
                         continue;
-                    }
+
+                    // TODO: is definitely not efficient.
+                    // CarouselItem? newItemSameModel = displayCarouselItems.FirstOrDefault(i => i.Model == panel.Item.Model);
+                    //
+                    // if (newItemSameModel == null)
+                    //     expirePanelImmediately(panel);
+                    // else if (newItemSameModel == panel.Item)
+                    // {
+                    //     // nothing to do in this case
+                    //     Console.WriteLine();
+                    // }
+                    // else if (newItemSameModel?.Model == panel.Item.Model)
+                    // {
+                    //     panel.Item = newItemSameModel;
+                    //     toDisplay.Remove(newItemSameModel);
+                    // }
 
                     // panel loaded as drawable but not required by visible range.
                     // remove but only if too far off-screen
-                    if (panel.Y + panel.DrawHeight < visibleUpperBound - distance_offscreen_before_unload ||
-                        panel.Y > visibleBottomBound + distance_offscreen_before_unload)
+                    if (panel.YPosition + panel.DrawHeight < visibleUpperBound - distance_offscreen_before_unload ||
+                        panel.YPosition > visibleBottomBound + distance_offscreen_before_unload)
                         expirePanelImmediately(panel);
                 }
 
@@ -291,7 +341,7 @@ namespace osu.Game.Screens.SelectV2
 
                     scroll.Add(carouselPanel);
 
-                    carouselPanel.FlashColour(Color4.Red, 500);
+                    carouselPanel.FlashColour(Color4.Red, 2000);
                 }
 
                 var lastItem = displayCarouselItems[^1];
@@ -320,10 +370,8 @@ namespace osu.Game.Screens.SelectV2
             int lastIndex = displayCarouselItems.BinarySearch(carouselBoundsItem);
             if (lastIndex < 0) lastIndex = ~lastIndex;
 
-            // as we can't be 100% sure on the size of individual carousel drawables,
-            // always play it safe and extend bounds by one.
             firstIndex = Math.Max(0, firstIndex - 1);
-            lastIndex = Math.Clamp(lastIndex + 1, firstIndex, Math.Max(0, displayCarouselItems.Count - 1));
+            lastIndex = Math.Max(0, lastIndex - 1);
 
             return (firstIndex, lastIndex);
         }
@@ -385,7 +433,12 @@ namespace osu.Game.Screens.SelectV2
                 get => item!;
                 set
                 {
+                    bool sameModel = item?.Model == value.Model;
+
                     item = value;
+
+                    if (sameModel)
+                        return;
 
                     Size = new Vector2(500, item.DrawHeight);
 
