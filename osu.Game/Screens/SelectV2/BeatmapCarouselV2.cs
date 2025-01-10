@@ -192,21 +192,6 @@ namespace osu.Game.Screens.SelectV2
             displayCarouselItems = items;
             displayedRange = null;
 
-            // As long as PanelItems are allowed to be generated arbitrarily in the async process,
-            // we need to ensure that they are reattached to active drawables to avoid reconstruction.
-            //
-            // Doing this here is the best way I can come up with, besides from creating a dictionary or
-            // other tracking method for these relationships.
-            //
-            // Is this an issue? Probably. It's adding a relatively expensive operation here that I'd like
-            // to be able to avoid.
-            foreach (var item in displayCarouselItems)
-            {
-                var existingPanel = scroll.Panels.FirstOrDefault(p => p.Item.Model == item.Model);
-                if (existingPanel != null)
-                    existingPanel.Item = item;
-            }
-
             void log(string text) => Logger.Log($"Carousel[op {cts.GetHashCode().ToString().Substring(0, 5)}] {stopwatch.ElapsedMilliseconds} ms: {text}");
         }
 
@@ -306,13 +291,21 @@ namespace osu.Game.Screens.SelectV2
                     ? new List<CarouselItem>()
                     : displayCarouselItems.GetRange(range.first, range.last - range.first + 1);
 
-                // Iterate over all panels which are already displayed
+                // Iterate over all panels which are already displayed and figure which need to be displayed / removed.
                 foreach (var panel in scroll.Panels)
                 {
                     // The case where we're intending to display this panel, but it's already displayed.
-                    if (toDisplay.Remove(panel.Item))
-                        continue;
+                    // Note that we **must compare the model here** as the CarouselItems may be fresh instances due to a sort / group operation.
+                    var existing = toDisplay.FirstOrDefault(i => i.Model == panel.Item.Model);
 
+                    if (existing != null)
+                    {
+                        panel.Item = existing;
+                        toDisplay.Remove(existing);
+                        continue;
+                    }
+
+                    // If the new display range doesn't contain the panel, it's no longer required for display.
                     expirePanelImmediately(panel);
                 }
 
