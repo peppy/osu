@@ -68,6 +68,14 @@ namespace osu.Game.Screens.SelectV2
 
         private readonly DrawablePool<CarouselPanel> carouselPanelPool = new DrawablePool<CarouselPanel>(100);
 
+        /// <summary>
+        /// When a new request arrives to change filtering, we wait a small period before beginning processing.
+        /// Regardless of any external debouncing, this is a safety measure to avoid triggering too many threaded operations.
+        ///
+        /// Based on how fast we want this to respond, this could be reduced down to 50 ms or so.
+        /// </summary>
+        private const int debounce_delay = 100;
+
         [BackgroundDependencyLoader]
         private void load(BeatmapStore beatmapStore, CancellationToken? cancellationToken)
         {
@@ -158,9 +166,9 @@ namespace osu.Game.Screens.SelectV2
             {
                 try
                 {
-                    // debounce
+                    // brief debounce
                     log("New changes to handle");
-                    await Task.Delay(500, cts.Token).ConfigureAwait(false);
+                    await Task.Delay(debounce_delay, cts.Token).ConfigureAwait(false);
 
                     log("Performing sort");
                     await sort(items, criteria, cts.Token).ConfigureAwait(false);
@@ -173,7 +181,7 @@ namespace osu.Game.Screens.SelectV2
                 }
                 catch (OperationCanceledException)
                 {
-                    log("Cancelled");
+                    log("Cancelled due to newer request arriving");
                 }
             }, cts.Token).ConfigureAwait(true);
 
@@ -182,7 +190,7 @@ namespace osu.Game.Screens.SelectV2
 
             log("Items ready for display");
             displayCarouselItems = items;
-            displayedRange = default;
+            displayedRange = null;
 
             // As long as PanelItems are allowed to be generated arbitrarily in the async process,
             // we need to ensure that they are reattached to active drawables to avoid reconstruction.
@@ -263,7 +271,7 @@ namespace osu.Game.Screens.SelectV2
 
         #region Display range handling
 
-        private (int first, int last) displayedRange;
+        private (int first, int last)? displayedRange;
 
         private readonly CarouselItem carouselBoundsItem = new CarouselItem(null!);
 
@@ -282,11 +290,6 @@ namespace osu.Game.Screens.SelectV2
         /// </summary>
         private const float distance_offscreen_to_preload = 0; // 768
 
-        /// <summary>
-        /// Extend the range to retain already loaded pooled drawables.
-        /// </summary>
-        private const float distance_offscreen_before_unload = 0; // 2048;
-
         private void updateDisplayedRange()
         {
             Debug.Assert(displayCarouselItems != null);
@@ -299,7 +302,9 @@ namespace osu.Game.Screens.SelectV2
 
                 displayedRange = range;
 
-                List<CarouselItem> toDisplay = displayCarouselItems.GetRange(displayedRange.first, displayedRange.last - displayedRange.first + 1);
+                List<CarouselItem> toDisplay = range.last - range.first == 0
+                    ? new List<CarouselItem>()
+                    : displayCarouselItems.GetRange(range.first, range.last - range.first + 1);
 
                 // Iterate over all panels which are already displayed
                 foreach (var panel in scroll.Panels)
@@ -308,27 +313,7 @@ namespace osu.Game.Screens.SelectV2
                     if (toDisplay.Remove(panel.Item))
                         continue;
 
-                    // TODO: is definitely not efficient.
-                    // CarouselItem? newItemSameModel = displayCarouselItems.FirstOrDefault(i => i.Model == panel.Item.Model);
-                    //
-                    // if (newItemSameModel == null)
-                    //     expirePanelImmediately(panel);
-                    // else if (newItemSameModel == panel.Item)
-                    // {
-                    //     // nothing to do in this case
-                    //     Console.WriteLine();
-                    // }
-                    // else if (newItemSameModel?.Model == panel.Item.Model)
-                    // {
-                    //     panel.Item = newItemSameModel;
-                    //     toDisplay.Remove(newItemSameModel);
-                    // }
-
-                    // panel loaded as drawable but not required by visible range.
-                    // remove but only if too far off-screen
-                    if (panel.YPosition + panel.DrawHeight < visibleUpperBound - distance_offscreen_before_unload ||
-                        panel.YPosition > visibleBottomBound + distance_offscreen_before_unload)
-                        expirePanelImmediately(panel);
+                    expirePanelImmediately(panel);
                 }
 
                 foreach (var item in toDisplay)
@@ -344,8 +329,13 @@ namespace osu.Game.Screens.SelectV2
                     carouselPanel.FlashColour(Color4.Red, 2000);
                 }
 
-                var lastItem = displayCarouselItems[^1];
-                scroll.SetLayoutHeight((float)(lastItem.CarouselYPosition + lastItem.DrawHeight));
+                if (displayCarouselItems.Count > 0)
+                {
+                    var lastItem = displayCarouselItems[^1];
+                    scroll.SetLayoutHeight((float)(lastItem.CarouselYPosition + lastItem.DrawHeight));
+                }
+                else
+                    scroll.SetLayoutHeight(0);
             }
         }
 
@@ -357,7 +347,7 @@ namespace osu.Game.Screens.SelectV2
             panel.Expire();
         }
 
-        private (int firstIndex, int lastIndex) getDisplayRange()
+        private (int first, int last) getDisplayRange()
         {
             Debug.Assert(displayCarouselItems != null);
 

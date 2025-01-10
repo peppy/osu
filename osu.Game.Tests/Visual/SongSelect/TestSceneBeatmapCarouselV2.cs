@@ -118,16 +118,16 @@ namespace osu.Game.Tests.Visual.SongSelect
             });
 
             AddStep("add 1 beatmap", () => beatmapSets.Add(TestResources.CreateTestBeatmapSetInfo(RNG.Next(1, 4))));
+
+            AddStep("remove all beatmaps", () => beatmapSets.Clear());
         }
 
         [Test]
-        public void TestConstantlyAdded()
+        public void TestAddRemoveOneByOne()
         {
-            AddRepeatStep("add beatmaps", () =>
-            {
-                for (int i = 0; i < 10; i++)
-                    beatmapSets.Add(TestResources.CreateTestBeatmapSetInfo(RNG.Next(1, 4)));
-            }, 100);
+            AddRepeatStep("add beatmaps", () => beatmapSets.Add(TestResources.CreateTestBeatmapSetInfo(RNG.Next(1, 4))), 20);
+
+            AddRepeatStep("remove beatmaps", () => beatmapSets.RemoveAt(RNG.Next(0, beatmapSets.Count)), 20);
         }
 
         [Test]
