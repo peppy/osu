@@ -19,7 +19,6 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Screens.SelectV2;
 using osu.Game.Tests.Beatmaps;
 using osu.Game.Tests.Resources;
-using osuTK;
 using osuTK.Graphics;
 
 namespace osu.Game.Tests.Visual.SongSelect
@@ -62,47 +61,62 @@ namespace osu.Game.Tests.Visual.SongSelect
                 Box topBox;
                 Children = new Drawable[]
                 {
-                    stats = new OsuTextFlowContainer
+                    new GridContainer
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        ColumnDimensions = new[]
+                        {
+                            new Dimension(GridSizeMode.Relative, 1),
+                        },
+                        RowDimensions = new[]
+                        {
+                            new Dimension(GridSizeMode.Absolute, 200),
+                            new Dimension(),
+                            new Dimension(GridSizeMode.Absolute, 200),
+                        },
+                        Content = new[]
+                        {
+                            new Drawable[]
+                            {
+                                topBox = new Box
+                                {
+                                    Anchor = Anchor.Centre,
+                                    Origin = Anchor.Centre,
+                                    Colour = Color4.Cyan,
+                                    RelativeSizeAxes = Axes.Both,
+                                    Alpha = 0.4f,
+                                },
+                            },
+                            new Drawable[]
+                            {
+                                carousel = new BeatmapCarouselV2
+                                {
+                                    Anchor = Anchor.Centre,
+                                    Origin = Anchor.Centre,
+                                    Width = 500,
+                                    RelativeSizeAxes = Axes.Y,
+                                },
+                            },
+                            new[]
+                            {
+                                new Box
+                                {
+                                    Anchor = Anchor.Centre,
+                                    Origin = Anchor.Centre,
+                                    Colour = Color4.Cyan,
+                                    RelativeSizeAxes = Axes.Both,
+                                    Alpha = 0.4f,
+                                },
+                                topBox.CreateProxy(),
+                            }
+                        }
+                    },
+                    stats = new OsuTextFlowContainer(cp => cp.Font = FrameworkFont.Regular.With())
                     {
                         Padding = new MarginPadding(10),
-                    },
-                    new FillFlowContainer
-                    {
-                        Anchor = Anchor.Centre,
-                        Origin = Anchor.Centre,
-                        RelativeSizeAxes = Axes.X,
-                        AutoSizeAxes = Axes.Y,
-                        Direction = FillDirection.Vertical,
-                        Children = new[]
-                        {
-                            topBox = new Box
-                            {
-                                Anchor = Anchor.Centre,
-                                Origin = Anchor.Centre,
-                                Colour = Color4.Cyan,
-                                RelativeSizeAxes = Axes.X,
-                                Alpha = 0.4f,
-                                Height = 50,
-                                Width = 2,
-                            },
-                            carousel = new BeatmapCarouselV2
-                            {
-                                Anchor = Anchor.Centre,
-                                Origin = Anchor.Centre,
-                                Size = new Vector2(500, 700),
-                            },
-                            new Box
-                            {
-                                Anchor = Anchor.Centre,
-                                Origin = Anchor.Centre,
-                                Colour = Color4.Cyan,
-                                RelativeSizeAxes = Axes.X,
-                                Alpha = 0.4f,
-                                Height = 50,
-                                Width = 2,
-                            },
-                            topBox.CreateProxy(),
-                        }
+                        TextAnchor = Anchor.CentreLeft,
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
                     },
                 };
             });
@@ -165,7 +179,7 @@ namespace osu.Game.Tests.Visual.SongSelect
                                           sets: {beatmapSets.Count}
                                           beatmaps: {beatmapCount}
                                         carousel:
-                                          sorting: {carousel.IsSorting}
+                                          sorting: {carousel.IsFiltering}
                                           tracked: {carousel.ItemsTracked}
                                           displayable: {carousel.DisplayableItems}
                                           displayed: {carousel.VisibleItems}

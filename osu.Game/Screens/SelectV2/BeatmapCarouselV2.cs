@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
@@ -26,19 +27,35 @@ namespace osu.Game.Screens.SelectV2
     {
         private IBindableList<BeatmapSetInfo> detachedBeatmaps = null!;
 
+        private readonly DrawablePool<BeatmapCarouselPanel> carouselPanelPool = new DrawablePool<BeatmapCarouselPanel>(100);
+
         public BeatmapCarouselV2()
         {
-            Filters = new List<ICarouselFilter>
+            DebounceDelay = 100;
+            DistanceOffscreenToPreload = 100;
+
+            Filters = new ICarouselFilter[]
             {
                 new Sorter(),
                 new Grouper(),
             };
+
+            AddInternal(carouselPanelPool);
         }
 
+        [BackgroundDependencyLoader]
         private void load(BeatmapStore beatmapStore, CancellationToken? cancellationToken)
         {
             detachedBeatmaps = beatmapStore.GetBeatmapSets(cancellationToken);
             detachedBeatmaps.BindCollectionChanged(beatmapSetsChanged, true);
+        }
+
+        protected override Drawable GetDrawableForDisplay(CarouselItem item)
+        {
+            var drawable = carouselPanelPool.Get();
+            drawable.FlashColour(Color4.Red, 2000);
+
+            return drawable;
         }
 
         private void beatmapSetsChanged(object? beatmaps, NotifyCollectionChangedEventArgs changed)
@@ -51,7 +68,7 @@ namespace osu.Game.Screens.SelectV2
             switch (changed.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    Items.AddRange(newBeatmapSets!.SelectMany(s => s.Beatmaps).Select(b => new CarouselItem(b)));
+                    Items.AddRange(newBeatmapSets!.SelectMany(s => s.Beatmaps).Select(b => new BeatmapCarouselItem(b)));
                     break;
 
                 case NotifyCollectionChangedAction.Remove:
@@ -72,8 +89,6 @@ namespace osu.Game.Screens.SelectV2
                     Items.Clear();
                     break;
             }
-
-            PerformSort();
         }
 
         public FilterCriteria Criteria { get; private set; } = new FilterCriteria();
@@ -81,68 +96,69 @@ namespace osu.Game.Screens.SelectV2
         public void Filter(FilterCriteria criteria)
         {
             Criteria = criteria;
-            PerformSort();
+            QueueFilter();
         }
+    }
 
-        private class BeatmapCarouselPanel : PoolableDrawable, ICarouselPanel
+    public partial class BeatmapCarouselPanel : PoolableDrawable, ICarouselPanel
+    {
+        public CarouselItem? Item { get; set; }
+
+        protected override void PrepareForUse()
         {
-            public CarouselItem? Item { get; set; }
+            base.PrepareForUse();
 
-            protected override void PrepareForUse()
+            Debug.Assert(Item != null);
+
+            Size = new Vector2(500, Item.DrawHeight);
+
+            InternalChildren = new Drawable[]
             {
-                base.PrepareForUse();
-
-                Debug.Assert(Item != null);
-
-                Size = new Vector2(500, Item.DrawHeight);
-
-                InternalChildren = new Drawable[]
+                new Box
                 {
-                    new Box
-                    {
-                        Colour = (Item.Model is BeatmapInfo ? Color4.Aqua : Color4.Yellow).Darken(5),
-                        RelativeSizeAxes = Axes.Both,
-                    },
-                    new OsuSpriteText
-                    {
-                        Text = Item.ToString() ?? string.Empty,
-                        Padding = new MarginPadding(5),
-                        Anchor = Anchor.CentreLeft,
-                        Origin = Anchor.CentreLeft,
-                    }
-                };
-            }
-        }
-
-        private class BeatmapCarouselItem : CarouselItem
-        {
-            public override float DrawHeight => Model is BeatmapInfo ? 40 : 80;
-
-            public BeatmapCarouselItem(object model)
-                : base(model)
-            {
-            }
-
-            public override string? ToString()
-            {
-                switch (Model)
+                    Colour = (Item.Model is BeatmapInfo ? Color4.Aqua : Color4.Yellow).Darken(5),
+                    RelativeSizeAxes = Axes.Both,
+                },
+                new OsuSpriteText
                 {
-                    case BeatmapInfo bi:
-                        return $"Difficulty: {bi.DifficultyName} ({bi.StarRating:N1}*)";
-
-                    case BeatmapSetInfo si:
-                        return $"{si.Metadata}";
+                    Text = Item.ToString() ?? string.Empty,
+                    Padding = new MarginPadding(5),
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreLeft,
                 }
+            };
+        }
+    }
 
-                return Model.ToString();
+    public class BeatmapCarouselItem : CarouselItem
+    {
+        public readonly Guid ID;
+
+        public override float DrawHeight => Model is BeatmapInfo ? 40 : 80;
+
+        public BeatmapCarouselItem(object model)
+            : base(model)
+        {
+            ID = (Model as IHasGuidPrimaryKey)?.ID ?? Guid.NewGuid();
+        }
+
+        public override string? ToString()
+        {
+            switch (Model)
+            {
+                case BeatmapInfo bi:
+                    return $"Difficulty: {bi.DifficultyName} ({bi.StarRating:N1}*)";
+
+                case BeatmapSetInfo si:
+                    return $"{si.Metadata}";
             }
+
+            return Model.ToString();
         }
     }
 
     public class Grouper : ICarouselFilter
     {
-        public string Name { get; } = "Grouper";
-
         public async Task<IEnumerable<CarouselItem>> Run(IEnumerable<CarouselItem> items, CancellationToken cancellationToken) => await Task.Run(() =>
         {
             // TODO: perform grouping based on FilterCriteria
@@ -159,7 +175,7 @@ namespace osu.Game.Screens.SelectV2
                 {
                     // Add set header
                     if (lastItem == null || (lastItem.Model is BeatmapInfo b2 && b2.BeatmapSet!.OnlineID != b1.BeatmapSet!.OnlineID))
-                        newItems.Add(new CarouselItem(b1.BeatmapSet!));
+                        newItems.Add(new BeatmapCarouselItem(b1.BeatmapSet!));
                 }
 
                 newItems.Add(item);
@@ -172,16 +188,17 @@ namespace osu.Game.Screens.SelectV2
 
     public class Sorter : ICarouselFilter
     {
-        public string Name { get; } = "Sorter";
-
         public async Task<IEnumerable<CarouselItem>> Run(IEnumerable<CarouselItem> items, CancellationToken cancellationToken) => await Task.Run(() =>
         {
             return items.OrderDescending(Comparer<CarouselItem>.Create((a, b) =>
             {
                 if (a.Model is BeatmapInfo ab && b.Model is BeatmapInfo bb)
-                    return -1 * ab.OnlineID.CompareTo(bb.OnlineID);
+                    return ab.OnlineID.CompareTo(bb.OnlineID);
 
-                return a.ID.CompareTo(b.ID);
+                if (a is BeatmapCarouselItem aItem && b is BeatmapCarouselItem bItem)
+                    return aItem.ID.CompareTo(bItem.ID);
+
+                return 0;
             }));
         }, cancellationToken).ConfigureAwait(false);
     }
