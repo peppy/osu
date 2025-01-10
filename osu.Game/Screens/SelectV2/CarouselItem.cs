@@ -7,7 +7,7 @@ using osu.Framework.Bindables;
 namespace osu.Game.Screens.SelectV2
 {
     /// <summary>
-    /// Represents a single display item for display in a <see cref="Carousel"/>.
+    /// Represents a single display item for display in a <see cref="Carousel{T}"/>.
     /// This is used to house information related to the attached model that helps with display and tracking.
     /// </summary>
     public abstract class CarouselItem : IComparable<CarouselItem>
@@ -20,7 +20,7 @@ namespace osu.Game.Screens.SelectV2
         public readonly object Model;
 
         /// <summary>
-        /// The current Y position in the carousel. This is managed by <see cref="Carousel"/> and should not be set manually.
+        /// The current Y position in the carousel. This is managed by <see cref="Carousel{T}"/> and should not be set manually.
         /// </summary>
         public double CarouselYPosition { get; set; }
 

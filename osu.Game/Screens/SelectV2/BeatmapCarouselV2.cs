@@ -109,9 +109,22 @@ namespace osu.Game.Screens.SelectV2
         [Resolved]
         private BeatmapCarouselV2 carousel { get; set; } = null!;
 
-        public CarouselItem? Item { get; set; }
+        public CarouselItem? Item
+        {
+            get => item;
+            set
+            {
+                item = value;
+
+                selected.UnbindBindings();
+
+                if (item != null)
+                    selected.BindTo(item.Selected);
+            }
+        }
 
         private readonly BindableBool selected = new BindableBool();
+        private CarouselItem? item;
 
         [BackgroundDependencyLoader]
         private void load()
@@ -133,8 +146,7 @@ namespace osu.Game.Screens.SelectV2
         protected override void FreeAfterUse()
         {
             base.FreeAfterUse();
-
-            selected.UnbindBindings();
+            Item = null;
         }
 
         protected override void PrepareForUse()
@@ -142,8 +154,6 @@ namespace osu.Game.Screens.SelectV2
             base.PrepareForUse();
 
             Debug.Assert(Item != null);
-
-            selected.BindTo(Item.Selected);
 
             Size = new Vector2(500, Item.DrawHeight);
             Masking = true;
@@ -207,7 +217,7 @@ namespace osu.Game.Screens.SelectV2
 
             CarouselItem? lastItem = null;
 
-            var newItems = new List<CarouselItem>();
+            var newItems = new List<CarouselItem>(items.Count());
 
             foreach (var item in items)
             {
