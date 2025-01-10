@@ -14,6 +14,7 @@ using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Pooling;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Input.Events;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
 using osu.Game.Graphics.Sprites;
@@ -23,6 +24,7 @@ using osuTK.Graphics;
 
 namespace osu.Game.Screens.SelectV2
 {
+    [Cached]
     public partial class BeatmapCarouselV2 : Carousel
     {
         private IBindableList<BeatmapSetInfo> detachedBeatmaps = null!;
@@ -102,7 +104,36 @@ namespace osu.Game.Screens.SelectV2
 
     public partial class BeatmapCarouselPanel : PoolableDrawable, ICarouselPanel
     {
+        [Resolved]
+        private BeatmapCarouselV2 carousel { get; set; } = null!;
+
         public CarouselItem? Item { get; set; }
+
+        private readonly BindableBool selected = new BindableBool();
+
+        [BackgroundDependencyLoader]
+        private void load()
+        {
+            selected.BindValueChanged(value =>
+            {
+                if (value.NewValue)
+                {
+                    BorderThickness = 5;
+                    BorderColour = Color4.Pink;
+                }
+                else
+                {
+                    BorderThickness = 0;
+                }
+            });
+        }
+
+        protected override void FreeAfterUse()
+        {
+            base.FreeAfterUse();
+
+            selected.UnbindBindings();
+        }
 
         protected override void PrepareForUse()
         {
@@ -110,7 +141,10 @@ namespace osu.Game.Screens.SelectV2
 
             Debug.Assert(Item != null);
 
+            selected.BindTo(Item.Selected);
+
             Size = new Vector2(500, Item.DrawHeight);
+            Masking = true;
 
             InternalChildren = new Drawable[]
             {
@@ -127,6 +161,12 @@ namespace osu.Game.Screens.SelectV2
                     Origin = Anchor.CentreLeft,
                 }
             };
+        }
+
+        protected override bool OnClick(ClickEvent e)
+        {
+            carousel.CurrentSelection = Item!.Model;
+            return true;
         }
     }
 

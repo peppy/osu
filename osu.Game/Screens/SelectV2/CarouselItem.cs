@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using osu.Framework.Bindables;
 
 namespace osu.Game.Screens.SelectV2
 {
@@ -11,6 +12,8 @@ namespace osu.Game.Screens.SelectV2
     /// </summary>
     public abstract class CarouselItem : IComparable<CarouselItem>
     {
+        public readonly BindableBool Selected = new BindableBool();
+
         /// <summary>
         /// The model this item is representing.
         /// </summary>
