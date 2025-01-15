@@ -24,6 +24,8 @@ namespace osu.Game.Screens.SelectV2
     {
         private IBindableList<BeatmapSetInfo> detachedBeatmaps = null!;
 
+        private readonly DrawablePool<BeatmapCarouselSetPanel> carouselSetPanelPool = new DrawablePool<BeatmapCarouselSetPanel>(100);
+
         private readonly DrawablePool<BeatmapCarouselPanel> carouselPanelPool = new DrawablePool<BeatmapCarouselPanel>(100);
 
         private readonly LoadingLayer loading;
@@ -40,6 +42,7 @@ namespace osu.Game.Screens.SelectV2
             };
 
             AddInternal(carouselPanelPool);
+            AddInternal(carouselSetPanelPool);
 
             AddInternal(loading = new LoadingLayer(dimBackground: true));
         }
@@ -51,7 +54,20 @@ namespace osu.Game.Screens.SelectV2
             detachedBeatmaps.BindCollectionChanged(beatmapSetsChanged, true);
         }
 
-        protected override Drawable GetDrawableForDisplay(CarouselItem item) => carouselPanelPool.Get();
+        protected override Drawable GetDrawableForDisplay(CarouselItem item)
+        {
+            switch (item.Model)
+            {
+                case BeatmapInfo:
+                    return carouselPanelPool.Get();
+
+                case BeatmapSetInfo:
+                    return carouselSetPanelPool.Get();
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(item));
+            }
+        }
 
         protected override CarouselItem CreateCarouselItemForModel(BeatmapInfo model) => new BeatmapCarouselItem(model);
 

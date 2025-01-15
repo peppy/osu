@@ -193,22 +193,27 @@ namespace osu.Game.Screens.Select.Carousel
             }
         }
 
-        [Resolved]
-        private BeatmapCarousel.CarouselScrollContainer scrollContainer { get; set; } = null!;
+        [Resolved(canBeNull: true)]
+        private BeatmapCarousel.CarouselScrollContainer? scrollContainer { get; set; }
 
         private void loadContentIfRequired()
         {
-            Quad containingSsdq = scrollContainer.ScreenSpaceDrawQuad;
+            float timeUpdatingBeforeLoad = 0;
 
-            // Using DelayedLoadWrappers would only allow us to load content when on screen, but we want to preload while off-screen
-            // to provide a better user experience.
+            if (scrollContainer != null)
+            {
+                Quad containingSsdq = scrollContainer.ScreenSpaceDrawQuad;
 
-            // This is tracking time that this drawable is updating since the last pool.
-            // This is intended to provide a debounce so very fast scrolls (from one end to the other of the carousel)
-            // don't cause huge overheads.
-            //
-            // We increase the delay based on distance from centre, so the beatmaps the user is currently looking at load first.
-            float timeUpdatingBeforeLoad = 50 + Math.Abs(containingSsdq.Centre.Y - ScreenSpaceDrawQuad.Centre.Y) / containingSsdq.Height * 100;
+                // Using DelayedLoadWrappers would only allow us to load content when on screen, but we want to preload while off-screen
+                // to provide a better user experience.
+
+                // This is tracking time that this drawable is updating since the last pool.
+                // This is intended to provide a debounce so very fast scrolls (from one end to the other of the carousel)
+                // don't cause huge overheads.
+                //
+                // We increase the delay based on distance from centre, so the beatmaps the user is currently looking at load first.
+                timeUpdatingBeforeLoad = 50 + Math.Abs(containingSsdq.Centre.Y - ScreenSpaceDrawQuad.Centre.Y) / containingSsdq.Height * 100;
+            }
 
             Debug.Assert(Item != null);
 

@@ -4,6 +4,7 @@
 using System;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
+using osu.Game.Screens.Select.Carousel;
 
 namespace osu.Game.Screens.SelectV2
 {
@@ -23,7 +24,7 @@ namespace osu.Game.Screens.SelectV2
         /// </summary>
         public bool IsGroupHeader { get; set; }
 
-        public override float DrawHeight => IsGroupHeader ? 80 : 40;
+        public override float DrawHeight => IsGroupHeader ? DrawableCarouselBeatmapSet.HEIGHT : DrawableCarouselBeatmap.HEIGHT;
 
         public BeatmapCarouselItem(object model)
             : base(model)

@@ -14,7 +14,7 @@ using osuTK.Graphics;
 
 namespace osu.Game.Screens.SelectV2
 {
-    public partial class BeatmapCarouselPanel : PoolableDrawable, ICarouselPanel
+    public partial class BeatmapCarouselSetPanel : PoolableDrawable, ICarouselPanel
     {
         [Resolved]
         private BeatmapCarousel carousel { get; set; } = null!;
@@ -74,10 +74,13 @@ namespace osu.Game.Screens.SelectV2
 
             InternalChildren = new Drawable[]
             {
-                new DrawableCarouselBeatmap(new CarouselBeatmap((BeatmapInfo)Item.Model)
+                new DrawableCarouselBeatmapSet
                 {
-                    State = { Value = CarouselItemState.NotSelected }
-                })
+                    Item = new CarouselBeatmapSet((BeatmapSetInfo)Item.Model)
+                    {
+                        State = { Value = CarouselItemState.NotSelected }
+                    },
+                },
             };
 
             this.FadeInFromZero(500, Easing.OutQuint);
