@@ -24,12 +24,30 @@ namespace osu.Game.Screens.SelectV2
         {
             var criteria = getCriteria();
 
+            int starGroup = int.MinValue;
+
             if (criteria.SplitOutDifficulties)
             {
-                foreach (var item in items)
-                    ((BeatmapCarouselItem)item).HasGroupHeader = false;
+                var diffItems = new List<CarouselItem>(items.Count());
 
-                return items;
+                foreach (var item in items)
+                {
+                    var b = (BeatmapInfo)item.Model;
+
+                    if (b.StarRating > starGroup)
+                    {
+                        starGroup = (int)Math.Floor(b.StarRating);
+                        diffItems.Add(new BeatmapCarouselItem($"{starGroup} - {++starGroup} *")
+                        {
+                            IsGroupHeader = true
+                        });
+                    }
+
+                    ((BeatmapCarouselItem)item).HasGroupHeader = true;
+                    diffItems.Add(item);
+                }
+
+                return diffItems;
             }
 
             CarouselItem? lastItem = null;

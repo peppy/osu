@@ -10,12 +10,17 @@ using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Pooling;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
+using osu.Game.Graphics;
+using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Screens.Select;
+using osu.Game.Screens.Select.Carousel;
+using osuTK;
 
 namespace osu.Game.Screens.SelectV2
 {
@@ -63,6 +68,9 @@ namespace osu.Game.Screens.SelectV2
 
                 case BeatmapSetInfo:
                     return carouselSetPanelPool.Get();
+
+                case string s:
+                    return new GroupHeader(s);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(item));
@@ -118,5 +126,27 @@ namespace osu.Game.Screens.SelectV2
             await base.FilterAsync().ConfigureAwait(true);
             loading.Hide();
         }
+    }
+
+    public class GroupHeader : CompositeDrawable, ICarouselPanel
+    {
+        public GroupHeader(string s)
+        {
+            Size = new Vector2(200, DrawableCarouselBeatmapSet.HEIGHT);
+
+            InternalChildren = new Drawable[]
+            {
+                new OsuSpriteText
+                {
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreLeft,
+                    Text = s,
+                    Font = OsuFont.Default.With(size: 20, weight: FontWeight.Bold),
+                }
+            };
+        }
+
+        public double DrawYPosition { get; set; }
+        public CarouselItem? Item { get; set; }
     }
 }
