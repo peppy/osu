@@ -56,10 +56,15 @@ namespace osu.Game.Scoring
 
                     if (!parameters.Batch)
                     {
-                        // In the case of a missing beatmap, let's attempt to resolve it and show a prompt to the user to download the required beatmap.
-                        var req = new GetBeatmapRequest(new BeatmapInfo { MD5Hash = notFound.Hash });
-                        req.Success += res => PostNotification?.Invoke(new MissingBeatmapNotification(res, archive, notFound.Hash));
-                        api.Queue(req);
+                        if (api.HasLogin)
+                        {
+                            parameters.SuppressError = true;
+
+                            // In the case of a missing beatmap, let's attempt to resolve it and show a prompt to the user to download the required beatmap.
+                            var req = new GetBeatmapRequest(new BeatmapInfo { MD5Hash = notFound.Hash });
+                            req.Success += res => PostNotification?.Invoke(new MissingBeatmapNotification(res, archive, notFound.Hash));
+                            api.Queue(req);
+                        }
                     }
 
                     return null;

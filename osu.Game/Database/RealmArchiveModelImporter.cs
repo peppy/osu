@@ -159,8 +159,17 @@ namespace osu.Game.Database
                     }
                     else
                     {
-                        notification.Text = $"{HumanisedModelName.Humanize(LetterCasing.Title)} import failed! Check logs for more information.";
-                        notification.State = ProgressNotificationState.Cancelled;
+                        if (parameters.SuppressError)
+                        {
+                            // Assume this is handled elsewhere, and we don't want this notification polluting the feed.
+                            notification.State = ProgressNotificationState.Cancelled;
+                            notification.Close(false);
+                        }
+                        else
+                        {
+                            notification.Text = $"{HumanisedModelName.Humanize(LetterCasing.Title)} import failed! Check logs for more information.";
+                            notification.State = ProgressNotificationState.Cancelled;
+                        }
                     }
                 }
                 else

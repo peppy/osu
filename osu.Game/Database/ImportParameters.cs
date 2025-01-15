@@ -27,5 +27,13 @@ namespace osu.Game.Database
         /// This is useful for cases where an import <em>must</em> complete even if gameplay is in progress.
         /// </summary>
         public bool ImportImmediately { get; set; }
+
+        /// <summary>
+        /// Whether any errors should be suppressed on a failed import, presumably because it has been locally handled in a better way.
+        /// </summary>
+        /// <remarks>
+        /// This can be set at any point during the import process.
+        /// </remarks>
+        public bool SuppressError { get; set; }
     }
 }

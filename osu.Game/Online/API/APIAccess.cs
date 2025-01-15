@@ -75,7 +75,9 @@ namespace osu.Game.Online.API
         private Bindable<UserStatus?> configStatus { get; } = new Bindable<UserStatus?>();
         private Bindable<UserStatus?> localUserStatus { get; } = new Bindable<UserStatus?>();
 
-        protected bool HasLogin => authentication.Token.Value != null || (!string.IsNullOrEmpty(ProvidedUsername) && !string.IsNullOrEmpty(password));
+        public bool HasLogin => authentication.Token.Value != null || (!string.IsNullOrEmpty(ProvidedUsername) && !string.IsNullOrEmpty(password));
+
+        public bool IsLoggedIn => State.Value > APIState.Offline;
 
         private readonly CancellationTokenSource cancellationToken = new CancellationTokenSource();
 
@@ -568,8 +570,6 @@ namespace osu.Game.Online.API
                 flushQueue();
             }
         }
-
-        public bool IsLoggedIn => State.Value > APIState.Offline;
 
         public void Queue(APIRequest request)
         {

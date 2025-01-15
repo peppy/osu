@@ -46,6 +46,13 @@ namespace osu.Game.Online.API
         Guid SessionIdentifier { get; }
 
         /// <summary>
+        /// Returns whether the local user has a provided login.
+        /// </summary>
+        /// <remarks>
+        /// Unlike <see cref="IsLoggedIn"/>, this will be true before the API has had a chance to connect.</remarks>
+        bool HasLogin { get; }
+
+        /// <summary>
         /// Returns whether the local user is logged in.
         /// </summary>
         bool IsLoggedIn { get; }

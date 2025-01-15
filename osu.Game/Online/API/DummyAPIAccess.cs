@@ -42,6 +42,8 @@ namespace osu.Game.Online.API
         /// <seealso cref="APIAccess.IsLoggedIn"/>
         public bool IsLoggedIn => State.Value > APIState.Offline;
 
+        public bool HasLogin { get; private set; }
+
         public string ProvidedUsername => LocalUser.Value.Username;
 
         public string APIEndpointUrl => "http://localhost";
@@ -115,6 +117,7 @@ namespace osu.Game.Online.API
 
         public void Login(string username, string password)
         {
+            HasLogin = true;
             state.Value = APIState.Connecting;
 
             if (stayConnectingNextLogin)
@@ -180,6 +183,7 @@ namespace osu.Game.Online.API
 
         public void Logout()
         {
+            HasLogin = false;
             state.Value = APIState.Offline;
             // must happen after `state.Value` is changed such that subscribers to that bindable's value changes see the correct user.
             // compare: `APIAccess.Logout()`.
