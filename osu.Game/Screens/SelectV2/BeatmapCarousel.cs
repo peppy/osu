@@ -128,7 +128,7 @@ namespace osu.Game.Screens.SelectV2
         }
     }
 
-    public class GroupHeader : CompositeDrawable, ICarouselPanel
+    public partial class GroupHeader : CompositeDrawable, ICarouselPanel
     {
         public GroupHeader(string s)
         {
