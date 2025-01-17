@@ -37,6 +37,7 @@ namespace osu.Game.Screens.SelectV2
 
         private readonly BindableBool selected = new BindableBool();
         private CarouselItem? item;
+        private Box activationFlash = null!;
 
         [BackgroundDependencyLoader]
         private void load()
@@ -77,6 +78,14 @@ namespace osu.Game.Screens.SelectV2
                 new Box
                 {
                     Colour = (Item.Model is BeatmapInfo ? Color4.Aqua : Color4.Yellow).Darken(5),
+                    Alpha = 0.8f,
+                    RelativeSizeAxes = Axes.Both,
+                },
+                activationFlash = new Box
+                {
+                    Colour = Color4.White,
+                    Blending = BlendingParameters.Additive,
+                    Alpha = 0,
                     RelativeSizeAxes = Axes.Both,
                 },
                 new OsuSpriteText
@@ -94,9 +103,15 @@ namespace osu.Game.Screens.SelectV2
         protected override bool OnClick(ClickEvent e)
         {
             carousel.CurrentSelection = Item!.Model;
+            carousel.ActivateSelection();
             return true;
         }
 
         public double DrawYPosition { get; set; }
+
+        public void FlashFromActivation()
+        {
+            activationFlash.FadeOutFromOne(500, Easing.OutQuint);
+        }
     }
 }
