@@ -12,7 +12,17 @@ namespace osu.Game.Screens.SelectV2
     /// </summary>
     public abstract class CarouselItem : IComparable<CarouselItem>
     {
+        /// <summary>
+        /// Whether this item has selection.
+        /// This is managed by <see cref="Carousel{T}"/> and should not be set manually.
+        /// </summary>
         public readonly BindableBool Selected = new BindableBool();
+
+        /// <summary>
+        /// Whether this item has keyboard selection.
+        /// This is managed by <see cref="Carousel{T}"/> and should not be set manually.
+        /// </summary>
+        public readonly BindableBool KeyboardSelected = new BindableBool();
 
         /// <summary>
         /// The model this item is representing.
@@ -20,7 +30,8 @@ namespace osu.Game.Screens.SelectV2
         public readonly object Model;
 
         /// <summary>
-        /// The current Y position in the carousel. This is managed by <see cref="Carousel{T}"/> and should not be set manually.
+        /// The current Y position in the carousel.
+        /// This is managed by <see cref="Carousel{T}"/> and should not be set manually.
         /// </summary>
         public double CarouselYPosition { get; set; }
 
