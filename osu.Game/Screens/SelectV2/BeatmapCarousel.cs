@@ -53,7 +53,7 @@ namespace osu.Game.Screens.SelectV2
 
         protected override Drawable GetDrawableForDisplay(CarouselItem item) => carouselPanelPool.Get();
 
-        protected override CarouselItem CreateCarouselItemForModel(BeatmapInfo model) => new BeatmapCarouselItem(model);
+        protected override CarouselItem CreateCarouselItemForModel(BeatmapInfo model) => new CarouselItem(model);
 
         protected override void HandleItemDeselected(List<CarouselItem> allItems, CarouselItem item)
         {

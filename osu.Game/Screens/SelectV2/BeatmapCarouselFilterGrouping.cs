@@ -31,7 +31,7 @@ namespace osu.Game.Screens.SelectV2
                 foreach (var item in items)
                 {
                     item.IsVisible = true;
-                    ((BeatmapCarouselItem)item).IsGroupSelectionTarget = true;
+                    item.IsGroupSelectionTarget = true;
                 }
 
                 return items;
@@ -50,9 +50,9 @@ namespace osu.Game.Screens.SelectV2
                     // Add set header
                     if (lastItem == null || (lastItem.Model is BeatmapInfo b2 && b2.BeatmapSet!.OnlineID != b.BeatmapSet!.OnlineID))
                     {
-                        newItems.Add(new BeatmapCarouselItem(b.BeatmapSet!)
+                        newItems.Add(new CarouselItem(b.BeatmapSet!)
                         {
-                            IsGroupHeader = true,
+                            IsHeader = true,
                             IsGroupSelectionTarget = true
                         });
                     }

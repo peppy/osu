@@ -476,7 +476,7 @@ namespace osu.Game.Screens.SelectV2
 
         private DisplayRange? displayedRange;
 
-        private readonly CarouselItem carouselBoundsItem = new BoundsCarouselItem();
+        private readonly CarouselItem carouselBoundsItem = new CarouselItem(new object());
 
         /// <summary>
         /// The position of the lower visible bound with respect to the current scroll position.
@@ -768,16 +768,6 @@ namespace osu.Game.Screens.SelectV2
             private void endAbsoluteScrolling() => absoluteScrolling = false;
 
             #endregion
-        }
-
-        private class BoundsCarouselItem : CarouselItem
-        {
-            public override float DrawHeight => 0;
-
-            public BoundsCarouselItem()
-                : base(new object())
-            {
-            }
         }
 
         #endregion

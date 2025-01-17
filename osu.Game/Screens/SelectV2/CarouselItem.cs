@@ -9,7 +9,7 @@ namespace osu.Game.Screens.SelectV2
     /// Represents a single display item for display in a <see cref="Carousel{T}"/>.
     /// This is used to house information related to the attached model that helps with display and tracking.
     /// </summary>
-    public abstract class CarouselItem : IComparable<CarouselItem>
+    public sealed class CarouselItem : IComparable<CarouselItem>
     {
         /// <summary>
         /// The model this item is representing.
@@ -25,7 +25,13 @@ namespace osu.Game.Screens.SelectV2
         /// <summary>
         /// The height this item will take when displayed.
         /// </summary>
-        public abstract float DrawHeight { get; }
+        public float DrawHeight => IsHeader ? 80 : 40;
+
+        /// <summary>
+        /// Whether this item is a group header.
+        /// Group headers are generally larger in display. Setting this will account for the size difference.
+        /// </summary>
+        public bool IsHeader { get; set; }
 
         /// <summary>
         /// Whether this item should be a valid target for user group selection hotkeys.
@@ -37,7 +43,7 @@ namespace osu.Game.Screens.SelectV2
         /// </summary>
         public bool IsVisible { get; set; } = true;
 
-        protected CarouselItem(object model)
+        public CarouselItem(object model)
         {
             Model = model;
         }
