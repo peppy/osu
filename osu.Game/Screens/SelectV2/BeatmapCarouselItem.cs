@@ -19,11 +19,6 @@ namespace osu.Game.Screens.SelectV2
 
         public override float DrawHeight => IsGroupHeader ? 80 : 40;
 
-        public override void Activate()
-        {
-            // If we are a group, we should expand on activation.
-        }
-
         public BeatmapCarouselItem(object model)
             : base(model)
         {

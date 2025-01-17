@@ -108,7 +108,13 @@ namespace osu.Game.Screens.SelectV2
         /// <summary>
         /// Activate the current selection, if a selection exists.
         /// </summary>
-        public void ActivateSelection() => currentSelectionCarouselItem?.Activate();
+        public void ActivateSelection()
+        {
+            if (currentSelectionCarouselItem == null)
+                return;
+
+            HandleItemActivated(currentSelectionCarouselItem);
+        }
 
         #endregion
 
@@ -157,6 +163,19 @@ namespace osu.Game.Screens.SelectV2
         /// <param name="model">The model.</param>
         /// <returns>A <see cref="CarouselItem"/> representing the model.</returns>
         protected abstract CarouselItem CreateCarouselItemForModel(T model);
+
+        /// <summary>
+        /// Called when an item is "activated".
+        /// </summary>
+        /// <remarks>
+        /// An activated item should for instance:
+        /// - Open or close a folder
+        /// - Start gameplay on a beatmap difficulty.
+        /// </remarks>
+        /// <param name="item"></param>
+        protected virtual void HandleItemActivated(CarouselItem item)
+        {
+        }
 
         #endregion
 
@@ -283,27 +302,44 @@ namespace osu.Game.Screens.SelectV2
 
         protected bool SelectNext(int direction, bool isGroupSelection)
         {
-            // For this to work, we need to have a valid selection.
-            currentSelection ??= displayedCarouselItems?.FirstOrDefault();
-
-            if (currentSelectionCarouselItem == null || displayedCarouselItems == null)
+            if (displayedCarouselItems == null || displayedCarouselItems.Count == 0)
                 return false;
 
-            int currentSelectionIndex = displayedCarouselItems.IndexOf(currentSelectionCarouselItem);
+            CarouselItem? originalItem = currentSelectionCarouselItem;
+
+            // To keep things simple, let's first handle the cases where there's no selection yet.
+            // Once we've confirmed that the first or last isn't valid, we can handle everything
+            // using the same process.
+            if (originalItem == null)
+            {
+                originalItem = direction > 0
+                    ? displayedCarouselItems.First()
+                    : displayedCarouselItems.Last();
+
+                if (isValidItem(originalItem))
+                {
+                    performSelection(originalItem);
+                    return true;
+                }
+            }
+
+            int currentSelectionIndex = displayedCarouselItems.IndexOf(originalItem);
             int newSelectionIndex = currentSelectionIndex;
+
             Debug.Assert(currentSelectionIndex >= 0);
 
             CarouselItem newItem;
 
-            while ((newItem = selectNextPanel()) != currentSelectionCarouselItem)
+            while ((newItem = selectNextPanel()) != originalItem)
             {
-                if (!isGroupSelection || newItem.IsGroupSelectionTarget)
+                if (isValidItem(newItem))
                     break;
             }
 
-            CurrentSelection = newItem.Model;
-            if (isGroupSelection)
-                ActivateSelection();
+            if (newItem == originalItem)
+                return false;
+
+            performSelection(newItem);
             return true;
 
             CarouselItem selectNextPanel()
@@ -311,6 +347,15 @@ namespace osu.Game.Screens.SelectV2
                 newSelectionIndex += direction;
                 return newItem = displayedCarouselItems[(newSelectionIndex + displayedCarouselItems.Count) % displayedCarouselItems.Count];
             }
+
+            void performSelection(CarouselItem item)
+            {
+                CurrentSelection = item.Model;
+                if (isGroupSelection)
+                    ActivateSelection();
+            }
+
+            bool isValidItem(CarouselItem item) => !isGroupSelection || item.IsGroupSelectionTarget;
         }
 
         #endregion
