@@ -191,6 +191,13 @@ namespace osu.Game.Screens.SelectV2
         {
         }
 
+        /// <summary>
+        /// Called when an item is "selected".
+        /// </summary>
+        protected virtual void HandleItemSelected(CarouselItem item, Drawable? drawableItem)
+        {
+        }
+
         #endregion
 
         #region Initialisation
@@ -352,6 +359,14 @@ namespace osu.Game.Screens.SelectV2
             int currentSelectionIndex = displayedCarouselItems.IndexOf(originalItem);
             int newSelectionIndex = currentSelectionIndex;
 
+            // As a second special case, if we're group selecting backwards and the current selection isn't
+            // a group, base this selection operation from the closest previous group.
+            if (isGroupSelection && direction < 0)
+            {
+                while (!displayedCarouselItems[newSelectionIndex].IsGroupSelectionTarget)
+                    newSelectionIndex--;
+            }
+
             Debug.Assert(currentSelectionIndex >= 0);
 
             CarouselItem newItem;
@@ -430,7 +445,13 @@ namespace osu.Game.Screens.SelectV2
                 }
 
                 if (isSelected)
-                    currentSelectionCarouselItem = item;
+                {
+                    if (item != currentSelectionCarouselItem)
+                    {
+                        currentSelectionCarouselItem = item;
+                        HandleItemSelected(item, scroll.Panels.SingleOrDefault(p => ((ICarouselPanel)p).Item == currentSelectionCarouselItem));
+                    }
+                }
             }
         }
 
