@@ -22,10 +22,34 @@ namespace osu.Game.Screens.SelectV2
         private BeatmapCarousel carousel { get; set; } = null!;
 
         private Box activationFlash = null!;
+        private Box background = null!;
+        private OsuSpriteText text = null!;
 
         [BackgroundDependencyLoader]
         private void load()
         {
+            InternalChildren = new Drawable[]
+            {
+                background = new Box
+                {
+                    Alpha = 0.8f,
+                    RelativeSizeAxes = Axes.Both,
+                },
+                activationFlash = new Box
+                {
+                    Colour = Color4.White,
+                    Blending = BlendingParameters.Additive,
+                    Alpha = 0,
+                    RelativeSizeAxes = Axes.Both,
+                },
+                text = new OsuSpriteText
+                {
+                    Padding = new MarginPadding(5),
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreLeft,
+                }
+            };
+
             Selected.BindValueChanged(value =>
             {
                 activationFlash.FadeTo(value.NewValue ? 0.2f : 0, 500, Easing.OutQuint);
@@ -62,29 +86,8 @@ namespace osu.Game.Screens.SelectV2
             Size = new Vector2(500, Item.DrawHeight);
             Masking = true;
 
-            InternalChildren = new Drawable[]
-            {
-                new Box
-                {
-                    Colour = (Item.Model is BeatmapInfo ? Color4.Aqua : Color4.Yellow).Darken(5),
-                    Alpha = 0.8f,
-                    RelativeSizeAxes = Axes.Both,
-                },
-                activationFlash = new Box
-                {
-                    Colour = Color4.White,
-                    Blending = BlendingParameters.Additive,
-                    Alpha = 0,
-                    RelativeSizeAxes = Axes.Both,
-                },
-                new OsuSpriteText
-                {
-                    Text = Item.ToString() ?? string.Empty,
-                    Padding = new MarginPadding(5),
-                    Anchor = Anchor.CentreLeft,
-                    Origin = Anchor.CentreLeft,
-                }
-            };
+            background.Colour = (Item.Model is BeatmapInfo ? Color4.Aqua : Color4.Yellow).Darken(5);
+            text.Text = Item.ToString() ?? string.Empty;
 
             this.FadeInFromZero(500, Easing.OutQuint);
         }
