@@ -28,7 +28,7 @@ namespace osu.Game.Screens.SelectV2
     /// A highly efficient vertical list display that is used primarily for the song select screen,
     /// but flexible enough to be used for other use cases.
     /// </summary>
-    public abstract partial class Carousel<T> : CompositeDrawable
+    public abstract partial class Carousel<T> : CompositeDrawable, IKeyBindingHandler<GlobalAction>
     {
         #region Properties and methods for external usage
 
@@ -91,6 +91,9 @@ namespace osu.Game.Screens.SelectV2
             get => currentSelection;
             set
             {
+                if (currentSelection == value)
+                    return;
+
                 if (currentSelectionCarouselItem != null)
                     currentSelectionCarouselItem.Selected.Value = false;
 
@@ -101,6 +104,11 @@ namespace osu.Game.Screens.SelectV2
                 updateSelection();
             }
         }
+
+        /// <summary>
+        /// Activate the current selection, if a selection exists.
+        /// </summary>
+        public void ActivateSelection() => currentSelectionCarouselItem?.Activate();
 
         #endregion
 
@@ -240,6 +248,70 @@ namespace osu.Game.Screens.SelectV2
                 yPos += item.DrawHeight + SpacingBetweenPanels;
             }
         }, cancellationToken).ConfigureAwait(false);
+
+        #endregion
+
+        #region Input handling
+
+        public bool OnPressed(KeyBindingPressEvent<GlobalAction> e)
+        {
+            switch (e.Action)
+            {
+                case GlobalAction.SelectNext:
+                    SelectNext(1, isGroupSelection: false);
+                    return true;
+
+                case GlobalAction.SelectNextGroup:
+                    SelectNext(1, isGroupSelection: true);
+                    return true;
+
+                case GlobalAction.SelectPrevious:
+                    SelectNext(-1, isGroupSelection: false);
+                    return true;
+
+                case GlobalAction.SelectPreviousGroup:
+                    SelectNext(-1, isGroupSelection: true);
+                    return true;
+            }
+
+            return false;
+        }
+
+        public void OnReleased(KeyBindingReleaseEvent<GlobalAction> e)
+        {
+        }
+
+        protected bool SelectNext(int direction, bool isGroupSelection)
+        {
+            // For this to work, we need to have a valid selection.
+            currentSelection ??= displayedCarouselItems?.FirstOrDefault();
+
+            if (currentSelectionCarouselItem == null || displayedCarouselItems == null)
+                return false;
+
+            int currentSelectionIndex = displayedCarouselItems.IndexOf(currentSelectionCarouselItem);
+            int newSelectionIndex = currentSelectionIndex;
+            Debug.Assert(currentSelectionIndex >= 0);
+
+            CarouselItem newItem;
+
+            while ((newItem = selectNextPanel()) != currentSelectionCarouselItem)
+            {
+                if (!isGroupSelection || newItem.IsGroupSelectionTarget)
+                    break;
+            }
+
+            CurrentSelection = newItem.Model;
+            if (isGroupSelection)
+                ActivateSelection();
+            return true;
+
+            CarouselItem selectNextPanel()
+            {
+                newSelectionIndex += direction;
+                return newItem = displayedCarouselItems[(newSelectionIndex + displayedCarouselItems.Count) % displayedCarouselItems.Count];
+            }
+        }
 
         #endregion
 

@@ -27,7 +27,7 @@ namespace osu.Game.Screens.SelectV2
             if (criteria.SplitOutDifficulties)
             {
                 foreach (var item in items)
-                    ((BeatmapCarouselItem)item).HasGroupHeader = false;
+                    ((BeatmapCarouselItem)item).IsGroupSelectionTarget = true;
 
                 return items;
             }
@@ -44,14 +44,20 @@ namespace osu.Game.Screens.SelectV2
                 {
                     // Add set header
                     if (lastItem == null || (lastItem.Model is BeatmapInfo b2 && b2.BeatmapSet!.OnlineID != b.BeatmapSet!.OnlineID))
-                        newItems.Add(new BeatmapCarouselItem(b.BeatmapSet!) { IsGroupHeader = true });
+                    {
+                        newItems.Add(new BeatmapCarouselItem(b.BeatmapSet!)
+                        {
+                            IsGroupHeader = true,
+                            IsGroupSelectionTarget = true
+                        });
+                    }
                 }
 
                 newItems.Add(item);
                 lastItem = item;
 
                 var beatmapCarouselItem = (BeatmapCarouselItem)item;
-                beatmapCarouselItem.HasGroupHeader = true;
+                beatmapCarouselItem.IsGroupSelectionTarget = false;
             }
 
             return newItems;

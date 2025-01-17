@@ -12,12 +12,6 @@ namespace osu.Game.Screens.SelectV2
         public readonly Guid ID;
 
         /// <summary>
-        /// Whether this item has a header providing extra information for it.
-        /// When displaying items which don't have header, we should make sure enough information is included inline.
-        /// </summary>
-        public bool HasGroupHeader { get; set; }
-
-        /// <summary>
         /// Whether this item is a group header.
         /// Group headers are generally larger in display. Setting this will account for the size difference.
         /// </summary>
@@ -25,10 +19,19 @@ namespace osu.Game.Screens.SelectV2
 
         public override float DrawHeight => IsGroupHeader ? 80 : 40;
 
+        public override void Activate()
+        {
+            // If we are a group, we should expand on activation.
+        }
+
         public BeatmapCarouselItem(object model)
             : base(model)
         {
             ID = (Model as IHasGuidPrimaryKey)?.ID ?? Guid.NewGuid();
+
+            // This would be true for beatmap set headers in general..
+            // unless we have no set headers, at which point difficulties become group targets.
+            IsGroupSelectionTarget = IsGroupHeader;
         }
 
         public override string? ToString()
