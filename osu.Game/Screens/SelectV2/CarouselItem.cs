@@ -29,6 +29,11 @@ namespace osu.Game.Screens.SelectV2
         /// </summary>
         public abstract float DrawHeight { get; }
 
+        /// <summary>
+        /// Whether this item should be a valid target for user group selection hotkeys.
+        /// </summary>
+        public bool IsGroupSelectionTarget { get; set; }
+
         protected CarouselItem(object model)
         {
             Model = model;
@@ -40,5 +45,11 @@ namespace osu.Game.Screens.SelectV2
 
             return CarouselYPosition.CompareTo(other.CarouselYPosition);
         }
+
+        /// <summary>
+        /// Signal that this item has been activated.
+        /// For example, a group would expand or contract on activation.
+        /// </summary>
+        public virtual void Activate() { }
     }
 }
