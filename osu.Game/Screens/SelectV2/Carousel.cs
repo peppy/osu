@@ -98,9 +98,10 @@ namespace osu.Game.Screens.SelectV2
                     currentSelectionCarouselItem.Selected.Value = false;
 
                 currentSelection = value;
+                currentKeyboardSelectionCarouselItem = value;
 
                 currentSelectionCarouselItem = null;
-                currentSelectionYPosition = null;
+                currentKeyboardSelectionYPosition = null;
                 updateSelection();
                 scrollToSelection();
             }
@@ -356,9 +357,13 @@ namespace osu.Game.Screens.SelectV2
 
             void performSelection(CarouselItem item)
             {
-                CurrentSelection = item.Model;
                 if (isGroupSelection)
+                {
+                    CurrentSelection = item.Model;
                     ActivateSelection();
+                }
+                else
+                    currentKeyboardSelectionCarouselItem = item.Model;
             }
 
             bool isValidItem(CarouselItem item) => !isGroupSelection || item.IsGroupSelectionTarget;
@@ -368,9 +373,11 @@ namespace osu.Game.Screens.SelectV2
 
         #region Selection handling
 
+        private object? currentKeyboardSelectionCarouselItem;
+        private double? currentKeyboardSelectionYPosition;
+
         private object? currentSelection;
         private CarouselItem? currentSelectionCarouselItem;
-        private double? currentSelectionYPosition;
 
         private void updateSelection()
         {
@@ -381,21 +388,27 @@ namespace osu.Game.Screens.SelectV2
             foreach (var item in displayedCarouselItems)
             {
                 bool isSelected = item.Model == currentSelection;
+                bool isKeyboardSelected = item.Model == currentKeyboardSelectionCarouselItem;
+
+                if (isKeyboardSelected)
+                {
+                    currentKeyboardSelectionCarouselItem = item;
+
+                    if (currentKeyboardSelectionYPosition != item.CarouselYPosition)
+                    {
+                        if (currentKeyboardSelectionYPosition != null)
+                        {
+                            float adjustment = (float)(item.CarouselYPosition - currentKeyboardSelectionYPosition.Value);
+                            scroll.OffsetScrollPosition(adjustment);
+                        }
+
+                        currentKeyboardSelectionYPosition = item.CarouselYPosition;
+                    }
+                }
 
                 if (isSelected)
                 {
                     currentSelectionCarouselItem = item;
-
-                    if (currentSelectionYPosition != item.CarouselYPosition)
-                    {
-                        if (currentSelectionYPosition != null)
-                        {
-                            float adjustment = (float)(item.CarouselYPosition - currentSelectionYPosition.Value);
-                            scroll.OffsetScrollPosition(adjustment);
-                        }
-
-                        currentSelectionYPosition = item.CarouselYPosition;
-                    }
                 }
 
                 item.Selected.Value = isSelected;
@@ -404,8 +417,8 @@ namespace osu.Game.Screens.SelectV2
 
         private void scrollToSelection()
         {
-            if (currentSelectionYPosition != null)
-                scroll.ScrollTo(currentSelectionYPosition.Value - visibleHalfHeight);
+            if (currentKeyboardSelectionYPosition != null)
+                scroll.ScrollTo(currentKeyboardSelectionYPosition.Value - visibleHalfHeight);
         }
 
         #endregion
