@@ -109,6 +109,9 @@ namespace osu.Game.Screens.SelectV2
 
                 updateSelection();
                 scrollToSelection();
+
+                // TODO: hidden values may have changed. this isn't a great way of handling.
+                displayedRange = null;
             }
         }
 
@@ -194,7 +197,7 @@ namespace osu.Game.Screens.SelectV2
         /// <summary>
         /// Called when an item is "selected".
         /// </summary>
-        protected virtual void HandleItemSelected(CarouselItem item, Drawable? drawableItem)
+        protected virtual void HandleItemSelected(List<CarouselItem> allItems, CarouselItem item, Drawable? drawableItem)
         {
         }
 
@@ -278,13 +281,17 @@ namespace osu.Game.Screens.SelectV2
             void log(string text) => Logger.Log($"Carousel[op {cts.GetHashCode().ToString()}] {stopwatch.ElapsedMilliseconds} ms: {text}");
         }
 
-        private async Task updateYPositions(IEnumerable<CarouselItem> carouselItems, CancellationToken cancellationToken) => await Task.Run(() =>
+        protected async Task updateYPositions(IEnumerable<CarouselItem> carouselItems, CancellationToken cancellationToken) => await Task.Run(() =>
         {
             float yPos = visibleHalfHeight;
 
             foreach (var item in carouselItems)
             {
                 item.CarouselYPosition = yPos;
+
+                if (!item.IsVisible)
+                    continue;
+
                 yPos += item.DrawHeight + SpacingBetweenPanels;
             }
         }, cancellationToken).ConfigureAwait(false);
@@ -402,7 +409,7 @@ namespace osu.Game.Screens.SelectV2
                 }
             }
 
-            bool isValidItem(CarouselItem item) => !isGroupSelection || item.IsGroupSelectionTarget;
+            bool isValidItem(CarouselItem item) => item.IsVisible && (!isGroupSelection || item.IsGroupSelectionTarget);
         }
 
         #endregion
@@ -449,7 +456,7 @@ namespace osu.Game.Screens.SelectV2
                     if (item != currentSelectionCarouselItem)
                     {
                         currentSelectionCarouselItem = item;
-                        HandleItemSelected(item, scroll.Panels.SingleOrDefault(p => ((ICarouselPanel)p).Item == currentSelectionCarouselItem));
+                        HandleItemSelected(displayedCarouselItems, item, scroll.Panels.SingleOrDefault(p => ((ICarouselPanel)p).Item == currentSelectionCarouselItem));
                     }
                 }
             }
@@ -565,6 +572,9 @@ namespace osu.Game.Screens.SelectV2
             List<CarouselItem> toDisplay = range.Last - range.First == 0
                 ? new List<CarouselItem>()
                 : displayedCarouselItems.GetRange(range.First, range.Last - range.First + 1);
+
+            // TODO: make more efficient
+            toDisplay.RemoveAll(i => !i.IsVisible);
 
             // Iterate over all panels which are already displayed and figure which need to be displayed / removed.
             foreach (var panel in scroll.Panels)

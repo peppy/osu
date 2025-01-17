@@ -27,7 +27,10 @@ namespace osu.Game.Screens.SelectV2
             if (criteria.SplitOutDifficulties)
             {
                 foreach (var item in items)
+                {
+                    item.IsVisible = true;
                     ((BeatmapCarouselItem)item).IsGroupSelectionTarget = true;
+                }
 
                 return items;
             }
@@ -56,8 +59,8 @@ namespace osu.Game.Screens.SelectV2
                 newItems.Add(item);
                 lastItem = item;
 
-                var beatmapCarouselItem = (BeatmapCarouselItem)item;
-                beatmapCarouselItem.IsGroupSelectionTarget = false;
+                item.IsGroupSelectionTarget = false;
+                item.IsVisible = false;
             }
 
             return newItems;
