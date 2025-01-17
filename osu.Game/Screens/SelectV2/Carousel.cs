@@ -83,7 +83,6 @@ namespace osu.Game.Screens.SelectV2
         /// The currently selected model.
         /// </summary>
         /// <remarks>
-        /// Setting this will ensure <see cref="CarouselItem.Selected"/> is set to <c>true</c> only on the matching <see cref="CarouselItem"/>.
         /// Of note, if no matching item exists all items will be deselected while waiting for potential new item which matches.
         /// </remarks>
         public virtual object? CurrentSelection
@@ -94,14 +93,20 @@ namespace osu.Game.Screens.SelectV2
                 if (currentSelection == value)
                     return;
 
-                if (currentSelectionCarouselItem != null)
-                    currentSelectionCarouselItem.Selected.Value = false;
+                if (scroll.Panels.SingleOrDefault(p => ((ICarouselPanel)p).Item == currentSelectionCarouselItem) is ICarouselPanel d)
+                {
+                    d.Selected.Value = false;
+                    d.KeyboardSelected.Value = false;
+                }
 
                 currentSelection = value;
-                currentKeyboardSelectionCarouselItem = value;
+                currentKeyboardSelection = value;
 
                 currentSelectionCarouselItem = null;
+                currentKeyboardSelectionCarouselItem = null;
+
                 currentKeyboardSelectionYPosition = null;
+
                 updateSelection();
                 scrollToSelection();
             }
@@ -114,6 +119,12 @@ namespace osu.Game.Screens.SelectV2
         {
             if (currentSelectionCarouselItem == null)
                 return;
+
+            if (currentSelectionCarouselItem != currentKeyboardSelectionCarouselItem)
+            {
+                CurrentSelection = currentKeyboardSelection;
+                return;
+            }
 
             HandleItemActivated(currentSelectionCarouselItem, scroll.Panels.SingleOrDefault(p => ((ICarouselPanel)p).Item == currentSelectionCarouselItem));
         }
@@ -312,7 +323,7 @@ namespace osu.Game.Screens.SelectV2
             if (displayedCarouselItems == null || displayedCarouselItems.Count == 0)
                 return false;
 
-            CarouselItem? originalItem = currentSelectionCarouselItem;
+            CarouselItem? originalItem = currentKeyboardSelectionCarouselItem;
 
             // To keep things simple, let's first handle the cases where there's no selection yet.
             // Once we've confirmed that the first or last isn't valid, we can handle everything
@@ -328,6 +339,14 @@ namespace osu.Game.Screens.SelectV2
                     performSelection(originalItem);
                     return true;
                 }
+            }
+
+            // As a special case, if the user has a different keyboard selection and requests
+            // group selection, first transfer the keyboard selection.
+            if (isGroupSelection && currentSelectionCarouselItem != originalItem)
+            {
+                CurrentSelection = originalItem.Model;
+                return true;
             }
 
             int currentSelectionIndex = displayedCarouselItems.IndexOf(originalItem);
@@ -360,10 +379,12 @@ namespace osu.Game.Screens.SelectV2
                 if (isGroupSelection)
                 {
                     CurrentSelection = item.Model;
-                    ActivateSelection();
                 }
                 else
-                    currentKeyboardSelectionCarouselItem = item.Model;
+                {
+                    currentKeyboardSelection = item.Model;
+                    updateSelection();
+                }
             }
 
             bool isValidItem(CarouselItem item) => !isGroupSelection || item.IsGroupSelectionTarget;
@@ -373,7 +394,8 @@ namespace osu.Game.Screens.SelectV2
 
         #region Selection handling
 
-        private object? currentKeyboardSelectionCarouselItem;
+        private object? currentKeyboardSelection;
+        private CarouselItem? currentKeyboardSelectionCarouselItem;
         private double? currentKeyboardSelectionYPosition;
 
         private object? currentSelection;
@@ -382,13 +404,14 @@ namespace osu.Game.Screens.SelectV2
         private void updateSelection()
         {
             currentSelectionCarouselItem = null;
+            currentKeyboardSelectionCarouselItem = null;
 
             if (displayedCarouselItems == null) return;
 
             foreach (var item in displayedCarouselItems)
             {
                 bool isSelected = item.Model == currentSelection;
-                bool isKeyboardSelected = item.Model == currentKeyboardSelectionCarouselItem;
+                bool isKeyboardSelected = item.Model == currentKeyboardSelection;
 
                 if (isKeyboardSelected)
                 {
@@ -407,11 +430,7 @@ namespace osu.Game.Screens.SelectV2
                 }
 
                 if (isSelected)
-                {
                     currentSelectionCarouselItem = item;
-                }
-
-                item.Selected.Value = isSelected;
             }
         }
 
@@ -477,6 +496,9 @@ namespace osu.Game.Screens.SelectV2
                 float dist = Math.Abs(1f - posInScroll.Y / visibleHalfHeight);
 
                 panel.X = offsetX(dist, visibleHalfHeight);
+
+                c.Selected.Value = c.Item == currentSelectionCarouselItem;
+                c.KeyboardSelected.Value = c.Item == currentKeyboardSelectionCarouselItem;
             }
         }
 

@@ -21,28 +21,17 @@ namespace osu.Game.Screens.SelectV2
         [Resolved]
         private BeatmapCarousel carousel { get; set; } = null!;
 
-        public CarouselItem? Item
-        {
-            get => item;
-            set
-            {
-                item = value;
-
-                selected.UnbindBindings();
-
-                if (item != null)
-                    selected.BindTo(item.Selected);
-            }
-        }
-
-        private readonly BindableBool selected = new BindableBool();
-        private CarouselItem? item;
         private Box activationFlash = null!;
 
         [BackgroundDependencyLoader]
         private void load()
         {
-            selected.BindValueChanged(value =>
+            Selected.BindValueChanged(value =>
+            {
+                activationFlash.FadeTo(value.NewValue ? 0.2f : 0, 500, Easing.OutQuint);
+            });
+
+            KeyboardSelected.BindValueChanged(value =>
             {
                 if (value.NewValue)
                 {
@@ -102,10 +91,16 @@ namespace osu.Game.Screens.SelectV2
 
         protected override bool OnClick(ClickEvent e)
         {
-            carousel.CurrentSelection = Item!.Model;
-            carousel.ActivateSelection();
+            if (carousel.CurrentSelection == Item!.Model)
+                carousel.ActivateSelection();
+            else
+                carousel.CurrentSelection = Item!.Model;
             return true;
         }
+
+        public CarouselItem? Item { get; set; }
+        public BindableBool Selected { get; } = new BindableBool();
+        public BindableBool KeyboardSelected { get; } = new BindableBool();
 
         public double DrawYPosition { get; set; }
 
