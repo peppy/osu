@@ -53,6 +53,14 @@ namespace osu.Game.Screens.SelectV2
 
         protected override CarouselItem CreateCarouselItemForModel(BeatmapInfo model) => new BeatmapCarouselItem(model);
 
+        protected override void HandleItemActivated(CarouselItem item, Drawable? drawableItem)
+        {
+            base.HandleItemActivated(item, drawableItem);
+
+            if (drawableItem is BeatmapCarouselPanel drawable)
+                drawable.FlashFromActivation();
+        }
+
         private void beatmapSetsChanged(object? beatmaps, NotifyCollectionChangedEventArgs changed)
         {
             // TODO: moving management of BeatmapInfo tracking to BeatmapStore might be something we want to consider.

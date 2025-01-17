@@ -114,7 +114,7 @@ namespace osu.Game.Screens.SelectV2
             if (currentSelectionCarouselItem == null)
                 return;
 
-            HandleItemActivated(currentSelectionCarouselItem);
+            HandleItemActivated(currentSelectionCarouselItem, scroll.Panels.SingleOrDefault(p => ((ICarouselPanel)p).Item == currentSelectionCarouselItem));
         }
 
         #endregion
@@ -173,8 +173,9 @@ namespace osu.Game.Screens.SelectV2
         /// - Open or close a folder
         /// - Start gameplay on a beatmap difficulty.
         /// </remarks>
-        /// <param name="item"></param>
-        protected virtual void HandleItemActivated(CarouselItem item)
+        /// <param name="item">The carousel item which was activated.</param>
+        /// <param name="drawableItem">The drawable representation of the item, if manifested.</param>
+        protected virtual void HandleItemActivated(CarouselItem item, Drawable? drawableItem)
         {
         }
 
@@ -277,6 +278,10 @@ namespace osu.Game.Screens.SelectV2
         {
             switch (e.Action)
             {
+                case GlobalAction.Select:
+                    ActivateSelection();
+                    return true;
+
                 case GlobalAction.SelectNext:
                     SelectNext(1, isGroupSelection: false);
                     return true;
