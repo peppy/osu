@@ -45,11 +45,5 @@ namespace osu.Game.Screens.SelectV2
 
             return CarouselYPosition.CompareTo(other.CarouselYPosition);
         }
-
-        /// <summary>
-        /// Signal that this item has been activated.
-        /// For example, a group would expand or contract on activation.
-        /// </summary>
-        public virtual void Activate() { }
     }
 }
