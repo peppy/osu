@@ -55,6 +55,15 @@ namespace osu.Game.Screens.SelectV2
 
         protected override CarouselItem CreateCarouselItemForModel(BeatmapInfo model) => new BeatmapCarouselItem(model);
 
+        protected override void HandleItemSelected(CarouselItem item, Drawable? drawableItem)
+        {
+            base.HandleItemSelected(item, drawableItem);
+
+            // Selecting a set isn't valid – let's re-select the first difficulty.
+            if (item.Model is BeatmapSetInfo setInfo)
+                CurrentSelection = setInfo.Beatmaps.First();
+        }
+
         protected override void HandleItemActivated(CarouselItem item, Drawable? drawableItem)
         {
             base.HandleItemActivated(item, drawableItem);
