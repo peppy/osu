@@ -102,6 +102,7 @@ namespace osu.Game.Screens.SelectV2
                 currentSelectionCarouselItem = null;
                 currentSelectionYPosition = null;
                 updateSelection();
+                scrollToSelection();
             }
         }
 
@@ -394,6 +395,12 @@ namespace osu.Game.Screens.SelectV2
 
                 item.Selected.Value = isSelected;
             }
+        }
+
+        private void scrollToSelection()
+        {
+            if (currentSelectionYPosition != null)
+                scroll.ScrollTo(currentSelectionYPosition.Value - visibleHalfHeight);
         }
 
         #endregion
