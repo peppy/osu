@@ -32,6 +32,11 @@ namespace osu.Game.Screens.SelectV2
         /// </summary>
         public bool IsGroupSelectionTarget { get; set; }
 
+        /// <summary>
+        /// Whether this item is visible or collapsed (hidden).
+        /// </summary>
+        public bool IsVisible { get; set; } = true;
+
         protected CarouselItem(object model)
         {
             Model = model;
