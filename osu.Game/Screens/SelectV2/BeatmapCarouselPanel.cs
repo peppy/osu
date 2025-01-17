@@ -87,9 +87,23 @@ namespace osu.Game.Screens.SelectV2
             Masking = true;
 
             background.Colour = (Item.Model is BeatmapInfo ? Color4.Aqua : Color4.Yellow).Darken(5);
-            text.Text = Item.ToString() ?? string.Empty;
+            text.Text = getTextFor(Item.Model);
 
             this.FadeInFromZero(500, Easing.OutQuint);
+        }
+
+        private string getTextFor(object item)
+        {
+            switch (item)
+            {
+                case BeatmapInfo bi:
+                    return $"Difficulty: {bi.DifficultyName} ({bi.StarRating:N1}*)";
+
+                case BeatmapSetInfo si:
+                    return $"{si.Metadata}";
+            }
+
+            return "unknown";
         }
 
         protected override bool OnClick(ClickEvent e)
