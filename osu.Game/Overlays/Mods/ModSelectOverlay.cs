@@ -45,6 +45,16 @@ namespace osu.Game.Overlays.Mods
         [Cached]
         public Bindable<IReadOnlyList<Mod>> SelectedMods { get; private set; } = new Bindable<IReadOnlyList<Mod>>(Array.Empty<Mod>());
 
+        private bool shouldBlockInput => customisationPanel.ExpandedState.Value != ModCustomisationPanel.ModCustomisationPanelState.Collapsed;
+
+        protected override bool ShouldBeConsideredForInput(Drawable child)
+        {
+            if (shouldBlockInput && child != customisationPanel)
+                return false;
+
+            return base.ShouldBeConsideredForInput(child);
+        }
+
         /// <summary>
         /// Contains a list of mods which <see cref="ModSelectOverlay"/> should read from to display effects on the selected beatmap.
         /// </summary>
@@ -660,7 +670,7 @@ namespace osu.Game.Overlays.Mods
             if (e.Repeat || e.Key != Key.Tab)
                 return false;
 
-            if (customisationPanel.ExpandedState.Value != ModCustomisationPanel.ModCustomisationPanelState.Collapsed)
+            if (shouldBlockInput)
                 return true;
 
             // TODO: should probably eventually support typical platform search shortcuts (`Ctrl-F`, `/`)

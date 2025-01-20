@@ -139,8 +139,6 @@ namespace osu.Game.Overlays.Mods
             return base.OnClick(e);
         }
 
-        protected override bool OnKeyDown(KeyDownEvent e) => true;
-
         protected override bool OnScroll(ScrollEvent e) => true;
 
         public bool OnPressed(KeyBindingPressEvent<GlobalAction> e)
