@@ -93,17 +93,8 @@ namespace osu.Game.Screens.SelectV2
                 if (currentSelection == value)
                     return;
 
-                if (scroll.Panels.SingleOrDefault(p => ((ICarouselPanel)p).Item == currentSelectionCarouselItem) is ICarouselPanel d)
-                {
-                    d.Selected.Value = false;
-                    d.KeyboardSelected.Value = false;
-                }
-
                 currentSelection = value;
                 currentKeyboardSelection = value;
-
-                currentSelectionCarouselItem = null;
-                currentKeyboardSelectionCarouselItem = null;
 
                 currentKeyboardSelectionYPosition = null;
 
@@ -191,6 +182,13 @@ namespace osu.Game.Screens.SelectV2
         /// <param name="item">The carousel item which was activated.</param>
         /// <param name="drawableItem">The drawable representation of the item, if manifested.</param>
         protected virtual void HandleItemActivated(CarouselItem item, Drawable? drawableItem)
+        {
+        }
+
+        /// <summary>
+        /// Called when an item is "deselected".
+        /// </summary>
+        protected virtual void HandleItemDeselected(List<CarouselItem> carouselItems, CarouselItem carouselItem)
         {
         }
 
@@ -425,10 +423,12 @@ namespace osu.Game.Screens.SelectV2
 
         private void updateSelection()
         {
-            currentSelectionCarouselItem = null;
-            currentKeyboardSelectionCarouselItem = null;
-
-            if (displayedCarouselItems == null) return;
+            if (displayedCarouselItems == null)
+            {
+                currentSelectionCarouselItem = null;
+                currentKeyboardSelectionCarouselItem = null;
+                return;
+            }
 
             foreach (var item in displayedCarouselItems)
             {
@@ -455,6 +455,8 @@ namespace osu.Game.Screens.SelectV2
                 {
                     if (item != currentSelectionCarouselItem)
                     {
+                        if (currentSelectionCarouselItem != null)
+                            HandleItemDeselected(displayedCarouselItems, currentSelectionCarouselItem);
                         currentSelectionCarouselItem = item;
                         HandleItemSelected(displayedCarouselItems, item, scroll.Panels.SingleOrDefault(p => ((ICarouselPanel)p).Item == currentSelectionCarouselItem));
                     }

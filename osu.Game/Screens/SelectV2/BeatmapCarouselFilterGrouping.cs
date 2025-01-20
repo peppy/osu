@@ -13,6 +13,8 @@ namespace osu.Game.Screens.SelectV2
 {
     public class BeatmapCarouselFilterGrouping : ICarouselFilter
     {
+        public readonly Dictionary<BeatmapSetInfo, HashSet<CarouselItem>> SetGroups = new Dictionary<BeatmapSetInfo, HashSet<CarouselItem>>();
+
         private readonly Func<FilterCriteria> getCriteria;
 
         public BeatmapCarouselFilterGrouping(Func<FilterCriteria> getCriteria)
@@ -54,6 +56,11 @@ namespace osu.Game.Screens.SelectV2
                             IsGroupSelectionTarget = true
                         });
                     }
+
+                    if (!SetGroups.TryGetValue(b.BeatmapSet!, out var related))
+                        SetGroups[b.BeatmapSet!] = related = new HashSet<CarouselItem>();
+
+                    related.Add(item);
                 }
 
                 newItems.Add(item);
