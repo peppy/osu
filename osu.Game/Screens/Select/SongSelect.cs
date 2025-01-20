@@ -1137,8 +1137,6 @@ namespace osu.Game.Screens.Select
             // as those will usually correspond to other interactions like adjusting volume.
             protected override bool OnScroll(ScrollEvent e) => !e.ControlPressed && !e.AltPressed && !e.ShiftPressed && !e.SuperPressed;
 
-            protected override bool OnMouseDown(MouseDownEvent e) => true;
-
             protected override bool OnHover(HoverEvent e)
             {
                 resetCarouselPosition?.Invoke();
