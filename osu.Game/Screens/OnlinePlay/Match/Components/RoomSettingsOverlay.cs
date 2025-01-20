@@ -23,8 +23,6 @@ namespace osu.Game.Screens.OnlinePlay.Match.Components
 
         protected Drawable Settings { get; set; } = null!;
 
-        protected override bool BlockScrollInput => false;
-
         protected abstract OsuButton SubmitButton { get; }
 
         protected abstract bool IsLoading { get; }

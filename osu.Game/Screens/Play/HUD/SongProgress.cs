@@ -22,8 +22,6 @@ namespace osu.Game.Screens.Play.HUD
         public override bool HandleNonPositionalInput => Interactive.Value;
         public override bool HandlePositionalInput => Interactive.Value;
 
-        protected override bool BlockScrollInput => false;
-
         /// <summary>
         /// Whether interaction should be allowed (ie. seeking). If <c>false</c>, interaction controls will not be displayed.
         /// </summary>
