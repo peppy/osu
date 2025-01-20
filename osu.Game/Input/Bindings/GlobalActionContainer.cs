@@ -14,8 +14,6 @@ namespace osu.Game.Input.Bindings
 {
     public partial class GlobalActionContainer : DatabasedKeyBindingContainer<GlobalAction>, IHandleGlobalKeyboardInput, IKeyBindingHandler<GlobalAction>
     {
-        protected override bool Prioritised => true;
-
         private readonly IKeyBindingHandler<GlobalAction>? handler;
 
         public GlobalActionContainer(OsuGameBase? game)
