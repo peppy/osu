@@ -26,6 +26,8 @@ namespace osu.Game.Screens.SelectV2
 
         private readonly LoadingLayer loading;
 
+        private readonly BeatmapCarouselFilterGrouping grouping;
+
         public BeatmapCarousel()
         {
             DebounceDelay = 100;
@@ -34,7 +36,7 @@ namespace osu.Game.Screens.SelectV2
             Filters = new ICarouselFilter[]
             {
                 new BeatmapCarouselFilterSorting(() => Criteria),
-                new BeatmapCarouselFilterGrouping(() => Criteria),
+                grouping = new BeatmapCarouselFilterGrouping(() => Criteria),
             };
 
             AddInternal(carouselPanelPool);
@@ -53,18 +55,36 @@ namespace osu.Game.Screens.SelectV2
 
         protected override CarouselItem CreateCarouselItemForModel(BeatmapInfo model) => new BeatmapCarouselItem(model);
 
+        protected override void HandleItemDeselected(List<CarouselItem> allItems, CarouselItem item)
+        {
+            base.HandleItemDeselected(allItems, item);
+
+            var deselectedSet = item.Model as BeatmapSetInfo ?? (item.Model as BeatmapInfo)?.BeatmapSet;
+
+            if (grouping.SetGroups.TryGetValue(deselectedSet!, out var group))
+            {
+                foreach (var i in group)
+                    i.IsVisible = false;
+            }
+        }
+
         protected override void HandleItemSelected(List<CarouselItem> allItems, CarouselItem item, Drawable? drawableItem)
         {
             base.HandleItemSelected(allItems, item, drawableItem);
 
             // Selecting a set isn't valid – let's re-select the first difficulty.
             if (item.Model is BeatmapSetInfo setInfo)
-                CurrentSelection = setInfo.Beatmaps.First();
-
-            foreach (var i in allItems)
             {
-                i.IsVisible = i.IsGroupSelectionTarget
-                              || (i.Model as BeatmapInfo)?.BeatmapSet?.Equals((CurrentSelection as BeatmapInfo)?.BeatmapSet) == true;
+                CurrentSelection = setInfo.Beatmaps.First();
+                return;
+            }
+
+            var currentSelectionSet = (item.Model as BeatmapInfo)?.BeatmapSet;
+
+            if (grouping.SetGroups.TryGetValue(currentSelectionSet!, out var group))
+            {
+                foreach (var i in group)
+                    i.IsVisible = true;
             }
 
             UpdateYPositions(allItems, VisibleHalfHeight, SpacingBetweenPanels);
