@@ -261,7 +261,7 @@ namespace osu.Game.Screens.SelectV2
                     }
 
                     log("Updating Y positions");
-                    await updateYPositions(items, cts.Token).ConfigureAwait(false);
+                    UpdateYPositions(items, VisibleHalfHeight, SpacingBetweenPanels);
                 }
                 catch (OperationCanceledException)
                 {
@@ -281,9 +281,9 @@ namespace osu.Game.Screens.SelectV2
             void log(string text) => Logger.Log($"Carousel[op {cts.GetHashCode().ToString()}] {stopwatch.ElapsedMilliseconds} ms: {text}");
         }
 
-        protected async Task updateYPositions(IEnumerable<CarouselItem> carouselItems, CancellationToken cancellationToken) => await Task.Run(() =>
+        protected static void UpdateYPositions(IEnumerable<CarouselItem> carouselItems, float offset, float spacing)
         {
-            float yPos = visibleHalfHeight;
+            float yPos = offset;
 
             foreach (var item in carouselItems)
             {
@@ -292,9 +292,9 @@ namespace osu.Game.Screens.SelectV2
                 if (!item.IsVisible)
                     continue;
 
-                yPos += item.DrawHeight + SpacingBetweenPanels;
+                yPos += item.DrawHeight + spacing;
             }
-        }, cancellationToken).ConfigureAwait(false);
+        }
 
         #endregion
 
@@ -465,7 +465,7 @@ namespace osu.Game.Screens.SelectV2
         private void scrollToSelection()
         {
             if (currentKeyboardSelectionYPosition != null)
-                scroll.ScrollTo(currentKeyboardSelectionYPosition.Value - visibleHalfHeight);
+                scroll.ScrollTo(currentKeyboardSelectionYPosition.Value - VisibleHalfHeight);
         }
 
         #endregion
@@ -489,7 +489,7 @@ namespace osu.Game.Screens.SelectV2
         /// <summary>
         /// Half the height of the visible content.
         /// </summary>
-        private float visibleHalfHeight => (DrawHeight + BleedBottom + BleedTop) / 2;
+        protected float VisibleHalfHeight => (DrawHeight + BleedBottom + BleedTop) / 2;
 
         protected override void Update()
         {
@@ -521,9 +521,9 @@ namespace osu.Game.Screens.SelectV2
                     c.DrawYPosition = Interpolation.DampContinuously(c.DrawYPosition, c.Item.CarouselYPosition, 50, Time.Elapsed);
 
                 Vector2 posInScroll = scroll.ToLocalSpace(panel.ScreenSpaceDrawQuad.Centre);
-                float dist = Math.Abs(1f - posInScroll.Y / visibleHalfHeight);
+                float dist = Math.Abs(1f - posInScroll.Y / VisibleHalfHeight);
 
-                panel.X = offsetX(dist, visibleHalfHeight);
+                panel.X = offsetX(dist, VisibleHalfHeight);
 
                 c.Selected.Value = c.Item == currentSelectionCarouselItem;
                 c.KeyboardSelected.Value = c.Item == currentKeyboardSelectionCarouselItem;
@@ -613,7 +613,7 @@ namespace osu.Game.Screens.SelectV2
             if (displayedCarouselItems.Count > 0)
             {
                 var lastItem = displayedCarouselItems[^1];
-                scroll.SetLayoutHeight((float)(lastItem.CarouselYPosition + lastItem.DrawHeight + visibleHalfHeight));
+                scroll.SetLayoutHeight((float)(lastItem.CarouselYPosition + lastItem.DrawHeight + VisibleHalfHeight));
             }
             else
                 scroll.SetLayoutHeight(0);
