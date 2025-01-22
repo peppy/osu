@@ -55,11 +55,11 @@ namespace osu.Game.Screens.SelectV2
 
         protected override CarouselItem CreateCarouselItemForModel(BeatmapInfo model) => new CarouselItem(model);
 
-        protected override void HandleItemDeselected(List<CarouselItem> allItems, CarouselItem item)
+        protected override void HandleItemDeselected(object? model)
         {
-            base.HandleItemDeselected(allItems, item);
+            base.HandleItemDeselected(model);
 
-            var deselectedSet = item.Model as BeatmapSetInfo ?? (item.Model as BeatmapInfo)?.BeatmapSet;
+            var deselectedSet = model as BeatmapSetInfo ?? (model as BeatmapInfo)?.BeatmapSet;
 
             if (grouping.SetGroups.TryGetValue(deselectedSet!, out var group))
             {
@@ -68,26 +68,27 @@ namespace osu.Game.Screens.SelectV2
             }
         }
 
-        protected override void HandleItemSelected(List<CarouselItem> allItems, CarouselItem item)
+        protected override void HandleItemSelected(object? model)
         {
-            base.HandleItemSelected(allItems, item);
+            base.HandleItemSelected(model);
 
             // Selecting a set isn't valid – let's re-select the first difficulty.
-            if (item.Model is BeatmapSetInfo setInfo)
+            if (model is BeatmapSetInfo setInfo)
             {
                 CurrentSelection = setInfo.Beatmaps.First();
                 return;
             }
 
-            var currentSelectionSet = (item.Model as BeatmapInfo)?.BeatmapSet;
+            var currentSelectionSet = (model as BeatmapInfo)?.BeatmapSet;
 
-            if (grouping.SetGroups.TryGetValue(currentSelectionSet!, out var group))
+            if (currentSelectionSet == null)
+                return;
+
+            if (grouping.SetGroups.TryGetValue(currentSelectionSet, out var group))
             {
                 foreach (var i in group)
                     i.IsVisible = true;
             }
-
-            UpdateYPositions(allItems, VisibleHalfHeight, SpacingBetweenPanels);
         }
 
         protected override void HandleItemActivated(CarouselItem item)
