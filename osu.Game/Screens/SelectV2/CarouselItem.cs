@@ -30,12 +30,6 @@ namespace osu.Game.Screens.SelectV2
         public float DrawHeight { get; set; } = DEFAULT_HEIGHT;
 
         /// <summary>
-        /// Whether this item is a group header.
-        /// Group headers are generally larger in display. Setting this will account for the size difference.
-        /// </summary>
-        public bool IsHeader { get; set; }
-
-        /// <summary>
         /// Whether this item should be a valid target for user group selection hotkeys.
         /// </summary>
         public bool IsGroupSelectionTarget { get; set; }
