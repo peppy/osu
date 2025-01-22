@@ -278,17 +278,15 @@ namespace osu.Game.Screens.SelectV2
 
         private static void updateYPositions(IEnumerable<CarouselItem> carouselItems, float offset, float spacing)
         {
-            float yPos = offset;
-
             foreach (var item in carouselItems)
-            {
-                item.CarouselYPosition = yPos;
+                updateItemYPosition(item, ref offset, spacing);
+        }
 
-                if (!item.IsVisible)
-                    continue;
-
-                yPos += item.DrawHeight + spacing;
-            }
+        private static void updateItemYPosition(CarouselItem item, ref float offset, float spacing)
+        {
+            item.CarouselYPosition = offset;
+            if (item.IsVisible)
+                offset += item.DrawHeight + spacing;
         }
 
         #endregion
@@ -332,33 +330,43 @@ namespace osu.Game.Screens.SelectV2
             if (displayedCarouselItems == null || displayedCarouselItems.Count == 0)
                 return false;
 
-            CarouselItem? originalItem = currentKeyboardSelection.CarouselItem;
+            CarouselItem? originalSelection = currentKeyboardSelection.CarouselItem;
+            int currentSelectionIndex = currentKeyboardSelection.Index ?? -1;
 
             // To keep things simple, let's first handle the cases where there's no selection yet.
             // Once we've confirmed that the first or last isn't valid, we can handle everything
             // using the same process.
-            if (originalItem == null)
+            if (originalSelection == null || currentSelectionIndex < 0)
             {
-                originalItem = direction > 0
-                    ? displayedCarouselItems.First()
-                    : displayedCarouselItems.Last();
-
-                if (isValidItem(originalItem))
+                if (direction > 0)
                 {
-                    performSelection(originalItem);
+                    originalSelection = displayedCarouselItems.First();
+                    currentSelectionIndex = 0;
+                }
+                else
+                {
+                    originalSelection = displayedCarouselItems.Last();
+                    currentSelectionIndex = displayedCarouselItems.Count - 1;
+                }
+
+                if (isValidItem(originalSelection))
+                {
+                    performSelection(originalSelection);
                     return true;
                 }
             }
 
+            Debug.Assert(originalSelection != null);
+            Debug.Assert(currentSelectionIndex >= 0);
+
             // As a special case, if the user has a different keyboard selection and requests
             // group selection, first transfer the keyboard selection.
-            if (isGroupSelection && currentSelection.CarouselItem != originalItem)
+            if (isGroupSelection && currentSelection.CarouselItem != originalSelection)
             {
-                setSelection(originalItem.Model);
+                setSelection(originalSelection.Model);
                 return true;
             }
 
-            int currentSelectionIndex = displayedCarouselItems.IndexOf(originalItem);
             int newSelectionIndex = currentSelectionIndex;
 
             // As a second special case, if we're group selecting backwards and the current selection isn't
@@ -369,17 +377,15 @@ namespace osu.Game.Screens.SelectV2
                     newSelectionIndex--;
             }
 
-            Debug.Assert(currentSelectionIndex >= 0);
-
             CarouselItem newItem;
 
-            while ((newItem = selectNextPanel()) != originalItem)
+            while ((newItem = selectNextPanel()) != originalSelection)
             {
                 if (isValidItem(newItem))
                     break;
             }
 
-            if (newItem == originalItem)
+            if (newItem == originalSelection)
                 return false;
 
             performSelection(newItem);
@@ -475,6 +481,8 @@ namespace osu.Game.Screens.SelectV2
             {
                 var item = displayedCarouselItems[i];
 
+                updateItemYPosition(item, ref yPos, spacing);
+
                 bool isSelected = item.Model == currentSelection?.Model;
                 bool isKeyboardSelected = item.Model == currentKeyboardSelection?.Model;
 
@@ -482,7 +490,7 @@ namespace osu.Game.Screens.SelectV2
                 {
                     double? previousYPosition = currentKeyboardSelection?.YPosition;
 
-                    currentKeyboardSelection = new Selection(item.Model, item, item.CarouselYPosition);
+                    currentKeyboardSelection = new Selection(item.Model, item, item.CarouselYPosition, i);
 
                     if (previousYPosition != null && previousYPosition != item.CarouselYPosition)
                     {
@@ -492,14 +500,7 @@ namespace osu.Game.Screens.SelectV2
                 }
 
                 if (isSelected)
-                    currentSelection = new Selection(item.Model, item, item.CarouselYPosition);
-
-                item.CarouselYPosition = yPos;
-
-                if (item.IsVisible)
-                {
-                    yPos += item.DrawHeight + spacing;
-                }
+                    currentSelection = new Selection(item.Model, item, item.CarouselYPosition, i);
             }
         }
 
@@ -670,7 +671,7 @@ namespace osu.Game.Screens.SelectV2
 
         #region Internal helper classes
 
-        private record Selection(object? Model = null, CarouselItem? CarouselItem = null, double? YPosition = null);
+        private record Selection(object? Model = null, CarouselItem? CarouselItem = null, double? YPosition = null, int? Index = null);
 
         private record DisplayRange(int First, int Last);
 
