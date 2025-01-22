@@ -11,6 +11,8 @@ namespace osu.Game.Screens.SelectV2
     /// </summary>
     public sealed class CarouselItem : IComparable<CarouselItem>
     {
+        public const float DEFAULT_HEIGHT = 40;
+
         /// <summary>
         /// The model this item is representing.
         /// </summary>
@@ -23,9 +25,9 @@ namespace osu.Game.Screens.SelectV2
         public double CarouselYPosition { get; set; }
 
         /// <summary>
-        /// The height this item will take when displayed.
+        /// The height this item will take when displayed. Defaults to <see cref="DEFAULT_HEIGHT"/>.
         /// </summary>
-        public float DrawHeight => IsHeader ? 80 : 40;
+        public float DrawHeight { get; set; } = DEFAULT_HEIGHT;
 
         /// <summary>
         /// Whether this item is a group header.

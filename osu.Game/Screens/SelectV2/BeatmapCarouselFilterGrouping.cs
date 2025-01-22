@@ -53,6 +53,7 @@ namespace osu.Game.Screens.SelectV2
                         newItems.Add(new CarouselItem(b.BeatmapSet!)
                         {
                             IsHeader = true,
+                            DrawHeight = 80,
                             IsGroupSelectionTarget = true
                         });
                     }
