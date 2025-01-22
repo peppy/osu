@@ -68,9 +68,9 @@ namespace osu.Game.Screens.SelectV2
             }
         }
 
-        protected override void HandleItemSelected(List<CarouselItem> allItems, CarouselItem item, Drawable? drawableItem)
+        protected override void HandleItemSelected(List<CarouselItem> allItems, CarouselItem item)
         {
-            base.HandleItemSelected(allItems, item, drawableItem);
+            base.HandleItemSelected(allItems, item);
 
             // Selecting a set isn't valid – let's re-select the first difficulty.
             if (item.Model is BeatmapSetInfo setInfo)
@@ -90,11 +90,12 @@ namespace osu.Game.Screens.SelectV2
             UpdateYPositions(allItems, VisibleHalfHeight, SpacingBetweenPanels);
         }
 
-        protected override void HandleItemActivated(CarouselItem item, Drawable? drawableItem)
+        protected override void HandleItemActivated(CarouselItem item)
         {
-            base.HandleItemActivated(item, drawableItem);
+            base.HandleItemActivated(item);
 
-            if (drawableItem is BeatmapCarouselPanel drawable)
+            // TODO: maybe this should be handled by the panel itself?
+            if (GetMaterialisedDrawableForItem(item) is BeatmapCarouselPanel drawable)
                 drawable.FlashFromActivation();
         }
 

@@ -120,7 +120,7 @@ namespace osu.Game.Screens.SelectV2
                 return;
             }
 
-            HandleItemActivated(currentSelectionCarouselItem, scroll.Panels.SingleOrDefault(p => ((ICarouselPanel)p).Item == currentSelectionCarouselItem));
+            HandleItemActivated(currentSelectionCarouselItem);
         }
 
         #endregion
@@ -172,6 +172,17 @@ namespace osu.Game.Screens.SelectV2
         protected abstract CarouselItem CreateCarouselItemForModel(T model);
 
         /// <summary>
+        /// Given a <see cref="CarouselItem"/>, find a drawable representation if it is currently displayed in the carousel.
+        /// </summary>
+        /// <remarks>
+        /// This will only return a drawable if it is "on-screen".
+        /// </remarks>
+        /// <param name="item">The item to find a related drawable representation.</param>
+        /// <returns>The drawable representation if it exists.</returns>
+        protected Drawable? GetMaterialisedDrawableForItem(CarouselItem item) =>
+            scroll.Panels.SingleOrDefault(p => ((ICarouselPanel)p).Item == item);
+
+        /// <summary>
         /// Called when an item is "activated".
         /// </summary>
         /// <remarks>
@@ -180,22 +191,21 @@ namespace osu.Game.Screens.SelectV2
         /// - Start gameplay on a beatmap difficulty.
         /// </remarks>
         /// <param name="item">The carousel item which was activated.</param>
-        /// <param name="drawableItem">The drawable representation of the item, if manifested.</param>
-        protected virtual void HandleItemActivated(CarouselItem item, Drawable? drawableItem)
+        protected virtual void HandleItemActivated(CarouselItem item)
         {
         }
 
         /// <summary>
         /// Called when an item is "deselected".
         /// </summary>
-        protected virtual void HandleItemDeselected(List<CarouselItem> carouselItems, CarouselItem carouselItem)
+        protected virtual void HandleItemDeselected(List<CarouselItem> allItems, CarouselItem item)
         {
         }
 
         /// <summary>
         /// Called when an item is "selected".
         /// </summary>
-        protected virtual void HandleItemSelected(List<CarouselItem> allItems, CarouselItem item, Drawable? drawableItem)
+        protected virtual void HandleItemSelected(List<CarouselItem> allItems, CarouselItem item)
         {
         }
 
@@ -458,7 +468,7 @@ namespace osu.Game.Screens.SelectV2
                         if (currentSelectionCarouselItem != null)
                             HandleItemDeselected(displayedCarouselItems, currentSelectionCarouselItem);
                         currentSelectionCarouselItem = item;
-                        HandleItemSelected(displayedCarouselItems, item, scroll.Panels.SingleOrDefault(p => ((ICarouselPanel)p).Item == currentSelectionCarouselItem));
+                        HandleItemSelected(displayedCarouselItems, item);
                     }
                 }
             }
