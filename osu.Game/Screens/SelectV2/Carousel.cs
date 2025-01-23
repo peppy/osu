@@ -73,7 +73,7 @@ namespace osu.Game.Screens.SelectV2
         /// <summary>
         /// The number of carousel items currently in rotation for display.
         /// </summary>
-        public int DisplayableItems => displayedCarouselItems?.Count ?? 0;
+        public int DisplayableItems => carouselItems?.Count ?? 0;
 
         /// <summary>
         /// The number of items currently actualised into drawables.
@@ -213,7 +213,7 @@ namespace osu.Game.Screens.SelectV2
 
         #region Filtering and display preparation
 
-        private List<CarouselItem>? displayedCarouselItems; // TODO: rename to carouselItems for simplicity.
+        private List<CarouselItem>? carouselItems;
 
         private Task filterTask = Task.CompletedTask;
         private CancellationTokenSource cancellationSource = new CancellationTokenSource();
@@ -264,7 +264,7 @@ namespace osu.Game.Screens.SelectV2
                 return;
 
             log("Items ready for display");
-            displayedCarouselItems = items.ToList();
+            carouselItems = items.ToList();
             displayedRange = null;
 
             // Need to call this to ensure correct post-selection logic is handled on the new items list.
@@ -337,7 +337,7 @@ namespace osu.Game.Screens.SelectV2
             Debug.Assert(direction != 0);
             direction = direction > 0 ? 1 : -1;
 
-            if (displayedCarouselItems == null || displayedCarouselItems.Count == 0)
+            if (carouselItems == null || carouselItems.Count == 0)
                 return false;
 
             // If the user has a different keyboard selection and requests
@@ -358,13 +358,13 @@ namespace osu.Game.Screens.SelectV2
             {
                 if (direction > 0)
                 {
-                    selectionItem = displayedCarouselItems.First();
+                    selectionItem = carouselItems.First();
                     selectionIndex = 0;
                 }
                 else
                 {
-                    selectionItem = displayedCarouselItems.Last();
-                    selectionIndex = displayedCarouselItems.Count - 1;
+                    selectionItem = carouselItems.Last();
+                    selectionIndex = carouselItems.Count - 1;
                 }
 
                 if (attemptSelection(selectionItem))
@@ -378,7 +378,7 @@ namespace osu.Game.Screens.SelectV2
             // a group, base this selection operation from the closest previous group.
             if (isGroupSelection && direction < 0)
             {
-                while (!displayedCarouselItems[selectionIndex].IsGroupSelectionTarget)
+                while (!carouselItems[selectionIndex].IsGroupSelectionTarget)
                     selectionIndex--;
             }
 
@@ -389,7 +389,7 @@ namespace osu.Game.Screens.SelectV2
             do
             {
                 selectionIndex += direction;
-                newItem = displayedCarouselItems[(selectionIndex + displayedCarouselItems.Count) % displayedCarouselItems.Count];
+                newItem = carouselItems[(selectionIndex + carouselItems.Count) % carouselItems.Count];
 
                 if (attemptSelection(newItem))
                     return true;
@@ -460,7 +460,7 @@ namespace osu.Game.Screens.SelectV2
             displayedRange = null;
 
             // The case where no items are available for display yet.
-            if (displayedCarouselItems == null)
+            if (carouselItems == null)
             {
                 currentKeyboardSelection = new Selection();
                 currentSelection = new Selection();
@@ -468,7 +468,7 @@ namespace osu.Game.Screens.SelectV2
             }
 
             float spacing = SpacingBetweenPanels;
-            int count = displayedCarouselItems.Count;
+            int count = carouselItems.Count;
 
             Selection prevKeyboard = currentKeyboardSelection;
 
@@ -477,7 +477,7 @@ namespace osu.Game.Screens.SelectV2
             // - Link selected models to CarouselItems. If a selection changed, this is where we find the relevant CarouselItems for further use.
             for (int i = 0; i < count; i++)
             {
-                var item = displayedCarouselItems[i];
+                var item = carouselItems[i];
 
                 updateItemYPosition(item, ref yPos, spacing);
 
@@ -527,7 +527,7 @@ namespace osu.Game.Screens.SelectV2
         {
             base.Update();
 
-            if (displayedCarouselItems == null)
+            if (carouselItems == null)
                 return;
 
             var range = getDisplayRange();
@@ -580,15 +580,15 @@ namespace osu.Game.Screens.SelectV2
 
         private DisplayRange getDisplayRange()
         {
-            Debug.Assert(displayedCarouselItems != null);
+            Debug.Assert(carouselItems != null);
 
             // Find index range of all items that should be on-screen
             carouselBoundsItem.CarouselYPosition = visibleUpperBound - DistanceOffscreenToPreload;
-            int firstIndex = displayedCarouselItems.BinarySearch(carouselBoundsItem);
+            int firstIndex = carouselItems.BinarySearch(carouselBoundsItem);
             if (firstIndex < 0) firstIndex = ~firstIndex;
 
             carouselBoundsItem.CarouselYPosition = visibleBottomBound + DistanceOffscreenToPreload;
-            int lastIndex = displayedCarouselItems.BinarySearch(carouselBoundsItem);
+            int lastIndex = carouselItems.BinarySearch(carouselBoundsItem);
             if (lastIndex < 0) lastIndex = ~lastIndex;
 
             firstIndex = Math.Max(0, firstIndex - 1);
@@ -599,11 +599,11 @@ namespace osu.Game.Screens.SelectV2
 
         private void updateDisplayedRange(DisplayRange range)
         {
-            Debug.Assert(displayedCarouselItems != null);
+            Debug.Assert(carouselItems != null);
 
             List<CarouselItem> toDisplay = range.Last - range.First == 0
                 ? new List<CarouselItem>()
-                : displayedCarouselItems.GetRange(range.First, range.Last - range.First + 1);
+                : carouselItems.GetRange(range.First, range.Last - range.First + 1);
 
             toDisplay.RemoveAll(i => !i.IsVisible);
 
@@ -641,9 +641,9 @@ namespace osu.Game.Screens.SelectV2
 
             // Update the total height of all items (to make the scroll container scrollable through the full height even though
             // most items are not displayed / loaded).
-            if (displayedCarouselItems.Count > 0)
+            if (carouselItems.Count > 0)
             {
-                var lastItem = displayedCarouselItems[^1];
+                var lastItem = carouselItems[^1];
                 scroll.SetLayoutHeight((float)(lastItem.CarouselYPosition + lastItem.DrawHeight + visibleHalfHeight));
             }
             else
