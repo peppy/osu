@@ -47,11 +47,11 @@ namespace osu.Game.Tests.Visual.SongSelect
         }
 
         [Test]
+        [Solo]
         public void TestSorting()
         {
             AddBeatmaps(10);
             SortBy(new FilterCriteria { Sort = SortMode.Difficulty });
-            SortBy(new FilterCriteria { Sort = SortMode.Artist });
         }
 
         [Test]

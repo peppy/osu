@@ -373,6 +373,7 @@ namespace osu.Game.Screens.SelectV2
             // make sure to go back to the group header this item belongs to, so that the block below doesn't find it and stop too early.
             if (isGroupSelection && direction < 0)
             {
+                // TODO: falls over with groups
                 while (!carouselItems[selectionIndex].IsGroupSelectionTarget)
                     selectionIndex--;
             }

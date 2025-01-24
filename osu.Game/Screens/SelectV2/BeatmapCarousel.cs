@@ -124,6 +124,7 @@ namespace osu.Game.Screens.SelectV2
                     lastSelectedBeatmap = beatmapInfo;
 
                     setVisibilityOfSetItems(beatmapInfo.BeatmapSet!, true);
+                    // TODO: need to update visibility of correct group?
                     break;
             }
         }
