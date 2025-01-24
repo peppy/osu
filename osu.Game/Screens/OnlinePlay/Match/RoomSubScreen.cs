@@ -60,7 +60,7 @@ namespace osu.Game.Screens.OnlinePlay.Match
         /// <summary>
         /// A container that will display the user's style.
         /// </summary>
-        protected Container<DrawableRoomPlaylistItem>? UserStyleDisplayContainer;
+        protected Container<DrawableRoomPlaylistItem> UserStyleDisplayContainer = null!;
 
         private Sample? sampleStart;
 
@@ -509,21 +509,18 @@ namespace osu.Game.Screens.OnlinePlay.Match
 
             Ruleset.Value = GetGameplayRuleset();
 
-            if (UserStyleDisplayContainer != null)
+            PlaylistItem gameplayItem = SelectedItem.Value.With(ruleset: GetGameplayRuleset().OnlineID, beatmap: new Optional<IBeatmapInfo>(GetGameplayBeatmap()));
+            PlaylistItem? currentItem = UserStyleDisplayContainer.SingleOrDefault()?.Item;
+
+            if (gameplayItem.Equals(currentItem))
+                return;
+
+            UserStyleDisplayContainer.Child = new DrawableRoomPlaylistItem(gameplayItem)
             {
-                PlaylistItem gameplayItem = SelectedItem.Value.With(ruleset: GetGameplayRuleset().OnlineID, beatmap: new Optional<IBeatmapInfo>(GetGameplayBeatmap()));
-                PlaylistItem? currentItem = UserStyleDisplayContainer.SingleOrDefault()?.Item;
-
-                if (gameplayItem.Equals(currentItem))
-                    return;
-
-                UserStyleDisplayContainer.Child = new DrawableRoomPlaylistItem(gameplayItem)
-                {
-                    AllowReordering = false,
-                    AllowEditing = true,
-                    RequestEdit = _ => OpenStyleSelection()
-                };
-            }
+                AllowReordering = false,
+                AllowEditing = true,
+                RequestEdit = _ => OpenStyleSelection()
+            };
         }
 
         protected virtual APIMod[] GetGameplayMods()
