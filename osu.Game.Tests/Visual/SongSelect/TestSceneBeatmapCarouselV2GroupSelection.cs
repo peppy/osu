@@ -3,68 +3,43 @@
 
 using System.Linq;
 using NUnit.Framework;
+using osu.Framework.Graphics;
 using osu.Framework.Testing;
 using osu.Game.Beatmaps;
+using osu.Game.Screens.Select;
+using osu.Game.Screens.Select.Filter;
 using osu.Game.Screens.SelectV2;
-using osuTK.Input;
 
 namespace osu.Game.Tests.Visual.SongSelect
 {
     [TestFixture]
-    public partial class TestSceneBeatmapCarouselV2Selection : BeatmapCarouselV2TestScene
+    public partial class TestSceneBeatmapCarouselV2GroupSelection : BeatmapCarouselV2TestScene
     {
-        /// <summary>
-        /// Keyboard selection via up and down arrows doesn't actually change the selection until
-        /// the select key is pressed.
-        /// </summary>
-        [Test]
-        public void TestKeyboardSelectionKeyRepeat()
+        public override void SetUpSteps()
         {
-            AddBeatmaps(10);
-            WaitForDrawablePanels();
-            CheckNoSelection();
+            RemoveAllBeatmaps();
 
-            Select();
-            CheckNoSelection();
+            CreateCarousel();
 
-            AddStep("press down arrow", () => InputManager.PressKey(Key.Down));
-            checkSelectionIterating(false);
-
-            AddStep("press up arrow", () => InputManager.PressKey(Key.Up));
-            checkSelectionIterating(false);
-
-            AddStep("release down arrow", () => InputManager.ReleaseKey(Key.Down));
-            checkSelectionIterating(false);
-
-            AddStep("release up arrow", () => InputManager.ReleaseKey(Key.Up));
-            checkSelectionIterating(false);
-
-            Select();
-            CheckHasSelection();
+            SortBy(new FilterCriteria { Sort = SortMode.Difficulty });
         }
 
-        /// <summary>
-        /// Keyboard selection via left and right arrows moves between groups, updating the selection
-        /// immediately.
-        /// </summary>
         [Test]
-        public void TestGroupSelectionKeyRepeat()
+        public void TestOpenCloseGroupWithNoSelection()
         {
-            AddBeatmaps(10);
+            AddBeatmaps(10, 5);
             WaitForDrawablePanels();
+
+            AddAssert("no beatmaps visible", () => Carousel.ChildrenOfType<BeatmapPanel>().Count(p => p.Alpha > 0), () => Is.Zero);
             CheckNoSelection();
 
-            AddStep("press right arrow", () => InputManager.PressKey(Key.Right));
-            checkSelectionIterating(true);
+            ClickVisiblePanel<GroupPanel>(0);
+            AddUntilStep("some beatmaps visible", () => Carousel.ChildrenOfType<BeatmapPanel>().Count(p => p.Alpha > 0), () => Is.GreaterThan(0));
+            CheckNoSelection();
 
-            AddStep("press left arrow", () => InputManager.PressKey(Key.Left));
-            checkSelectionIterating(true);
-
-            AddStep("release right arrow", () => InputManager.ReleaseKey(Key.Right));
-            checkSelectionIterating(true);
-
-            AddStep("release left arrow", () => InputManager.ReleaseKey(Key.Left));
-            checkSelectionIterating(false);
+            ClickVisiblePanel<GroupPanel>(0);
+            AddUntilStep("no beatmaps visible", () => Carousel.ChildrenOfType<BeatmapPanel>().Count(p => p.Alpha > 0), () => Is.Zero);
+            CheckNoSelection();
         }
 
         [Test]
@@ -188,20 +163,6 @@ namespace osu.Game.Tests.Visual.SongSelect
 
                 return BeatmapSets[set].Beatmaps.Contains(Carousel.CurrentSelection);
             });
-        }
-
-        private void checkSelectionIterating(bool isIterating)
-        {
-            object? selection = null;
-
-            for (int i = 0; i < 3; i++)
-            {
-                AddStep("store selection", () => selection = Carousel.CurrentSelection);
-                if (isIterating)
-                    AddUntilStep("selection changed", () => Carousel.CurrentSelection != selection);
-                else
-                    AddUntilStep("selection not changed", () => Carousel.CurrentSelection == selection);
-            }
         }
     }
 }
