@@ -294,6 +294,9 @@ namespace osu.Game.Screens.SelectV2
             item.CarouselYPosition = offset;
             if (item.IsVisible)
                 offset += item.DrawHeight + spacing;
+            // temporary
+            else
+                item.CarouselYPosition -= item.DrawHeight;
         }
 
         #endregion
@@ -564,6 +567,14 @@ namespace osu.Game.Screens.SelectV2
                 if (c.DrawYPosition != c.Item.CarouselYPosition)
                     c.DrawYPosition = Interpolation.DampContinuously(c.DrawYPosition, c.Item.CarouselYPosition, 50, Time.Elapsed);
 
+                if (!c.Item.IsVisible)
+                    panel.Alpha = (float)Interpolation.DampContinuously(panel.Alpha, 0, 50, Time.Elapsed);
+                else
+                    panel.Alpha = (float)Interpolation.DampContinuously(panel.Alpha, 1, 50, Time.Elapsed);
+
+                if (!c.Item.IsVisible && panel.Alpha < 0.01f)
+                    panel.Expire();
+
                 Vector2 posInScroll = scroll.ToLocalSpace(panel.ScreenSpaceDrawQuad.Centre);
                 float dist = Math.Abs(1f - posInScroll.Y / visibleHalfHeight);
 
@@ -634,9 +645,6 @@ namespace osu.Game.Screens.SelectV2
                     toDisplay.Remove(existing);
                     continue;
                 }
-
-                // If the new display range doesn't contain the panel, it's no longer required for display.
-                expirePanelImmediately(panel);
             }
 
             // Add any new items which need to be displayed and haven't yet.
@@ -647,6 +655,8 @@ namespace osu.Game.Screens.SelectV2
                 if (drawable is not ICarouselPanel carouselPanel)
                     throw new InvalidOperationException($"Carousel panel drawables must implement {typeof(ICarouselPanel)}");
 
+                carouselPanel.Selected.Value = false;
+                carouselPanel.KeyboardSelected.Value = false;
                 carouselPanel.DrawYPosition = item.CarouselYPosition;
                 carouselPanel.Item = item;
 
@@ -662,18 +672,6 @@ namespace osu.Game.Screens.SelectV2
             }
             else
                 scroll.SetLayoutHeight(0);
-        }
-
-        private static void expirePanelImmediately(Drawable panel)
-        {
-            panel.FinishTransforms();
-            panel.Expire();
-
-            var carouselPanel = (ICarouselPanel)panel;
-
-            carouselPanel.Item = null;
-            carouselPanel.Selected.Value = false;
-            carouselPanel.KeyboardSelected.Value = false;
         }
 
         #endregion
