@@ -138,20 +138,25 @@ namespace osu.Game.Overlays
         /// Ensures music is playing, no matter what, unless the user has explicitly paused.
         /// This means that if the current beatmap has a virtual track (see <see cref="TrackVirtual"/>) a new beatmap will be selected.
         /// </summary>
+        /// <remarks>
+        /// Even when user-paused, the current track will be updated if considered not valid for playback.
+        /// </remarks>
         public void EnsurePlayingSomething()
         {
-            if (UserPauseRequested) return;
-
             if (CurrentTrack.IsDummyDevice || beatmap.Value.BeatmapSetInfo.DeletePending)
             {
                 if (beatmap.Disabled || !AllowTrackControl.Value)
                     return;
 
                 Logger.Log($"{nameof(MusicController)} skipping next track to {nameof(EnsurePlayingSomething)}");
-                NextTrack(allowProtectedTracks: true);
+                next(allowProtectedTracks: true);
+                if (!UserPauseRequested)
+                    restartTrack();
             }
             else if (!IsPlaying)
             {
+                if (UserPauseRequested) return;
+
                 Logger.Log($"{nameof(MusicController)} starting playback to {nameof(EnsurePlayingSomething)}");
                 Play();
             }
@@ -226,6 +231,10 @@ namespace osu.Game.Overlays
         public void PreviousTrack(Action<PreviousTrackResult>? onSuccess = null, bool allowProtectedTracks = false) => Schedule(() =>
         {
             PreviousTrackResult res = prev(allowProtectedTracks);
+
+            if (res == PreviousTrackResult.Restart)
+                restartTrack();
+
             if (res != PreviousTrackResult.None)
                 onSuccess?.Invoke(res);
         });
@@ -263,7 +272,6 @@ namespace osu.Game.Overlays
             if (playableSet != null)
             {
                 changeBeatmap(beatmaps.GetWorkingBeatmap(playableSet.Value.Beatmaps.First()));
-                restartTrack();
                 return PreviousTrackResult.Previous;
             }
 
@@ -279,8 +287,12 @@ namespace osu.Game.Overlays
         public void NextTrack(Action? onSuccess = null, bool allowProtectedTracks = false) => Schedule(() =>
         {
             bool res = next(allowProtectedTracks);
+
             if (res)
+            {
+                restartTrack();
                 onSuccess?.Invoke();
+            }
         });
 
         private readonly List<DuckParameters> duckOperations = new List<DuckParameters>();
@@ -363,7 +375,6 @@ namespace osu.Game.Overlays
             if (playableBeatmap != null)
             {
                 changeBeatmap(beatmaps.GetWorkingBeatmap(playableBeatmap));
-                restartTrack();
                 return true;
             }
 
