@@ -571,7 +571,7 @@ namespace osu.Game.Screens.SelectV2
                 if (c.DrawYPosition != c.Item.CarouselYPosition)
                     c.DrawYPosition = Interpolation.DampContinuously(c.DrawYPosition, c.Item.CarouselYPosition, 50, Time.Elapsed);
 
-                panel.X = GetPanelXOffset(panel);
+                panel.X = 0;
 
                 c.Selected.Value = c.Item == currentSelection?.CarouselItem;
                 c.KeyboardSelected.Value = c.Item == currentKeyboardSelection?.CarouselItem;
@@ -662,6 +662,9 @@ namespace osu.Game.Screens.SelectV2
 
                 carouselPanel.DrawYPosition = item.CarouselYPosition;
                 carouselPanel.Item = item;
+
+                // wtf is going on????
+                drawable.X = 0;
 
                 Scroll.Add(drawable);
             }
