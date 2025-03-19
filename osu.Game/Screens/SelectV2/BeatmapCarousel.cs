@@ -43,7 +43,7 @@ namespace osu.Game.Screens.SelectV2
         public BeatmapCarousel()
         {
             DebounceDelay = 100;
-            DistanceOffscreenToPreload = 100;
+            DistanceOffscreenToPreload = 1800;
 
             Filters = new ICarouselFilter[]
             {

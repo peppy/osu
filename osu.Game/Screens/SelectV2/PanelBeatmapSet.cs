@@ -8,6 +8,8 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
+using osu.Framework.Statistics;
+using osu.Framework.Threading;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Drawables;
 using osu.Game.Graphics;
@@ -138,6 +140,15 @@ namespace osu.Game.Screens.SelectV2
             }
         }
 
+        private ScheduledDelegate? delayedLoad;
+
+        private static readonly GlobalStatistic<int> stat_depools;
+
+        static PanelBeatmapSet()
+        {
+            stat_depools = GlobalStatistics.Get<int>("Carousel", "Set panel depools");
+        }
+
         protected override void PrepareForUse()
         {
             base.PrepareForUse();
@@ -146,23 +157,27 @@ namespace osu.Game.Screens.SelectV2
 
             var beatmapSet = (BeatmapSetInfo)Item.Model;
 
-            // Choice of background image matches BSS implementation (always uses the lowest `beatmap_id` from the set).
-            background.Beatmap = beatmaps.GetWorkingBeatmap(beatmapSet.Beatmaps.MinBy(b => b.OnlineID));
+            stat_depools.Value++;
 
-            titleText.Text = new RomanisableString(beatmapSet.Metadata.TitleUnicode, beatmapSet.Metadata.Title);
-            artistText.Text = new RomanisableString(beatmapSet.Metadata.ArtistUnicode, beatmapSet.Metadata.Artist);
-            updateButton.BeatmapSet = beatmapSet;
-            statusPill.Status = beatmapSet.Status;
-            difficultiesDisplay.BeatmapSet = beatmapSet;
+            delayedLoad = Scheduler.AddDelayed(() =>
+            {
+                // Choice of background image matches BSS implementation (always uses the lowest `beatmap_id` from the set).
+                background.Beatmap = beatmaps.GetWorkingBeatmap(beatmapSet.Beatmaps.MinBy(b => b.OnlineID));
+
+                titleText.Text = new RomanisableString(beatmapSet.Metadata.TitleUnicode, beatmapSet.Metadata.Title);
+                artistText.Text = new RomanisableString(beatmapSet.Metadata.ArtistUnicode, beatmapSet.Metadata.Artist);
+                updateButton.BeatmapSet = beatmapSet;
+                statusPill.Status = beatmapSet.Status;
+                difficultiesDisplay.BeatmapSet = beatmapSet;
+            }, 200);
         }
 
         protected override void FreeAfterUse()
         {
             base.FreeAfterUse();
 
+            delayedLoad?.Cancel();
             background.Beatmap = null;
-            updateButton.BeatmapSet = null;
-            difficultiesDisplay.BeatmapSet = null;
         }
     }
 }
