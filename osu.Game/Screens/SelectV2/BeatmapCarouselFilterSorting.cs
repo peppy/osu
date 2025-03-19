@@ -41,12 +41,44 @@ namespace osu.Game.Screens.SelectV2
                             goto case SortMode.Title;
                         break;
 
-                    case SortMode.Difficulty:
-                        comparison = ab.StarRating.CompareTo(bb.StarRating);
-                        break;
-
                     case SortMode.Title:
                         comparison = OrdinalSortByCaseStringComparer.DEFAULT.Compare(ab.Metadata.Title, bb.Metadata.Title);
+                        break;
+
+                    case SortMode.Author:
+                        comparison = OrdinalSortByCaseStringComparer.DEFAULT.Compare(ab.Metadata.Author.Username, bb.Metadata.Author.Username);
+                        break;
+
+                    case SortMode.Source:
+                        comparison = OrdinalSortByCaseStringComparer.DEFAULT.Compare(ab.Metadata.Source, bb.Metadata.Source);
+                        break;
+
+                    case SortMode.DateAdded:
+                        comparison = bb.BeatmapSet!.DateAdded.CompareTo(ab.BeatmapSet!.DateAdded);
+                        break;
+
+                    case SortMode.DateRanked:
+                        comparison = Nullable.Compare(bb.BeatmapSet!.DateRanked, ab.BeatmapSet!.DateRanked);
+                        break;
+
+                    case SortMode.DateSubmitted:
+                        comparison = Nullable.Compare(bb.BeatmapSet!.DateSubmitted, ab.BeatmapSet!.DateSubmitted);
+                        break;
+
+                    case SortMode.LastPlayed:
+                        comparison = Nullable.Compare(bb.LastPlayed, ab.LastPlayed);
+                        break;
+
+                    case SortMode.BPM:
+                        comparison = ab.BPM.CompareTo(bb.BPM);
+                        break;
+
+                    case SortMode.Length:
+                        comparison = ab.Length.CompareTo(bb.Length);
+                        break;
+
+                    case SortMode.Difficulty:
+                        comparison = ab.StarRating.CompareTo(bb.StarRating);
                         break;
 
                     default:
