@@ -15,7 +15,7 @@ namespace osu.Game.Graphics.UserInterface
         public LocalisableString FilterText
         {
             get => ((InnerFilterTextBox)TextBox).FilterText.Text;
-            set => ((InnerFilterTextBox)TextBox).FilterText.Text = value;
+            set => Schedule(() => ((InnerFilterTextBox)TextBox).FilterText.Text = value);
         }
 
         public ShearedFilterTextBox()
@@ -37,7 +37,7 @@ namespace osu.Game.Graphics.UserInterface
                     Anchor = Anchor.BottomLeft,
                     Origin = Anchor.TopLeft,
                     Font = OsuFont.Default.With(size: filter_text_size, weight: FontWeight.SemiBold),
-                    Margin = new MarginPadding { Top = 2, Left = 2 },
+                    Margin = new MarginPadding { Top = 2, Left = -1 },
                     Colour = colours.Yellow
                 });
             }
