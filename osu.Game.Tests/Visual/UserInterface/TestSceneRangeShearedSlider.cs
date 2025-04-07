@@ -74,24 +74,24 @@ namespace osu.Game.Tests.Visual.UserInterface
         public void TestAdjustRange()
         {
             AddAssert("Initial lower bound is correct", () => shearedRangeSlider.LowerBound.Value, () => Is.EqualTo(0).Within(0.1f));
-            AddAssert("Initial upper bound is correct", () => shearedRangeSlider.UpperBound.Value, () => Is.EqualTo(100).Within(0.1f));
+            AddAssert("Initial upper bound is correct", () => shearedRangeSlider.UpperBound.Value, () => Is.EqualTo(10).Within(0.1f));
 
             AddStep("Adjust range", () =>
             {
-                customStart.Value = 50;
-                customEnd.Value = 75;
+                customStart.Value = 5;
+                customEnd.Value = 7.5;
             });
 
-            AddAssert("Adjusted lower bound is correct", () => shearedRangeSlider.LowerBound.Value, () => Is.EqualTo(50).Within(0.1f));
-            AddAssert("Adjusted upper bound is correct", () => shearedRangeSlider.UpperBound.Value, () => Is.EqualTo(75).Within(0.1f));
+            AddAssert("Adjusted lower bound is correct", () => shearedRangeSlider.LowerBound.Value, () => Is.EqualTo(5).Within(0.1f));
+            AddAssert("Adjusted upper bound is correct", () => shearedRangeSlider.UpperBound.Value, () => Is.EqualTo(7.5).Within(0.1f));
 
             AddStep("Test nub pushing", () =>
             {
-                customStart.Value = 90;
+                customStart.Value = 9;
             });
 
-            AddAssert("Pushed lower bound is correct", () => shearedRangeSlider.LowerBound.Value, () => Is.EqualTo(90).Within(0.1f));
-            AddAssert("Pushed upper bound is correct", () => shearedRangeSlider.UpperBound.Value, () => Is.EqualTo(100).Within(0.1f));
+            AddAssert("Pushed lower bound is correct", () => shearedRangeSlider.LowerBound.Value, () => Is.EqualTo(9).Within(0.1f));
+            AddAssert("Pushed upper bound is correct", () => shearedRangeSlider.UpperBound.Value, () => Is.EqualTo(9.1).Within(0.1f));
         }
     }
 }

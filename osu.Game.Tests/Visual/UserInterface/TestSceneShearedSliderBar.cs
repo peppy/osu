@@ -60,6 +60,7 @@ namespace osu.Game.Tests.Visual.UserInterface
             });
 
             AddAssert("slider is still at 1", () => slider.Current.Value, () => Is.EqualTo(1));
+            AddStep("enable slider", () => slider.Current.Disabled = false);
         }
     }
 }
