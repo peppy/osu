@@ -32,12 +32,12 @@ namespace osu.Game.Screens.SelectV2
         private BeatmapDetailsWedgeStatistic submitted = null!;
         private BeatmapDetailsWedgeStatistic ranked = null!;
 
-        private Drawable ratingsWedge = null!;
+        private Container ratingsWedge = null!;
         private BeatmapDetailsSuccessRate successRate = null!;
         private BeatmapDetailsUserRating userRating = null!;
         private BeatmapDetailsRatingSpread ratingSpread = null!;
 
-        private Drawable failRetryWedge = null!;
+        private Container failRetryWedge = null!;
         private BeatmapDetailsFailRetry failRetry = null!;
 
         [Resolved]
@@ -63,7 +63,7 @@ namespace osu.Game.Screens.SelectV2
 
             Width = 0.9f;
 
-            InternalChild = new FillFlowContainer
+            InternalChild = new ShearedFillFlowContainer
             {
                 RelativeSizeAxes = Axes.X,
                 AutoSizeAxes = Axes.Y,
@@ -71,7 +71,7 @@ namespace osu.Game.Screens.SelectV2
                 Spacing = new Vector2(0f, 4f),
                 Children = new[]
                 {
-                    new ShearAlignedDrawable(shear, new Container
+                    new Container
                     {
                         CornerRadius = 10,
                         Masking = true,
@@ -161,8 +161,8 @@ namespace osu.Game.Screens.SelectV2
                                 },
                             },
                         },
-                    }),
-                    new ShearAlignedDrawable(shear, ratingsWedge = new Container
+                    },
+                    ratingsWedge = new Container
                     {
                         Alpha = 0f,
                         CornerRadius = 10,
@@ -205,8 +205,8 @@ namespace osu.Game.Screens.SelectV2
                                 },
                             },
                         }
-                    }),
-                    new ShearAlignedDrawable(shear, failRetryWedge = new Container
+                    },
+                    failRetryWedge = new Container
                     {
                         Alpha = 0f,
                         CornerRadius = 10,
@@ -230,7 +230,7 @@ namespace osu.Game.Screens.SelectV2
                                 Child = failRetry = new BeatmapDetailsFailRetry(),
                             },
                         },
-                    }),
+                    },
                 }
             };
         }

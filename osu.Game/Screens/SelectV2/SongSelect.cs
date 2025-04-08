@@ -53,7 +53,7 @@ namespace osu.Game.Screens.SelectV2
         private BeatmapFilterControl filterControl = null!;
         private BeatmapInfoWedge infoWedge = null!;
         private BeatmapWedgesArea wedgesArea = null!;
-        private FillFlowContainer wedgesContainer = null!;
+        private ShearedFillFlowContainer wedgesContainer = null!;
 
         public override bool ShowFooter => true;
 
@@ -103,16 +103,16 @@ namespace osu.Game.Screens.SelectV2
                                 {
                                     new[]
                                     {
-                                        wedgesContainer = new FillFlowContainer
+                                        wedgesContainer = new ShearedFillFlowContainer
                                         {
                                             RelativeSizeAxes = Axes.Both,
                                             Margin = new MarginPadding { Left = -20 },
                                             Spacing = new Vector2(0f, 4f),
                                             Direction = FillDirection.Vertical,
-                                            Children = new Drawable[]
+                                            Children = new Container[]
                                             {
-                                                new ShearAlignedDrawable(shear, infoWedge = new BeatmapInfoWedge()),
-                                                new ShearAlignedDrawable(shear, wedgesArea = new BeatmapWedgesArea()),
+                                                infoWedge = new BeatmapInfoWedge(),
+                                                wedgesArea = new BeatmapWedgesArea(),
                                             },
                                         },
                                         Empty(),

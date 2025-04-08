@@ -93,78 +93,83 @@ namespace osu.Game.Screens.SelectV2
                     RelativeSizeAxes = Axes.Both,
                     Colour = colourProvider.Background4.Opacity(0.6f),
                 },
-                new FillFlowContainer
+                new ShearedFillFlowContainer
                 {
                     RelativeSizeAxes = Axes.X,
                     AutoSizeAxes = Axes.Y,
                     Direction = FillDirection.Vertical,
                     Shear = -shear,
-                    Children = new Drawable[]
+                    Children = new[]
                     {
-                        new ShearAlignedDrawable(shear, ratingAndNameContainer = new GridContainer
+                        new Container
                         {
-                            AlwaysPresent = true,
                             RelativeSizeAxes = Axes.X,
                             AutoSizeAxes = Axes.Y,
-                            Margin = new MarginPadding { Vertical = 5f },
-                            Padding = new MarginPadding { Left = SongSelect.WEDGE_CONTENT_MARGIN },
-                            RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
-                            ColumnDimensions = new[]
+                            Child = ratingAndNameContainer = new GridContainer
                             {
-                                new Dimension(GridSizeMode.AutoSize),
-                                new Dimension(GridSizeMode.Absolute, 6),
-                                new Dimension(),
-                            },
-                            Content = new[]
-                            {
-                                new[]
+                                AlwaysPresent = true,
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y,
+                                Margin = new MarginPadding { Vertical = 5f },
+                                Padding = new MarginPadding { Left = SongSelect.WEDGE_CONTENT_MARGIN },
+                                RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
+                                ColumnDimensions = new[]
                                 {
-                                    starRatingDisplay = new StarRatingDisplay(default, animated: true)
+                                    new Dimension(GridSizeMode.AutoSize),
+                                    new Dimension(GridSizeMode.Absolute, 6),
+                                    new Dimension(),
+                                },
+                                Content = new[]
+                                {
+                                    new[]
                                     {
-                                        Anchor = Anchor.CentreLeft,
-                                        Origin = Anchor.CentreLeft,
-                                    },
-                                    Empty(),
-                                    nameLine = new FillFlowContainer
-                                    {
-                                        Anchor = Anchor.CentreLeft,
-                                        Origin = Anchor.CentreLeft,
-                                        RelativeSizeAxes = Axes.X,
-                                        AutoSizeAxes = Axes.Y,
-                                        Direction = FillDirection.Horizontal,
-                                        Margin = new MarginPadding { Bottom = 2f },
-                                        Children = new Drawable[]
+                                        starRatingDisplay = new StarRatingDisplay(default, animated: true)
                                         {
-                                            difficultyText = new TruncatingSpriteText
+                                            Anchor = Anchor.CentreLeft,
+                                            Origin = Anchor.CentreLeft,
+                                        },
+                                        Empty(),
+                                        nameLine = new FillFlowContainer
+                                        {
+                                            Anchor = Anchor.CentreLeft,
+                                            Origin = Anchor.CentreLeft,
+                                            RelativeSizeAxes = Axes.X,
+                                            AutoSizeAxes = Axes.Y,
+                                            Direction = FillDirection.Horizontal,
+                                            Margin = new MarginPadding { Bottom = 2f },
+                                            Children = new Drawable[]
                                             {
-                                                Anchor = Anchor.BottomLeft,
-                                                Origin = Anchor.BottomLeft,
-                                                Font = OsuFont.Body.With(weight: FontWeight.SemiBold),
-                                            },
-                                            mappedByText = new OsuSpriteText
-                                            {
-                                                Anchor = Anchor.BottomLeft,
-                                                Origin = Anchor.BottomLeft,
-                                                Text = " mapped by ",
-                                                Font = OsuFont.Body,
-                                            },
-                                            mapperLink = new MapperLinkContainer
-                                            {
-                                                AutoSizeAxes = Axes.Both,
-                                                Anchor = Anchor.BottomLeft,
-                                                Origin = Anchor.BottomLeft,
-                                                Child = mapperText = new TruncatingSpriteText
+                                                difficultyText = new TruncatingSpriteText
                                                 {
-                                                    Shadow = true,
+                                                    Anchor = Anchor.BottomLeft,
+                                                    Origin = Anchor.BottomLeft,
                                                     Font = OsuFont.Body.With(weight: FontWeight.SemiBold),
+                                                },
+                                                mappedByText = new OsuSpriteText
+                                                {
+                                                    Anchor = Anchor.BottomLeft,
+                                                    Origin = Anchor.BottomLeft,
+                                                    Text = " mapped by ",
+                                                    Font = OsuFont.Body,
+                                                },
+                                                mapperLink = new MapperLinkContainer
+                                                {
+                                                    AutoSizeAxes = Axes.Both,
+                                                    Anchor = Anchor.BottomLeft,
+                                                    Origin = Anchor.BottomLeft,
+                                                    Child = mapperText = new TruncatingSpriteText
+                                                    {
+                                                        Shadow = true,
+                                                        Font = OsuFont.Body.With(weight: FontWeight.SemiBold),
+                                                    },
                                                 },
                                             },
                                         },
-                                    },
-                                }
+                                    }
+                                },
                             },
-                        }),
-                        new ShearAlignedDrawable(shear, new Container
+                        },
+                        new Container
                         {
                             RelativeSizeAxes = Axes.X,
                             AutoSizeAxes = Axes.Y,
@@ -211,7 +216,7 @@ namespace osu.Game.Screens.SelectV2
                                     }
                                 },
                             }
-                        }),
+                        },
                     }
                 },
             };

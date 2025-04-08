@@ -94,7 +94,7 @@ namespace osu.Game.Screens.SelectV2
                     RelativeSizeAxes = Axes.Both,
                     Colour = colourProvider.Background3.Opacity(0.6f),
                 },
-                new FillFlowContainer
+                new ShearedFillFlowContainer
                 {
                     RelativeSizeAxes = Axes.X,
                     AutoSizeAxes = Axes.Y,
@@ -102,9 +102,9 @@ namespace osu.Game.Screens.SelectV2
                     Padding = new MarginPadding { Left = SongSelect.WEDGE_CONTENT_MARGIN },
                     Spacing = new Vector2(0f, 4f),
                     Shear = -shear,
-                    Children = new Drawable[]
+                    Children = new[]
                     {
-                        new ShearAlignedDrawable(shear, new Container
+                        new Container
                         {
                             RelativeSizeAxes = Axes.X,
                             Height = 35,
@@ -115,8 +115,8 @@ namespace osu.Game.Screens.SelectV2
                                 TextSize = OsuFont.Caption.Size,
                                 TextPadding = new MarginPadding { Horizontal = 6, Vertical = 1 },
                             }
-                        }),
-                        new ShearAlignedDrawable(shear, titleContainer = new Container
+                        },
+                        titleContainer = new Container
                         {
                             RelativeSizeAxes = Axes.X,
                             Height = OsuFont.Display.Size + 2,
@@ -130,8 +130,8 @@ namespace osu.Game.Screens.SelectV2
                                     Font = OsuFont.Display,
                                 },
                             }
-                        }),
-                        new ShearAlignedDrawable(shear, artistContainer = new Container
+                        },
+                        artistContainer = new Container
                         {
                             RelativeSizeAxes = Axes.X,
                             Height = OsuFont.Subheading.Size,
@@ -145,44 +145,52 @@ namespace osu.Game.Screens.SelectV2
                                     Font = OsuFont.Subheading,
                                 },
                             }
-                        }),
-                        new ShearAlignedDrawable(shear, new FillFlowContainer
-                        {
-                            AutoSizeAxes = Axes.Both,
-                            Direction = FillDirection.Horizontal,
-                            Spacing = new Vector2(2f, 0f),
-                            AutoSizeDuration = 100,
-                            AutoSizeEasing = Easing.OutQuint,
-                            Children = new Drawable[]
-                            {
-                                playCount = new WedgeStatisticPlayCount(background: true, leftPadding: SongSelect.WEDGE_CONTENT_MARGIN, minSize: 50f)
-                                {
-                                    Margin = new MarginPadding { Left = -SongSelect.WEDGE_CONTENT_MARGIN },
-                                },
-                                favouritesStatistic = new WedgeStatistic(OsuIcon.Heart, background: true, minSize: 25f)
-                                {
-                                    TooltipText = BeatmapsStrings.StatusFavourites,
-                                },
-                                lengthStatistic = new WedgeStatistic(OsuIcon.Clock),
-                                bpmStatistic = new WedgeStatistic(OsuIcon.Metronome)
-                                {
-                                    TooltipText = BeatmapsetsStrings.ShowStatsBpm,
-                                    Margin = new MarginPadding { Left = 5f },
-                                },
-                            },
-                        }),
-                        new ShearAlignedDrawable(shear, new Container
+                        },
+                        new Container
                         {
                             RelativeSizeAxes = Axes.X,
                             AutoSizeAxes = Axes.Y,
-                            Anchor = Anchor.BottomLeft,
-                            Origin = Anchor.BottomLeft,
-                            Margin = new MarginPadding { Left = -SongSelect.WEDGE_CONTENT_MARGIN },
-                            Padding = new MarginPadding { Right = -SongSelect.WEDGE_CONTENT_MARGIN },
-                            Child = new WedgeDifficultyDisplay(),
-                        }),
+                            Child = new FillFlowContainer
+                            {
+                                AutoSizeAxes = Axes.Both,
+                                Direction = FillDirection.Horizontal,
+                                Spacing = new Vector2(2f, 0f),
+                                AutoSizeDuration = 100,
+                                AutoSizeEasing = Easing.OutQuint,
+                                Children = new Drawable[]
+                                {
+                                    playCount = new WedgeStatisticPlayCount(background: true, leftPadding: SongSelect.WEDGE_CONTENT_MARGIN, minSize: 50f)
+                                    {
+                                        Margin = new MarginPadding { Left = -SongSelect.WEDGE_CONTENT_MARGIN },
+                                    },
+                                    favouritesStatistic = new WedgeStatistic(OsuIcon.Heart, background: true, minSize: 25f)
+                                    {
+                                        TooltipText = BeatmapsStrings.StatusFavourites,
+                                    },
+                                    lengthStatistic = new WedgeStatistic(OsuIcon.Clock),
+                                    bpmStatistic = new WedgeStatistic(OsuIcon.Metronome)
+                                    {
+                                        TooltipText = BeatmapsetsStrings.ShowStatsBpm,
+                                        Margin = new MarginPadding { Left = 5f },
+                                    },
+                                },
+                            }
+                        },
+                        new Container
+                        {
+                            RelativeSizeAxes = Axes.X,
+                            AutoSizeAxes = Axes.Y,
+                            Child = new Container
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y,
+                                Margin = new MarginPadding { Left = -SongSelect.WEDGE_CONTENT_MARGIN, },
+                                Padding = new MarginPadding { Right = -SongSelect.WEDGE_CONTENT_MARGIN },
+                                Child = new WedgeDifficultyDisplay(),
+                            },
+                        },
                     },
-                }
+                },
             };
         }
 
