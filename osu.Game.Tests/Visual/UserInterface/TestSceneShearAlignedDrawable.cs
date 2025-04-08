@@ -17,7 +17,7 @@ using osuTK.Graphics;
 
 namespace osu.Game.Tests.Visual.UserInterface
 {
-    public partial class TestSharedFillFlowContainer : OsuTestScene
+    public partial class TestSceneShearAlignedDrawable : OsuTestScene
     {
         private static readonly Vector2 shear = new Vector2(OsuGame.SHEAR, 0);
 
@@ -46,30 +46,30 @@ namespace osu.Game.Tests.Visual.UserInterface
                         RelativeSizeAxes = Axes.Both,
                         Colour = colourProvider.Background6,
                     },
-                    new ShearedFillFlowContainer
+                    new FillFlowContainer
                     {
                         RelativeSizeAxes = Axes.X,
                         AutoSizeAxes = Axes.Y,
                         Direction = FillDirection.Vertical,
                         Spacing = new Vector2(0f, 10f),
                         Shear = -shear,
-                        Children = new Container[]
+                        Children = new Drawable[]
                         {
-                            first = new ShearedBox("Text 1", OsuColour.Gray(0.4f))
+                            new ShearAlignedDrawable(shear, first = new ShearedBox("Text 1", OsuColour.Gray(0.4f))
                             {
                                 RelativeSizeAxes = Axes.X,
                                 Height = 30,
-                            },
-                            second = new ShearedBox("Text 2", OsuColour.Gray(0.3f))
+                            }),
+                            new ShearAlignedDrawable(shear, second = new ShearedBox("Text 2", OsuColour.Gray(0.3f))
                             {
                                 RelativeSizeAxes = Axes.X,
                                 Height = 30,
-                            },
-                            third = new ShearedBox("Text 3", OsuColour.Gray(0.2f))
+                            }),
+                            new ShearAlignedDrawable(shear, third = new ShearedBox("Text 3", OsuColour.Gray(0.2f))
                             {
                                 RelativeSizeAxes = Axes.X,
                                 Height = 30,
-                            },
+                            }),
                         }
                     }
                 },

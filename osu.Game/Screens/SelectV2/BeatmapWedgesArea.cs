@@ -29,32 +29,23 @@ namespace osu.Game.Screens.SelectV2
 
             const float header_height = 45f;
 
-            InternalChild = new ShearedFillFlowContainer
+            InternalChildren = new Drawable[]
             {
-                RelativeSizeAxes = Axes.Both,
-                Direction = FillDirection.Vertical,
-                Children = new[]
+                new ShearAlignedDrawable(shear, header = new BeatmapWedgesHeader
                 {
-                    new Container
+                    RelativeSizeAxes = Axes.X,
+                    Height = header_height,
+                }),
+                new Container
+                {
+                    Depth = 1f,
+                    Padding = new MarginPadding { Top = header_height },
+                    RelativeSizeAxes = Axes.Both,
+                    Child = new ShearAlignedDrawable(shear, contentContainer = new Container
                     {
-                        AutoSizeAxes = Axes.Both,
-                        Child = header = new BeatmapWedgesHeader
-                        {
-                            RelativeSizeAxes = Axes.X,
-                            Height = header_height,
-                        },
-                    },
-                    new Container
-                    {
-                        Depth = 1f,
-                        Padding = new MarginPadding { Top = header_height },
                         RelativeSizeAxes = Axes.Both,
-                        Child = contentContainer = new Container
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                        },
-                    },
-                }
+                    }),
+                },
             };
         }
 
