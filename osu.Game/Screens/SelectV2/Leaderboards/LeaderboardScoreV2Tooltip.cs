@@ -365,7 +365,7 @@ namespace osu.Game.Screens.SelectV2.Leaderboards
                         Anchor = Anchor.BottomCentre,
                         Origin = Anchor.BottomCentre,
                         Margin = new MarginPadding { Bottom = 25f, Top = 10f + spacing },
-                        Font = OsuFont.Subdisplay.With(weight: FontWeight.Light, fixedWidth: true),
+                        Font = OsuFont.Subtitle.With(weight: FontWeight.Light, fixedWidth: true),
                         Spacing = new Vector2(-1.5f),
                         UseFullGlyphHeight = false,
                     },

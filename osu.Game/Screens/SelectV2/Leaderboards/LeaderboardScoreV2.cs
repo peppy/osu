@@ -511,7 +511,7 @@ namespace osu.Game.Screens.SelectV2.Leaderboards
                                             Shear = new Vector2(sheared ? -OsuGame.SHEAR : 0, 0),
                                             Current = scoreManager.GetBindableTotalScoreString(score),
                                             Spacing = new Vector2(-1.5f),
-                                            Font = OsuFont.Subdisplay.With(weight: FontWeight.Light, fixedWidth: true),
+                                            Font = OsuFont.Subtitle.With(weight: FontWeight.Light, fixedWidth: true),
                                         },
                                         new InputBlockingContainer
                                         {

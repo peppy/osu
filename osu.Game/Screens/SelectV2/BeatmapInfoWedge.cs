@@ -107,15 +107,15 @@ namespace osu.Game.Screens.SelectV2
                         new ShearAlignedDrawable(shear, titleContainer = new Container
                         {
                             RelativeSizeAxes = Axes.X,
-                            Height = OsuFont.Title.Size,
-                            Margin = new MarginPadding { Bottom = -4f },
+                            Height = OsuFont.Title.Size + 2,
+                            Margin = new MarginPadding { Bottom = -5f },
                             Child = titleLink = new OsuHoverContainer
                             {
                                 AutoSizeAxes = Axes.Both,
                                 Child = titleLabel = new TruncatingSpriteText
                                 {
                                     Shadow = true,
-                                    Font = OsuFont.Display,
+                                    Font = OsuFont.Title,
                                 },
                             }
                         }),

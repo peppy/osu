@@ -23,12 +23,12 @@ namespace osu.Game.Graphics
         /// <summary>
         /// Equivalent to Torus with 32px size and semi-bold weight.
         /// </summary>
-        public static FontUsage Display => GetFont(size: 32, weight: FontWeight.SemiBold);
+        public static FontUsage Title => GetFont(size: 32, weight: FontWeight.SemiBold);
 
         /// <summary>
         /// Equivalent to Torus with 28px size and semi-bold weight.
         /// </summary>
-        public static FontUsage Subdisplay => GetFont(size: 28, weight: FontWeight.SemiBold);
+        public static FontUsage Subtitle => GetFont(size: 28, weight: FontWeight.SemiBold);
 
         /// <summary>
         /// Equivalent to Torus with 22px size and semi-bold weight.
