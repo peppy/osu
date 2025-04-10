@@ -506,7 +506,7 @@ namespace osu.Game.Screens.SelectV2
         private void scrollToSelection()
         {
             if (currentKeyboardSelection.CarouselItem != null)
-                Scroll.ScrollTo(currentKeyboardSelection.CarouselItem.CarouselYPosition - visibleHalfHeight);
+                Scroll.ScrollTo(currentKeyboardSelection.CarouselItem.CarouselYPosition - visibleHalfHeight + BleedTop);
         }
 
         #endregion
@@ -520,17 +520,17 @@ namespace osu.Game.Screens.SelectV2
         /// <summary>
         /// The position of the lower visible bound with respect to the current scroll position.
         /// </summary>
-        private float visibleBottomBound => (float)(Scroll.Current + DrawHeight + BleedBottom);
+        private float visibleBottomBound;
 
         /// <summary>
         /// The position of the upper visible bound with respect to the current scroll position.
         /// </summary>
-        private float visibleUpperBound => (float)(Scroll.Current - BleedTop);
+        private float visibleUpperBound;
 
         /// <summary>
         /// Half the height of the visible content.
         /// </summary>
-        private float visibleHalfHeight => (DrawHeight + BleedBottom + BleedTop) / 2;
+        private float visibleHalfHeight;
 
         protected override void Update()
         {
@@ -538,6 +538,10 @@ namespace osu.Game.Screens.SelectV2
 
             if (carouselItems == null)
                 return;
+
+            visibleBottomBound = (float)(Scroll.Current + DrawHeight + BleedBottom);
+            visibleUpperBound = (float)(Scroll.Current - BleedTop);
+            visibleHalfHeight = (DrawHeight + BleedBottom + BleedTop) / 2;
 
             if (!selectionValid.IsValid)
             {
@@ -583,7 +587,7 @@ namespace osu.Game.Screens.SelectV2
         protected virtual float GetPanelXOffset(Drawable panel)
         {
             Vector2 posInScroll = Scroll.ToLocalSpace(panel.ScreenSpaceDrawQuad.Centre);
-            float dist = Math.Abs(1f - posInScroll.Y / visibleHalfHeight);
+            float dist = Math.Abs(1f - (posInScroll.Y + BleedTop) / visibleHalfHeight);
 
             return offsetX(dist, visibleHalfHeight);
         }
