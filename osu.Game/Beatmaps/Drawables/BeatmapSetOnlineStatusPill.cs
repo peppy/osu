@@ -19,6 +19,11 @@ namespace osu.Game.Beatmaps.Drawables
 {
     public partial class BeatmapSetOnlineStatusPill : CircularContainer, IHasTooltip
     {
+        /// <summary>
+        /// Whether to show <see cref="BeatmapOnlineStatus.None"/> as "unknownn" instead of fading out.
+        /// </summary>
+        public bool ShowUnknownStatus { get; init; } = false;
+
         public BeatmapOnlineStatus Status
         {
             get => status;
@@ -93,7 +98,7 @@ namespace osu.Game.Beatmaps.Drawables
 
         private void updateState()
         {
-            if (Status == BeatmapOnlineStatus.None)
+            if (Status == BeatmapOnlineStatus.None && !ShowUnknownStatus)
             {
                 this.FadeOut(animation_duration, Easing.OutQuint);
                 return;
