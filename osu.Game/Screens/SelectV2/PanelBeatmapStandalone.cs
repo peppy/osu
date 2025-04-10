@@ -114,7 +114,6 @@ namespace osu.Game.Screens.SelectV2
                             },
                             statusPill = new BeatmapSetOnlineStatusPill
                             {
-                                AutoSizeAxes = Axes.Both,
                                 Origin = Anchor.CentreLeft,
                                 Anchor = Anchor.CentreLeft,
                                 TextSize = OsuFont.Tiny.Size,
