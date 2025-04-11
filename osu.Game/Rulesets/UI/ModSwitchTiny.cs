@@ -67,7 +67,7 @@ namespace osu.Game.Rulesets.UI
                         extendedText = new OsuSpriteText
                         {
                             Margin = new MarginPadding { Left = 3 * DEFAULT_HEIGHT / 4 },
-                            Font = OsuFont.Default.With(size: 30f, weight: FontWeight.Bold),
+                            Font = OsuFont.Torus.With(size: 30f, weight: FontWeight.Bold),
                             UseFullGlyphHeight = false,
                             Text = mod.ExtendedIconInformation,
                             Anchor = Anchor.Centre,

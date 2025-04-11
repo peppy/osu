@@ -45,7 +45,7 @@ namespace osu.Game.Screens.Play
             AddInternal(new OsuSpriteText
             {
                 Text = $"Watching {score.ScoreInfo.User.Username} playing live!",
-                Font = OsuFont.Default.With(size: 30),
+                Font = OsuFont.Torus.With(size: 30),
                 Y = 100,
                 Anchor = Anchor.TopCentre,
                 Origin = Anchor.TopCentre,

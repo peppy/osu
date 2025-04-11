@@ -372,7 +372,7 @@ namespace osu.Game.Screens.Ranking
                                     TagNameText = new OsuSpriteText
                                     {
                                         Text = UserTag.DisplayName,
-                                        Font = OsuFont.Default.With(weight: FontWeight.SemiBold),
+                                        Font = OsuFont.Torus.With(weight: FontWeight.SemiBold),
                                         Anchor = Anchor.CentreLeft,
                                         Origin = Anchor.CentreLeft,
                                         Margin = new MarginPadding { Horizontal = 6, Vertical = 3, },
@@ -693,13 +693,13 @@ namespace osu.Game.Screens.Ranking
                             Padding = new MarginPadding(5) { Right = 35 },
                             Children = new Drawable[]
                             {
-                                new OsuTextFlowContainer(t => t.Font = OsuFont.Default.With(weight: FontWeight.SemiBold))
+                                new OsuTextFlowContainer(t => t.Font = OsuFont.Torus.With(weight: FontWeight.SemiBold))
                                 {
                                     RelativeSizeAxes = Axes.X,
                                     AutoSizeAxes = Axes.Y,
                                     Text = Tag.DisplayName,
                                 },
-                                new OsuTextFlowContainer(t => t.Font = OsuFont.Default.With(size: 14))
+                                new OsuTextFlowContainer(t => t.Font = OsuFont.Torus.With(size: 14))
                                 {
                                     RelativeSizeAxes = Axes.X,
                                     AutoSizeAxes = Axes.Y,

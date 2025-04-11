@@ -72,7 +72,7 @@ namespace osu.Game.Screens.Play
                     Children = new Drawable[]
                     {
                         offsetControl = new BeatmapOffsetControl(),
-                        text = new OsuTextFlowContainer(cp => cp.Font = OsuFont.Default.With(weight: FontWeight.SemiBold))
+                        text = new OsuTextFlowContainer(cp => cp.Font = OsuFont.Torus.With(weight: FontWeight.SemiBold))
                         {
                             RelativeSizeAxes = Axes.X,
                             AutoSizeAxes = Axes.Y,

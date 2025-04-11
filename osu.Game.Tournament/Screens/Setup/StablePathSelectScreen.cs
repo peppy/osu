@@ -74,7 +74,7 @@ namespace osu.Game.Tournament.Screens.Setup
                                         Anchor = Anchor.Centre,
                                         Origin = Anchor.Centre,
                                         Text = "Please select a new location",
-                                        Font = OsuFont.Default.With(size: 40)
+                                        Font = OsuFont.Torus.With(size: 40)
                                     },
                                 },
                                 new Drawable[]

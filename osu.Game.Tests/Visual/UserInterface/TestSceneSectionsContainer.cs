@@ -282,7 +282,7 @@ namespace osu.Game.Tests.Visual.UserInterface
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
                         Text = label,
-                        Font = OsuFont.Default.With(size: 36),
+                        Font = OsuFont.Torus.With(size: 36),
                     }
                 };
             }

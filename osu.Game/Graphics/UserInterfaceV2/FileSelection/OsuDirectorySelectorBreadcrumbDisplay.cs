@@ -98,7 +98,7 @@ namespace osu.Game.Graphics.UserInterfaceV2.FileSelection
                 Flow.Colour = colourProvider.Light3;
             }
 
-            protected override SpriteText CreateSpriteText() => new OsuSpriteText().With(t => t.Font = OsuFont.Default.With(weight: FontWeight.SemiBold));
+            protected override SpriteText CreateSpriteText() => new OsuSpriteText().With(t => t.Font = OsuFont.Torus.With(weight: FontWeight.SemiBold));
 
             protected override IconUsage? Icon => Directory.Name.Contains(Path.DirectorySeparatorChar) ? FontAwesome.Solid.Database : null;
         }

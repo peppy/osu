@@ -153,7 +153,7 @@ namespace osu.Game.Collections
                         Anchor = Anchor.BottomLeft,
                         Origin = Anchor.TopLeft,
                         Depth = float.MinValue,
-                        Font = OsuFont.Default.With(size: count_text_size, weight: FontWeight.SemiBold),
+                        Font = OsuFont.Torus.With(size: count_text_size, weight: FontWeight.SemiBold),
                         Margin = new MarginPadding { Top = 2, Left = 2 },
                         Colour = colours.Yellow
                     });

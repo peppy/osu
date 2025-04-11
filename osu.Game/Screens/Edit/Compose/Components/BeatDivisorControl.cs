@@ -248,7 +248,7 @@ namespace osu.Game.Screens.Edit.Compose.Components
 
                 Add(divisorText = new OsuSpriteText
                 {
-                    Font = OsuFont.Default.With(size: 20),
+                    Font = OsuFont.Torus.With(size: 20),
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
                     Margin = new MarginPadding
@@ -348,7 +348,7 @@ namespace osu.Game.Screens.Edit.Compose.Components
                 Anchor = Anchor.Centre;
                 Origin = Anchor.Centre;
 
-                Font = OsuFont.Default.With(size: 14);
+                Font = OsuFont.Torus.With(size: 14);
             }
 
             protected override void LoadComplete()

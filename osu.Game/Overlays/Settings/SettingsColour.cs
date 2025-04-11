@@ -49,7 +49,7 @@ namespace osu.Game.Overlays.Settings
                     {
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
-                        Font = OsuFont.Default.With(size: 20)
+                        Font = OsuFont.Torus.With(size: 20)
                     }
                 };
             }

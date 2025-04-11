@@ -70,13 +70,13 @@ namespace osu.Game.Tests.Visual.Online
                                         {
                                             Anchor = Anchor.TopCentre,
                                             Origin = Anchor.TopCentre,
-                                            Font = OsuFont.Default.With(size: 20),
+                                            Font = OsuFont.Torus.With(size: 20),
                                         },
                                         searchText = new OsuSpriteText
                                         {
                                             Anchor = Anchor.TopCentre,
                                             Origin = Anchor.TopCentre,
-                                            Font = OsuFont.Default.With(size: 20),
+                                            Font = OsuFont.Torus.With(size: 20),
                                         },
                                     },
                                 },

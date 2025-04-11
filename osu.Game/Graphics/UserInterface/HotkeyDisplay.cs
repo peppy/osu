@@ -100,7 +100,7 @@ namespace osu.Game.Graphics.UserInterface
                     {
                         Margin = new MarginPadding { Horizontal = 5, Bottom = 1, },
                         Text = hotkey.ToUpperInvariant(),
-                        Font = OsuFont.Default.With(size: 12, weight: FontWeight.Bold),
+                        Font = OsuFont.Torus.With(size: 12, weight: FontWeight.Bold),
                         Colour = colourProvider?.Light1 ?? colours.GrayA,
                     }
                 };

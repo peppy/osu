@@ -48,7 +48,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
                     captionText = new OsuSpriteText
                     {
                         Text = caption,
-                        Font = OsuFont.Default.With(size: 12, weight: FontWeight.SemiBold),
+                        Font = OsuFont.Torus.With(size: 12, weight: FontWeight.SemiBold),
                         Anchor = Anchor.CentreLeft,
                         Origin = Anchor.CentreLeft,
                     },

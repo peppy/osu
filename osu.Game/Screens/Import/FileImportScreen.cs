@@ -80,7 +80,7 @@ namespace osu.Game.Screens.Import
                                     RelativeSizeAxes = Axes.Both,
                                     Anchor = Anchor.TopCentre,
                                     Origin = Anchor.TopCentre,
-                                    Child = currentFileText = new TextFlowContainer(t => t.Font = OsuFont.Default.With(size: 30))
+                                    Child = currentFileText = new TextFlowContainer(t => t.Font = OsuFont.Torus.With(size: 30))
                                     {
                                         AutoSizeAxes = Axes.Y,
                                         RelativeSizeAxes = Axes.X,

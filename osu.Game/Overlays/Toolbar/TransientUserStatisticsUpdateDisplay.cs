@@ -141,14 +141,14 @@ namespace osu.Game.Overlays.Toolbar
                                 {
                                     Anchor = Anchor.CentreRight,
                                     Origin = Anchor.CentreRight,
-                                    Font = OsuFont.Default.With(size: 12, fixedWidth: true, weight: FontWeight.SemiBold),
+                                    Font = OsuFont.Torus.With(size: 12, fixedWidth: true, weight: FontWeight.SemiBold),
                                     AlwaysPresent = true,
                                 },
                                 titleText = new OsuSpriteText
                                 {
                                     Anchor = Anchor.CentreRight,
                                     Origin = Anchor.CentreRight,
-                                    Font = OsuFont.Default.With(size: 12, weight: FontWeight.SemiBold),
+                                    Font = OsuFont.Torus.With(size: 12, weight: FontWeight.SemiBold),
                                     Text = title,
                                     AlwaysPresent = true,
                                 }
@@ -207,7 +207,7 @@ namespace osu.Game.Overlays.Toolbar
         private partial class Counter<T> : RollingCounter<T>
             where T : struct, IEquatable<T>, IFormattable
         {
-            public FontUsage Font { get; init; } = OsuFont.Default.With(fixedWidth: true);
+            public FontUsage Font { get; init; } = OsuFont.Torus.With(fixedWidth: true);
 
             public string ValuePrefix
             {

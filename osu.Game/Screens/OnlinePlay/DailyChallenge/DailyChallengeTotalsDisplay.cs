@@ -131,7 +131,7 @@ namespace osu.Game.Screens.OnlinePlay.DailyChallenge
 
             protected override OsuSpriteText CreateSpriteText() => new OsuSpriteText
             {
-                Font = OsuFont.Default.With(size: 80f, fixedWidth: true),
+                Font = OsuFont.Torus.With(size: 80f, fixedWidth: true),
                 Spacing = new Vector2(-4, 0)
             };
 

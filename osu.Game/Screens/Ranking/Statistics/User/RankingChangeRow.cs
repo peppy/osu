@@ -47,7 +47,7 @@ namespace osu.Game.Screens.Ranking.Statistics.User
                 new OsuSpriteText
                 {
                     Text = Label,
-                    Font = OsuFont.Default.With(size: StatisticItem.FONT_SIZE)
+                    Font = OsuFont.Torus.With(size: StatisticItem.FONT_SIZE)
                 },
                 new FillFlowContainer
                 {
@@ -91,7 +91,7 @@ namespace osu.Game.Screens.Ranking.Statistics.User
                                 {
                                     Anchor = Anchor.CentreRight,
                                     Origin = Anchor.CentreRight,
-                                    Font = OsuFont.Default.With(size: StatisticItem.FONT_SIZE, weight: FontWeight.Bold)
+                                    Font = OsuFont.Torus.With(size: StatisticItem.FONT_SIZE, weight: FontWeight.Bold)
                                 },
                             }
                         },
@@ -99,7 +99,7 @@ namespace osu.Game.Screens.Ranking.Statistics.User
                         {
                             Anchor = Anchor.TopRight,
                             Origin = Anchor.TopRight,
-                            Font = OsuFont.Default.With(size: StatisticItem.FONT_SIZE, weight: FontWeight.Bold)
+                            Font = OsuFont.Torus.With(size: StatisticItem.FONT_SIZE, weight: FontWeight.Bold)
                         }
                     }
                 }

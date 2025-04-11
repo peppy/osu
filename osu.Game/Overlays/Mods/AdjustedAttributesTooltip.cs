@@ -133,7 +133,7 @@ namespace osu.Game.Overlays.Mods
 
                 InternalChild = new OsuSpriteText
                 {
-                    Font = OsuFont.Default.With(weight: FontWeight.Bold),
+                    Font = OsuFont.Torus.With(weight: FontWeight.Bold),
                     Text = $"{name}: {original:0.0#} → {adjusted:0.0#}"
                 };
             }

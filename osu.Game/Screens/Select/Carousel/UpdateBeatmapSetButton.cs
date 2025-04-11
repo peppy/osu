@@ -98,7 +98,7 @@ namespace osu.Game.Screens.Select.Carousel
                         {
                             Anchor = Anchor.CentreLeft,
                             Origin = Anchor.CentreLeft,
-                            Font = OsuFont.Default.With(weight: FontWeight.Bold),
+                            Font = OsuFont.Torus.With(weight: FontWeight.Bold),
                             Text = "Update",
                         }
                     }

@@ -101,7 +101,7 @@ namespace osu.Game.Rulesets.Osu.Skinning.Argon
                 },
                 number = new OsuSpriteText
                 {
-                    Font = OsuFont.Default.With(size: 52, weight: FontWeight.Bold),
+                    Font = OsuFont.Torus.With(size: 52, weight: FontWeight.Bold),
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
                     Y = -2,

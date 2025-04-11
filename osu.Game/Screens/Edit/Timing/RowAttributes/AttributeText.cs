@@ -25,7 +25,7 @@ namespace osu.Game.Screens.Edit.Timing.RowAttributes
             Origin = Anchor.CentreLeft;
 
             Padding = new MarginPadding(6);
-            Font = OsuFont.Default.With(weight: FontWeight.Bold, size: 12);
+            Font = OsuFont.Torus.With(weight: FontWeight.Bold, size: 12);
             Colour = controlPoint.GetRepresentingColour(colours);
         }
     }

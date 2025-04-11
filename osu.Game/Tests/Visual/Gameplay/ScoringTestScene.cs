@@ -622,7 +622,7 @@ namespace osu.Game.Tests.Visual.Gameplay
                     {
                         Anchor = Anchor.CentreRight,
                         Origin = Anchor.CentreRight,
-                        Font = OsuFont.Default.With(fixedWidth: true)
+                        Font = OsuFont.Torus.With(fixedWidth: true)
                     }
                 };
             }

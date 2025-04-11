@@ -102,7 +102,7 @@ namespace osu.Game.Screens.Play
                             new OsuSpriteText
                             {
                                 Text = "Spectator Mode",
-                                Font = OsuFont.Default.With(size: 30),
+                                Font = OsuFont.Torus.With(size: 30),
                                 Anchor = Anchor.Centre,
                                 Origin = Anchor.Centre,
                             },

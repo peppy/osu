@@ -52,7 +52,7 @@ namespace osu.Game.Rulesets.Taiko.Skinning.Argon
                 Blending = BlendingParameters.Additive,
                 Spacing = new Vector2(10, 0),
                 RelativePositionAxes = Axes.Both,
-                Font = OsuFont.Default.With(size: 20, weight: FontWeight.Regular),
+                Font = OsuFont.Torus.With(size: 20, weight: FontWeight.Regular),
             };
 
         /// <summary>

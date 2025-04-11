@@ -50,7 +50,7 @@ namespace osu.Game.Rulesets.Osu.Skinning.Argon
                 Origin = Anchor.Centre,
                 Blending = BlendingParameters.Additive,
                 Spacing = new Vector2(5, 0),
-                Font = OsuFont.Default.With(size: 20, weight: FontWeight.Bold),
+                Font = OsuFont.Torus.With(size: 20, weight: FontWeight.Bold),
             };
 
         /// <summary>

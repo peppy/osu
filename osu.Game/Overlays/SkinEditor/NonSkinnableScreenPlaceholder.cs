@@ -49,7 +49,7 @@ namespace osu.Game.Overlays.SkinEditor
                             Size = new Vector2(24),
                             Y = -5,
                         },
-                        new OsuTextFlowContainer(t => t.Font = OsuFont.Default.With(weight: FontWeight.SemiBold, size: 18))
+                        new OsuTextFlowContainer(t => t.Font = OsuFont.Torus.With(weight: FontWeight.SemiBold, size: 18))
                         {
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.TopCentre,

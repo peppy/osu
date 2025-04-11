@@ -101,7 +101,7 @@ namespace osu.Game.Screens.Edit.Compose.Components.Timeline
                             Anchor = Anchor.CentreLeft,
                             Origin = Anchor.Centre,
                             Y = -1,
-                            Font = OsuFont.Default.With(size: circle_size * 0.5f, weight: FontWeight.Regular),
+                            Font = OsuFont.Torus.With(size: circle_size * 0.5f, weight: FontWeight.Regular),
                         },
                     }
                 },

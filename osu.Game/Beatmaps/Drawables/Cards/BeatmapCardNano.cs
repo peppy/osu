@@ -83,13 +83,13 @@ namespace osu.Game.Beatmaps.Drawables.Cards
                                         new TruncatingSpriteText
                                         {
                                             Text = new RomanisableString(BeatmapSet.TitleUnicode, BeatmapSet.Title),
-                                            Font = OsuFont.Default.With(size: 19, weight: FontWeight.SemiBold),
+                                            Font = OsuFont.Torus.With(size: 19, weight: FontWeight.SemiBold),
                                             RelativeSizeAxes = Axes.X,
                                         },
                                         new TruncatingSpriteText
                                         {
                                             Text = createArtistText(),
-                                            Font = OsuFont.Default.With(size: 16, weight: FontWeight.SemiBold),
+                                            Font = OsuFont.Torus.With(size: 16, weight: FontWeight.SemiBold),
                                             RelativeSizeAxes = Axes.X,
                                         },
                                     }

@@ -60,7 +60,7 @@ namespace osu.Game.Beatmaps.Drawables.Cards.Statistics
                     {
                         Anchor = Anchor.CentreLeft,
                         Origin = Anchor.CentreLeft,
-                        Font = OsuFont.Default.With(size: 11)
+                        Font = OsuFont.Torus.With(size: 11)
                     }
                 }
             };

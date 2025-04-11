@@ -58,9 +58,9 @@ namespace osu.Game.Skinning.Components
                     Text = "Big Black Box",
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    Font = OsuFont.Default.With(size: 40)
+                    Font = OsuFont.Torus.With(size: 40)
                 },
-                disclaimer = new OsuTextFlowContainer(st => st.Font = OsuFont.Default.With(size: 10))
+                disclaimer = new OsuTextFlowContainer(st => st.Font = OsuFont.Torus.With(size: 10))
                 {
                     Text = "This is intended to be a test component and may disappear in the future!",
                     RelativeSizeAxes = Axes.X,

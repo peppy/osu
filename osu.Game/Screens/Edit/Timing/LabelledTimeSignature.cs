@@ -63,7 +63,7 @@ namespace osu.Game.Screens.Edit.Timing
                                 Right = CONTENT_PADDING_HORIZONTAL
                             },
                             Text = "/ 4",
-                            Font = OsuFont.Default.With(size: 20)
+                            Font = OsuFont.Torus.With(size: 20)
                         }
                     }
                 };

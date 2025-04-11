@@ -133,7 +133,7 @@ namespace osu.Game.Screens.OnlinePlay.Lounge.Components
                                         },
                                         totalCount = new OsuSpriteText
                                         {
-                                            Font = OsuFont.Default.With(weight: FontWeight.Bold),
+                                            Font = OsuFont.Torus.With(weight: FontWeight.Bold),
                                             Anchor = Anchor.CentreLeft,
                                             Origin = Anchor.CentreLeft,
                                         },
@@ -352,7 +352,7 @@ namespace osu.Game.Screens.OnlinePlay.Lounge.Components
             {
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
-                Font = OsuFont.Default.With(weight: FontWeight.Bold),
+                Font = OsuFont.Torus.With(weight: FontWeight.Bold),
             };
 
             [BackgroundDependencyLoader]

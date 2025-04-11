@@ -61,14 +61,14 @@ namespace osu.Game.Overlays.Settings.Sections.Maintenance
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
                             Text = MaintenanceSettingsStrings.MigrationInProgress,
-                            Font = OsuFont.Default.With(size: 40)
+                            Font = OsuFont.Torus.With(size: 40)
                         },
                         new OsuSpriteText
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
                             Text = MaintenanceSettingsStrings.MigrationDescription,
-                            Font = OsuFont.Default.With(size: 30)
+                            Font = OsuFont.Torus.With(size: 30)
                         },
                         new LoadingSpinner(true)
                         {
@@ -79,7 +79,7 @@ namespace osu.Game.Overlays.Settings.Sections.Maintenance
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
                             Text = MaintenanceSettingsStrings.ProhibitedInteractDuringMigration,
-                            Font = OsuFont.Default.With(size: 30)
+                            Font = OsuFont.Torus.With(size: 30)
                         },
                     }
                 },

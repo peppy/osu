@@ -38,7 +38,7 @@ namespace osu.Game.Graphics.UserInterface
                 },
                 new OsuTextFlowContainer(cp =>
                 {
-                    cp.Font = OsuFont.Default.With(weight: FontWeight.SemiBold);
+                    cp.Font = OsuFont.Torus.With(weight: FontWeight.SemiBold);
                 })
                 {
                     AutoSizeAxes = Axes.Both,
@@ -48,7 +48,7 @@ namespace osu.Game.Graphics.UserInterface
                 },
                 textFlow = new OsuTextFlowContainer(cp =>
                 {
-                    cp.Font = OsuFont.Default.With(fixedWidth: true, weight: FontWeight.Regular);
+                    cp.Font = OsuFont.Torus.With(fixedWidth: true, weight: FontWeight.Regular);
                     cp.Spacing = new Vector2(-1);
                 })
                 {

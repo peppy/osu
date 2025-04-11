@@ -132,7 +132,7 @@ namespace osu.Game.Screens.Edit
                 new OsuSpriteText
                 {
                     Text = "Beatmap is mounted externally",
-                    Font = OsuFont.Default.With(size: 30),
+                    Font = OsuFont.Torus.With(size: 30),
                     Anchor = Anchor.TopCentre,
                     Origin = Anchor.TopCentre,
                 },
@@ -236,7 +236,7 @@ namespace osu.Game.Screens.Edit
                 new OsuSpriteText
                 {
                     Text = text,
-                    Font = OsuFont.Default.With(size: 30),
+                    Font = OsuFont.Torus.With(size: 30),
                     Anchor = Anchor.TopCentre,
                     Origin = Anchor.TopCentre,
                 },

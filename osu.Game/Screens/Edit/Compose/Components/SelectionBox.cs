@@ -203,7 +203,7 @@ namespace osu.Game.Screens.Edit.Compose.Components
                         {
                             Padding = new MarginPadding(2),
                             Colour = colours.Gray0,
-                            Font = OsuFont.Default.With(size: 11),
+                            Font = OsuFont.Torus.With(size: 11),
                             Text = text,
                         }
                     }

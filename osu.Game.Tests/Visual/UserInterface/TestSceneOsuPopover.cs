@@ -29,7 +29,7 @@ namespace osu.Game.Tests.Visual.UserInterface
                     new OsuSpriteText
                     {
                         Text = @"No OverlayColourProvider",
-                        Font = OsuFont.Default.With(size: 40)
+                        Font = OsuFont.Torus.With(size: 40)
                     },
                     new RoundedButtonWithPopover()
                 }
@@ -46,7 +46,7 @@ namespace osu.Game.Tests.Visual.UserInterface
                         new OsuSpriteText
                         {
                             Text = @"With OverlayColourProvider (orange)",
-                            Font = OsuFont.Default.With(size: 40)
+                            Font = OsuFont.Torus.With(size: 40)
                         },
                         new RoundedButtonWithPopover()
                     }

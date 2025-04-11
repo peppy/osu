@@ -83,7 +83,7 @@ namespace osu.Game.Overlays.SkinEditor
                         label = new OsuSpriteText
                         {
                             Text = Item.GetType().Name,
-                            Font = OsuFont.Default.With(size: 10, weight: FontWeight.Bold),
+                            Font = OsuFont.Torus.With(size: 10, weight: FontWeight.Bold),
                             Alpha = 0,
                             Anchor = Anchor.BottomRight,
                             Origin = Anchor.TopRight,

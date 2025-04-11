@@ -113,7 +113,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
                     {
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
-                        Font = OsuFont.Default.With(size: 12)
+                        Font = OsuFont.Torus.With(size: 12)
                     }
                 };
             }

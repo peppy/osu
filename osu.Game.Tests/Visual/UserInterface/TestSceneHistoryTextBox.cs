@@ -41,7 +41,7 @@ namespace osu.Game.Tests.Visual.UserInterface
                         RelativeSizeAxes = Axes.X,
                         Width = 0.99f,
                         Y = -box.Height,
-                        Font = OsuFont.Default.With(size: 20),
+                        Font = OsuFont.Torus.With(size: 20),
                     }
                 };
 

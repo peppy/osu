@@ -109,7 +109,7 @@ namespace osu.Game.Beatmaps.Drawables.Cards
                                                     new TruncatingSpriteText
                                                     {
                                                         Text = new RomanisableString(BeatmapSet.TitleUnicode, BeatmapSet.Title),
-                                                        Font = OsuFont.Default.With(size: 18f, weight: FontWeight.SemiBold),
+                                                        Font = OsuFont.Torus.With(size: 18f, weight: FontWeight.SemiBold),
                                                         RelativeSizeAxes = Axes.X,
                                                     },
                                                     titleBadgeArea = new FillFlowContainer
@@ -142,7 +142,7 @@ namespace osu.Game.Beatmaps.Drawables.Cards
                                                     new TruncatingSpriteText
                                                     {
                                                         Text = createArtistText(),
-                                                        Font = OsuFont.Default.With(size: 14f, weight: FontWeight.SemiBold),
+                                                        Font = OsuFont.Torus.With(size: 14f, weight: FontWeight.SemiBold),
                                                         RelativeSizeAxes = Axes.X,
                                                     },
                                                     Empty()

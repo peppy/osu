@@ -95,7 +95,7 @@ namespace osu.Game.Screens.SelectV2.Footer
                 Padding = new MarginPadding(10),
             };
 
-            textFlow.AddText(text, t => t.Font = OsuFont.Default.With(weight: FontWeight.SemiBold));
+            textFlow.AddText(text, t => t.Font = OsuFont.Torus.With(weight: FontWeight.SemiBold));
 
             if (context != null)
             {

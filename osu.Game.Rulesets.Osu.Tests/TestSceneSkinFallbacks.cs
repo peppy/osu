@@ -160,7 +160,7 @@ namespace osu.Game.Rulesets.Osu.Tests
                 return new OsuSpriteText
                 {
                     Text = identifier,
-                    Font = OsuFont.Default.With(size: 30),
+                    Font = OsuFont.Torus.With(size: 30),
                 };
             }
 

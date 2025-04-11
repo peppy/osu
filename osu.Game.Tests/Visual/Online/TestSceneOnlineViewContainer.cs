@@ -86,7 +86,7 @@ namespace osu.Game.Tests.Visual.Online
                     new OsuSpriteText
                     {
                         Text = "dummy online content",
-                        Font = OsuFont.Default.With(size: 40),
+                        Font = OsuFont.Torus.With(size: 40),
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
                     }

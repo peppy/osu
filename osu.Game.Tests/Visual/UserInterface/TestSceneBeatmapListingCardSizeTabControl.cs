@@ -35,7 +35,7 @@ namespace osu.Game.Tests.Visual.UserInterface
                 {
                     cardSizeText = new OsuSpriteText
                     {
-                        Font = OsuFont.Default.With(size: 24)
+                        Font = OsuFont.Torus.With(size: 24)
                     },
                     new BeatmapListingCardSizeTabControl
                     {

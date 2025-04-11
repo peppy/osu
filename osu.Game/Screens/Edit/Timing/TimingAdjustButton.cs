@@ -68,7 +68,7 @@ namespace osu.Game.Screens.Edit.Timing
                     {
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
-                        Font = OsuFont.Default.With(weight: FontWeight.SemiBold),
+                        Font = OsuFont.Torus.With(weight: FontWeight.SemiBold),
                         Padding = new MarginPadding(5),
                         Depth = float.MinValue
                     }
@@ -149,7 +149,7 @@ namespace osu.Game.Screens.Edit.Timing
                     {
                         Anchor = direction,
                         Origin = direction,
-                        Font = OsuFont.Default.With(size: 10, weight: FontWeight.Bold),
+                        Font = OsuFont.Torus.With(size: 10, weight: FontWeight.Bold),
                         Text = $"{(index > 0 ? "+" : "-")}{Math.Abs(Multiplier * amount)}",
                         Padding = new MarginPadding(2),
                         Alpha = 0,

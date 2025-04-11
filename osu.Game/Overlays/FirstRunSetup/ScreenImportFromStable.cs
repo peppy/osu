@@ -53,7 +53,7 @@ namespace osu.Game.Overlays.FirstRunSetup
         {
             Content.Children = new Drawable[]
             {
-                new LinkFlowContainer(cp => cp.Font = OsuFont.Default.With(size: CONTENT_FONT_SIZE))
+                new LinkFlowContainer(cp => cp.Font = OsuFont.Torus.With(size: CONTENT_FONT_SIZE))
                 {
                     Colour = OverlayColourProvider.Content1,
                     Text = FirstRunOverlayImportFromStableScreenStrings.Description,
@@ -69,7 +69,7 @@ namespace osu.Game.Overlays.FirstRunSetup
                 new ImportCheckbox(CommonStrings.Scores, StableContent.Scores),
                 new ImportCheckbox(CommonStrings.Skins, StableContent.Skins),
                 new ImportCheckbox(CommonStrings.Collections, StableContent.Collections),
-                copyInformation = new LinkFlowContainer(cp => cp.Font = OsuFont.Default.With(size: CONTENT_FONT_SIZE))
+                copyInformation = new LinkFlowContainer(cp => cp.Font = OsuFont.Torus.With(size: CONTENT_FONT_SIZE))
                 {
                     Colour = OverlayColourProvider.Content1,
                     RelativeSizeAxes = Axes.X,
@@ -83,7 +83,7 @@ namespace osu.Game.Overlays.FirstRunSetup
                     Text = FirstRunOverlayImportFromStableScreenStrings.ImportButton,
                     Action = runImport
                 },
-                progressText = new OsuTextFlowContainer(cp => cp.Font = OsuFont.Default.With(size: CONTENT_FONT_SIZE))
+                progressText = new OsuTextFlowContainer(cp => cp.Font = OsuFont.Torus.With(size: CONTENT_FONT_SIZE))
                 {
                     Colour = OverlayColourProvider.Content1,
                     Text = FirstRunOverlayImportFromStableScreenStrings.ImportInProgress,

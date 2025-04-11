@@ -371,7 +371,7 @@ namespace osu.Game.Screens.OnlinePlay
 
         protected override Drawable CreateContent()
         {
-            Action<SpriteText> fontParameters = s => s.Font = OsuFont.Default.With(size: 14, weight: FontWeight.SemiBold);
+            Action<SpriteText> fontParameters = s => s.Font = OsuFont.Torus.With(size: 14, weight: FontWeight.SemiBold);
 
             return new Container
             {

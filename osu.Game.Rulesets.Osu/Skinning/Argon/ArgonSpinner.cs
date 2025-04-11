@@ -45,7 +45,7 @@ namespace osu.Game.Rulesets.Osu.Skinning.Argon
                     Alpha = 0,
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    Font = OsuFont.Default.With(size: 28, weight: FontWeight.Bold),
+                    Font = OsuFont.Torus.With(size: 28, weight: FontWeight.Bold),
                     Y = -100,
                 },
                 spmContainer = new Container
@@ -61,14 +61,14 @@ namespace osu.Game.Rulesets.Osu.Skinning.Argon
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.TopCentre,
                             Text = @"0",
-                            Font = OsuFont.Default.With(size: 28, weight: FontWeight.SemiBold)
+                            Font = OsuFont.Torus.With(size: 28, weight: FontWeight.SemiBold)
                         },
                         new OsuSpriteText
                         {
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.TopCentre,
                             Text = @"SPINS PER MINUTE",
-                            Font = OsuFont.Default.With(size: 16, weight: FontWeight.SemiBold),
+                            Font = OsuFont.Torus.With(size: 16, weight: FontWeight.SemiBold),
                             Y = 30
                         }
                     }

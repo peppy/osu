@@ -138,7 +138,7 @@ namespace osu.Game.Screens.Utility
                     Origin = Anchor.BottomCentre,
                     Children = new Drawable[]
                     {
-                        explanatoryText = new LinkFlowContainer(cp => cp.Font = OsuFont.Default.With(size: 20))
+                        explanatoryText = new LinkFlowContainer(cp => cp.Font = OsuFont.Torus.With(size: 20))
                         {
                             AutoSizeAxes = Axes.Y,
                             RelativeSizeAxes = Axes.X,
@@ -179,7 +179,7 @@ namespace osu.Game.Screens.Utility
                 {
                     RelativeSizeAxes = Axes.Both,
                 },
-                statusText = new OsuTextFlowContainer(cp => cp.Font = OsuFont.Default.With(size: 40))
+                statusText = new OsuTextFlowContainer(cp => cp.Font = OsuFont.Torus.With(size: 40))
                 {
                     Anchor = Anchor.TopCentre,
                     Origin = Anchor.TopCentre,
@@ -268,7 +268,7 @@ namespace osu.Game.Screens.Utility
 
             statusText.AddParagraph($"You scored {correctAtCurrentDifficulty} out of {attemptsAtCurrentDifficulty} ({successRate:0%})!", cp => cp.Colour = isPass ? colours.Green : colours.Red);
             statusText.AddParagraph($"Level {DifficultyLevel} ({mapDifficultyToTargetFrameRate(DifficultyLevel):N0} Hz)",
-                cp => cp.Font = OsuFont.Default.With(size: 24));
+                cp => cp.Font = OsuFont.Torus.With(size: 24));
 
             statusText.AddParagraph(string.Empty);
             statusText.AddParagraph(string.Empty);
@@ -278,17 +278,17 @@ namespace osu.Game.Screens.Utility
             if (!isPass && DifficultyLevel > 1)
             {
                 statusText.AddParagraph("To complete certification, the difficulty level will now decrease until you can get 20 rounds correct in a row!",
-                    cp => cp.Font = OsuFont.Default.With(size: 24, weight: FontWeight.SemiBold));
+                    cp => cp.Font = OsuFont.Torus.With(size: 24, weight: FontWeight.SemiBold));
                 statusText.AddParagraph(string.Empty);
             }
 
             statusText.AddParagraph($"Polling: {pollingMax} Hz Monitor: {displayMode?.RefreshRate ?? 0:N0} Hz Exclusive: {exclusive}",
-                cp => cp.Font = OsuFont.Default.With(size: 15, weight: FontWeight.SemiBold));
+                cp => cp.Font = OsuFont.Torus.With(size: 15, weight: FontWeight.SemiBold));
 
             statusText.AddParagraph($"Input: {host.InputThread.Clock.FramesPerSecond} Hz "
                                     + $"Update: {host.UpdateThread.Clock.FramesPerSecond} Hz "
                                     + $"Draw: {host.DrawThread.Clock.FramesPerSecond} Hz"
-                , cp => cp.Font = OsuFont.Default.With(size: 15, weight: FontWeight.SemiBold));
+                , cp => cp.Font = OsuFont.Torus.With(size: 15, weight: FontWeight.SemiBold));
 
             if (isCertifying && isPass)
             {

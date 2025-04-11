@@ -20,7 +20,7 @@ namespace osu.Game.Screens.Edit.Submission
         {
             Content.AddRange(new Drawable[]
             {
-                new OsuTextFlowContainer(cp => cp.Font = OsuFont.Default.With(size: CONTENT_FONT_SIZE))
+                new OsuTextFlowContainer(cp => cp.Font = OsuFont.Torus.With(size: CONTENT_FONT_SIZE))
                 {
                     RelativeSizeAxes = Axes.X,
                     AutoSizeAxes = Axes.Y,

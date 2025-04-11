@@ -62,7 +62,7 @@ namespace osu.Game.Overlays.Toolbar
             {
                 realTime = new OsuSpriteText
                 {
-                    Font = OsuFont.Default.With(fixedWidth: true),
+                    Font = OsuFont.Torus.With(fixedWidth: true),
                     Spacing = new Vector2(-1.5f, 0),
                 },
                 runningText = new FillFlowContainer
@@ -77,11 +77,11 @@ namespace osu.Game.Overlays.Toolbar
                         new OsuSpriteText
                         {
                             Text = "running",
-                            Font = OsuFont.Default.With(size: 10, weight: FontWeight.SemiBold),
+                            Font = OsuFont.Torus.With(size: 10, weight: FontWeight.SemiBold),
                         },
                         gameTime = new OsuSpriteText
                         {
-                            Font = OsuFont.Default.With(size: 10, fixedWidth: true, weight: FontWeight.SemiBold),
+                            Font = OsuFont.Torus.With(size: 10, fixedWidth: true, weight: FontWeight.SemiBold),
                             Spacing = new Vector2(-0.5f, 0),
                         }
                     }

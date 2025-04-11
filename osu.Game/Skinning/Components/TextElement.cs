@@ -29,7 +29,7 @@ namespace osu.Game.Skinning.Components
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    Font = OsuFont.Default.With(size: 40)
+                    Font = OsuFont.Torus.With(size: 40)
                 }
             };
             text.Current.BindTo(Text);

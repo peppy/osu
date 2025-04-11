@@ -80,7 +80,7 @@ namespace osu.Game.Overlays.Mods
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
                         Shear = new Vector2(-OsuGame.SHEAR, 0),
-                        Font = OsuFont.Default.With(size: 17, weight: FontWeight.SemiBold)
+                        Font = OsuFont.Torus.With(size: 17, weight: FontWeight.SemiBold)
                     }
                 }
             });
@@ -178,7 +178,7 @@ namespace osu.Game.Overlays.Mods
             {
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
-                Font = OsuFont.Default.With(size: 17, weight: FontWeight.SemiBold)
+                Font = OsuFont.Torus.With(size: 17, weight: FontWeight.SemiBold)
             };
 
             public LocalisableString TooltipText => ModSelectOverlayStrings.ScoreMultiplier;

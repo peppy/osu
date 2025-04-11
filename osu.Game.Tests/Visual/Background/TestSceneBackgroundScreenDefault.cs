@@ -366,7 +366,7 @@ namespace osu.Game.Tests.Visual.Background
                 public DrawableTestStoryboardElement()
                 {
                     Anchor = Origin = Anchor.Centre;
-                    Font = OsuFont.Default.With(size: 32);
+                    Font = OsuFont.Torus.With(size: 32);
                     Text = "(not started)";
                 }
 

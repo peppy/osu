@@ -86,7 +86,7 @@ namespace osu.Game.Beatmaps.Drawables.Cards
                         },
                         new LinkFlowContainer(s =>
                         {
-                            s.Font = OsuFont.Default.With(size: 14, weight: FontWeight.SemiBold);
+                            s.Font = OsuFont.Torus.With(size: 14, weight: FontWeight.SemiBold);
                         }).With(d =>
                         {
                             d.AutoSizeAxes = Axes.Both;

@@ -124,7 +124,7 @@ namespace osu.Game.Rulesets.UI
                         },
                         extendedText = new OsuSpriteText
                         {
-                            Font = OsuFont.Default.With(size: 34f, weight: FontWeight.Bold),
+                            Font = OsuFont.Torus.With(size: 34f, weight: FontWeight.Bold),
                             UseFullGlyphHeight = false,
                             Text = mod.ExtendedIconInformation,
                             X = 6,

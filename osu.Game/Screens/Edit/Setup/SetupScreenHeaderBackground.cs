@@ -61,7 +61,7 @@ namespace osu.Game.Screens.Edit.Setup
                             Colour = colours.GreySeaFoamDarker,
                             RelativeSizeAxes = Axes.Both,
                         },
-                        new OsuTextFlowContainer(t => t.Font = OsuFont.Default.With(size: 24))
+                        new OsuTextFlowContainer(t => t.Font = OsuFont.Torus.With(size: 24))
                         {
                             Text = EditorSetupStrings.DragToSetBackground,
                             Anchor = Anchor.Centre,

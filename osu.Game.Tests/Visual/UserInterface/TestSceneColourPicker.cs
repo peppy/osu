@@ -40,7 +40,7 @@ namespace osu.Game.Tests.Visual.UserInterface
                                 new OsuSpriteText
                                 {
                                     Text = @"No OverlayColourProvider",
-                                    Font = OsuFont.Default.With(size: 40)
+                                    Font = OsuFont.Torus.With(size: 40)
                                 },
                                 new OsuColourPicker
                                 {
@@ -58,7 +58,7 @@ namespace osu.Game.Tests.Visual.UserInterface
                                 new OsuSpriteText
                                 {
                                     Text = @"With blue OverlayColourProvider",
-                                    Font = OsuFont.Default.With(size: 40)
+                                    Font = OsuFont.Torus.With(size: 40)
                                 },
                                 new OsuColourPicker
                                 {

@@ -237,7 +237,7 @@ namespace osu.Game.Tests.Visual.Gameplay
                     },
                     new OsuSpriteText
                     {
-                        Font = OsuFont.Default.With(size: 40),
+                        Font = OsuFont.Torus.With(size: 40),
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
                         Text = name

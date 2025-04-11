@@ -52,7 +52,7 @@ namespace osu.Game.Rulesets.EmptyScrolling
             Anchor = Anchor.Centre,
             Origin = Anchor.Centre,
             Text = ShortName[0].ToString(),
-            Font = OsuFont.Default.With(size: 18),
+            Font = OsuFont.Torus.With(size: 18),
         };
 
         // Leave this line intact. It will bake the correct version into the ruleset on each build/release.

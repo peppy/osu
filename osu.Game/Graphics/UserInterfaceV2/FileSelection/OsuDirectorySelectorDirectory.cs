@@ -28,7 +28,7 @@ namespace osu.Game.Graphics.UserInterfaceV2.FileSelection
             Colour = colours.Orange1;
         }
 
-        protected override SpriteText CreateSpriteText() => new OsuSpriteText().With(t => t.Font = OsuFont.Default.With(weight: FontWeight.Bold));
+        protected override SpriteText CreateSpriteText() => new OsuSpriteText().With(t => t.Font = OsuFont.Torus.With(weight: FontWeight.Bold));
 
         protected override IconUsage? Icon => Directory.Name.Contains(Path.DirectorySeparatorChar)
             ? FontAwesome.Solid.Database

@@ -213,7 +213,7 @@ namespace osu.Game.Overlays.Mods
             {
                 Anchor = Anchor.CentreRight,
                 Origin = Anchor.CentreRight,
-                Font = OsuFont.Default.With(size: 20, weight: FontWeight.SemiBold),
+                Font = OsuFont.Torus.With(size: 20, weight: FontWeight.SemiBold),
                 UseFullGlyphHeight = false,
             };
         }

@@ -104,7 +104,7 @@ namespace osu.Game.Overlays.Comments
                     new OsuSpriteText
                     {
                         Text = title,
-                        Font = OsuFont.Default.With(size: 10, weight: FontWeight.Bold),
+                        Font = OsuFont.Torus.With(size: 10, weight: FontWeight.Bold),
                         Margin = new MarginPadding { Vertical = 2, Horizontal = 5 },
                         Colour = colourProvider.Background6,
                     },

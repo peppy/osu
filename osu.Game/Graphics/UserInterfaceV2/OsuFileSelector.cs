@@ -112,7 +112,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
                 }
             }
 
-            protected override SpriteText CreateSpriteText() => new OsuSpriteText().With(t => t.Font = OsuFont.Default.With(weight: FontWeight.SemiBold));
+            protected override SpriteText CreateSpriteText() => new OsuSpriteText().With(t => t.Font = OsuFont.Torus.With(weight: FontWeight.SemiBold));
         }
     }
 }

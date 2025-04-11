@@ -141,7 +141,7 @@ namespace osu.Game.Screens.Edit.Compose.Components.Timeline
                         Origin = Anchor.Centre,
                         Rotation = 90,
                         Padding = new MarginPadding { Horizontal = 2 },
-                        Font = OsuFont.Default.With(size: 12, weight: FontWeight.SemiBold),
+                        Font = OsuFont.Torus.With(size: 12, weight: FontWeight.SemiBold),
                     }
                 };
 

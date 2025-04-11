@@ -103,7 +103,7 @@ namespace osu.Game.Graphics.UserInterface
                                     Anchor = Anchor.TopRight,
                                     Origin = Anchor.TopRight,
                                     Margin = new MarginPadding(1),
-                                    Font = OsuFont.Default.With(fixedWidth: true, size: 16, weight: FontWeight.SemiBold),
+                                    Font = OsuFont.Torus.With(fixedWidth: true, size: 16, weight: FontWeight.SemiBold),
                                     Spacing = new Vector2(-1),
                                     Y = -2,
                                 },
@@ -112,7 +112,7 @@ namespace osu.Game.Graphics.UserInterface
                                     Anchor = Anchor.TopRight,
                                     Origin = Anchor.TopRight,
                                     Margin = new MarginPadding(2),
-                                    Font = OsuFont.Default.With(fixedWidth: true, size: 13, weight: FontWeight.SemiBold),
+                                    Font = OsuFont.Torus.With(fixedWidth: true, size: 13, weight: FontWeight.SemiBold),
                                     Spacing = new Vector2(-2),
                                     Y = 10,
                                 }

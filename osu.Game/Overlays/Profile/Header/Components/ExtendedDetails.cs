@@ -30,7 +30,7 @@ namespace osu.Game.Overlays.Profile.Header.Components
         [BackgroundDependencyLoader]
         private void load()
         {
-            var font = OsuFont.Default.With(size: 12);
+            var font = OsuFont.Torus.With(size: 12);
             const float vertical_spacing = 4;
 
             AutoSizeAxes = Axes.Both;

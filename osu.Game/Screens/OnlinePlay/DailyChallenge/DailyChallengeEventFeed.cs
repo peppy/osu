@@ -128,7 +128,7 @@ namespace osu.Game.Screens.OnlinePlay.DailyChallenge
                         else if (newScore.NewRank < 1000)
                             fontWeight = FontWeight.SemiBold;
 
-                        t.Font = OsuFont.Default.With(weight: fontWeight);
+                        t.Font = OsuFont.Torus.With(weight: fontWeight);
                         t.Colour = newScore.NewRank < 10 ? colours.Orange1 : Colour4.White;
                     })
                     {

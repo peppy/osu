@@ -281,7 +281,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
 
                 protected override TextBox CreateTextBox() => new DropdownSearchTextBox
                 {
-                    FontSize = OsuFont.Default.Size,
+                    FontSize = OsuFont.Torus.Size,
                 };
 
                 private partial class DropdownSearchTextBox : OsuTextBox

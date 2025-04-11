@@ -278,7 +278,7 @@ namespace osu.Game.Tournament
                             },
                             new OsuSpriteText
                             {
-                                Font = OsuFont.Default.With(size: 24),
+                                Font = OsuFont.Torus.With(size: 24),
                                 Y = -2,
                                 Anchor = Anchor.Centre,
                                 Origin = Anchor.Centre,

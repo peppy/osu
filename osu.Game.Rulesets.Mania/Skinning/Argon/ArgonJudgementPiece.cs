@@ -66,7 +66,7 @@ namespace osu.Game.Rulesets.Mania.Skinning.Argon
                 Origin = Anchor.Centre,
                 Blending = BlendingParameters.Additive,
                 Spacing = new Vector2(10, 0),
-                Font = OsuFont.Default.With(size: 28, weight: FontWeight.Regular),
+                Font = OsuFont.Torus.With(size: 28, weight: FontWeight.Regular),
             };
 
         /// <summary>

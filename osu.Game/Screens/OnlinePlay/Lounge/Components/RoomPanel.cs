@@ -473,12 +473,12 @@ namespace osu.Game.Screens.OnlinePlay.Lounge.Components
                         {
                             statusText = new OsuSpriteText
                             {
-                                Font = OsuFont.Default.With(size: 16),
+                                Font = OsuFont.Torus.With(size: 16),
                                 Colour = colours.Lime1
                             },
                             beatmapText = new LinkFlowContainer(s =>
                             {
-                                s.Font = OsuFont.Default.With(size: 16);
+                                s.Font = OsuFont.Torus.With(size: 16);
                                 s.Colour = colours.Lime1;
                             })
                             {

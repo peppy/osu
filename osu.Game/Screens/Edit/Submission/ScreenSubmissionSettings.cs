@@ -54,7 +54,7 @@ namespace osu.Game.Screens.Edit.Submission
                         Caption = BeatmapSubmissionStrings.LoadInBrowserAfterSubmission,
                         Current = loadInBrowserAfterSubmission,
                     },
-                    new OsuTextFlowContainer(cp => cp.Font = OsuFont.Default.With(size: CONTENT_FONT_SIZE, weight: FontWeight.Bold))
+                    new OsuTextFlowContainer(cp => cp.Font = OsuFont.Torus.With(size: CONTENT_FONT_SIZE, weight: FontWeight.Bold))
                     {
                         RelativeSizeAxes = Axes.X,
                         Colour = colours.Orange1,

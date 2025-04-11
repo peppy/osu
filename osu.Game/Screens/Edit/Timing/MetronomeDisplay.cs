@@ -215,7 +215,7 @@ namespace osu.Game.Screens.Edit.Timing
                 },
                 bpmText = new OsuTextFlowContainer(st =>
                 {
-                    st.Font = OsuFont.Default.With(fixedWidth: true);
+                    st.Font = OsuFont.Torus.With(fixedWidth: true);
                     st.Spacing = new Vector2(-1.9f, 0);
                 })
                 {

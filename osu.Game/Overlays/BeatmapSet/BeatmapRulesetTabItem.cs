@@ -54,7 +54,7 @@ namespace osu.Game.Overlays.BeatmapSet
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
                         Margin = new MarginPadding { Horizontal = 5f },
-                        Font = OsuFont.Default.With(weight: FontWeight.SemiBold),
+                        Font = OsuFont.Torus.With(weight: FontWeight.SemiBold),
                         Colour = colourProvider.Foreground1,
                     }
                 }

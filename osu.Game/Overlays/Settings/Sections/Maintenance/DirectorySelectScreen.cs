@@ -84,7 +84,7 @@ namespace osu.Game.Overlays.Settings.Sections.Maintenance
                             {
                                 new OsuTextFlowContainer(cp =>
                                 {
-                                    cp.Font = OsuFont.Default.With(size: 24);
+                                    cp.Font = OsuFont.Torus.With(size: 24);
                                 })
                                 {
                                     Text = HeaderText,

@@ -84,7 +84,7 @@ namespace osu.Game.Overlays.Settings.Sections.Audio
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.TopCentre,
                         },
-                        hintText = new OsuTextFlowContainer(t => t.Font = OsuFont.Default.With(size: 16))
+                        hintText = new OsuTextFlowContainer(t => t.Font = OsuFont.Torus.With(size: 16))
                         {
                             RelativeSizeAxes = Axes.X,
                             AutoSizeAxes = Axes.Y,

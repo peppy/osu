@@ -72,7 +72,7 @@ namespace osu.Game.Screens.Edit.Timing
                             Anchor = Anchor.CentreLeft,
                             Origin = Anchor.CentreLeft,
                             Padding = new MarginPadding(3),
-                            Font = OsuFont.Default.With(weight: FontWeight.Bold, size: 12),
+                            Font = OsuFont.Torus.With(weight: FontWeight.Bold, size: 12),
                             Text = label,
                         },
                     },

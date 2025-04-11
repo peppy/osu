@@ -318,14 +318,14 @@ namespace osu.Game.Screens.Play.HUD.HitErrorMeters
                     labelEarly.Child = new OsuSpriteText
                     {
                         Text = "Early",
-                        Font = OsuFont.Default.With(size: 10),
+                        Font = OsuFont.Torus.With(size: 10),
                         Height = 12,
                     };
 
                     labelLate.Child = new OsuSpriteText
                     {
                         Text = "Late",
-                        Font = OsuFont.Default.With(size: 10),
+                        Font = OsuFont.Torus.With(size: 10),
                         Height = 12,
                     };
 

@@ -100,7 +100,7 @@ namespace osu.Game.Tests.Visual
                                 {
                                     Anchor = Anchor.TopCentre,
                                     Origin = Anchor.TopCentre,
-                                    Font = OsuFont.Default.With(weight: FontWeight.Bold),
+                                    Font = OsuFont.Torus.With(weight: FontWeight.Bold),
                                     Text = "The test is currently overriding local input",
                                 },
                                 new FillFlowContainer

@@ -95,7 +95,7 @@ namespace osu.Game.Overlays.Settings.Sections.Input
                                 Anchor = Anchor.Centre,
                                 Origin = Anchor.Centre,
                                 Colour = Color4.White,
-                                Font = OsuFont.Default.With(size: 12),
+                                Font = OsuFont.Torus.With(size: 12),
                                 Y = 10
                             }
                         }
@@ -103,7 +103,7 @@ namespace osu.Game.Overlays.Settings.Sections.Input
                     tabletName = new OsuSpriteText
                     {
                         Padding = new MarginPadding(3),
-                        Font = OsuFont.Default.With(size: 8)
+                        Font = OsuFont.Torus.With(size: 8)
                     },
                 }
             };
