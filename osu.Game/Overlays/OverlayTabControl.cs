@@ -97,7 +97,7 @@ namespace osu.Game.Overlays
                         Margin = new MarginPadding { Bottom = 10 },
                         Origin = Anchor.BottomLeft,
                         Anchor = Anchor.BottomLeft,
-                        Font = OsuFont.GetFont(),
+                        Font = OsuFont.Style.Body,
                     },
                     Bar = new ExpandingBar
                     {

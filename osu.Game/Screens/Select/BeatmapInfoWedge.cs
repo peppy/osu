@@ -289,13 +289,13 @@ namespace osu.Game.Screens.Select
                             TitleLabel = new TruncatingSpriteText
                             {
                                 Current = { BindTarget = titleBinding },
-                                Font = OsuFont.GetFont(size: 28, italics: true),
+                                Font = OsuFont.Style.Subtitle,
                                 RelativeSizeAxes = Axes.X,
                             },
                             ArtistLabel = new TruncatingSpriteText
                             {
                                 Current = { BindTarget = artistBinding },
-                                Font = OsuFont.GetFont(size: 17, italics: true),
+                                Font = OsuFont.Style.Body,
                                 RelativeSizeAxes = Axes.X,
                             },
                             MapperContainer = new FillFlowContainer

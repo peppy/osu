@@ -180,7 +180,7 @@ namespace osu.Game.Graphics.UserInterface
                         Origin = Anchor.BottomLeft,
                         Anchor = Anchor.BottomLeft,
                         Text = text,
-                        Font = OsuFont.GetFont(size: 14)
+                        Font = OsuFont.Style.Caption1
                     },
                     Bar = new Box
                     {

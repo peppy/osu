@@ -94,7 +94,7 @@ namespace osu.Game.Screens.SelectV2
                 {
                     titleText = new OsuSpriteText
                     {
-                        Font = OsuFont.GetFont(weight: FontWeight.Bold, size: 22, italics: true),
+                        Font = OsuFont.Style.Heading1,
                         Shadow = true,
                     },
                     artistText = new OsuSpriteText
@@ -146,7 +146,7 @@ namespace osu.Game.Screens.SelectV2
                                     },
                                     difficultyKeyCountText = new OsuSpriteText
                                     {
-                                        Font = OsuFont.GetFont(size: 18, weight: FontWeight.SemiBold),
+                                        Font = OsuFont.Style.Heading2,
                                         Anchor = Anchor.BottomLeft,
                                         Origin = Anchor.BottomLeft,
                                         Alpha = 0,
@@ -154,7 +154,7 @@ namespace osu.Game.Screens.SelectV2
                                     },
                                     difficultyName = new OsuSpriteText
                                     {
-                                        Font = OsuFont.GetFont(size: 18, weight: FontWeight.SemiBold),
+                                        Font = OsuFont.Style.Heading2,
                                         Origin = Anchor.BottomLeft,
                                         Anchor = Anchor.BottomLeft,
                                         Margin = new MarginPadding { Right = 5f, Bottom = 2f },

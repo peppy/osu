@@ -36,7 +36,7 @@ namespace osu.Game.Graphics.UserInterface.PageSelector
 
         protected override Drawable CreateContent() => text = new OsuSpriteText
         {
-            Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold),
+            Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold),
             Text = PageNumber.ToString(),
         };
 

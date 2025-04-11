@@ -69,7 +69,7 @@ namespace osu.Game.Overlays.Profile.Header.Components
                             Direction = FillDirection.Horizontal,
                             Children = new Drawable[]
                             {
-                                new OsuTextFlowContainer(s => s.Font = OsuFont.GetFont(size: 12))
+                                new OsuTextFlowContainer(s => s.Font = OsuFont.Style.Caption2)
                                 {
                                     AutoSizeAxes = Axes.Both,
                                     // can't use this because osu-web does weird stuff with \\n.

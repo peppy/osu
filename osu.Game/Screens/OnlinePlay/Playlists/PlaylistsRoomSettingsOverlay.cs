@@ -232,7 +232,7 @@ namespace osu.Game.Screens.OnlinePlay.Playlists
                                                                         {
                                                                             Margin = new MarginPadding { Vertical = 5 },
                                                                             Colour = colours.Yellow,
-                                                                            Font = OsuFont.GetFont(size: 12),
+                                                                            Font = OsuFont.Style.Caption2,
                                                                         }
                                                                     },
                                                                     new Drawable[]

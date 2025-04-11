@@ -62,7 +62,7 @@ namespace osu.Game.Overlays.Comments
                                 Anchor = Anchor.Centre,
                                 Origin = Anchor.Centre,
                                 Margin = new MarginPadding { Horizontal = 10, Vertical = 5 },
-                                Font = OsuFont.GetFont(size: 14, weight: FontWeight.Bold),
+                                Font = OsuFont.Style.Caption1.With(weight: FontWeight.Bold),
                                 Colour = colourProvider.Foreground1
                             }
                         },

@@ -13,7 +13,7 @@ namespace osu.Game.Screens.Edit
         public TableHeaderText(LocalisableString text)
         {
             Text = text.ToUpper();
-            Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold);
+            Font = OsuFont.Style.Caption2.With(weight: FontWeight.Bold);
         }
     }
 }

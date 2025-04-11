@@ -51,7 +51,7 @@ namespace osu.Game.Overlays.Mods
                     {
                         descriptionText = new TextFlowContainer(f =>
                         {
-                            f.Font = OsuFont.GetFont(weight: FontWeight.Regular);
+                            f.Font = OsuFont.Style.Body;
                             f.Colour = colourProvider.Content1;
                         })
                         {

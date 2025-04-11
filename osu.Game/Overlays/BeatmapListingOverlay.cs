@@ -350,7 +350,7 @@ namespace osu.Game.Overlays
                     BeatmapsStrings.ListingSearchSupporterFilterQuoteDefault(string.Join(" and ", filtersUsed), "").ToString(),
                     t =>
                     {
-                        t.Font = OsuFont.GetFont(size: 16);
+                        t.Font = OsuFont.Style.Body;
                         t.Colour = Colour4.White;
                     }
                 );

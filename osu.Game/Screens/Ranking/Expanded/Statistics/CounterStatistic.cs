@@ -59,7 +59,7 @@ namespace osu.Game.Screens.Ranking.Expanded.Statistics
                 {
                     Anchor = Anchor.BottomCentre,
                     Origin = Anchor.BottomCentre,
-                    Font = OsuFont.Torus.With(size: 12, fixedWidth: true),
+                    Font = OsuFont.Style.Caption2.With(fixedWidth: true),
                     Spacing = new Vector2(-2, 0),
                     Text = $"/{maxCount}"
                 });

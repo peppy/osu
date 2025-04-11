@@ -70,7 +70,7 @@ namespace osu.Game.Overlays.Profile.Sections
                             Anchor = Anchor.CentreLeft,
                             Origin = Anchor.CentreLeft,
                             Text = text,
-                            Font = OsuFont.GetFont(size: 14, weight: FontWeight.Bold),
+                            Font = OsuFont.Style.Caption1.With(weight: FontWeight.Bold),
                         },
                         counterPill = new CounterPill
                         {

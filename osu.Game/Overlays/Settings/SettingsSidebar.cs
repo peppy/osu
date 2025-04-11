@@ -93,7 +93,7 @@ namespace osu.Game.Overlays.Settings
                             {
                                 Anchor = Anchor.TopCentre,
                                 Origin = Anchor.TopCentre,
-                                Font = OsuFont.GetFont(size: 16, weight: FontWeight.Regular),
+                                Font = OsuFont.Style.Body,
                                 Text = @"back",
                             },
                         }

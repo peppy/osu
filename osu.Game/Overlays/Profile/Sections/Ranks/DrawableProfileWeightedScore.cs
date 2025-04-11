@@ -43,7 +43,7 @@ namespace osu.Game.Overlays.Profile.Sections.Ranks
                             Size = new Vector2(50, 14),
                             Child = new OsuSpriteText
                             {
-                                Font = OsuFont.GetFont(size: 14, weight: FontWeight.Bold, italics: true),
+                                Font = OsuFont.Style.Caption1.With(weight: FontWeight.Bold, italics: true),
                                 Text = Score.PP.HasValue ? $"{Score.PP * weight:0}pp" : string.Empty,
                             },
                         }
@@ -51,7 +51,7 @@ namespace osu.Game.Overlays.Profile.Sections.Ranks
                 },
                 new OsuSpriteText
                 {
-                    Font = OsuFont.GetFont(size: 12),
+                    Font = OsuFont.Style.Caption2,
                     Text = UsersStrings.ShowExtraTopRanksPpWeight(weight.ToLocalisableString("0%"))
                 }
             }

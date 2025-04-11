@@ -146,7 +146,7 @@ namespace osu.Game.Rulesets.Mania.Tests
                         {
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.TopCentre,
-                            Font = OsuFont.GetFont(size: 14),
+                            Font = OsuFont.Style.Caption1,
                             Text = description
                         }
                     }

@@ -67,7 +67,7 @@ namespace osu.Game.Screens.Menu
                     Left = -3,
                     Bottom = 22,
                 },
-                Font = OsuFont.Torus.With(size: 12),
+                Font = OsuFont.Style.Caption2,
                 Alpha = 0,
             });
         }

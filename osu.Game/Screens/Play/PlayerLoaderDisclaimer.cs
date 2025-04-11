@@ -71,7 +71,7 @@ namespace osu.Game.Screens.Play
                                     AutoSizeAxes = Axes.Y,
                                     Text = title,
                                 },
-                                new TextFlowContainer(t => t.Font = OsuFont.GetFont(size: 16))
+                                new TextFlowContainer(t => t.Font = OsuFont.Style.Body)
                                 {
                                     RelativeSizeAxes = Axes.X,
                                     AutoSizeAxes = Axes.Y,

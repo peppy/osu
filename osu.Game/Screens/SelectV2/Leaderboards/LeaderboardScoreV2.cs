@@ -642,7 +642,7 @@ namespace osu.Game.Screens.SelectV2.Leaderboards
             public DateLabel(DateTimeOffset date)
                 : base(date)
             {
-                Font = OsuFont.GetFont(size: 16, weight: FontWeight.Medium, italics: true);
+                Font = OsuFont.Style.Body.With(weight: FontWeight.Medium, italics: true);
             }
 
             protected override string Format() => Date.ToShortRelativeTime(TimeSpan.FromSeconds(30));
@@ -677,7 +677,7 @@ namespace osu.Game.Screens.SelectV2.Leaderboards
                         {
                             Colour = colourProvider.Content2,
                             Text = statisticInfo.Name,
-                            Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold),
+                            Font = OsuFont.Style.Caption2.With(weight: FontWeight.Bold),
                         },
                         value = new OsuSpriteText
                         {

@@ -95,7 +95,7 @@ namespace osu.Game.Overlays.Settings.Sections.Input
                                 Anchor = Anchor.Centre,
                                 Origin = Anchor.Centre,
                                 Colour = Color4.White,
-                                Font = OsuFont.Torus.With(size: 12),
+                                Font = OsuFont.Style.Caption2,
                                 Y = 10
                             }
                         }

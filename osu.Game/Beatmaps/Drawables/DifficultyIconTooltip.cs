@@ -61,7 +61,7 @@ namespace osu.Game.Beatmaps.Drawables
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
-                            Font = OsuFont.GetFont(size: 16, weight: FontWeight.Bold)
+                            Font = OsuFont.Style.Body.With(weight: FontWeight.Bold)
                         },
                         starRating = new StarRatingDisplay(default, StarRatingDisplaySize.Small)
                         {
@@ -78,10 +78,10 @@ namespace osu.Game.Beatmaps.Drawables
                             Spacing = new Vector2(5),
                             Children = new Drawable[]
                             {
-                                circleSize = new OsuSpriteText { Font = OsuFont.GetFont(size: 14) },
-                                drainRate = new OsuSpriteText { Font = OsuFont.GetFont(size: 14) },
-                                overallDifficulty = new OsuSpriteText { Font = OsuFont.GetFont(size: 14) },
-                                approachRate = new OsuSpriteText { Font = OsuFont.GetFont(size: 14) },
+                                circleSize = new OsuSpriteText { Font = OsuFont.Style.Caption1 },
+                                drainRate = new OsuSpriteText { Font = OsuFont.Style.Caption1 },
+                                overallDifficulty = new OsuSpriteText { Font = OsuFont.Style.Caption1 },
+                                approachRate = new OsuSpriteText { Font = OsuFont.Style.Caption1 },
                             }
                         },
                         miscFillFlowContainer = new FillFlowContainer
@@ -94,8 +94,8 @@ namespace osu.Game.Beatmaps.Drawables
                             Spacing = new Vector2(5),
                             Children = new Drawable[]
                             {
-                                length = new OsuSpriteText { Font = OsuFont.GetFont(size: 14) },
-                                bpm = new OsuSpriteText { Font = OsuFont.GetFont(size: 14) },
+                                length = new OsuSpriteText { Font = OsuFont.Style.Caption1 },
+                                bpm = new OsuSpriteText { Font = OsuFont.Style.Caption1 },
                             }
                         }
                     }

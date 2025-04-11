@@ -92,7 +92,7 @@ namespace osu.Game.Rulesets.Edit
                 {
                     SpriteText.Anchor = Anchor.CentreLeft;
                     SpriteText.Origin = Anchor.CentreLeft;
-                    SpriteText.Font = OsuFont.GetFont(weight: FontWeight.Regular);
+                    SpriteText.Font = OsuFont.Style.Body;
                     base.Height = actualHeight / 2;
                     Background.Hide();
                     Triangles?.Hide();

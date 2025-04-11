@@ -55,7 +55,7 @@ namespace osu.Game.Overlays.Login
                             Spacing = new Vector2(0f, SettingsSection.ITEM_SPACING),
                             Children = new Drawable[]
                             {
-                                new OsuTextFlowContainer(s => s.Font = OsuFont.GetFont(weight: FontWeight.Regular))
+                                new OsuTextFlowContainer(s => s.Font = OsuFont.Style.Body)
                                 {
                                     RelativeSizeAxes = Axes.X,
                                     AutoSizeAxes = Axes.Y,
@@ -68,7 +68,7 @@ namespace osu.Game.Overlays.Login
                                     RelativeSizeAxes = Axes.X,
                                     TabbableContentContainer = this,
                                 },
-                                explainText = new LinkFlowContainer(s => s.Font = OsuFont.GetFont(weight: FontWeight.Regular))
+                                explainText = new LinkFlowContainer(s => s.Font = OsuFont.Style.Body)
                                 {
                                     RelativeSizeAxes = Axes.X,
                                     AutoSizeAxes = Axes.Y,

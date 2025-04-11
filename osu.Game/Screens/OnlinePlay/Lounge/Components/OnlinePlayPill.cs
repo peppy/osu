@@ -14,7 +14,7 @@ namespace osu.Game.Screens.OnlinePlay.Lounge.Components
     {
         protected PillContainer Pill { get; private set; } = null!;
         protected OsuTextFlowContainer TextFlow { get; private set; } = null!;
-        protected virtual FontUsage Font => OsuFont.GetFont(size: 12);
+        protected virtual FontUsage Font => OsuFont.Style.Caption2;
 
         protected OnlinePlayPill()
         {

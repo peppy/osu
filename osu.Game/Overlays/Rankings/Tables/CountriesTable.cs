@@ -70,7 +70,7 @@ namespace osu.Game.Overlays.Rankings.Tables
             private RankingsOverlay? rankings { get; set; }
 
             public CountryName(CountryCode countryCode)
-                : base(t => t.Font = OsuFont.GetFont(size: 12))
+                : base(t => t.Font = OsuFont.Style.Caption2)
             {
                 AutoSizeAxes = Axes.X;
                 RelativeSizeAxes = Axes.Y;

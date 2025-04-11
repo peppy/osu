@@ -137,7 +137,7 @@ namespace osu.Game.Overlays.Mods
                                     },
                                     descriptionText = new TruncatingSpriteText
                                     {
-                                        Font = OsuFont.Torus.With(size: 12),
+                                        Font = OsuFont.Style.Caption2,
                                         RelativeSizeAxes = Axes.X,
                                         Shear = new Vector2(-OsuGame.SHEAR, 0),
                                         ShowTooltip = false, // Tooltip is handled by `IncompatibilityDisplayingModPanel`.

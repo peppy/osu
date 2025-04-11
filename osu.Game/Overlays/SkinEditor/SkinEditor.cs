@@ -436,17 +436,17 @@ namespace osu.Game.Overlays.SkinEditor
 
             headerText.Clear();
 
-            headerText.AddParagraph(SkinEditorStrings.SkinEditor, cp => cp.Font = OsuFont.Torus.With(size: 16));
+            headerText.AddParagraph(SkinEditorStrings.SkinEditor, cp => cp.Font = OsuFont.Style.Body);
             headerText.NewParagraph();
             headerText.AddText(SkinEditorStrings.CurrentlyEditing, cp =>
             {
-                cp.Font = OsuFont.Torus.With(size: 12);
+                cp.Font = OsuFont.Style.Caption2;
                 cp.Colour = colours.Yellow;
             });
 
             headerText.AddText($" {currentSkin.Value.SkinInfo}", cp =>
             {
-                cp.Font = OsuFont.Torus.With(size: 12, weight: FontWeight.Bold);
+                cp.Font = OsuFont.Style.Caption2.With(weight: FontWeight.Bold);
                 cp.Colour = colours.Yellow;
             });
 

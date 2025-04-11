@@ -199,7 +199,7 @@ namespace osu.Game.Overlays.Profile.Header.Components
                 {
                     new OsuSpriteText
                     {
-                        Font = OsuFont.GetFont(size: 12),
+                        Font = OsuFont.Style.Caption2,
                         Text = title,
                     },
                     valueText = new OsuSpriteText
@@ -233,14 +233,14 @@ namespace osu.Game.Overlays.Profile.Header.Components
                 {
                     new OsuSpriteText
                     {
-                        Font = OsuFont.GetFont(size: 12),
+                        Font = OsuFont.Style.Caption2,
                         Text = title,
                     },
                     valueText = new OsuSpriteText
                     {
                         Anchor = Anchor.TopRight,
                         Origin = Anchor.TopRight,
-                        Font = OsuFont.GetFont(size: 12),
+                        Font = OsuFont.Style.Caption2,
                     }
                 };
             }

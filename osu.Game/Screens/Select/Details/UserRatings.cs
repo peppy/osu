@@ -74,7 +74,7 @@ namespace osu.Game.Screens.Select.Details
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.TopCentre,
                             Text = BeatmapsetsStrings.ShowStatsUserRating,
-                            Font = OsuFont.GetFont(size: 12),
+                            Font = OsuFont.Style.Caption2,
                             Margin = new MarginPadding { Bottom = 5 },
                         },
                         ratingsBar = new Bar
@@ -92,14 +92,14 @@ namespace osu.Game.Screens.Select.Details
                                 negativeRatings = new OsuSpriteText
                                 {
                                     Text = 0.ToLocalisableString(@"N0"),
-                                    Font = OsuFont.GetFont(size: 12)
+                                    Font = OsuFont.Style.Caption2
                                 },
                                 positiveRatings = new OsuSpriteText
                                 {
                                     Anchor = Anchor.TopRight,
                                     Origin = Anchor.TopRight,
                                     Text = 0.ToLocalisableString(@"N0"),
-                                    Font = OsuFont.GetFont(size: 12)
+                                    Font = OsuFont.Style.Caption2
                                 },
                             },
                         },
@@ -108,7 +108,7 @@ namespace osu.Game.Screens.Select.Details
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.TopCentre,
                             Text = BeatmapsetsStrings.ShowStatsRatingSpread,
-                            Font = OsuFont.GetFont(size: 12),
+                            Font = OsuFont.Style.Caption2,
                             Margin = new MarginPadding { Bottom = 5 },
                         },
                     },

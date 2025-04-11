@@ -47,7 +47,7 @@ namespace osu.Game.Overlays.Comments
 
             InternalChildren = new Drawable[]
             {
-                link = new LinkFlowContainer(s => s.Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold))
+                link = new LinkFlowContainer(s => s.Font = OsuFont.Style.Caption2.With(weight: FontWeight.Bold))
                 {
                     AutoSizeAxes = Axes.Both,
                 },

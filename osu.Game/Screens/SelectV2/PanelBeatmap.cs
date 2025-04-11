@@ -122,14 +122,14 @@ namespace osu.Game.Screens.SelectV2
                             {
                                 keyCountText = new OsuSpriteText
                                 {
-                                    Font = OsuFont.GetFont(size: 18, weight: FontWeight.SemiBold),
+                                    Font = OsuFont.Style.Heading2,
                                     Anchor = Anchor.BottomLeft,
                                     Origin = Anchor.BottomLeft,
                                     Alpha = 0,
                                 },
                                 difficultyText = new OsuSpriteText
                                 {
-                                    Font = OsuFont.GetFont(size: 18, weight: FontWeight.SemiBold),
+                                    Font = OsuFont.Style.Heading2,
                                     Anchor = Anchor.BottomLeft,
                                     Origin = Anchor.BottomLeft,
                                     Margin = new MarginPadding { Right = 8f },

@@ -39,13 +39,13 @@ namespace osu.Game.Graphics
                     {
                         dateText = new OsuSpriteText
                         {
-                            Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold),
+                            Font = OsuFont.Style.Caption2.With(weight: FontWeight.Bold),
                             Anchor = Anchor.BottomLeft,
                             Origin = Anchor.BottomLeft,
                         },
                         timeText = new OsuSpriteText
                         {
-                            Font = OsuFont.GetFont(size: 12, weight: FontWeight.Regular),
+                            Font = OsuFont.Style.Caption2,
                             Anchor = Anchor.BottomLeft,
                             Origin = Anchor.BottomLeft,
                         }

@@ -160,7 +160,7 @@ namespace osu.Game.Overlays.Toolbar
                             Anchor = TooltipAnchor,
                             Origin = TooltipAnchor,
                             Shadow = true,
-                            Font = OsuFont.GetFont(size: 22, weight: FontWeight.Bold),
+                            Font = OsuFont.Style.Heading1,
                         },
                         new FillFlowContainer
                         {

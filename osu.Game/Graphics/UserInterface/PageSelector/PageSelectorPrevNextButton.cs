@@ -45,7 +45,7 @@ namespace osu.Game.Graphics.UserInterface.PageSelector
                     {
                         name = new OsuSpriteText
                         {
-                            Font = OsuFont.GetFont(size: 12),
+                            Font = OsuFont.Style.Caption2,
                             Anchor = rightAligned ? Anchor.CentreLeft : Anchor.CentreRight,
                             Origin = rightAligned ? Anchor.CentreLeft : Anchor.CentreRight,
                             Text = text.ToUpper(),

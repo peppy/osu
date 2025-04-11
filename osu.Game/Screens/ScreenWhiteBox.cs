@@ -174,7 +174,7 @@ namespace osu.Game.Screens
                                         Anchor = Anchor.TopCentre,
                                         Origin = Anchor.TopCentre,
                                         Text = "please check back a bit later.",
-                                        Font = OsuFont.GetFont(size: 14),
+                                        Font = OsuFont.Style.Caption1,
                                     },
                                 }
                             },

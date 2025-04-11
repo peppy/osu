@@ -60,7 +60,7 @@ namespace osu.Game.Overlays.Rankings
                                 Anchor = Anchor.CentreLeft,
                                 Origin = Anchor.CentreLeft,
                                 Text = @"filtered by country:",
-                                Font = OsuFont.GetFont(size: 14)
+                                Font = OsuFont.Style.Caption1
                             },
                             countryPill = new CountryPill
                             {

@@ -46,7 +46,7 @@ namespace osu.Game.Screens.OnlinePlay.Lounge.Components
                             Size = new Vector2(8),
                             Icon = FontAwesome.Solid.User
                         },
-                        rankFlow = new OsuTextFlowContainer(s => s.Font = OsuFont.GetFont(size: 12))
+                        rankFlow = new OsuTextFlowContainer(s => s.Font = OsuFont.Style.Caption2)
                         {
                             Anchor = Anchor.CentreLeft,
                             Origin = Anchor.CentreLeft,

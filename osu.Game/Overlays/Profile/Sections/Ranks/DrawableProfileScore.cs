@@ -97,7 +97,7 @@ namespace osu.Game.Overlays.Profile.Sections.Ranks
                                                     new OsuSpriteText
                                                     {
                                                         Text = $"{Score.Beatmap.AsNonNull().DifficultyName}",
-                                                        Font = OsuFont.GetFont(size: 12, weight: FontWeight.Regular),
+                                                        Font = OsuFont.Style.Caption2,
                                                         Colour = colours.Yellow
                                                     },
                                                     new DrawableDate(Score.EndedAt, 12)
@@ -205,7 +205,7 @@ namespace osu.Game.Overlays.Profile.Sections.Ranks
             Child = new OsuSpriteText
             {
                 Text = Score.Accuracy.FormatAccuracy(),
-                Font = OsuFont.GetFont(size: 14, weight: FontWeight.Bold, italics: true),
+                Font = OsuFont.Style.Caption1.With(weight: FontWeight.Bold, italics: true),
                 Colour = colours.Yellow,
                 Anchor = Anchor.CentreLeft,
                 Origin = Anchor.CentreLeft
@@ -304,21 +304,21 @@ namespace osu.Game.Overlays.Profile.Sections.Ranks
                         Anchor = Anchor.BottomLeft,
                         Origin = Anchor.BottomLeft,
                         Text = new RomanisableString(metadata.TitleUnicode, metadata.Title),
-                        Font = OsuFont.GetFont(size: 14, weight: FontWeight.SemiBold, italics: true)
+                        Font = OsuFont.Style.Caption1.With(weight: FontWeight.SemiBold, italics: true)
                     },
                     new OsuSpriteText
                     {
                         Anchor = Anchor.BottomLeft,
                         Origin = Anchor.BottomLeft,
                         Text = " by ",
-                        Font = OsuFont.GetFont(size: 12, italics: true)
+                        Font = OsuFont.Style.Caption2
                     },
                     new OsuSpriteText
                     {
                         Anchor = Anchor.BottomLeft,
                         Origin = Anchor.BottomLeft,
                         Text = new RomanisableString(metadata.ArtistUnicode, metadata.Artist),
-                        Font = OsuFont.GetFont(size: 12, italics: true)
+                        Font = OsuFont.Style.Caption2
                     },
                 };
             }

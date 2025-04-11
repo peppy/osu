@@ -268,14 +268,14 @@ namespace osu.Game.Screens.Play.HUD
                                             scoreText = new OsuSpriteText
                                             {
                                                 Spacing = new Vector2(-1f, 0f),
-                                                Font = OsuFont.Torus.With(size: 16, weight: FontWeight.SemiBold, fixedWidth: true),
+                                                Font = OsuFont.Style.Body.With(weight: FontWeight.SemiBold, fixedWidth: true),
                                                 Shadow = false,
                                             },
                                             accuracyText = new OsuSpriteText
                                             {
                                                 Anchor = Anchor.BottomLeft,
                                                 Origin = Anchor.BottomLeft,
-                                                Font = OsuFont.Torus.With(size: 12, weight: FontWeight.SemiBold, fixedWidth: true),
+                                                Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold, fixedWidth: true),
                                                 Spacing = new Vector2(-1f, 0f),
                                                 Shadow = false,
                                             },
@@ -284,7 +284,7 @@ namespace osu.Game.Screens.Play.HUD
                                                 Anchor = Anchor.BottomRight,
                                                 Origin = Anchor.BottomRight,
                                                 Spacing = new Vector2(-1f, 0f),
-                                                Font = OsuFont.Torus.With(size: 12, weight: FontWeight.SemiBold, fixedWidth: true),
+                                                Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold, fixedWidth: true),
                                                 Shadow = false,
                                             },
                                         },

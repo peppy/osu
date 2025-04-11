@@ -48,7 +48,7 @@ namespace osu.Game.Screens.Edit.Compose.Components.Timeline
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
                             Padding = new MarginPadding(5),
-                            Font = OsuFont.Torus.With(size: 12, weight: FontWeight.SemiBold),
+                            Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold),
                             Colour = colours.B5,
                         }
                     }

@@ -297,7 +297,7 @@ namespace osu.Game.Tournament.Screens.TeamIntro
                         {
                             Text = left,
                             Colour = TournamentGame.TEXT_COLOUR,
-                            Font = OsuFont.Torus.With(size: 22, weight: FontWeight.SemiBold),
+                            Font = OsuFont.Style.Heading1,
                         },
                         new TournamentSpriteText
                         {
@@ -305,7 +305,7 @@ namespace osu.Game.Tournament.Screens.TeamIntro
                             Colour = TournamentGame.TEXT_COLOUR,
                             Anchor = Anchor.TopRight,
                             Origin = Anchor.TopLeft,
-                            Font = OsuFont.Torus.With(size: 22, weight: FontWeight.Regular),
+                            Font = OsuFont.Style.Heading1.With(weight: FontWeight.Regular),
                         },
                     };
                 }
@@ -332,7 +332,7 @@ namespace osu.Game.Tournament.Screens.TeamIntro
                             new OsuSpriteText
                             {
                                 Text = team?.FullName.Value ?? "???",
-                                Font = OsuFont.Torus.With(size: 32, weight: FontWeight.SemiBold),
+                                Font = OsuFont.Style.Title.With(weight: FontWeight.SemiBold),
                                 Colour = TournamentGame.TEXT_COLOUR,
                             },
                         }

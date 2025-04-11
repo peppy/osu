@@ -61,7 +61,7 @@ namespace osu.Game.Screens.Ranking.Expanded.Statistics
                             {
                                 Anchor = Anchor.Centre,
                                 Origin = Anchor.Centre,
-                                Font = OsuFont.Torus.With(size: 12, weight: FontWeight.SemiBold),
+                                Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold),
                                 Text = header.ToUpper(),
                             }
                         }

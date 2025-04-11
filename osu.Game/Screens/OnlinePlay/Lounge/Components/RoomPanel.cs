@@ -207,7 +207,7 @@ namespace osu.Game.Screens.OnlinePlay.Lounge.Components
                                                                     roomName = new TruncatingSpriteText
                                                                     {
                                                                         RelativeSizeAxes = Axes.X,
-                                                                        Font = OsuFont.GetFont(size: 28)
+                                                                        Font = OsuFont.Style.Subtitle,
                                                                     },
                                                                     new RoomStatusText(Room)
                                                                     {
@@ -473,12 +473,12 @@ namespace osu.Game.Screens.OnlinePlay.Lounge.Components
                         {
                             statusText = new OsuSpriteText
                             {
-                                Font = OsuFont.Torus.With(size: 16),
+                                Font = OsuFont.Style.Body,
                                 Colour = colours.Lime1
                             },
                             beatmapText = new LinkFlowContainer(s =>
                             {
-                                s.Font = OsuFont.Torus.With(size: 16);
+                                s.Font = OsuFont.Style.Body;
                                 s.Colour = colours.Lime1;
                             })
                             {

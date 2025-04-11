@@ -60,7 +60,7 @@ namespace osu.Game.Graphics.Containers.Markdown
 
         public override SpriteText CreateSpriteText() => new OsuSpriteText
         {
-            Font = OsuFont.GetFont(Typeface.Inter, size: 14, weight: FontWeight.Regular),
+            Font = OsuFont.Inter.With(size: 14, weight: FontWeight.Regular),
         };
 
         public override OsuMarkdownTextFlowContainer CreateTextFlow() => new OsuMarkdownTextFlowContainer();

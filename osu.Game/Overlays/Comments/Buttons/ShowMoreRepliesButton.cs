@@ -40,7 +40,7 @@ namespace osu.Game.Overlays.Comments.Buttons
             Child = text = new OsuSpriteText
             {
                 AlwaysPresent = true,
-                Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold),
+                Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold),
                 Text = CommonStrings.ButtonsShowMore
             }
         };

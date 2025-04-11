@@ -182,7 +182,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Match
                                                                             },
                                                                             typeLabel = new OsuSpriteText
                                                                             {
-                                                                                Font = OsuFont.GetFont(size: 14),
+                                                                                Font = OsuFont.Style.Caption1,
                                                                                 Colour = colours.Yellow
                                                                             },
                                                                         },

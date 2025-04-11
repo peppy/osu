@@ -115,9 +115,9 @@ namespace osu.Game.Overlays.News
             HoverColour = colourProvider.Background3;
 
             main.AddParagraph(post.Title, t => t.Font = OsuFont.GetFont(size: 20, weight: FontWeight.SemiBold));
-            main.AddParagraph(post.Preview, t => t.Font = OsuFont.GetFont(size: 12)); // Should use sans-serif font
-            main.AddParagraph("by ", t => t.Font = OsuFont.GetFont(size: 12));
-            main.AddText(post.Author, t => t.Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold));
+            main.AddParagraph(post.Preview, t => t.Font = OsuFont.Style.Caption2); // Should use sans-serif font
+            main.AddParagraph("by ", t => t.Font = OsuFont.Style.Caption2);
+            main.AddText(post.Author, t => t.Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold));
         }
 
         private partial class DateContainer : CircularContainer, IHasCustomTooltip<DateTimeOffset>

@@ -84,7 +84,7 @@ namespace osu.Game.Overlays.Rankings
                                     {
                                         Anchor = Anchor.Centre,
                                         Origin = Anchor.Centre,
-                                        Font = OsuFont.GetFont(size: 14)
+                                        Font = OsuFont.Style.Caption1
                                     }
                                 }
                             },

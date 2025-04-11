@@ -148,7 +148,7 @@ namespace osu.Game.Screens.OnlinePlay.DailyChallenge
                                             Text = "Today's Challenge",
                                             Margin = new MarginPadding { Horizontal = 10f, Vertical = 5f },
                                             Shear = new Vector2(-OsuGame.SHEAR, 0f),
-                                            Font = OsuFont.GetFont(size: 32, weight: FontWeight.Light, typeface: Typeface.TorusAlternate),
+                                            Font = OsuFont.Style.Title.With(weight: FontWeight.Light),
                                         },
                                     }
                                 },
@@ -174,7 +174,7 @@ namespace osu.Game.Screens.OnlinePlay.DailyChallenge
                                             Text = room.Name.Split(':', StringSplitOptions.TrimEntries).Last(),
                                             Margin = new MarginPadding { Horizontal = 10f, Vertical = 5f },
                                             Shear = new Vector2(-OsuGame.SHEAR, 0f),
-                                            Font = OsuFont.GetFont(size: 32, weight: FontWeight.Light, typeface: Typeface.TorusAlternate),
+                                            Font = OsuFont.Style.Title.With(weight: FontWeight.Light),
                                         },
                                     }
                                 },
@@ -264,7 +264,7 @@ namespace osu.Game.Screens.OnlinePlay.DailyChallenge
                                                 new TruncatingSpriteText
                                                 {
                                                     Text = $"by {beatmap.Metadata.Author.Username}",
-                                                    Font = OsuFont.GetFont(size: 16, italics: true),
+                                                    Font = OsuFont.Style.Body,
                                                     MaxWidth = horizontal_info_size,
                                                     Shear = new Vector2(-OsuGame.SHEAR, 0f),
                                                     Anchor = Anchor.TopCentre,

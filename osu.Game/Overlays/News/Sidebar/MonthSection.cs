@@ -99,7 +99,7 @@ namespace osu.Game.Overlays.News.Sidebar
                     {
                         Anchor = Anchor.CentreLeft,
                         Origin = Anchor.CentreLeft,
-                        Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold),
+                        Font = OsuFont.Style.Caption2.With(weight: FontWeight.Bold),
                         Text = date.ToLocalisableString(@"MMM yyyy")
                     },
                     icon = new SpriteIcon
@@ -126,7 +126,7 @@ namespace osu.Game.Overlays.News.Sidebar
         private partial class PostLink : LinkFlowContainer
         {
             public PostLink(APINewsPost post)
-                : base(t => t.Font = OsuFont.GetFont(size: 12))
+                : base(t => t.Font = OsuFont.Style.Caption2)
             {
                 RelativeSizeAxes = Axes.X;
                 AutoSizeAxes = Axes.Y;

@@ -90,7 +90,7 @@ namespace osu.Game.Overlays.AccountCreation
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.TopCentre,
                             Colour = Color4.Red,
-                            Font = OsuFont.GetFont(size: 28, weight: FontWeight.Light),
+                            Font = OsuFont.Style.Subtitle,
                             Text = "Warning! 注意！",
                         },
                         multiAccountExplanationText = new OsuTextFlowContainer(cp => cp.Font = cp.Font.With(size: 12))

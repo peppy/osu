@@ -60,7 +60,7 @@ namespace osu.Game.Screens.Play.HUD
                     Alpha = 0,
                     BypassAutoSizeAxes = Axes.X,
                     Text = label.GetValueOrDefault(),
-                    Font = OsuFont.Torus.With(size: 12, weight: FontWeight.Bold),
+                    Font = OsuFont.Style.Caption2.With(weight: FontWeight.Bold),
                     Margin = new MarginPadding { Left = 2.5f },
                 },
                 NumberContainer = new Container

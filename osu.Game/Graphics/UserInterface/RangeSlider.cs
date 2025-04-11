@@ -102,7 +102,7 @@ namespace osu.Game.Graphics.UserInterface
             {
                 label = new OsuSpriteText
                 {
-                    Font = OsuFont.GetFont(size: 14),
+                    Font = OsuFont.Style.Caption1,
                 },
                 upperBound = new UpperBoundSlider
                 {

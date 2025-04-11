@@ -62,7 +62,7 @@ namespace osu.Game.Online.Leaderboards
                         // Info row
                         timestampLabel = new OsuSpriteText
                         {
-                            Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold),
+                            Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold),
                         },
                         // Mods row
                         modStatistics = new FillFlowContainer<ModCell>
@@ -175,13 +175,13 @@ namespace osu.Game.Online.Leaderboards
                     {
                         new OsuSpriteText
                         {
-                            Font = OsuFont.Torus.With(size: 12, weight: FontWeight.SemiBold),
+                            Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold),
                             Text = displayName.ToUpper(),
                             Colour = colours.ForHitResult(result),
                         },
                         new OsuSpriteText
                         {
-                            Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold),
+                            Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold),
                             Text = count.ToString(),
                         },
                     }
@@ -227,7 +227,7 @@ namespace osu.Game.Online.Leaderboards
                     container.Add(new OsuSpriteText
                     {
                         RelativeSizeAxes = Axes.Y,
-                        Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold),
+                        Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold),
                         Text = description,
                         Origin = Anchor.CentreLeft,
                         Anchor = Anchor.CentreLeft,

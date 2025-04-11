@@ -104,7 +104,7 @@ namespace osu.Game.Overlays.Settings
 
                 Add(new OsuSpriteText
                 {
-                    Font = OsuFont.GetFont(size: 16),
+                    Font = OsuFont.Style.Body,
 
                     Text = version,
                     Anchor = Anchor.Centre,

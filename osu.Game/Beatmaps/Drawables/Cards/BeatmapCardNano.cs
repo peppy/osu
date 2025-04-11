@@ -89,7 +89,7 @@ namespace osu.Game.Beatmaps.Drawables.Cards
                                         new TruncatingSpriteText
                                         {
                                             Text = createArtistText(),
-                                            Font = OsuFont.Torus.With(size: 16, weight: FontWeight.SemiBold),
+                                            Font = OsuFont.Style.Body.With(weight: FontWeight.SemiBold),
                                             RelativeSizeAxes = Axes.X,
                                         },
                                     }
@@ -115,7 +115,7 @@ namespace osu.Game.Beatmaps.Drawables.Cards
                                                 new LinkFlowContainer(s =>
                                                 {
                                                     s.Shadow = false;
-                                                    s.Font = OsuFont.GetFont(size: 16, weight: FontWeight.SemiBold);
+                                                    s.Font = OsuFont.Style.Body.With(weight: FontWeight.SemiBold);
                                                 }).With(d =>
                                                 {
                                                     d.AutoSizeAxes = Axes.Both;

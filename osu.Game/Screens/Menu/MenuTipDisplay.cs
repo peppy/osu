@@ -77,8 +77,8 @@ namespace osu.Game.Screens.Menu
                 return;
             }
 
-            static void formatRegular(SpriteText t) => t.Font = OsuFont.GetFont(size: 16, weight: FontWeight.Regular);
-            static void formatSemiBold(SpriteText t) => t.Font = OsuFont.GetFont(size: 16, weight: FontWeight.SemiBold);
+            static void formatRegular(SpriteText t) => t.Font = OsuFont.Style.Body;
+            static void formatSemiBold(SpriteText t) => t.Font = OsuFont.Style.Body.With(weight: FontWeight.SemiBold);
 
             var tip = getRandomTip();
 

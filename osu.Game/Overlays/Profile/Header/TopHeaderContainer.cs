@@ -155,7 +155,7 @@ namespace osu.Game.Overlays.Profile.Header
                                                 },
                                                 titleText = new OsuSpriteText
                                                 {
-                                                    Font = OsuFont.GetFont(size: 16, weight: FontWeight.Regular),
+                                                    Font = OsuFont.Style.Body,
                                                     Margin = new MarginPadding { Bottom = 3 },
                                                 },
                                                 new FillFlowContainer
@@ -184,7 +184,7 @@ namespace osu.Game.Overlays.Profile.Header
                                                                     Origin = Anchor.CentreLeft,
                                                                     Child = userCountryText = new OsuSpriteText
                                                                     {
-                                                                        Font = OsuFont.GetFont(size: 14f, weight: FontWeight.Regular),
+                                                                        Font = OsuFont.Style.Caption1,
                                                                     },
                                                                 },
                                                             }
@@ -204,7 +204,7 @@ namespace osu.Game.Overlays.Profile.Header
                                                                 {
                                                                     Anchor = Anchor.CentreLeft,
                                                                     Origin = Anchor.CentreLeft,
-                                                                    Font = OsuFont.GetFont(size: 14f, weight: FontWeight.Regular),
+                                                                    Font = OsuFont.Style.Caption1,
                                                                 },
                                                             }
                                                         }

@@ -33,7 +33,7 @@ namespace osu.Game.Overlays.Mods
                 {
                     Margin = new MarginPadding { Top = 5 },
                     Colour = colourProvider.Content2,
-                    Font = OsuFont.GetFont(weight: FontWeight.Regular),
+                    Font = OsuFont.Style.Body,
                     Text = "Incompatible with:"
                 },
                 new ModDisplay

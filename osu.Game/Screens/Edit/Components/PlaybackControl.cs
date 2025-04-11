@@ -189,14 +189,14 @@ namespace osu.Game.Screens.Edit.Components
                             Origin = Anchor.TopCentre,
                             Anchor = Anchor.TopCentre,
                             Text = $"{value:0%}",
-                            Font = OsuFont.GetFont(size: 14)
+                            Font = OsuFont.Style.Caption1
                         },
                         textBold = new OsuSpriteText
                         {
                             Origin = Anchor.TopCentre,
                             Anchor = Anchor.TopCentre,
                             Text = $"{value:0%}",
-                            Font = OsuFont.GetFont(size: 14, weight: FontWeight.Bold),
+                            Font = OsuFont.Style.Caption1.With(weight: FontWeight.Bold),
                             Alpha = 0,
                         },
                     };

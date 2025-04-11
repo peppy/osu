@@ -68,7 +68,7 @@ namespace osu.Game.Tournament.Screens.Ladder.Components
 
             AcronymText.Anchor = AcronymText.Origin = Anchor.CentreLeft;
             AcronymText.Padding = new MarginPadding { Left = 50 };
-            AcronymText.Font = OsuFont.Torus.With(size: 22, weight: FontWeight.Bold);
+            AcronymText.Font = OsuFont.Style.Heading1;
 
             isWinner = () => match.Winner == Team;
 
@@ -121,7 +121,7 @@ namespace osu.Game.Tournament.Screens.Ladder.Components
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
-                            Font = OsuFont.Torus.With(size: 22),
+                            Font = OsuFont.Style.Heading1.With(weight: FontWeight.Regular)
                         }
                     }
                 }

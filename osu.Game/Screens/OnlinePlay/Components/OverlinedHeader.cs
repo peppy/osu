@@ -64,11 +64,11 @@ namespace osu.Game.Screens.OnlinePlay.Components
                             new OsuSpriteText
                             {
                                 Text = title,
-                                Font = OsuFont.GetFont(size: 14, weight: FontWeight.SemiBold)
+                                Font = OsuFont.Style.Caption1.With(weight: FontWeight.SemiBold)
                             },
                             details = new OsuSpriteText
                             {
-                                Font = OsuFont.GetFont(size: 14, weight: FontWeight.SemiBold)
+                                Font = OsuFont.Style.Caption1.With(weight: FontWeight.SemiBold)
                             },
                         }
                     },

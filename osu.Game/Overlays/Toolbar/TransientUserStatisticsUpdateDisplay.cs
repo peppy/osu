@@ -141,14 +141,14 @@ namespace osu.Game.Overlays.Toolbar
                                 {
                                     Anchor = Anchor.CentreRight,
                                     Origin = Anchor.CentreRight,
-                                    Font = OsuFont.Torus.With(size: 12, fixedWidth: true, weight: FontWeight.SemiBold),
+                                    Font = OsuFont.Style.Caption2.With(fixedWidth: true, weight: FontWeight.SemiBold),
                                     AlwaysPresent = true,
                                 },
                                 titleText = new OsuSpriteText
                                 {
                                     Anchor = Anchor.CentreRight,
                                     Origin = Anchor.CentreRight,
-                                    Font = OsuFont.Torus.With(size: 12, weight: FontWeight.SemiBold),
+                                    Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold),
                                     Text = title,
                                     AlwaysPresent = true,
                                 }

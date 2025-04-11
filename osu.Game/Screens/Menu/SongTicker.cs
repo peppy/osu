@@ -80,7 +80,7 @@ namespace osu.Game.Screens.Menu
                         {
                             Anchor = Anchor.TopRight,
                             Origin = Anchor.TopRight,
-                            Font = OsuFont.GetFont(size: 16)
+                            Font = OsuFont.Style.Body
                         }
                     }
                 },

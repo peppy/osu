@@ -99,12 +99,12 @@ namespace osu.Game.Overlays.Dashboard.Home.News
 
                 textFlow.AddText(date.ToLocalisableString(@"dd"), t =>
                 {
-                    t.Font = OsuFont.GetFont(size: 14, weight: FontWeight.Bold);
+                    t.Font = OsuFont.Style.Caption1.With(weight: FontWeight.Bold);
                 });
 
                 textFlow.AddText(date.ToLocalisableString(@" MMM"), t =>
                 {
-                    t.Font = OsuFont.GetFont(size: 14, weight: FontWeight.Regular);
+                    t.Font = OsuFont.Style.Caption1.With(weight: FontWeight.Regular);
                 });
             }
 

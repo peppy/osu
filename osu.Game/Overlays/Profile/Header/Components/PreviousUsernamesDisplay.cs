@@ -81,7 +81,7 @@ namespace osu.Game.Overlays.Profile.Header.Components
                             {
                                 RelativeSizeAxes = Axes.Both,
                             },
-                            text = new TextFlowContainer(s => s.Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold, italics: true))
+                            text = new TextFlowContainer(s => s.Font = OsuFont.Style.Caption2.With(weight: FontWeight.Bold, italics: true))
                             {
                                 RelativeSizeAxes = Axes.X,
                                 AutoSizeAxes = Axes.Y,

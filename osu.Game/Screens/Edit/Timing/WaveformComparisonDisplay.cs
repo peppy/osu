@@ -270,7 +270,7 @@ namespace osu.Game.Screens.Edit.Timing
                                 Text = "Locked",
                                 Margin = new MarginPadding(5),
                                 Shadow = false,
-                                Font = OsuFont.Torus.With(size: 12, weight: FontWeight.SemiBold),
+                                Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold),
                             }
                         }
                     },

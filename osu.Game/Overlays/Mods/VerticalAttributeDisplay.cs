@@ -130,7 +130,7 @@ namespace osu.Game.Overlays.Mods
 
             protected override OsuSpriteText CreateSpriteText() => new OsuSpriteText
             {
-                Font = OsuFont.Torus.With(size: 18, weight: FontWeight.SemiBold)
+                Font = OsuFont.Style.Heading2
             };
         }
     }

@@ -70,7 +70,7 @@ namespace osu.Game.Overlays.Profile.Sections.Kudosu
                         new OsuSpriteText
                         {
                             Text = header,
-                            Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold)
+                            Font = OsuFont.Style.Caption2.With(weight: FontWeight.Bold)
                         },
                         valueText = new OsuSpriteText
                         {

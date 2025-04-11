@@ -31,8 +31,8 @@ namespace osu.Game.Overlays.BeatmapSet.Scores
         private const float top_columns_min_width = 64;
         private const float bottom_columns_min_width = 45;
 
-        private readonly FontUsage smallFont = OsuFont.GetFont(size: 16);
-        private readonly FontUsage largeFont = OsuFont.GetFont(size: 22, weight: FontWeight.Light);
+        private readonly FontUsage largeFont = OsuFont.Style.Heading1.With(weight: FontWeight.Light);
+        private readonly FontUsage smallFont = OsuFont.Style.Body;
 
         private readonly TotalScoreColumn totalScoreColumn;
         private readonly TextColumn accuracyColumn;

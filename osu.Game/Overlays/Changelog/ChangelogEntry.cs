@@ -48,8 +48,8 @@ namespace osu.Game.Overlays.Changelog
         [BackgroundDependencyLoader]
         private void load()
         {
-            fontLarge = OsuFont.GetFont(size: 16);
-            fontMedium = OsuFont.GetFont(size: 12);
+            fontLarge = OsuFont.Style.Body;
+            fontMedium = OsuFont.Style.Caption2;
 
             Children = new[]
             {

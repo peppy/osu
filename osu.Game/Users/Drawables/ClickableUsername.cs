@@ -32,7 +32,7 @@ namespace osu.Game.Users.Drawables
             Child = new OsuSpriteText
             {
                 Text = user!.Username,
-                Font = OsuFont.Torus.With(size: 16, weight: FontWeight.SemiBold),
+                Font = OsuFont.Style.Body.With(weight: FontWeight.SemiBold),
             };
 
             if (user.Id != APIUser.SYSTEM_USER_ID)

@@ -260,7 +260,7 @@ namespace osu.Game.Overlays.Profile.Header.Components
                         },
                         rankCount = new OsuSpriteText
                         {
-                            Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold),
+                            Font = OsuFont.Style.Caption2.With(weight: FontWeight.Bold),
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.TopCentre
                         }

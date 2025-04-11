@@ -163,7 +163,7 @@ namespace osu.Game.Graphics.UserInterface
                     Text = Text,
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    Font = OsuFont.GetFont(size: 28, weight: FontWeight.Bold),
+                    Font = OsuFont.Style.Subtitle.With(weight: FontWeight.Bold),
                     Shadow = true,
                     ShadowColour = new Color4(0, 0, 0, 0.1f),
                     Colour = Color4.White,

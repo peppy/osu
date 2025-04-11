@@ -157,7 +157,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Participants
                                         {
                                             Anchor = Anchor.CentreLeft,
                                             Origin = Anchor.CentreLeft,
-                                            Font = OsuFont.GetFont(size: 14),
+                                            Font = OsuFont.Style.Caption1,
                                         }
                                     }
                                 },

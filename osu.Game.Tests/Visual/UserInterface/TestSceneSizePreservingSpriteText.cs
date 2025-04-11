@@ -68,7 +68,7 @@ namespace osu.Game.Tests.Visual.UserInterface
                     Child = new OsuSpriteText
                     {
                         Text = (i == 0) ? "OsuSpriteText" : "SizePreservingSpriteText",
-                        Font = OsuFont.GetFont(Typeface.Inter, weight: FontWeight.Bold, size: 40),
+                        Font = OsuFont.Inter.With(weight: FontWeight.Bold, size: 40),
                         Origin = Anchor.TopCentre,
                         Anchor = Anchor.TopCentre,
                     },

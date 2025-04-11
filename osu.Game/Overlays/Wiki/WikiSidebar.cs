@@ -29,7 +29,7 @@ namespace osu.Game.Overlays.Wiki
                 new OsuSpriteText
                 {
                     Text = WikiStrings.ShowToc.ToUpper(),
-                    Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold),
+                    Font = OsuFont.Style.Caption2.With(weight: FontWeight.Bold),
                     Margin = new MarginPadding { Bottom = 5 },
                 },
                 tableOfContents = new WikiTableOfContents(),

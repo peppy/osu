@@ -67,7 +67,7 @@ namespace osu.Game.Overlays.Mods
                     {
                         new TextFlowContainer(t =>
                         {
-                            t.Font = OsuFont.Torus.With(size: 12f, weight: FontWeight.SemiBold);
+                            t.Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold);
                         })
                         {
                             AutoSizeAxes = Axes.Both,
@@ -76,7 +76,7 @@ namespace osu.Game.Overlays.Mods
                         },
                         new TextFlowContainer(t =>
                         {
-                            t.Font = OsuFont.Torus.With(size: 12f, weight: FontWeight.SemiBold);
+                            t.Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold);
                         })
                         {
                             Anchor = Anchor.TopRight,

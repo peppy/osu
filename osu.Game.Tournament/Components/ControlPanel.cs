@@ -39,7 +39,7 @@ namespace osu.Game.Tournament.Components
                     Anchor = Anchor.TopCentre,
                     Origin = Anchor.TopCentre,
                     Text = "Control Panel",
-                    Font = OsuFont.GetFont(weight: FontWeight.Bold, size: 22)
+                    Font = OsuFont.Style.Heading1,
                 },
                 buttons = new FillFlowContainer
                 {

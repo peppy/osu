@@ -41,7 +41,7 @@ namespace osu.Game.Overlays.Mods
                         descriptionText = new OsuSpriteText
                         {
                             Colour = colourProvider.Content1,
-                            Font = OsuFont.GetFont(weight: FontWeight.Regular),
+                            Font = OsuFont.Style.Body,
                         },
                     }
                 },

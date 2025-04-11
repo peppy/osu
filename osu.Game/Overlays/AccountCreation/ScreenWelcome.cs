@@ -52,7 +52,7 @@ namespace osu.Game.Overlays.AccountCreation
                     {
                         Anchor = Anchor.TopCentre,
                         Origin = Anchor.TopCentre,
-                        Font = OsuFont.GetFont(size: 12),
+                        Font = OsuFont.Style.Caption2,
                         Text = AccountCreationStrings.LetsGetYouStarted.ToLower(),
                     },
                     new SettingsButton

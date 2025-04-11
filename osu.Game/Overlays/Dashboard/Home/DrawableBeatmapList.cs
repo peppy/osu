@@ -40,7 +40,7 @@ namespace osu.Game.Overlays.Dashboard.Home
                 {
                     new OsuSpriteText
                     {
-                        Font = OsuFont.GetFont(size: 16, weight: FontWeight.Bold),
+                        Font = OsuFont.Style.Body.With(weight: FontWeight.Bold),
                         Colour = colourProvider.Light1,
                         Text = Title
                     }

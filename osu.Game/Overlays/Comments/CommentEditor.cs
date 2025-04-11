@@ -114,7 +114,7 @@ namespace osu.Game.Overlays.Comments
                                 {
                                     Anchor = Anchor.CentreLeft,
                                     Origin = Anchor.CentreLeft,
-                                    Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold),
+                                    Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold),
                                     Text = FooterText
                                 },
                                 new FillFlowContainer
@@ -248,7 +248,7 @@ namespace osu.Game.Overlays.Comments
 
             protected override SpriteText CreatePlaceholder() => placeholder = new OsuSpriteText
             {
-                Font = OsuFont.GetFont(weight: FontWeight.Regular),
+                Font = OsuFont.Style.Body,
             };
         }
 

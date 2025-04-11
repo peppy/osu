@@ -37,7 +37,7 @@ namespace osu.Game.Screens.Select.Carousel
                 Origin = Anchor.CentreRight,
                 Padding = new MarginPadding { Left = Size.X },
                 Margin = new MarginPadding { Left = 2, Right = 5 },
-                Font = OsuFont.GetFont(size: 14, weight: FontWeight.SemiBold),
+                Font = OsuFont.Style.Caption1.With(weight: FontWeight.SemiBold),
                 Text = items.Count.ToString(),
                 Colour = Color4.White,
             });

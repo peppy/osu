@@ -135,7 +135,7 @@ namespace osu.Game.Overlays.Comments
                     Anchor = Anchor.TopCentre,
                     Origin = Anchor.BottomCentre,
                     Text = "+1",
-                    Font = OsuFont.GetFont(size: 14),
+                    Font = OsuFont.Style.Caption1,
                     Alpha = 0,
                 },
                 votesCounter = new OsuSpriteText
@@ -143,7 +143,7 @@ namespace osu.Game.Overlays.Comments
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
                     Margin = new MarginPadding { Horizontal = 10 },
-                    Font = OsuFont.GetFont(size: 14),
+                    Font = OsuFont.Style.Caption1,
                     AlwaysPresent = true,
                 }
             },

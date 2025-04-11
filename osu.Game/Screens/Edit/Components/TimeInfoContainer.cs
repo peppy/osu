@@ -127,7 +127,7 @@ namespace osu.Game.Screens.Edit.Components
                         Anchor = Anchor.CentreLeft,
                         Origin = Anchor.CentreLeft,
                         Spacing = new Vector2(-2, 0),
-                        Font = OsuFont.Torus.With(size: 32, fixedWidth: true, weight: FontWeight.Light),
+                        Font = OsuFont.Style.Title.With(fixedWidth: true, weight: FontWeight.Light),
                     },
                     inputTextBox = new TimestampTextBox
                     {

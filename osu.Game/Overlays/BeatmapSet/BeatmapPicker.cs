@@ -379,7 +379,7 @@ namespace osu.Game.Overlays.BeatmapSet
                     {
                         Anchor = Anchor.CentreLeft,
                         Origin = Anchor.CentreLeft,
-                        Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold, italics: true),
+                        Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold, italics: true),
                     },
                 };
             }

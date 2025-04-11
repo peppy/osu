@@ -123,7 +123,7 @@ namespace osu.Game.Overlays.Rankings.Tables
                 this.isHighlighted = isHighlighted;
 
                 Text = text;
-                Font = OsuFont.GetFont(size: 12);
+                Font = OsuFont.Style.Caption2;
                 Margin = new MarginPadding { Vertical = 5, Horizontal = 10 };
             }
 

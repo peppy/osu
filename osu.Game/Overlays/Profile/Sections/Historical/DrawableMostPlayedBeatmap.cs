@@ -79,7 +79,7 @@ namespace osu.Game.Overlays.Profile.Sections.Historical
                                                     new MostPlayedBeatmapMetadataContainer(mostPlayed.BeatmapInfo),
                                                     new LinkFlowContainer(t =>
                                                     {
-                                                        t.Font = OsuFont.GetFont(size: 12, weight: FontWeight.Regular);
+                                                        t.Font = OsuFont.Style.Caption2;
                                                         t.Colour = colourProvider.Foreground1;
                                                     })
                                                     {
@@ -143,12 +143,12 @@ namespace osu.Game.Overlays.Profile.Sections.Historical
                     new OsuSpriteText
                     {
                         Text = " by ",
-                        Font = OsuFont.GetFont(weight: FontWeight.Regular)
+                        Font = OsuFont.Style.Body
                     },
                     new OsuSpriteText
                     {
                         Text = new RomanisableString(metadata.ArtistUnicode, metadata.Artist),
-                        Font = OsuFont.GetFont(weight: FontWeight.Regular)
+                        Font = OsuFont.Style.Body
                     },
                 };
             }

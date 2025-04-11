@@ -229,14 +229,14 @@ namespace osu.Game.Screens.Ranking.Contracted
                     Anchor = Anchor.CentreLeft,
                     Origin = Anchor.CentreLeft,
                     Text = key.ToTitle(),
-                    Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold)
+                    Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold)
                 },
                 new OsuSpriteText
                 {
                     Anchor = Anchor.CentreRight,
                     Origin = Anchor.CentreRight,
                     Text = value,
-                    Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold),
+                    Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold),
                     Colour = Color4Extensions.FromHex("#FFDD55")
                 }
             }

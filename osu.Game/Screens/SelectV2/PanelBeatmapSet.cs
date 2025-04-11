@@ -76,7 +76,7 @@ namespace osu.Game.Screens.SelectV2
                     {
                         titleText = new OsuSpriteText
                         {
-                            Font = OsuFont.GetFont(weight: FontWeight.Bold, size: 22, italics: true),
+                            Font = OsuFont.Style.Heading1,
                         },
                         artistText = new OsuSpriteText
                         {

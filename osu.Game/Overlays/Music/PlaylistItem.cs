@@ -79,11 +79,11 @@ namespace osu.Game.Overlays.Music
                     Direction = FillDirection.Horizontal,
                 };
 
-                flow.AddText(title, sprite => sprite.Font = OsuFont.GetFont(weight: FontWeight.Regular));
+                flow.AddText(title, sprite => sprite.Font = OsuFont.Style.Body);
                 flow.AddText(@"  "); // to separate the title from the artist.
                 flow.AddText(artist, sprite =>
                 {
-                    sprite.Font = OsuFont.GetFont(size: 14, weight: FontWeight.Bold);
+                    sprite.Font = OsuFont.Style.Caption1.With(weight: FontWeight.Bold);
                     sprite.Colour = colours.Gray9;
                 });
                 return flow;

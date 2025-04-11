@@ -101,7 +101,7 @@ namespace osu.Game.Overlays.News.Sidebar
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    Font = OsuFont.GetFont(size: 12, weight: isCurrent ? FontWeight.SemiBold : FontWeight.Medium),
+                    Font = OsuFont.Style.Caption2.With(weight: isCurrent ? FontWeight.SemiBold : FontWeight.Medium),
                     Text = year.ToString()
                 };
             }

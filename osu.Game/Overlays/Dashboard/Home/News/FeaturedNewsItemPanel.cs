@@ -86,7 +86,7 @@ namespace osu.Game.Overlays.Dashboard.Home.News
                                             new NewsTitleLink(post),
                                             new TextFlowContainer(f =>
                                             {
-                                                f.Font = OsuFont.GetFont(size: 12, weight: FontWeight.Regular);
+                                                f.Font = OsuFont.Style.Caption2;
                                             })
                                             {
                                                 RelativeSizeAxes = Axes.X,

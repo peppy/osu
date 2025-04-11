@@ -202,7 +202,7 @@ namespace osu.Game.Overlays.Comments
                                                                 }
                                                             }
                                                         },
-                                                        actionsContainer = new LinkFlowContainer(s => s.Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold))
+                                                        actionsContainer = new LinkFlowContainer(s => s.Font = OsuFont.Style.Caption2.With(weight: FontWeight.Bold))
                                                         {
                                                             Name = @"Actions buttons",
                                                             AutoSizeAxes = Axes.Both,
@@ -293,7 +293,7 @@ namespace osu.Game.Overlays.Comments
 
             if (Comment.EditedAt.HasValue && Comment.EditedUser != null)
             {
-                var font = OsuFont.GetFont(size: 12, weight: FontWeight.Regular);
+                var font = OsuFont.Style.Caption2;
                 var colour = colourProvider.Foreground1;
 
                 info.Add(new FillFlowContainer

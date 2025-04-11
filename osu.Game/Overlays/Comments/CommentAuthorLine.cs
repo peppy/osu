@@ -39,7 +39,7 @@ namespace osu.Game.Overlays.Comments
             Direction = FillDirection.Horizontal;
             Spacing = new Vector2(4, 0);
 
-            Add(new LinkFlowContainer(s => s.Font = OsuFont.GetFont(size: 14, weight: FontWeight.Bold))
+            Add(new LinkFlowContainer(s => s.Font = OsuFont.Style.Caption1.With(weight: FontWeight.Bold))
             {
                 AutoSizeAxes = Axes.Both
             }.With(username =>
@@ -69,7 +69,7 @@ namespace osu.Game.Overlays.Comments
             Add(deletedLabel = new OsuSpriteText
             {
                 Alpha = 0f,
-                Font = OsuFont.GetFont(size: 14, weight: FontWeight.Bold),
+                Font = OsuFont.Style.Caption1.With(weight: FontWeight.Bold),
                 Text = CommentsStrings.Deleted
             });
         }
@@ -130,7 +130,7 @@ namespace osu.Game.Overlays.Comments
                     },
                     new OsuSpriteText
                     {
-                        Font = OsuFont.GetFont(size: 14, weight: FontWeight.Bold),
+                        Font = OsuFont.Style.Caption1.With(weight: FontWeight.Bold),
                         Text = CommentsStrings.Pinned,
                         Anchor = Anchor.CentreLeft,
                         Origin = Anchor.CentreLeft,
@@ -162,7 +162,7 @@ namespace osu.Game.Overlays.Comments
                     },
                     new OsuSpriteText
                     {
-                        Font = OsuFont.GetFont(size: 14, weight: FontWeight.Bold, italics: true),
+                        Font = OsuFont.Style.Caption1.With(weight: FontWeight.Bold, italics: true),
                         Text = parentComment?.User?.Username ?? parentComment?.LegacyName!
                     }
                 };

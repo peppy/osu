@@ -58,7 +58,7 @@ namespace osu.Game.Overlays.Wiki
                 {
                     Vertical = 30,
                 },
-                Child = new OsuTextFlowContainer(t => t.Font = OsuFont.GetFont(Typeface.Inter, size: 12, weight: FontWeight.Light))
+                Child = new OsuTextFlowContainer(t => t.Font = OsuFont.Inter.With(size: 12, weight: FontWeight.Light))
                 {
                     RelativeSizeAxes = Axes.X,
                     AutoSizeAxes = Axes.Y,

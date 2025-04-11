@@ -21,7 +21,7 @@ namespace osu.Game.Graphics.UserInterface.PageSelector
             {
                 new OsuSpriteText
                 {
-                    Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold),
+                    Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold),
                     Text = "...",
                     Colour = colourProvider.Light3,
                     Anchor = Anchor.Centre,

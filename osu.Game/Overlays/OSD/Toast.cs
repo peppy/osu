@@ -59,7 +59,7 @@ namespace osu.Game.Overlays.OSD
                 {
                     Padding = new MarginPadding(10),
                     Name = "Description",
-                    Font = OsuFont.GetFont(size: 14, weight: FontWeight.Bold),
+                    Font = OsuFont.Style.Caption1.With(weight: FontWeight.Bold),
                     Spacing = new Vector2(1, 0),
                     Anchor = Anchor.TopCentre,
                     Origin = Anchor.TopCentre,
@@ -81,7 +81,7 @@ namespace osu.Game.Overlays.OSD
                     Name = "Shortcut",
                     Alpha = 0.3f,
                     Margin = new MarginPadding { Bottom = 15, Horizontal = 10 },
-                    Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold),
+                    Font = OsuFont.Style.Caption2.With(weight: FontWeight.Bold),
                     Text = string.IsNullOrEmpty(shortcut.ToString()) ? ToastStrings.NoKeyBound.ToUpper() : shortcut.ToUpper()
                 },
             };

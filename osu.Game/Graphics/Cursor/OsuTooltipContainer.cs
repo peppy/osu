@@ -74,7 +74,7 @@ namespace osu.Game.Graphics.Cursor
                     },
                     text = new TextFlowContainer(f =>
                     {
-                        f.Font = OsuFont.GetFont(weight: FontWeight.Regular);
+                        f.Font = OsuFont.Style.Body;
                     })
                     {
                         Margin = new MarginPadding(5),
