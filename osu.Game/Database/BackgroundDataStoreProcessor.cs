@@ -13,6 +13,7 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
+using osu.Framework.Utils;
 using osu.Game.Beatmaps;
 using osu.Game.Extensions;
 using osu.Game.Online.API;
@@ -108,7 +109,7 @@ namespace osu.Game.Database
                 // beatmap being passed in is arbitrary here. just needs to be non-null.
                 int currentVersion = ruleset.CreateInstance().CreateDifficultyCalculator(gameBeatmap.Value).Version;
 
-                if (ruleset.LastAppliedDifficultyVersion < currentVersion)
+                //if (ruleset.LastAppliedDifficultyVersion < currentVersion)
                 {
                     Logger.Log($"Resetting star ratings for {ruleset.Name} (difficulty calculation version updated from {ruleset.LastAppliedDifficultyVersion} to {currentVersion})");
 
@@ -153,63 +154,65 @@ namespace osu.Game.Database
             if (beatmapIds.Count == 0)
                 return;
 
-            Logger.Log($"Found {beatmapIds.Count} beatmaps which require star rating reprocessing.");
-
-            var notification = showProgressNotification(beatmapIds.Count, "Reprocessing star rating for beatmaps", "beatmaps' star ratings have been updated");
-
-            int processedCount = 0;
-            int failedCount = 0;
-
-            Dictionary<string, Ruleset> rulesetCache = new Dictionary<string, Ruleset>();
-
-            Ruleset getRuleset(RulesetInfo rulesetInfo)
+            while (true)
             {
-                if (!rulesetCache.TryGetValue(rulesetInfo.ShortName, out var ruleset))
-                    ruleset = rulesetCache[rulesetInfo.ShortName] = rulesetInfo.CreateInstance();
+                Logger.Log($"Found {beatmapIds.Count} beatmaps which require star rating reprocessing.");
 
-                return ruleset;
-            }
+                var notification = showProgressNotification(beatmapIds.Count, "Reprocessing star rating for beatmaps", "beatmaps' star ratings have been updated");
 
-            foreach (Guid id in beatmapIds)
-            {
-                if (notification?.State == ProgressNotificationState.Cancelled)
-                    break;
+                int processedCount = 0;
+                int failedCount = 0;
 
-                updateNotificationProgress(notification, processedCount, beatmapIds.Count);
+                Dictionary<string, Ruleset> rulesetCache = new Dictionary<string, Ruleset>();
 
-                sleepIfRequired();
-
-                var beatmap = realmAccess.Run(r => r.Find<BeatmapInfo>(id)?.Detach());
-
-                if (beatmap == null)
-                    return;
-
-                try
+                Ruleset getRuleset(RulesetInfo rulesetInfo)
                 {
-                    var working = beatmapManager.GetWorkingBeatmap(beatmap);
-                    var ruleset = getRuleset(working.BeatmapInfo.Ruleset);
+                    if (!rulesetCache.TryGetValue(rulesetInfo.ShortName, out var ruleset))
+                        ruleset = rulesetCache[rulesetInfo.ShortName] = rulesetInfo.CreateInstance();
 
-                    Debug.Assert(ruleset != null);
+                    return ruleset;
+                }
 
-                    var calculator = ruleset.CreateDifficultyCalculator(working);
+                foreach (Guid id in beatmapIds)
+                {
+                    if (notification?.State == ProgressNotificationState.Cancelled)
+                        break;
 
-                    double starRating = calculator.Calculate().StarRating;
-                    realmAccess.Write(r =>
+                    updateNotificationProgress(notification, processedCount, beatmapIds.Count);
+
+                    sleepIfRequired();
+
+                    var beatmap = realmAccess.Run(r => r.Find<BeatmapInfo>(id)?.Detach());
+
+                    if (beatmap == null)
+                        return;
+
+                    try
                     {
-                        if (r.Find<BeatmapInfo>(id) is BeatmapInfo liveBeatmapInfo)
-                            liveBeatmapInfo.StarRating = starRating;
-                    });
-                    ((IWorkingBeatmapCache)beatmapManager).Invalidate(beatmap);
-                    ++processedCount;
-                }
-                catch (Exception e)
-                {
-                    Logger.Log($"Background processing failed on {beatmap}: {e}");
-                    ++failedCount;
-                }
-            }
+                        var working = beatmapManager.GetWorkingBeatmap(beatmap);
+                        var ruleset = getRuleset(working.BeatmapInfo.Ruleset);
 
-            completeNotification(notification, processedCount, beatmapIds.Count, failedCount);
+                        Debug.Assert(ruleset != null);
+
+                        Thread.Sleep(50);
+
+                        realmAccess.Write(r =>
+                        {
+                            if (r.Find<BeatmapInfo>(id) is BeatmapInfo liveBeatmapInfo)
+                                liveBeatmapInfo.StarRating = RNG.NextDouble() * 10;
+                        });
+                        ((IWorkingBeatmapCache)beatmapManager).Invalidate(beatmap);
+                        ++processedCount;
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log($"Background processing failed on {beatmap}: {e}");
+                        ++failedCount;
+                    }
+                }
+
+                completeNotification(notification, processedCount, beatmapIds.Count, failedCount);
+            }
         }
 
         private void processOnlineBeatmapSetsWithNoUpdate()
