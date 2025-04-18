@@ -8,6 +8,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Utils;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Drawables;
 using osu.Game.Graphics;
@@ -155,14 +156,20 @@ namespace osu.Game.Screens.SelectV2
 
             ruleset.BindValueChanged(_ =>
             {
-                computeStarRating();
-                updateKeyCount();
+                if (Item?.Model is BeatmapInfo beatmapInfo)
+                {
+                    computeStarRating(beatmapInfo);
+                    updateKeyCount(beatmapInfo);
+                }
             });
 
             mods.BindValueChanged(_ =>
             {
-                computeStarRating();
-                updateKeyCount();
+                if (Item?.Model is BeatmapInfo beatmapInfo)
+                {
+                    computeStarRating(beatmapInfo);
+                    updateKeyCount(beatmapInfo);
+                }
             }, true);
         }
 
@@ -172,15 +179,19 @@ namespace osu.Game.Screens.SelectV2
 
             Debug.Assert(Item != null);
             var beatmap = (BeatmapInfo)Item.Model;
+            UpdateDisplayFrom(beatmap);
+        }
 
+        public void UpdateDisplayFrom(BeatmapInfo beatmap)
+        {
             difficultyIcon.Icon = beatmap.Ruleset.CreateInstance().CreateIcon();
 
             localRank.Beatmap = beatmap;
-            difficultyText.Text = beatmap.DifficultyName;
+            difficultyText.Text = beatmap.DifficultyName + RNG.NextDouble();
             authorText.Text = BeatmapsetsStrings.ShowDetailsMappedBy(beatmap.Metadata.Author.Username);
 
-            computeStarRating();
-            updateKeyCount();
+            computeStarRating(beatmap);
+            updateKeyCount(beatmap);
         }
 
         protected override void FreeAfterUse()
@@ -191,27 +202,17 @@ namespace osu.Game.Screens.SelectV2
             starDifficultyBindable = null;
         }
 
-        private void computeStarRating()
+        private void computeStarRating(BeatmapInfo beatmap)
         {
             starDifficultyCancellationSource?.Cancel();
             starDifficultyCancellationSource = new CancellationTokenSource();
-
-            if (Item == null)
-                return;
-
-            var beatmap = (BeatmapInfo)Item.Model;
 
             starDifficultyBindable = difficultyCache.GetBindableDifficulty(beatmap, starDifficultyCancellationSource.Token);
             starDifficultyBindable.BindValueChanged(_ => updateDisplay(), true);
         }
 
-        private void updateKeyCount()
+        private void updateKeyCount(BeatmapInfo beatmap)
         {
-            if (Item == null)
-                return;
-
-            var beatmap = (BeatmapInfo)Item.Model;
-
             if (ruleset.Value.OnlineID == 3)
             {
                 // Account for mania differences locally for now.

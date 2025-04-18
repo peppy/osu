@@ -118,6 +118,12 @@ namespace osu.Game.Screens.SelectV2
                         if (matchingNewBeatmap != null)
                         {
                             Items.ReplaceRange(previousIndex, 1, [matchingNewBeatmap]);
+
+                            var existingDrawable = GetMaterialisedDrawableForItem(new CarouselItem(matchingNewBeatmap));
+
+                            if (existingDrawable is PanelBeatmap panel)
+                                panel.UpdateDisplayFrom(matchingNewBeatmap);
+
                             newSetBeatmaps.Remove(matchingNewBeatmap);
                         }
                         else
