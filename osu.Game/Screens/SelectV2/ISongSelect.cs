@@ -1,6 +1,8 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Collections.Generic;
+using osu.Framework.Graphics.UserInterface;
 using osu.Game.Beatmaps;
 using osu.Game.Scoring;
 
@@ -55,5 +57,10 @@ namespace osu.Game.Screens.SelectV2
         /// Selects the provided beatmap and progresses song select to the next screen.
         /// </summary>
         void SelectAndStart(BeatmapInfo beatmap);
+
+        /// <summary>
+        /// Gets relevant actionable items for beatmap context menus, based on the type of song select.
+        /// </summary>
+        IEnumerable<MenuItem> CreateMenuItemsForBeatmap(BeatmapInfo beatmap);
     }
 }

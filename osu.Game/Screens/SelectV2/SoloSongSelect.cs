@@ -5,7 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Extensions.LocalisationExtensions;
+using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Screens;
+using osu.Game.Beatmaps;
+using osu.Game.Graphics.UserInterface;
 using osu.Game.Localisation;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Notifications;
@@ -20,6 +24,12 @@ namespace osu.Game.Screens.SelectV2
         private PlayerLoader? playerLoader;
 
         public override bool EditingAllowed => true;
+
+        public override IEnumerable<MenuItem> CreateMenuItemsForBeatmap(BeatmapInfo beatmap) => new[]
+        {
+            new OsuMenuItem(ButtonSystemStrings.Play.ToSentence(), MenuItemType.Highlighted, () => SelectAndStart(beatmap)),
+            new OsuMenuItem(ButtonSystemStrings.Edit.ToSentence(), MenuItemType.Standard, () => Edit(beatmap)),
+        };
 
         protected override bool OnStart()
         {
