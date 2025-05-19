@@ -71,6 +71,7 @@ namespace osu.Game.Tests.Visual.SongSelectV2
                         {
                             State = { Value = Visibility.Visible },
                         },
+                        // TODO: this setup is completely broken. footer can't see ISongSelect.
                         Footer = new ScreenFooter
                         {
                             BackButtonPressed = () => Stack.CurrentScreen.Exit(),
