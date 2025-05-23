@@ -30,7 +30,7 @@ namespace osu.Game.Database
         {
             this.realm = realm;
 
-            Storage = storage.GetStorageForDirectory(@"files");
+            Storage = storage.GetUserFileStorage();
             Store = new StorageBackedResourceStore(Storage);
         }
 

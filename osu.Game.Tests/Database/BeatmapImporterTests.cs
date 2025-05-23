@@ -627,7 +627,7 @@ namespace osu.Game.Tests.Database
 
                 var firstFile = imported.Files.First();
 
-                var fileStorage = storage.GetStorageForDirectory("files");
+                var fileStorage = storage.GetUserFileStorage();
 
                 long originalLength;
                 using (var stream = fileStorage.GetStream(firstFile.File.GetStoragePath()))
@@ -849,7 +849,7 @@ namespace osu.Game.Tests.Database
                 // intentionally nuke all files
                 storage.DeleteDirectory("files");
 
-                Assert.That(imported.Files.All(f => !storage.GetStorageForDirectory("files").Exists(f.File.GetStoragePath())));
+                Assert.That(imported.Files.All(f => !storage.GetUserFileStorage().Exists(f.File.GetStoragePath())));
 
                 var importedSecondTime = await LoadOszIntoStore(importer, realmFactory.Realm);
 
@@ -860,7 +860,7 @@ namespace osu.Game.Tests.Database
                 Assert.IsFalse(importedSecondTime.DeletePending);
 
                 // check that the files now exist, even though they were deleted above.
-                Assert.That(importedSecondTime.Files.All(f => storage.GetStorageForDirectory("files").Exists(f.File.GetStoragePath())));
+                Assert.That(importedSecondTime.Files.All(f => storage.GetUserFileStorage().Exists(f.File.GetStoragePath())));
             });
         }
 

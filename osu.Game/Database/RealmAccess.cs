@@ -194,6 +194,12 @@ namespace osu.Game.Database
         {
             this.storage = storage;
 
+            bool realmInsideFiles = storage.GetUserFileStorage().GetFiles(string.Empty, "client*.realm").Any();
+            bool freshInstall = !storage.GetFiles(string.Empty, "client*.realm").Any();
+
+            if (realmInsideFiles || freshInstall)
+                filename = Path.Combine("user_data", filename);
+
             updateThreadSyncContext = updateThread?.SynchronizationContext ?? SynchronizationContext.Current;
 
             Filename = filename;

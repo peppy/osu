@@ -22,6 +22,7 @@ using osu.Framework.Threading;
 using osu.Framework.Utils;
 using osu.Game.Audio;
 using osu.Game.Database;
+using osu.Game.Extensions;
 using osu.Game.IO;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Utils;
@@ -82,7 +83,7 @@ namespace osu.Game.Skinning
             this.host = host;
             this.resources = resources;
 
-            userFiles = new StorageBackedResourceStore(storage.GetStorageForDirectory("files"));
+            userFiles = new StorageBackedResourceStore(storage.GetUserFileStorage());
 
             skinImporter = new SkinImporter(storage, realm, this)
             {

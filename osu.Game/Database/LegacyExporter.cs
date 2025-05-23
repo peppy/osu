@@ -48,7 +48,7 @@ namespace osu.Game.Database
         protected LegacyExporter(Storage storage)
         {
             exportStorage = (storage as OsuStorage)?.GetExportStorage() ?? storage.GetStorageForDirectory(@"exports");
-            UserFileStorage = storage.GetStorageForDirectory(@"files");
+            UserFileStorage = storage.GetUserFileStorage();
         }
 
         /// <summary>
