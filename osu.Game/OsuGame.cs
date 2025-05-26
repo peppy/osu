@@ -1119,7 +1119,6 @@ namespace osu.Game
                                     RelativeSizeAxes = Axes.Both,
                                     Child = ScreenFooter = new ScreenFooter(backReceptor)
                                     {
-                                        RequestLogoInFront = inFront => ScreenContainer.ChangeChildDepth(logoContainer, inFront ? float.MinValue : 0),
                                         BackButtonPressed = handleBackButton
                                     },
                                 },

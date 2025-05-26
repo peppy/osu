@@ -26,11 +26,6 @@ namespace osu.Game.Screens.Footer
         public ScreenBackButton BackButton { get; private set; } = null!;
 
         /// <summary>
-        /// Called when logo tracking begins, intended to bring the osu! logo to the frontmost visually.
-        /// </summary>
-        public Action<bool>? RequestLogoInFront { private get; init; }
-
-        /// <summary>
         /// The back button was pressed.
         /// </summary>
         public Action? BackButtonPressed { private get; init; }
@@ -132,22 +127,16 @@ namespace osu.Game.Screens.Footer
             };
         }
 
-        private ScheduledDelegate? changeLogoDepthDelegate;
-
         public void StartTrackingLogo(OsuLogo logo, float duration = 0, Easing easing = Easing.None)
         {
-            changeLogoDepthDelegate?.Cancel();
-            changeLogoDepthDelegate = null;
-
             logoTrackingContainer.StartTracking(logo, duration, easing);
-            RequestLogoInFront?.Invoke(true);
+            logo.ProxyToContainer(logoTrackingContainer);
         }
 
-        public void StopTrackingLogo()
+        public void StopTrackingLogo(OsuLogo logo)
         {
             logoTrackingContainer.StopTracking();
-
-            changeLogoDepthDelegate = Scheduler.AddDelayed(() => RequestLogoInFront?.Invoke(false), transition_duration);
+            logo.ReturnProxy();
         }
 
         protected override void PopIn()

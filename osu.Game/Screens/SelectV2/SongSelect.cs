@@ -472,13 +472,13 @@ namespace osu.Game.Screens.SelectV2
         protected override void LogoSuspending(OsuLogo logo)
         {
             base.LogoSuspending(logo);
-            Footer?.StopTrackingLogo();
+            Footer?.StopTrackingLogo(logo);
         }
 
         protected override void LogoExiting(OsuLogo logo)
         {
             base.LogoExiting(logo);
-            Scheduler.AddDelayed(() => Footer?.StopTrackingLogo(), 120);
+            Scheduler.AddDelayed(() => Footer?.StopTrackingLogo(logo), 120);
             logo.ScaleTo(0.2f, 120, Easing.Out);
             logo.FadeOut(120, Easing.Out);
         }
