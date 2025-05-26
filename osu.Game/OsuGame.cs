@@ -1107,21 +1107,19 @@ namespace osu.Game
                                     Origin = Anchor.BottomLeft,
                                     Action = handleBackButton,
                                 },
-                                logoContainer = new Container { RelativeSizeAxes = Axes.Both },
                                 footerBasedOverlayContent = new Container
                                 {
-                                    Depth = -1,
                                     RelativeSizeAxes = Axes.Both,
                                 },
                                 new PopoverContainer
                                 {
-                                    Depth = -1,
                                     RelativeSizeAxes = Axes.Both,
                                     Child = ScreenFooter = new ScreenFooter(backReceptor)
                                     {
                                         BackButtonPressed = handleBackButton
                                     },
                                 },
+                                logoContainer = new Container { RelativeSizeAxes = Axes.Both },
                             }
                         },
                     }
