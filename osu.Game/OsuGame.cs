@@ -52,7 +52,6 @@ using osu.Game.Online.Leaderboards;
 using osu.Game.Online.Rooms;
 using osu.Game.Overlays;
 using osu.Game.Overlays.BeatmapListing;
-using osu.Game.Overlays.Mods;
 using osu.Game.Overlays.Music;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Overlays.OSD;
@@ -145,8 +144,6 @@ namespace osu.Game
         private Container leftFloatingOverlayContent;
 
         private Container topMostOverlayContent;
-
-        private Container footerBasedOverlayContent;
 
         protected ScalingContainer ScreenContainer { get; private set; }
 
@@ -264,10 +261,7 @@ namespace osu.Game
 
             externalOverlays.Add(overlayContainer);
 
-            if (overlayContainer is ShearedOverlayContainer)
-                footerBasedOverlayContent.Add(overlayContainer);
-            else
-                overlayContent.Add(overlayContainer);
+            overlayContent.Add(overlayContainer);
 
             if (overlayContainer is OsuFocusedOverlayContainer focusedOverlayContainer)
                 focusedOverlays.Add(focusedOverlayContainer);
@@ -1107,10 +1101,6 @@ namespace osu.Game
                                     Origin = Anchor.BottomLeft,
                                     Action = handleBackButton,
                                 },
-                                footerBasedOverlayContent = new Container
-                                {
-                                    RelativeSizeAxes = Axes.Both,
-                                },
                                 new PopoverContainer
                                 {
                                     RelativeSizeAxes = Axes.Both,
@@ -1201,7 +1191,7 @@ namespace osu.Game
             loadComponentSingleFile(CreateUpdateManager(), Add, true);
 
             // overlay elements
-            loadComponentSingleFile(FirstRunOverlay = new FirstRunSetupOverlay(), footerBasedOverlayContent.Add, true);
+            loadComponentSingleFile(FirstRunOverlay = new FirstRunSetupOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(new ManageCollectionsDialog(), overlayContent.Add, true);
             loadComponentSingleFile(beatmapListing = new BeatmapListingOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(dashboard = new DashboardOverlay(), overlayContent.Add, true);
