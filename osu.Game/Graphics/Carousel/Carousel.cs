@@ -274,7 +274,7 @@ namespace osu.Game.Graphics.Carousel
                 RelativeSizeAxes = Axes.Both,
             };
 
-            Items.BindCollectionChanged((_, _) => FilterAsync());
+            Items.BindCollectionChanged((_, _) => filterAfterItemsChanged.Invalidate());
         }
 
         [BackgroundDependencyLoader]
@@ -662,6 +662,12 @@ namespace osu.Game.Graphics.Carousel
         /// </summary>
         private readonly Cached filterReusesPanels = new Cached();
 
+        /// <summary>
+        /// For background re-filters, ensure we wait for the previous filter operation to complete before starting another.
+        /// This avoids the carousel never updating its display in high churn scenarios.
+        /// </summary>
+        private readonly Cached filterAfterItemsChanged = new Cached();
+
         protected override void Update()
         {
             base.Update();
@@ -714,6 +720,12 @@ namespace osu.Game.Graphics.Carousel
                 c.Selected.Value = currentSelection?.CarouselItem != null && CheckModelEquality(c.Item, currentSelection.CarouselItem);
                 c.KeyboardSelected.Value = c.Item == currentKeyboardSelection?.CarouselItem;
                 c.Expanded.Value = c.Item.IsExpanded;
+            }
+
+            if (!filterAfterItemsChanged.IsValid && !IsFiltering)
+            {
+                FilterAsync().FireAndForget();
+                filterAfterItemsChanged.Validate();
             }
         }
 
