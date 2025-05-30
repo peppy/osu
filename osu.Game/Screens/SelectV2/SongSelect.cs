@@ -219,7 +219,7 @@ namespace osu.Game.Screens.SelectV2
                                                         },
                                                         Children = new Drawable[]
                                                         {
-                                                            carousel = new BeatmapCarousel(waitForInitialCriteria: true)
+                                                            carousel = new BeatmapCarousel
                                                             {
                                                                 BleedTop = FilterControl.HEIGHT_FROM_SCREEN_TOP + 5,
                                                                 BleedBottom = ScreenFooter.HEIGHT + 5,
@@ -562,12 +562,18 @@ namespace osu.Game.Screens.SelectV2
 
         private void criteriaChanged(FilterCriteria criteria)
         {
+            // The first filter needs to be applied immediately as this triggers the initial carousel load.
+            double filterDelay = filterDebounce == null ? 0 : filter_delay;
+
             filterDebounce?.Cancel();
-            filterDebounce = Scheduler.AddDelayed(() => { carousel.Filter(criteria); }, filter_delay);
+            filterDebounce = Scheduler.AddDelayed(() => { carousel.Filter(criteria); }, filterDelay);
         }
 
         private void newItemsPresented(IEnumerable<CarouselItem> carouselItems)
         {
+            if (carousel.Criteria == null)
+                return;
+
             int count = carousel.MatchedBeatmapsCount;
 
             if (count == 0)
