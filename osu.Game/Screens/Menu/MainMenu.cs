@@ -14,11 +14,13 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Input;
 using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Framework.Screens;
+using osu.Framework.Testing;
 using osu.Framework.Threading;
 using osu.Game.Audio;
 using osu.Game.Beatmaps;
@@ -44,6 +46,7 @@ using osuTK;
 using osuTK.Graphics;
 using osu.Game.Localisation;
 using osu.Game.Screens.SelectV2;
+using osuTK.Input;
 
 namespace osu.Game.Screens.Menu
 {
@@ -236,14 +239,81 @@ namespace osu.Game.Screens.Menu
             Buttons.OnBeatmapListing = () => beatmapListing?.ToggleVisibility();
 
             reappearSampleSwoosh = audio.Samples.Get(@"Menu/reappear-swoosh");
+            ssv2Sample = audio.Samples.Get(@"UI/bss-complete");
         }
+
+        #region TEMPORARY: Song Select v2 easter egg
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+            inputManager = GetContainingInputManager();
+        }
+
+        private InputManager inputManager;
+        private double holdTime;
+        private bool ssv2Expanded;
+        private IDisposable ssv2Duck;
+        private Sample ssv2Sample;
+
+        protected override void Update()
+        {
+            base.Update();
+
+            if (Buttons.State == ButtonSystemState.Play &&
+                inputManager.CurrentState.Mouse.IsPressed(MouseButton.Left) &&
+                inputManager.HoveredDrawables.Any(h => h is OsuLogo || (h is MainMenuButton b && b.TriggerKeys.Contains(Key.P))))
+                holdTime += Time.Elapsed;
+            else
+            {
+                var transformTarget = Game.ChildrenOfType<ScalingContainer>().First();
+                transformTarget.ScaleTo(1, 200, Easing.OutQuint)
+                               .RotateTo(0, 200, Easing.OutQuint)
+                               .FadeColour(OsuColour.Gray(1f), 200, Easing.OutQuint);
+
+                ssv2Duck?.Dispose();
+                ssv2Duck = null;
+
+                ssv2Expanded = false;
+                holdTime = 0;
+            }
+
+            if (holdTime > 500 && !ssv2Expanded)
+            {
+                var transformTarget = Game.ChildrenOfType<ScalingContainer>().First();
+
+                transformTarget.Anchor = Anchor.Centre;
+                transformTarget.Origin = Anchor.Centre;
+
+                transformTarget.ScaleTo(1.2f, 5000, Easing.OutPow10)
+                               .RotateTo(2, 5000, Easing.OutPow10)
+                               .FadeColour(Color4.BlueViolet, 10000, Easing.OutPow10);
+
+                ssv2Duck = musicController.Duck(new DuckParameters
+                {
+                    DuckDuration = 2000,
+                    DuckVolumeTo = 0.8f,
+                    DuckCutoffTo = 500,
+                    DuckEasing = Easing.OutQuint,
+                    RestoreDuration = 200,
+                    RestoreEasing = Easing.OutQuint
+                });
+
+                ssv2Expanded = true;
+            }
+        }
+
+        #endregion
 
         public void ReturnToOsuLogo() => Buttons.State = ButtonSystemState.Initial;
 
         private void loadSoloSongSelect()
         {
-            if (GetContainingInputManager()!.CurrentState.Keyboard.ControlPressed)
+            if (holdTime > 500)
+            {
+                ssv2Sample?.Play();
                 this.Push(new SoloSongSelect());
+            }
             else
                 this.Push(new PlaySongSelect());
         }
