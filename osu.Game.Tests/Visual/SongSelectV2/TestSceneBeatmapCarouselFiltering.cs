@@ -31,14 +31,17 @@ namespace osu.Game.Tests.Visual.SongSelectV2
         [Test]
         public void TestBasicFiltering()
         {
+            WaitForFiltering();
+            AddAssert("invocation count correct", () => NewItemsPresentedInvocationCount, () => Is.EqualTo(1));
+
             AddBeatmaps(10, 3);
             WaitForDrawablePanels();
 
-            AddAssert("invocation count correct", () => NewItemsPresentedInvocationCount, () => Is.EqualTo(1));
+            AddAssert("invocation count correct", () => NewItemsPresentedInvocationCount, () => Is.EqualTo(2));
 
             ApplyToFilterAndWaitForFilter("filter", c => c.SearchText = BeatmapSets[2].Metadata.Title);
 
-            AddAssert("invocation count correct", () => NewItemsPresentedInvocationCount, () => Is.EqualTo(2));
+            AddAssert("invocation count correct", () => NewItemsPresentedInvocationCount, () => Is.EqualTo(3));
 
             CheckDisplayedBeatmapSetsCount(1);
             CheckDisplayedBeatmapsCount(3);
@@ -53,7 +56,7 @@ namespace osu.Game.Tests.Visual.SongSelectV2
 
             ApplyToFilterAndWaitForFilter("remove filter", c => c.SearchText = string.Empty);
 
-            AddAssert("invocation count correct", () => NewItemsPresentedInvocationCount, () => Is.EqualTo(3));
+            AddAssert("invocation count correct", () => NewItemsPresentedInvocationCount, () => Is.EqualTo(4));
 
             CheckDisplayedBeatmapSetsCount(10);
             CheckDisplayedBeatmapsCount(30);
