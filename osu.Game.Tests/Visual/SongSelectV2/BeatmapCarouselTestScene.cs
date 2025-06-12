@@ -150,11 +150,9 @@ namespace osu.Game.Tests.Visual.SongSelectV2
                     },
                 };
 
-                Carousel.Filter(new FilterCriteria());
+                // Prefer title sorting so that order of carousel panels match order of BeatmapSets bindable.
+                Carousel.Filter(new FilterCriteria { Sort = SortMode.Title });
             });
-
-            // Prefer title sorting so that order of carousel panels match order of BeatmapSets bindable.
-            SortBy(SortMode.Title);
         }
 
         protected void SortBy(SortMode mode) => ApplyToFilterAndWaitForFilter($"sort by {mode.GetDescription().ToLowerInvariant()}", c => c.Sort = mode);

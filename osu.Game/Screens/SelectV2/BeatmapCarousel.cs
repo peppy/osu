@@ -276,10 +276,8 @@ namespace osu.Game.Screens.SelectV2
             }
         }
 
-        protected override void HandleFilterCompleted()
+        private void selectAfterFilter()
         {
-            base.HandleFilterCompleted();
-
             attemptSelectSingleFilteredResult();
 
             // Store selected group before handling selection (it may implicitly change the expanded group).
@@ -529,14 +527,20 @@ namespace osu.Game.Screens.SelectV2
                 loading.Show();
             }, showLoadingImmediately ? 0 : 250);
 
-            FilterAsync(resetDisplay).ContinueWith(_ => Schedule(() =>
-            {
-                loadingDebounce?.Cancel();
-                loadingDebounce = null;
+            FilterAsync(resetDisplay);
+        }
 
-                Scroll.FadeColour(OsuColour.Gray(1f), 500, Easing.OutQuint);
-                loading.Hide();
-            }));
+        protected override void HandleFilterCompleted()
+        {
+            base.HandleFilterCompleted();
+
+            loadingDebounce?.Cancel();
+            loadingDebounce = null;
+
+            Scroll.FadeColour(OsuColour.Gray(1f), 500, Easing.OutQuint);
+            loading.Hide();
+
+            selectAfterFilter();
         }
 
         protected override Task<IEnumerable<CarouselItem>> FilterAsync(bool clearExistingPanels = false)

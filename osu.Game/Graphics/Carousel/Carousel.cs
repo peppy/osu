@@ -175,7 +175,7 @@ namespace osu.Game.Graphics.Carousel
 
         /// <summary>
         /// All items which are to be considered for display in this carousel.
-        /// Mutating this list will automatically queue a <see cref="FilterAsync"/>.
+        /// Mutating this list will automatically queue a <see cref="FilterAsync"/> unless <see cref="FilterAsync"/> has not been called yet.
         /// </summary>
         /// <remarks>
         /// Note that an <see cref="ICarouselFilter"/> may add new items which are displayed but not tracked in this list.
@@ -284,7 +284,13 @@ namespace osu.Game.Graphics.Carousel
                 RelativeSizeAxes = Axes.Both,
             };
 
-            Items.BindCollectionChanged((_, _) => filterAfterItemsChanged.Invalidate());
+            filterAfterItemsChanged.Validate();
+            Items.BindCollectionChanged((_, _) =>
+            {
+                initialItemsReceived |= Items.Any();
+                if (initialItemsReceived)
+                    filterAfterItemsChanged.Invalidate();
+            });
         }
 
         [BackgroundDependencyLoader]
@@ -312,6 +318,8 @@ namespace osu.Game.Graphics.Carousel
         /// This avoids the carousel never updating its display in high churn scenarios.
         /// </summary>
         private readonly Cached filterAfterItemsChanged = new Cached();
+
+        private bool initialItemsReceived;
 
         private async Task<IEnumerable<CarouselItem>> performFilter()
         {
@@ -711,6 +719,9 @@ namespace osu.Game.Graphics.Carousel
         {
             base.Update();
 
+            if (!filterAfterItemsChanged.IsValid && !IsFiltering)
+                FilterAsync();
+
             if (carouselItems == null)
                 return;
 
@@ -760,9 +771,6 @@ namespace osu.Game.Graphics.Carousel
                 c.KeyboardSelected.Value = c.Item == currentKeyboardSelection?.CarouselItem;
                 c.Expanded.Value = c.Item.IsExpanded;
             }
-
-            if (!filterAfterItemsChanged.IsValid && !IsFiltering)
-                FilterAsync();
         }
 
         protected override void UpdateAfterChildren()
