@@ -152,7 +152,7 @@ namespace osu.Game.Tests.Visual.SongSelectV2
 
             SelectPrevPanel();
             SelectNextSet();
-            WaitForSetSelection(1, 0);
+            WaitForSetSelection(0, 0);
         }
 
         [Test]

@@ -108,24 +108,16 @@ namespace osu.Game.Graphics.Carousel
             get => currentSelection.Model;
             set
             {
-                if (!CheckModelEquality(currentSelection.Model, value))
-                {
-                    HandleItemSelected(value);
+                if (CheckModelEquality(currentSelection.Model, value)) return;
 
-                    if (currentSelection.Model != null)
-                        HandleItemDeselected(currentSelection.Model);
+                HandleItemSelected(value);
 
-                    currentKeyboardSelection = new Selection(value);
-                    currentSelection = currentKeyboardSelection;
-                    selectionValid.Invalidate();
-                }
-                else if (currentKeyboardSelection.Model != value)
-                {
-                    // Even if the current selection matches, let's ensure the keyboard selection is reset
-                    // to the newly selected object. This matches user expectations (for now).
-                    currentKeyboardSelection = currentSelection;
-                    selectionValid.Invalidate();
-                }
+                if (currentSelection.Model != null)
+                    HandleItemDeselected(currentSelection.Model);
+
+                currentKeyboardSelection = new Selection(value);
+                currentSelection = currentKeyboardSelection;
+                selectionValid.Invalidate();
             }
         }
 

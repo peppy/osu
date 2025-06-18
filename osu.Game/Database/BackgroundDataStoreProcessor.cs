@@ -146,7 +146,7 @@ namespace osu.Game.Database
 
             realmAccess.Run(r =>
             {
-                foreach (var b in r.All<BeatmapInfo>().Where(b => b.StarRating < 0 && b.BeatmapSet != null))
+                foreach (var b in r.All<BeatmapInfo>())
                     beatmapIds.Add(b.ID);
             });
 
@@ -178,6 +178,8 @@ namespace osu.Game.Database
                 updateNotificationProgress(notification, processedCount, beatmapIds.Count);
 
                 sleepIfRequired();
+
+                Thread.Sleep(1000);
 
                 var beatmap = realmAccess.Run(r => r.Find<BeatmapInfo>(id)?.Detach());
 
