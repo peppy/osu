@@ -13,7 +13,7 @@ using osu.Game.Rulesets.Edit;
 using osu.Game.Screens.Edit;
 using osu.Game.Screens.Edit.Setup;
 using osu.Game.Screens.Menu;
-using osu.Game.Screens.Select;
+using osu.Game.Screens.SelectV2;
 using osuTK.Input;
 
 namespace osu.Game.Tests.Visual
@@ -74,10 +74,10 @@ namespace osu.Game.Tests.Visual
 
             AddUntilStep("Wait for main menu", () => Game.ScreenStack.CurrentScreen is MainMenu);
 
-            SongSelect songSelect = null;
+            SoloSongSelect songSelect = null;
 
-            PushAndConfirm(() => songSelect = new PlaySongSelect());
-            AddUntilStep("wait for carousel load", () => songSelect.BeatmapSetsLoaded);
+            PushAndConfirm(() => songSelect = new SoloSongSelect());
+            AddUntilStep("wait for carousel load", () => songSelect.CarouselItemsPresented);
 
             AddStep("Present same beatmap", () => Game.PresentBeatmap(Game.BeatmapManager.QueryBeatmapSet(set => set.ID == beatmapSetGuid)!.Value, beatmap => beatmap.ID == beatmapGuid));
             AddUntilStep("Wait for beatmap selected", () => Game.Beatmap.Value.BeatmapInfo.ID == beatmapGuid);

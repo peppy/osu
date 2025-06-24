@@ -22,8 +22,8 @@ using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Scoring;
-using osu.Game.Screens.Select;
 using osu.Game.Screens.Select.Leaderboards;
+using osu.Game.Screens.SelectV2;
 using osu.Game.Tests.Resources;
 using osu.Game.Users;
 using osuTK;
@@ -41,7 +41,7 @@ namespace osu.Game.Tests.Visual.SongSelect
         private ScoreManager scoreManager = null!;
         private RulesetStore rulesetStore = null!;
         private BeatmapManager beatmapManager = null!;
-        private PlaySongSelect songSelect = null!;
+        private SoloSongSelect songSelect = null!;
 
         private LeaderboardManager leaderboardManager = null!;
 
@@ -52,7 +52,7 @@ namespace osu.Game.Tests.Visual.SongSelect
             dependencies.Cache(rulesetStore = new RealmRulesetStore(Realm));
             dependencies.Cache(beatmapManager = new BeatmapManager(LocalStorage, Realm, null, dependencies.Get<AudioManager>(), Resources, dependencies.Get<GameHost>(), Beatmap.Default));
             dependencies.Cache(scoreManager = new ScoreManager(rulesetStore, () => beatmapManager, LocalStorage, Realm, API));
-            dependencies.CacheAs<Screens.Select.SongSelect>(songSelect = new PlaySongSelect());
+            dependencies.CacheAs<Screens.SelectV2.SongSelect>(songSelect = new SoloSongSelect());
             dependencies.Cache(leaderboardManager = new LeaderboardManager());
 
             Dependencies.Cache(Realm);
