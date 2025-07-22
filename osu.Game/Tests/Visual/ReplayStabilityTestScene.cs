@@ -104,7 +104,7 @@ namespace osu.Game.Tests.Visual
                     currentPlayer.Seek(0);
             });
 
-        private class TestScoreDecoder : LegacyScoreDecoder
+        public class TestScoreDecoder : LegacyScoreDecoder
         {
             private readonly WorkingBeatmap beatmap;
 

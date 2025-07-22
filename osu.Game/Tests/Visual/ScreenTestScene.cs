@@ -8,6 +8,7 @@ using osu.Framework.Development;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Logging;
+using osu.Framework.Screens;
 using osu.Framework.Testing;
 using osu.Game.Graphics;
 using osu.Game.Overlays;
@@ -56,7 +57,16 @@ namespace osu.Game.Tests.Visual
             Stack.ScreenExited += (_, newScreen) => Logger.Log($"{nameof(ScreenTestScene)} screen changed ← {newScreen}");
         }
 
-        protected void LoadScreen(OsuScreen screen) => Stack.Push(screen);
+        private Screen? currentScreen;
+
+        protected void LoadScreen(OsuScreen screen)
+        {
+            currentScreen?.Exit();
+
+            Stack.Push(screen);
+
+            currentScreen = screen;
+        }
 
         [SetUpSteps]
         public virtual void SetUpSteps() => addExitAllScreensStep();

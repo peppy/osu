@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
+using osu.Framework.Utils;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Formats;
 using osu.Game.Beatmaps.Legacy;
@@ -29,6 +30,8 @@ namespace osu.Game.Scoring.Legacy
 {
     public abstract class LegacyScoreDecoder
     {
+        public static float Noise = 0;
+
         private IBeatmap currentBeatmap;
         private Ruleset currentRuleset;
 
@@ -311,7 +314,7 @@ namespace osu.Game.Scoring.Legacy
 
                 lastTime += diff;
 
-                legacyFrames.Add(new LegacyReplayFrame(lastTime,
+                legacyFrames.Add(new LegacyReplayFrame(lastTime + RNG.NextSingle(-Noise, Noise),
                     mouseX,
                     mouseY,
                     (ReplayButtonState)Parsing.ParseInt(split[3])));
