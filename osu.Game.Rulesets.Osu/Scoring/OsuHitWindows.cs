@@ -18,6 +18,10 @@ namespace osu.Game.Rulesets.Osu.Scoring
         /// </summary>
         public const double MISS_WINDOW = 400;
 
+        private double overallDifficulty;
+
+        public static bool UseStableHitWindows = true;
+
         private double great;
         private double ok;
         private double meh;
@@ -38,9 +42,22 @@ namespace osu.Game.Rulesets.Osu.Scoring
 
         public override void SetDifficulty(double difficulty)
         {
-            great = Math.Floor(IBeatmapDifficultyInfo.DifficultyRange(difficulty, GREAT_WINDOW_RANGE)) - 0.5;
-            ok = Math.Floor(IBeatmapDifficultyInfo.DifficultyRange(difficulty, OK_WINDOW_RANGE)) - 0.5;
-            meh = Math.Floor(IBeatmapDifficultyInfo.DifficultyRange(difficulty, MEH_WINDOW_RANGE)) - 0.5;
+            overallDifficulty = difficulty;
+            updateWindows();
+        }
+
+        private void updateWindows()
+        {
+            great = IBeatmapDifficultyInfo.DifficultyRange(overallDifficulty, GREAT_WINDOW_RANGE);
+            ok = IBeatmapDifficultyInfo.DifficultyRange(overallDifficulty, OK_WINDOW_RANGE);
+            meh = IBeatmapDifficultyInfo.DifficultyRange(overallDifficulty, MEH_WINDOW_RANGE);
+
+            if (UseStableHitWindows)
+            {
+                great = Math.Floor(great) - 0.5;
+                ok = Math.Floor(ok) - 0.5;
+                meh = Math.Floor(meh) - 0.5;
+            }
         }
 
         public override double WindowFor(HitResult result)

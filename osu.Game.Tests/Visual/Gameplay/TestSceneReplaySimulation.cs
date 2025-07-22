@@ -9,6 +9,7 @@ using osu.Game.Beatmaps;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Osu;
+using osu.Game.Rulesets.Osu.Scoring;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
@@ -31,6 +32,7 @@ namespace osu.Game.Tests.Visual.Gameplay
             foreach (float noise in noiseTests)
             {
                 LegacyScoreDecoder.Noise = noise;
+                OsuHitWindows.UseStableHitWindows = true;
 
                 string filename = $"/Users/Dean/out-{noise}.txt";
 
