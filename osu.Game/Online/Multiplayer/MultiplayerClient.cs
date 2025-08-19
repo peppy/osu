@@ -17,6 +17,7 @@ using osu.Game.Localisation;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
+using osu.Game.Online.Matchmaking;
 using osu.Game.Online.Multiplayer.Countdown;
 using osu.Game.Online.Rooms;
 using osu.Game.Overlays.Notifications;
@@ -111,6 +112,18 @@ namespace osu.Game.Online.Multiplayer
         /// Invoked just prior to disconnection requested by the server via <see cref="IStatefulUserHubClient.DisconnectRequested"/>.
         /// </summary>
         public event Action? Disconnecting;
+
+        public event Action<MultiplayerCountdown>? CountdownStarted;
+
+        public event Action<MultiplayerCountdown>? CountdownStopped;
+
+        public event Action<MultiplayerRoomUser, MultiplayerUserState>? UserStateChanged;
+
+        public event Action<MatchmakingQueueStatus?>? MatchmakingQueueStatusChanged;
+
+        public event Action<int, long>? MatchmakingSelectionToggled;
+
+        public event Action<MatchRoomState>? MatchRoomStateChanged;
 
         /// <summary>
         /// Whether the <see cref="MultiplayerClient"/> is currently connected.
@@ -625,6 +638,7 @@ namespace osu.Game.Online.Multiplayer
                 user.State = state;
                 updateUserPlayingState(userId, state);
 
+                UserStateChanged?.Invoke(user, state);
                 RoomUpdated?.Invoke();
             }, false);
 
@@ -656,6 +670,7 @@ namespace osu.Game.Online.Multiplayer
                     return;
 
                 Room.MatchState = state;
+                MatchRoomStateChanged?.Invoke(state);
                 RoomUpdated?.Invoke();
             }, false);
 
@@ -673,6 +688,7 @@ namespace osu.Game.Online.Multiplayer
                 {
                     case CountdownStartedEvent countdownStartedEvent:
                         Room.ActiveCountdowns.Add(countdownStartedEvent.Countdown);
+                        CountdownStarted?.Invoke(countdownStartedEvent.Countdown);
 
                         switch (countdownStartedEvent.Countdown)
                         {
@@ -685,8 +701,13 @@ namespace osu.Game.Online.Multiplayer
 
                     case CountdownStoppedEvent countdownStoppedEvent:
                         MultiplayerCountdown? countdown = Room.ActiveCountdowns.FirstOrDefault(countdown => countdown.ID == countdownStoppedEvent.ID);
+
                         if (countdown != null)
+                        {
                             Room.ActiveCountdowns.Remove(countdown);
+                            CountdownStopped?.Invoke(countdown);
+                        }
+
                         break;
                 }
 
@@ -981,6 +1002,29 @@ namespace osu.Game.Online.Multiplayer
             });
             return Task.CompletedTask;
         }
+
+        public abstract Task ToggleMatchmakingQueue();
+
+        Task IMultiplayerClient.MatchmakingQueueStatusChanged(MatchmakingQueueStatus? status)
+        {
+            Scheduler.Add(() => MatchmakingQueueStatusChanged?.Invoke(status));
+            return Task.CompletedTask;
+        }
+
+        Task IMultiplayerClient.MatchmakingSelectionToggled(int userId, long playlistItemId)
+        {
+            Scheduler.Add(() =>
+            {
+                MatchmakingSelectionToggled?.Invoke(userId, playlistItemId);
+                RoomUpdated?.Invoke();
+            });
+
+            return Task.CompletedTask;
+        }
+
+        public abstract Task MatchmakingToggleSelection(long playlistItemId);
+
+        public abstract Task MatchmakingSkipToNextStage();
 
         private partial class MultiplayerInvitationNotification : UserAvatarNotification
         {

@@ -14,6 +14,7 @@ using osu.Game.Online.API;
 using osu.Game.Online.Rooms;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Localisation;
+using osu.Game.Online.Matchmaking;
 
 namespace osu.Game.Online.Multiplayer
 {
@@ -70,6 +71,9 @@ namespace osu.Game.Online.Multiplayer
                     connection.On<long>(nameof(IMultiplayerClient.PlaylistItemRemoved), ((IMultiplayerClient)this).PlaylistItemRemoved);
                     connection.On<MultiplayerPlaylistItem>(nameof(IMultiplayerClient.PlaylistItemChanged), ((IMultiplayerClient)this).PlaylistItemChanged);
                     connection.On(nameof(IStatefulUserHubClient.DisconnectRequested), ((IMultiplayerClient)this).DisconnectRequested);
+
+                    connection.On<MatchmakingQueueStatus?>(nameof(IMultiplayerClient.MatchmakingQueueStatusChanged), ((IMultiplayerClient)this).MatchmakingQueueStatusChanged);
+                    connection.On<int, long>(nameof(IMultiplayerClient.MatchmakingSelectionToggled), ((IMultiplayerClient)this).MatchmakingSelectionToggled);
                 };
 
                 IsConnected.BindTo(connector.IsConnected);
@@ -314,6 +318,33 @@ namespace osu.Game.Online.Multiplayer
         {
             base.Dispose(isDisposing);
             connector?.Dispose();
+        }
+
+        public override Task ToggleMatchmakingQueue()
+        {
+            if (!IsConnected.Value)
+                return Task.CompletedTask;
+
+            Debug.Assert(connection != null);
+            return connection.InvokeAsync(nameof(IMultiplayerLoungeServer.ToggleMatchmakingQueue));
+        }
+
+        public override Task MatchmakingToggleSelection(long playlistItemId)
+        {
+            if (!IsConnected.Value)
+                return Task.CompletedTask;
+
+            Debug.Assert(connection != null);
+            return connection.InvokeAsync(nameof(IMultiplayerServer.MatchmakingToggleSelection), playlistItemId);
+        }
+
+        public override Task MatchmakingSkipToNextStage()
+        {
+            if (!IsConnected.Value)
+                return Task.CompletedTask;
+
+            Debug.Assert(connection != null);
+            return connection.InvokeAsync(nameof(IMultiplayerServer.MatchmakingSkipToNextStage));
         }
     }
 }

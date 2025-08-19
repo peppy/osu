@@ -119,5 +119,9 @@ namespace osu.Game.Online.Multiplayer
         /// <exception cref="UserBlockedException">The user has blocked or has been blocked by the invited user.</exception>
         /// <exception cref="UserBlocksPMsException">The invited user does not accept private messages.</exception>
         Task InvitePlayer(int userId);
+
+        Task MatchmakingToggleSelection(long playlistItemId);
+
+        Task MatchmakingSkipToNextStage();
     }
 }

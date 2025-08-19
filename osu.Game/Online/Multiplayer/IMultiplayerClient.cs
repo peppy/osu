@@ -5,7 +5,9 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using osu.Game.Online.API;
+using osu.Game.Online.Matchmaking;
 using osu.Game.Online.Rooms;
 
 namespace osu.Game.Online.Multiplayer
@@ -149,5 +151,15 @@ namespace osu.Game.Online.Multiplayer
         /// </summary>
         /// <param name="item">The changed item.</param>
         Task PlaylistItemChanged(MultiplayerPlaylistItem item);
+
+        /// <summary>
+        /// The matchmaking status of the current user has changed.
+        /// </summary>
+        Task MatchmakingQueueStatusChanged([CanBeNull] MatchmakingQueueStatus status);
+
+        /// <summary>
+        /// A user has toggled their selection.
+        /// </summary>
+        Task MatchmakingSelectionToggled(int userId, long playlistItemId);
     }
 }

@@ -29,6 +29,7 @@ using osu.Game.Input.Bindings;
 using osu.Game.IO;
 using osu.Game.Localisation;
 using osu.Game.Online.API;
+using osu.Game.Online.Multiplayer;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Dialog;
 using osu.Game.Overlays.SkinEditor;
@@ -84,6 +85,9 @@ namespace osu.Game.Screens.Menu
 
         [Resolved(canBeNull: true)]
         private IDialogOverlay dialogOverlay { get; set; }
+
+        [Resolved]
+        private MultiplayerClient multiplayerClient { get; set; }
 
         // used to stop kiai fountain samples when navigating to other screens
         IBindable<bool> ISamplePlaybackDisabler.SamplePlaybackDisabled => samplePlaybackDisabled;
@@ -159,6 +163,7 @@ namespace osu.Game.Screens.Menu
                             },
                             OnSolo = loadSongSelect,
                             OnMultiplayer = () => this.Push(new Multiplayer()),
+                            OnMatchmaking = joinOrLeaveMatchmakingQueue,
                             OnPlaylists = () => this.Push(new Playlists()),
                             OnDailyChallenge = room =>
                             {
@@ -480,6 +485,8 @@ namespace osu.Game.Screens.Menu
         }
 
         private void loadSongSelect() => this.Push(new SoloSongSelect());
+
+        private void joinOrLeaveMatchmakingQueue() => multiplayerClient.ToggleMatchmakingQueue();
 
         private partial class MobileDisclaimerDialog : PopupDialog
         {
