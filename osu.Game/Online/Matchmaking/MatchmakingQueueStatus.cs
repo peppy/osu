@@ -14,11 +14,8 @@ namespace osu.Game.Online.Matchmaking
         [MessagePackObject]
         public class Searching : MatchmakingQueueStatus
         {
-            /// <summary>
-            /// Whether the user was returned to the queue as a result of a player declining a previous invitation.
-            /// </summary>
             [Key(0)]
-            public bool ReturnedToQueue { get; set; }
+            public int[] UsersInQueue { get; set; } = [];
         }
 
         [MessagePackObject]

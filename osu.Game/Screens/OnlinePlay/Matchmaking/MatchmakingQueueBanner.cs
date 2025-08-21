@@ -173,12 +173,9 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking
 
             switch (status)
             {
-                case MatchmakingQueueStatus.Searching searching:
+                case MatchmakingQueueStatus.Searching:
                     background.Colour = Color4.Yellow;
                     statusText.Text = "finding a match...";
-
-                    if (searching.ReturnedToQueue)
-                        background.FlashColour(Color4.Red, 1000, Easing.OutQuint);
 
                     // For the case that user is returned to the queue before clicking one of the acceptance buttons.
                     canAcceptInvitation.Value = false;

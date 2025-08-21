@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Graphics;
@@ -13,6 +14,7 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
+using osu.Game.Online.Matchmaking;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Rooms;
 using osu.Game.Overlays;
@@ -95,7 +97,18 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
             client.MatchmakingQueueJoined += onMatchmakingQueueJoined;
             client.MatchmakingRoomInvited += onMatchmakingRoomInvited;
             client.MatchmakingRoomReady += onMatchmakingRoomReady;
+            client.MatchmakingQueueStatusChanged += onMatchmakingQueueStatusChanged;
         }
+
+        private void onMatchmakingQueueStatusChanged(MatchmakingQueueStatus status) => Scheduler.Add(() =>
+        {
+            switch (status)
+            {
+                case MatchmakingQueueStatus.Searching searching:
+                    Users = searching.UsersInQueue.Select(u => new APIUser { Id = u }).ToArray();
+                    break;
+            }
+        });
 
         private void onMatchmakingQueueJoined() => Scheduler.Add(() =>
         {
@@ -310,6 +323,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
                 client.MatchmakingQueueJoined -= onMatchmakingQueueJoined;
                 client.MatchmakingRoomInvited -= onMatchmakingRoomInvited;
                 client.MatchmakingRoomReady -= onMatchmakingRoomReady;
+                client.MatchmakingQueueStatusChanged -= onMatchmakingQueueStatusChanged;
             }
         }
 

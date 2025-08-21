@@ -59,14 +59,6 @@ namespace osu.Game.Tests.Visual.Matchmaking
                 ((IMultiplayerClient)MultiplayerClient).MatchmakingQueueStatusChanged(new MatchmakingQueueStatus.JoiningMatch()).WaitSafely();
             });
 
-            AddStep("returned", () =>
-            {
-                ((IMultiplayerClient)MultiplayerClient).MatchmakingQueueStatusChanged(new MatchmakingQueueStatus.Searching
-                {
-                    ReturnedToQueue = true
-                }).WaitSafely();
-            });
-
             AddStep("queue left", () => ((IMultiplayerClient)MultiplayerClient).MatchmakingQueueLeft().WaitSafely());
         }
 
