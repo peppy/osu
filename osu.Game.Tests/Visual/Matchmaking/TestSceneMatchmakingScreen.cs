@@ -16,10 +16,10 @@ using osu.Game.Online.Multiplayer.MatchTypes.Matchmaking;
 using osu.Game.Online.Rooms;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Screens.OnlinePlay.Matchmaking;
-using osu.Game.Screens.OnlinePlay.Matchmaking.Screens.Pick;
 using osu.Game.Tests.Visual.Multiplayer;
 using osuTK;
 using osuTK.Input;
+using BeatmapPanel = osu.Game.Screens.OnlinePlay.Matchmaking.Screens.Pick.BeatmapPanel;
 
 namespace osu.Game.Tests.Visual.Matchmaking
 {

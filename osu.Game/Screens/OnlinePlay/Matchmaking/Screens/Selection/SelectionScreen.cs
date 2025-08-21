@@ -9,7 +9,6 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Screens;
 using osu.Game.Online.Rooms;
-using osu.Game.Screens.OnlinePlay.Matchmaking.Screens.Pick;
 using osuTK;
 using osuTK.Graphics;
 
@@ -36,7 +35,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens.Selection
         private readonly MultiplayerPlaylistItem finalItem;
 
         private readonly Bindable<float> currentPosition = new Bindable<float>();
-        private Container<BeatmapPanel> panels = null!;
+        private Container<Pick.BeatmapPanel> panels = null!;
 
         public SelectionScreen(MultiplayerPlaylistItem[] candidateItems, MultiplayerPlaylistItem finalItem)
         {
@@ -63,7 +62,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens.Selection
                         Alpha = 0.3f,
                     }
                 },
-                panels = new FillFlowContainer<BeatmapPanel>
+                panels = new FillFlowContainer<Pick.BeatmapPanel>
                 {
                     RelativeSizeAxes = Axes.Both,
                     Direction = FillDirection.Vertical
@@ -120,7 +119,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens.Selection
 
                 float distFromCentre = (i - centrePos) / visible_extent;
 
-                panels.Add(new BeatmapPanel(candidateItems[itemIndex])
+                panels.Add(new Pick.BeatmapPanel(candidateItems[itemIndex])
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
