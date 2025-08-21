@@ -3,6 +3,7 @@
 
 using System;
 using osu.Framework.Allocation;
+using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -12,6 +13,8 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
+using osu.Game.Online.Multiplayer;
+using osu.Game.Online.Rooms;
 using osu.Game.Overlays;
 using osuTK;
 
@@ -34,6 +37,9 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
 
         [Resolved]
         private OsuColour colours { get; set; } = null!;
+
+        [Resolved]
+        private MultiplayerClient client { get; set; } = null!;
 
         protected override void LoadComplete()
         {
@@ -85,7 +91,32 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
                     }
                 },
             };
+
+            client.MatchmakingQueueJoined += onMatchmakingQueueJoined;
+            client.MatchmakingRoomInvited += onMatchmakingRoomInvited;
+            client.MatchmakingRoomReady += onMatchmakingRoomReady;
         }
+
+        private void onMatchmakingQueueJoined() => Scheduler.Add(() =>
+        {
+            SetState(MatchmakingScreenState.Queueing);
+        });
+
+        private void onMatchmakingRoomInvited() => Scheduler.Add(() =>
+        {
+            SetState(MatchmakingScreenState.PendingAccept);
+        });
+
+        private void onMatchmakingRoomReady(long roomId) => Scheduler.Add(() =>
+        {
+            client.JoinRoom(new Room { RoomID = roomId })
+                  .FireAndForget(() => Schedule(() =>
+                  {
+                      SetState(MatchmakingScreenState.InRoom);
+
+                      Scheduler.AddDelayed(() => this.Push(new MatchmakingScreen(client.Room!)), 2000);
+                  }));
+        });
 
         public override void OnEntering(ScreenTransitionEvent e)
         {
@@ -127,7 +158,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
                                 LighterColour = colours.Blue1,
                                 Anchor = Anchor.Centre,
                                 Origin = Anchor.Centre,
-                                Action = () => SetState(MatchmakingScreenState.Queueing),
+                                Action = () => client.ToggleMatchmakingQueue(),
                                 Text = "Begin queueing",
                             }
                         }
@@ -204,7 +235,14 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
                                 LighterColour = colours.YellowLight,
                                 Anchor = Anchor.Centre,
                                 Origin = Anchor.Centre,
-                                Action = () => SetState(MatchmakingScreenState.AcceptedWaitingForRoom),
+                                Action = () =>
+                                {
+                                    client.MatchmakingAcceptInvitation()
+                                          .FireAndForget(() => Schedule(() =>
+                                          {
+                                              SetState(MatchmakingScreenState.AcceptedWaitingForRoom);
+                                          }));
+                                },
                                 Text = "Join match!",
                             }
                         }
@@ -260,6 +298,18 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(newState), newState, null);
+            }
+        }
+
+        protected override void Dispose(bool isDisposing)
+        {
+            base.Dispose(isDisposing);
+
+            if (client.IsNotNull())
+            {
+                client.MatchmakingQueueJoined -= onMatchmakingQueueJoined;
+                client.MatchmakingRoomInvited -= onMatchmakingRoomInvited;
+                client.MatchmakingRoomReady -= onMatchmakingRoomReady;
             }
         }
 

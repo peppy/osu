@@ -65,7 +65,6 @@ using osu.Game.Screens.Edit;
 using osu.Game.Screens.Footer;
 using osu.Game.Screens.Menu;
 using osu.Game.Screens.OnlinePlay.DailyChallenge;
-using osu.Game.Screens.OnlinePlay.Matchmaking;
 using osu.Game.Screens.OnlinePlay.Multiplayer;
 using osu.Game.Screens.OnlinePlay.Playlists;
 using osu.Game.Screens.Play;
@@ -1271,11 +1270,6 @@ namespace osu.Game
 
             loadComponentSingleFile(new BackgroundDataStoreProcessor(), Add);
             loadComponentSingleFile<BeatmapStore>(detachedBeatmapStore = new RealmDetachedBeatmapStore(), Add, true);
-            loadComponentSingleFile(new MatchmakingQueueBanner
-            {
-                Anchor = Anchor.TopCentre,
-                Origin = Anchor.TopCentre
-            }, topMostOverlayContent.Add, true);
 
             Add(externalLinkOpener = new ExternalLinkOpener());
             Add(new MusicKeyBindingHandler());

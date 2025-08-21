@@ -61,9 +61,6 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking
         [Resolved]
         private BeatmapModelDownloader beatmapDownloader { get; set; } = null!;
 
-        [Resolved]
-        private MatchmakingQueueBanner? banner { get; set; }
-
         private readonly MultiplayerRoom room;
 
         private CancellationTokenSource? downloadCheckCancellation;
@@ -194,8 +191,6 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking
             client.LoadRequested += onLoadRequested;
 
             beatmapAvailabilityTracker.Availability.BindValueChanged(onBeatmapAvailabilityChanged, true);
-
-            banner?.Hide();
         }
 
         private void onRoomUpdated()
