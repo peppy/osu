@@ -3,13 +3,16 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions;
 using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Screens;
+using osu.Game.Database;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
@@ -51,7 +54,11 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
         [Resolved]
         private MatchmakingController matchmakingController { get; set; } = null!;
 
+        [Resolved]
+        private UserLookupCache userLookupCache { get; set; } = null!;
+
         private readonly IBindable<MatchmakingScreenState> currentState = new Bindable<MatchmakingScreenState>();
+        private CancellationTokenSource userLookupCancellation = new CancellationTokenSource();
 
         protected override void LoadComplete()
         {
@@ -112,7 +119,16 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
 
         private void onMatchmakingLobbyStatusChanged(MatchmakingLobbyStatus status) => Scheduler.Add(() =>
         {
-            Users = status.UsersInQueue.Select(u => new APIUser { Id = u }).ToArray();
+            userLookupCancellation.Cancel();
+            var cancellation = userLookupCancellation = new CancellationTokenSource();
+
+            userLookupCache.GetUsersAsync(status.UsersInQueue, cancellation.Token)
+                           .ContinueWith(result => Schedule(() =>
+                           {
+                               APIUser?[] users = result.GetResultSafely();
+                               if (!cancellation.IsCancellationRequested)
+                                   Users = users.OfType<APIUser>().ToArray();
+                           }), cancellation.Token);
         });
 
         public override void OnEntering(ScreenTransitionEvent e)
