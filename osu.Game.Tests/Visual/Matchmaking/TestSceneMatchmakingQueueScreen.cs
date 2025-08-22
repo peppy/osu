@@ -1,23 +1,48 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using osu.Framework.Allocation;
+using osu.Framework.Screens;
 using osu.Framework.Testing;
 using osu.Framework.Utils;
 using osu.Game.Online.API.Requests.Responses;
+using osu.Game.Overlays;
+using osu.Game.Screens;
+using osu.Game.Screens.OnlinePlay.Matchmaking;
 using osu.Game.Screens.OnlinePlay.Matchmaking.Screens;
+using osu.Game.Tests.Visual.Multiplayer;
 using osu.Game.Users;
 
 namespace osu.Game.Tests.Visual.Matchmaking
 {
-    public class TestSceneMatchmakingQueueScreen : ScreenTestScene
+    public class TestSceneMatchmakingQueueScreen : MultiplayerTestScene, IPerformFromScreenRunner
     {
         private MatchmakingQueueScreen? queueScreen => Stack.CurrentScreen as MatchmakingQueueScreen;
+
+        [Cached(typeof(INotificationOverlay))]
+        private NotificationOverlay notificationOverlay = new NotificationOverlay();
+
+        [Cached]
+        private readonly MatchmakingController controller = new MatchmakingController();
+
+        [BackgroundDependencyLoader]
+        private void load()
+        {
+            Add(controller);
+        }
 
         [SetUpSteps]
         public override void SetUpSteps()
         {
+            base.SetUpSteps();
+
+            AddStep("join room", () => JoinRoom(CreateDefaultRoom()));
+            WaitForJoined();
+
             AddStep("load screen", () => LoadScreen(new MatchmakingIntroScreen()));
         }
 
@@ -45,6 +70,10 @@ namespace osu.Game.Tests.Visual.Matchmaking
             AddStep("change state to waiting for room", () => queueScreen!.SetState(MatchmakingQueueScreen.MatchmakingScreenState.AcceptedWaitingForRoom));
 
             AddStep("change state to in room", () => queueScreen!.SetState(MatchmakingQueueScreen.MatchmakingScreenState.InRoom));
+        }
+
+        public void PerformFromScreen(Action<IScreen> action, IEnumerable<Type>? validScreens = null)
+        {
         }
     }
 }
