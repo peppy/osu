@@ -158,6 +158,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
                 return true;
 
             client.LeaveMatchmakingLobby().FireAndForget();
+            client.LeaveMatchmakingQueue().FireAndForget();
             return false;
         }
 
