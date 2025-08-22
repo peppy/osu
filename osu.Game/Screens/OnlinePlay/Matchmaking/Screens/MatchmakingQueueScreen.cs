@@ -97,17 +97,12 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
             client.MatchmakingQueueJoined += onMatchmakingQueueJoined;
             client.MatchmakingRoomInvited += onMatchmakingRoomInvited;
             client.MatchmakingRoomReady += onMatchmakingRoomReady;
-            client.MatchmakingQueueStatusChanged += onMatchmakingQueueStatusChanged;
+            client.MatchmakingLobbyStatusChanged += onMatchmakingLobbyStatusChanged;
         }
 
-        private void onMatchmakingQueueStatusChanged(MatchmakingQueueStatus status) => Scheduler.Add(() =>
+        private void onMatchmakingLobbyStatusChanged(MatchmakingLobbyStatus status) => Scheduler.Add(() =>
         {
-            switch (status)
-            {
-                case MatchmakingQueueStatus.Searching searching:
-                    Users = searching.UsersInQueue.Select(u => new APIUser { Id = u }).ToArray();
-                    break;
-            }
+            Users = status.UsersInQueue.Select(u => new APIUser { Id = u }).ToArray();
         });
 
         private void onMatchmakingQueueJoined() => Scheduler.Add(() =>
@@ -135,10 +130,35 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
         {
             base.OnEntering(e);
 
+            client.JoinMatchmakingLobby().FireAndForget();
+
             using (BeginDelayedSequence(800))
             {
                 Schedule(() => SetState(MatchmakingScreenState.Idle));
             }
+        }
+
+        public override void OnResuming(ScreenTransitionEvent e)
+        {
+            base.OnResuming(e);
+
+            client.JoinMatchmakingLobby().FireAndForget();
+        }
+
+        public override void OnSuspending(ScreenTransitionEvent e)
+        {
+            base.OnSuspending(e);
+
+            client.LeaveMatchmakingLobby().FireAndForget();
+        }
+
+        public override bool OnExiting(ScreenExitEvent e)
+        {
+            if (base.OnExiting(e))
+                return true;
+
+            client.LeaveMatchmakingLobby().FireAndForget();
+            return false;
         }
 
         public APIUser[] Users
@@ -323,7 +343,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
                 client.MatchmakingQueueJoined -= onMatchmakingQueueJoined;
                 client.MatchmakingRoomInvited -= onMatchmakingRoomInvited;
                 client.MatchmakingRoomReady -= onMatchmakingRoomReady;
-                client.MatchmakingQueueStatusChanged -= onMatchmakingQueueStatusChanged;
+                client.MatchmakingLobbyStatusChanged -= onMatchmakingLobbyStatusChanged;
             }
         }
 

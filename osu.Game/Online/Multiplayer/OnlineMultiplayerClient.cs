@@ -76,6 +76,7 @@ namespace osu.Game.Online.Multiplayer
                     connection.On(nameof(IMultiplayerClient.MatchmakingQueueLeft), ((IMultiplayerClient)this).MatchmakingQueueLeft);
                     connection.On(nameof(IMultiplayerClient.MatchmakingRoomInvited), ((IMultiplayerClient)this).MatchmakingRoomInvited);
                     connection.On<long>(nameof(IMultiplayerClient.MatchmakingRoomReady), ((IMultiplayerClient)this).MatchmakingRoomReady);
+                    connection.On<MatchmakingLobbyStatus>(nameof(IMultiplayerClient.MatchmakingLobbyStatusChanged), ((IMultiplayerClient)this).MatchmakingLobbyStatusChanged);
                     connection.On<MatchmakingQueueStatus>(nameof(IMultiplayerClient.MatchmakingQueueStatusChanged), ((IMultiplayerClient)this).MatchmakingQueueStatusChanged);
                     connection.On<int, long>(nameof(IMultiplayerClient.MatchmakingSelectionToggled), ((IMultiplayerClient)this).MatchmakingSelectionToggled);
                 };
@@ -322,6 +323,24 @@ namespace osu.Game.Online.Multiplayer
         {
             base.Dispose(isDisposing);
             connector?.Dispose();
+        }
+
+        public override Task JoinMatchmakingLobby()
+        {
+            if (!IsConnected.Value)
+                return Task.CompletedTask;
+
+            Debug.Assert(connection != null);
+            return connection.InvokeAsync(nameof(IMultiplayerLoungeServer.JoinMatchmakingLobby));
+        }
+
+        public override Task LeaveMatchmakingLobby()
+        {
+            if (!IsConnected.Value)
+                return Task.CompletedTask;
+
+            Debug.Assert(connection != null);
+            return connection.InvokeAsync(nameof(IMultiplayerLoungeServer.LeaveMatchmakingLobby));
         }
 
         public override Task JoinMatchmakingQueue()

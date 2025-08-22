@@ -176,6 +176,11 @@ namespace osu.Game.Online.Multiplayer
         Task MatchmakingRoomReady(long roomId);
 
         /// <summary>
+        /// The matchmaking lobby status has changed.
+        /// </summary>
+        Task MatchmakingLobbyStatusChanged(MatchmakingLobbyStatus status);
+
+        /// <summary>
         /// The matchmaking status of the current user has changed.
         /// </summary>
         Task MatchmakingQueueStatusChanged(MatchmakingQueueStatus status);

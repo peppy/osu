@@ -749,6 +749,16 @@ namespace osu.Game.Tests.Visual.Multiplayer
             await ((IMultiplayerClient)this).MatchRoomStateChanged(clone(ServerRoom.MatchState)).ConfigureAwait(false);
         }
 
+        public override Task JoinMatchmakingLobby()
+        {
+            return Task.CompletedTask;
+        }
+
+        public override Task LeaveMatchmakingLobby()
+        {
+            return Task.CompletedTask;
+        }
+
         public override async Task JoinMatchmakingQueue()
         {
             await ((IMultiplayerClient)this).MatchmakingQueueJoined();
