@@ -1031,7 +1031,9 @@ namespace osu.Game.Online.Multiplayer
             return Task.CompletedTask;
         }
 
-        public abstract Task ToggleMatchmakingQueue();
+        public abstract Task JoinMatchmakingQueue();
+
+        public abstract Task LeaveMatchmakingQueue();
 
         Task IMultiplayerClient.MatchmakingQueueJoined()
         {

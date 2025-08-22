@@ -35,9 +35,14 @@ namespace osu.Game.Online.Multiplayer
         Task<MultiplayerRoom> JoinRoomWithPassword(long roomId, string password);
 
         /// <summary>
-        /// Toggles the user's presence in the matchmaking queue.
+        /// Joins the matchmaking queue, allowing the local user to get matched up with others.
         /// </summary>
-        Task ToggleMatchmakingQueue();
+        Task JoinMatchmakingQueue();
+
+        /// <summary>
+        /// Leaves the matchmaking queue.
+        /// </summary>
+        Task LeaveMatchmakingQueue();
 
         /// <summary>
         /// Accepts a matchmaking room invitation.

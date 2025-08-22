@@ -158,7 +158,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens.Results
                             Origin = Anchor.BottomCentre,
                             Size = new Vector2(200, 50),
                             Text = "Requeue",
-                            Action = () => client.ToggleMatchmakingQueue()
+                            Action = () => client.JoinMatchmakingQueue()
                         }
                     ]
                 }

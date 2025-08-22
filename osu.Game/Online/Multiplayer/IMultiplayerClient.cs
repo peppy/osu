@@ -152,23 +152,26 @@ namespace osu.Game.Online.Multiplayer
         Task PlaylistItemChanged(MultiplayerPlaylistItem item);
 
         /// <summary>
-        /// The local user was joined to the matchmaking queue.
+        /// Signals that the local user was placed in the matchmaking queue.
         /// </summary>
         /// <returns></returns>
         Task MatchmakingQueueJoined();
 
         /// <summary>
-        /// The local user was removed from the matchmaking queue.
+        /// Signals that the local user was removed from the matchmaking queue.
         /// </summary>
         Task MatchmakingQueueLeft();
 
         /// <summary>
-        /// The local user was invited to join a matchmaking room.
+        /// Signals that a match has been found and the local user is invited to it.
+        /// The invitation may be <see cref="IMultiplayerLoungeServer.MatchmakingAcceptInvitation">accepted</see>,
+        /// <see cref="IMultiplayerLoungeServer.MatchmakingDeclineInvitation">declined</see>,
+        /// or ignored - in which case it will automatically be declined after a short timeout period.
         /// </summary>
         Task MatchmakingRoomInvited();
 
         /// <summary>
-        /// The local user was joined to a matchmaking room.
+        /// Signals that the matchmaking room is ready to be opened.
         /// </summary>
         Task MatchmakingRoomReady(long roomId);
 

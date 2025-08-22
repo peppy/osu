@@ -171,7 +171,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
                                 LighterColour = colours.Blue1,
                                 Anchor = Anchor.Centre,
                                 Origin = Anchor.Centre,
-                                Action = () => client.ToggleMatchmakingQueue(),
+                                Action = () => client.JoinMatchmakingQueue(),
                                 Text = "Begin queueing",
                             }
                         }
