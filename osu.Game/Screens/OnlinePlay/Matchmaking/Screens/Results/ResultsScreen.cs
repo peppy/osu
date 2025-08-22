@@ -9,8 +9,6 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
-using osu.Game.Graphics.UserInterfaceV2;
-using osu.Game.Online.Matchmaking;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Multiplayer.MatchTypes.Matchmaking;
 using osu.Game.Rulesets.Scoring;
@@ -30,7 +28,6 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens.Results
         private OsuSpriteText placementText = null!;
         private FillFlowContainer<UserStatisticPanel> userStatistics = null!;
         private FillFlowContainer<RoomStatisticPanel> roomStatistics = null!;
-        private RoundedButton queueButton = null!;
 
         [BackgroundDependencyLoader]
         private void load()
@@ -151,16 +148,6 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens.Results
                             }
                         },
                     ],
-                    [
-                        queueButton = new RoundedButton
-                        {
-                            Anchor = Anchor.BottomCentre,
-                            Origin = Anchor.BottomCentre,
-                            Size = new Vector2(200, 50),
-                            Text = "Requeue",
-                            Action = () => client.JoinMatchmakingQueue()
-                        }
-                    ]
                 }
             };
         }
@@ -169,17 +156,10 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens.Results
         {
             base.LoadComplete();
 
-            client.MatchmakingQueueStatusChanged += onMatchmakingQueueStateChanged;
             client.MatchRoomStateChanged += onRoomStateChanged;
 
-            onMatchmakingQueueStateChanged(null);
             onRoomStateChanged(client.Room?.MatchState);
         }
-
-        private void onMatchmakingQueueStateChanged(MatchmakingQueueStatus? state) => Scheduler.Add(() =>
-        {
-            queueButton.Enabled.Value = state == null;
-        });
 
         private void onRoomStateChanged(MatchRoomState? state) => Scheduler.Add(() =>
         {
@@ -353,10 +333,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens.Results
             base.Dispose(isDisposing);
 
             if (client.IsNotNull())
-            {
-                client.MatchmakingQueueStatusChanged -= onMatchmakingQueueStateChanged;
                 client.MatchRoomStateChanged -= onRoomStateChanged;
-            }
         }
     }
 }
