@@ -122,7 +122,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
             updateAnimationState();
             playDateWindupSample();
 
-            controller.CloseAllNotifications();
+            controller.SearchInForeground();
         }
 
         public override void OnSuspending(ScreenTransitionEvent e)

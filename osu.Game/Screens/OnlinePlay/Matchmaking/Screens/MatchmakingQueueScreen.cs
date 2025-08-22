@@ -52,7 +52,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
         private IDialogOverlay dialogOverlay { get; set; } = null!;
 
         [Resolved]
-        private MatchmakingController matchmakingController { get; set; } = null!;
+        private MatchmakingController controller { get; set; } = null!;
 
         [Resolved]
         private UserLookupCache userLookupCache { get; set; } = null!;
@@ -111,7 +111,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
                 },
             };
 
-            currentState.BindTo(matchmakingController.CurrentState);
+            currentState.BindTo(controller.CurrentState);
             currentState.BindValueChanged(s => SetState(s.NewValue));
 
             client.MatchmakingLobbyStatusChanged += onMatchmakingLobbyStatusChanged;
@@ -255,7 +255,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
                                 Text = "Queue in background",
                                 Action = () =>
                                 {
-                                    notificationOverlay.Post(new MatchmakingQueueNotification());
+                                    controller.SearchInBackground();
                                     isBackgrounded = true;
                                     this.Exit();
                                 },
