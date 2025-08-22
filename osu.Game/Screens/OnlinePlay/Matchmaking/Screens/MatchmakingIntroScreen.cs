@@ -10,7 +10,6 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Screens;
-using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Overlays;
@@ -37,7 +36,9 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
         private MusicController musicController { get; set; } = null!;
 
         [Resolved]
-        private SessionStatics statics { get; set; } = null!;
+        private MatchmakingController controller { get; set; } = null!;
+
+        public override bool AllowUserExit => !ValidForResume;
 
         private Sample? dateWindupSample;
         private Sample? dateImpactSample;
@@ -50,11 +51,6 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
         private SampleChannel? beatmapImpactChannel;
 
         private IDisposable? duckOperation;
-
-        public MatchmakingIntroScreen()
-        {
-            ValidForResume = false;
-        }
 
         protected override BackgroundScreen CreateBackground() => new MatchmakingIntroBackgroundScreen(colourProvider);
 
@@ -125,10 +121,14 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
 
             updateAnimationState();
             playDateWindupSample();
+
+            controller.CloseAllNotifications();
         }
 
         public override void OnSuspending(ScreenTransitionEvent e)
         {
+            ValidForResume = false;
+
             this.FadeOut(800, Easing.OutQuint);
             base.OnSuspending(e);
         }

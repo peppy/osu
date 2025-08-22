@@ -4,6 +4,7 @@
 using System;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -16,20 +17,18 @@ using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Matchmaking;
 using osu.Game.Online.Multiplayer;
-using osu.Game.Online.Rooms;
 using osu.Game.Overlays;
+using osu.Game.Screens.Menu;
 using osuTK;
 
 namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
 {
-    internal class MatchmakingQueueScreen : OsuScreen
+    public class MatchmakingQueueScreen : OsuScreen
     {
         private Container mainContent = null!;
 
         private MatchmakingScreenState state;
         private MatchmakingCloud cloud = null!;
-
-        private BeatmapSelectionPanel.SelectionAvatar localUserAvatar = null!;
 
         [Resolved]
         private IAPIProvider api { get; set; } = null!;
@@ -42,6 +41,17 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
 
         [Resolved]
         private MultiplayerClient client { get; set; } = null!;
+
+        [Resolved]
+        private INotificationOverlay notificationOverlay { get; set; } = null!;
+
+        [Resolved]
+        private IDialogOverlay dialogOverlay { get; set; } = null!;
+
+        [Resolved]
+        private MatchmakingController matchmakingController { get; set; } = null!;
+
+        private readonly IBindable<MatchmakingScreenState> currentState = new Bindable<MatchmakingScreenState>();
 
         protected override void LoadComplete()
         {
@@ -57,7 +67,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
                     RelativeSizeAxes = Axes.Both,
                     Size = new Vector2(0.6f)
                 },
-                localUserAvatar = new BeatmapSelectionPanel.SelectionAvatar(api.LocalUser.Value, true)
+                new BeatmapSelectionPanel.SelectionAvatar(api.LocalUser.Value, true)
                 {
                     Y = -100,
                     Scale = new Vector2(3),
@@ -94,36 +104,15 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
                 },
             };
 
-            client.MatchmakingQueueJoined += onMatchmakingQueueJoined;
-            client.MatchmakingRoomInvited += onMatchmakingRoomInvited;
-            client.MatchmakingRoomReady += onMatchmakingRoomReady;
+            currentState.BindTo(matchmakingController.CurrentState);
+            currentState.BindValueChanged(s => SetState(s.NewValue));
+
             client.MatchmakingLobbyStatusChanged += onMatchmakingLobbyStatusChanged;
         }
 
         private void onMatchmakingLobbyStatusChanged(MatchmakingLobbyStatus status) => Scheduler.Add(() =>
         {
             Users = status.UsersInQueue.Select(u => new APIUser { Id = u }).ToArray();
-        });
-
-        private void onMatchmakingQueueJoined() => Scheduler.Add(() =>
-        {
-            SetState(MatchmakingScreenState.Queueing);
-        });
-
-        private void onMatchmakingRoomInvited() => Scheduler.Add(() =>
-        {
-            SetState(MatchmakingScreenState.PendingAccept);
-        });
-
-        private void onMatchmakingRoomReady(long roomId) => Scheduler.Add(() =>
-        {
-            client.JoinRoom(new Room { RoomID = roomId })
-                  .FireAndForget(() => Schedule(() =>
-                  {
-                      SetState(MatchmakingScreenState.InRoom);
-
-                      Scheduler.AddDelayed(() => this.Push(new MatchmakingScreen(client.Room!)), 2000);
-                  }));
         });
 
         public override void OnEntering(ScreenTransitionEvent e)
@@ -133,9 +122,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
             client.JoinMatchmakingLobby().FireAndForget();
 
             using (BeginDelayedSequence(800))
-            {
-                Schedule(() => SetState(MatchmakingScreenState.Idle));
-            }
+                Schedule(() => SetState(currentState.Value));
         }
 
         public override void OnResuming(ScreenTransitionEvent e)
@@ -143,11 +130,6 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
             base.OnResuming(e);
 
             client.JoinMatchmakingLobby().FireAndForget();
-
-            using (BeginDelayedSequence(800))
-            {
-                Schedule(() => SetState(MatchmakingScreenState.Idle));
-            }
         }
 
         public override void OnSuspending(ScreenTransitionEvent e)
@@ -157,14 +139,35 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
             client.LeaveMatchmakingLobby().FireAndForget();
         }
 
+        private bool exitConfirmed;
+        private bool isBackgrounded;
+
         public override bool OnExiting(ScreenExitEvent e)
         {
             if (base.OnExiting(e))
                 return true;
 
             client.LeaveMatchmakingLobby().FireAndForget();
-            client.LeaveMatchmakingQueue().FireAndForget();
-            return false;
+
+            if (isBackgrounded)
+                return false;
+
+            if (exitConfirmed)
+            {
+                client.LeaveMatchmakingQueue().FireAndForget();
+                return false;
+            }
+
+            if (currentState.Value == MatchmakingScreenState.Idle)
+                return false;
+
+            dialogOverlay.Push(new ConfirmDiscardChangesDialog(() =>
+            {
+                exitConfirmed = true;
+                this.Exit();
+            }));
+
+            return true;
         }
 
         public APIUser[] Users
@@ -234,6 +237,12 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
                                 Anchor = Anchor.Centre,
                                 Origin = Anchor.Centre,
                                 Text = "Queue in background",
+                                Action = () =>
+                                {
+                                    notificationOverlay.Post(new MatchmakingQueueNotification());
+                                    isBackgrounded = true;
+                                    this.Exit();
+                                },
                                 Enabled = { Value = false },
                                 TooltipText = "Wait 5 seconds for this option to become available."
                             }
@@ -246,7 +255,6 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
                             return;
 
                         sendToBackgroundButton.Enabled.Value = true;
-                        sendToBackgroundButton.Action = this.Exit;
                         sendToBackgroundButton.TooltipText = "You will receive a notification when your game is ready. Make sure to watch out for it!";
                     }, 5000);
                     break;
@@ -333,6 +341,9 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
                             },
                         }
                     };
+
+                    using (BeginDelayedSequence(2000))
+                        Schedule(() => this.Push(new MatchmakingScreen(client.Room!)));
                     break;
 
                 default:
@@ -345,12 +356,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
             base.Dispose(isDisposing);
 
             if (client.IsNotNull())
-            {
-                client.MatchmakingQueueJoined -= onMatchmakingQueueJoined;
-                client.MatchmakingRoomInvited -= onMatchmakingRoomInvited;
-                client.MatchmakingRoomReady -= onMatchmakingRoomReady;
                 client.MatchmakingLobbyStatusChanged -= onMatchmakingLobbyStatusChanged;
-            }
         }
 
         public enum MatchmakingScreenState
