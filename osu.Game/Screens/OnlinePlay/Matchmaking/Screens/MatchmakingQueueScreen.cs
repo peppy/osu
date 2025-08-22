@@ -143,6 +143,11 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Screens
             base.OnResuming(e);
 
             client.JoinMatchmakingLobby().FireAndForget();
+
+            using (BeginDelayedSequence(800))
+            {
+                Schedule(() => SetState(MatchmakingScreenState.Idle));
+            }
         }
 
         public override void OnSuspending(ScreenTransitionEvent e)
