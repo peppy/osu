@@ -36,7 +36,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking
             this.stage = stage;
             this.displayText = displayText;
 
-            AutoSizeAxes = Axes.Y;
+            AutoSizeAxes = Axes.Both;
         }
 
         [BackgroundDependencyLoader]
@@ -44,8 +44,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking
         {
             InternalChild = new CircularContainer
             {
-                RelativeSizeAxes = Axes.X,
-                AutoSizeAxes = Axes.Y,
+                AutoSizeAxes = Axes.Both,
                 Masking = true,
                 Children = new[]
                 {

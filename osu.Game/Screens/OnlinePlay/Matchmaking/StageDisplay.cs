@@ -49,11 +49,8 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking
                     });
                 }
 
-                columnDimensions.Add(new Dimension());
-                columnContent.Add(new StageBubble(DISPLAYED_STAGES[i].status, DISPLAYED_STAGES[i].text)
-                {
-                    RelativeSizeAxes = Axes.X
-                });
+                columnDimensions.Add(new Dimension(GridSizeMode.AutoSize));
+                columnContent.Add(new StageBubble(DISPLAYED_STAGES[i].status, DISPLAYED_STAGES[i].text));
             }
 
             InternalChild = new GridContainer
@@ -80,6 +77,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking
                     [
                         new StageText
                         {
+                            Margin = new MarginPadding { Vertical = 5 },
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.TopCentre
                         }
