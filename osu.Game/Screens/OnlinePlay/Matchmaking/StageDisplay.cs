@@ -5,10 +5,8 @@ using System.Collections.Generic;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
 using osu.Game.Online.Multiplayer.MatchTypes.Matchmaking;
-using osuTK;
 
 namespace osu.Game.Screens.OnlinePlay.Matchmaking
 {
@@ -36,19 +34,6 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking
 
             for (int i = 0; i < DISPLAYED_STAGES.Length; i++)
             {
-                if (i > 0)
-                {
-                    columnDimensions.Add(new Dimension(GridSizeMode.AutoSize));
-                    columnContent.Add(new SpriteIcon
-                    {
-                        Anchor = Anchor.Centre,
-                        Origin = Anchor.Centre,
-                        Size = new Vector2(16),
-                        Icon = FontAwesome.Solid.ArrowRight,
-                        Margin = new MarginPadding { Horizontal = 10 }
-                    });
-                }
-
                 columnDimensions.Add(new Dimension(GridSizeMode.AutoSize));
                 columnContent.Add(new StageBubble(DISPLAYED_STAGES[i].status, DISPLAYED_STAGES[i].text));
             }

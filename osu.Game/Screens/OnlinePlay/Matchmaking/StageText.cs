@@ -51,7 +51,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking
             if (state is not MatchmakingRoomState matchmakingState)
                 return;
 
-            LocalisableString textForStatus = getTextForStatus(matchmakingState.RoomStatus);
+            LocalisableString textForStatus = getTextForStatus(matchmakingState.Stage);
 
             if (string.IsNullOrEmpty(textForStatus.ToString()))
             {
