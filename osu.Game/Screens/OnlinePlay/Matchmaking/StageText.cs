@@ -22,7 +22,8 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking
 
         public StageText()
         {
-            AutoSizeAxes = Axes.Both;
+            AutoSizeAxes = Axes.X;
+            Height = 16;
         }
 
         [BackgroundDependencyLoader]
@@ -30,8 +31,9 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking
         {
             InternalChild = text = new OsuSpriteText
             {
+                Alpha = 0,
                 Height = 16,
-                Font = OsuFont.Default,
+                Font = OsuFont.Style.Caption1,
                 AlwaysPresent = true,
             };
         }
@@ -49,7 +51,23 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking
             if (state is not MatchmakingRoomState matchmakingState)
                 return;
 
-            text.Text = getTextForStatus(matchmakingState.Stage);
+            LocalisableString textForStatus = getTextForStatus(matchmakingState.RoomStatus);
+
+            if (string.IsNullOrEmpty(textForStatus.ToString()))
+            {
+                text.FadeOut();
+                return;
+            }
+
+            text.RotateTo(2f)
+                .RotateTo(0, 500, Easing.OutQuint);
+
+            text.FadeInFromZero(500, Easing.OutQuint);
+
+            text.ScaleTo(0.3f)
+                .ScaleTo(1, 500, Easing.OutQuint);
+
+            text.Text = textForStatus;
         });
 
         private LocalisableString getTextForStatus(MatchmakingStage status)
