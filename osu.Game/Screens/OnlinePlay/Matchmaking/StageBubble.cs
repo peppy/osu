@@ -26,7 +26,9 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking
         [Resolved]
         private MultiplayerClient client { get; set; } = null!;
 
-        private readonly MatchmakingStage trackedStatus;
+        private readonly int? round;
+
+        private readonly MatchmakingStage stage;
 
         private readonly LocalisableString displayText;
         private Drawable progressBar = null!;
@@ -35,9 +37,12 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking
         private DateTimeOffset countdownEndTime;
         private SpriteIcon arrow = null!;
 
-        public StageBubble(MatchmakingStage trackedStatus, LocalisableString displayText)
+        public bool Active { get; private set; }
+
+        public StageBubble(int? round, MatchmakingStage stage, LocalisableString displayText)
         {
-            this.trackedStatus = trackedStatus;
+            this.round = round;
+            this.stage = stage;
             this.displayText = displayText;
 
             AutoSizeAxes = Axes.Both;
@@ -128,13 +133,20 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking
 
         private void onMatchRoomStateChanged(MatchRoomState? state) => Scheduler.Add(() =>
         {
+            Active = false;
+
             if (state is not MatchmakingRoomState roomState)
                 return;
 
+            if (round != null && roomState.CurrentRound != round)
+                return;
+
+            Active = stage == roomState.Stage;
+
             bool isPreparing =
-                (trackedStatus == MatchmakingStage.RoundWarmupTime && roomState.Stage == MatchmakingStage.WaitingForClientsJoin) ||
-                (trackedStatus == MatchmakingStage.GameplayWarmupTime && roomState.Stage == MatchmakingStage.WaitingForClientsBeatmapDownload) ||
-                (trackedStatus == MatchmakingStage.ResultsDisplaying && roomState.Stage == MatchmakingStage.Gameplay);
+                (stage == MatchmakingStage.RoundWarmupTime && roomState.Stage == MatchmakingStage.WaitingForClientsJoin) ||
+                (stage == MatchmakingStage.GameplayWarmupTime && roomState.Stage == MatchmakingStage.WaitingForClientsBeatmapDownload) ||
+                (stage == MatchmakingStage.ResultsDisplaying && roomState.Stage == MatchmakingStage.Gameplay);
 
             if (isPreparing)
             {
@@ -147,7 +159,10 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking
 
         private void onCountdownStarted(MultiplayerCountdown countdown) => Scheduler.Add(() =>
         {
-            if (countdown is not MatchmakingStageCountdown matchmakingState || matchmakingState.Stage != trackedStatus)
+            if (!Active)
+                return;
+
+            if (countdown is not MatchmakingStageCountdown matchmakingState)
                 return;
 
             countdownStartTime = DateTimeOffset.Now;
@@ -158,7 +173,10 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking
 
         private void onCountdownStopped(MultiplayerCountdown countdown) => Scheduler.Add(() =>
         {
-            if (countdown is not MatchmakingStageCountdown matchmakingStatusCountdown || matchmakingStatusCountdown.Stage != trackedStatus)
+            if (!Active)
+                return;
+
+            if (countdown is not MatchmakingStageCountdown matchmakingState)
                 return;
 
             countdownEndTime = DateTimeOffset.Now;

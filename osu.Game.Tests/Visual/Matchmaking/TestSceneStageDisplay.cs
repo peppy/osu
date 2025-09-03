@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using MessagePack;
 using NUnit.Framework;
 using osu.Framework.Extensions;
 using osu.Framework.Graphics;
@@ -21,36 +22,51 @@ namespace osu.Game.Tests.Visual.Matchmaking
             AddStep("join room", () => JoinRoom(CreateDefaultRoom()));
             WaitForJoined();
 
-            AddStep("add bubble", () => Child = new StageDisplay
+            AddStep("add display", () => Child = new StageDisplay
             {
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
                 RelativeSizeAxes = Axes.X,
-                Width = 0.5f,
             });
         }
 
         [Test]
         public void TestStartCountdown()
         {
-            foreach (var status in Enum.GetValues<MatchmakingStage>())
+            addStage(MatchmakingStage.WaitingForClientsJoin, 0);
+
+            for (int i = 0; i < 5; i++)
             {
-                AddStep($"{status}", () =>
-                {
-                    MultiplayerClient.ChangeMatchRoomState(new MatchmakingRoomState
-                    {
-                        Stage = status
-                    }).WaitSafely();
-
-                    MultiplayerClient.StartCountdown(new MatchmakingStageCountdown
-                    {
-                        Stage = status,
-                        TimeRemaining = TimeSpan.FromSeconds(5)
-                    }).WaitSafely();
-                });
-
-                AddWaitStep("wait a bit", 10);
+                addStage(MatchmakingStage.RoundWarmupTime, i);
+                addStage(MatchmakingStage.UserBeatmapSelect, i);
+                addStage(MatchmakingStage.ServerBeatmapFinalised, i);
+                addStage(MatchmakingStage.WaitingForClientsBeatmapDownload, i);
+                addStage(MatchmakingStage.GameplayWarmupTime, i);
+                addStage(MatchmakingStage.Gameplay, i);
+                addStage(MatchmakingStage.ResultsDisplaying, i);
             }
+
+            addStage(MatchmakingStage.Ended, 4);
+        }
+
+        private void addStage(MatchmakingStage status, int round)
+        {
+            AddStep($"{status} ({round})", () =>
+            {
+                MultiplayerClient.ChangeMatchRoomState(new MatchmakingRoomState
+                {
+                    Stage = status,
+                    CurrentRound = round,
+                }).WaitSafely();
+
+                MultiplayerClient.StartCountdown(new MatchmakingStageCountdown
+                {
+                    Stage = status,
+                    TimeRemaining = TimeSpan.FromSeconds(5)
+                }).WaitSafely();
+            });
+
+            AddWaitStep("wait a bit", 10);
         }
     }
 }
