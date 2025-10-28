@@ -32,11 +32,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
         [Resolved]
         private INotificationOverlay? notifications { get; set; }
 
-        [Resolved]
-        private IPerformFromScreenRunner? performer { get; set; }
-
-        private ProgressNotification? backgroundNotification;
-        private Notification? readyNotification;
+        private BackgroundQueueNotification? backgroundNotification;
         private bool isBackgrounded;
 
         protected override void LoadComplete()
@@ -118,27 +114,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
             if (backgroundNotification != null)
                 return;
 
-            notifications?.Post(backgroundNotification = new ProgressNotification
-            {
-                Text = "Searching for opponents...",
-                CompletionTarget = n => notifications.Post(readyNotification = n),
-                CompletionText = "Your match is ready! Click to join.",
-                CompletionClickAction = () =>
-                {
-                    client.MatchmakingAcceptInvitation().FireAndForget();
-                    performer?.PerformFromScreen(s => s.Push(new IntroScreen()));
-
-                    closeNotifications();
-                    return true;
-                },
-                CancelRequested = () =>
-                {
-                    client.MatchmakingLeaveQueue().FireAndForget();
-
-                    closeNotifications();
-                    return true;
-                }
-            });
+            notifications?.Post(backgroundNotification = new BackgroundQueueNotification());
         }
 
         private void closeNotifications()
@@ -146,13 +122,9 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
             if (backgroundNotification != null)
             {
                 backgroundNotification.State = ProgressNotificationState.Cancelled;
-                backgroundNotification.Close(false);
+                backgroundNotification.CloseAll();
+                backgroundNotification = null;
             }
-
-            readyNotification?.Close(false);
-
-            backgroundNotification = null;
-            readyNotification = null;
         }
 
         protected override void Dispose(bool isDisposing)
@@ -166,6 +138,48 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
                 client.MatchmakingQueueLeft -= onMatchmakingQueueLeft;
                 client.MatchmakingRoomInvited -= onMatchmakingRoomInvited;
                 client.MatchmakingRoomReady -= onMatchmakingRoomReady;
+            }
+        }
+
+        internal class BackgroundQueueNotification : ProgressNotification
+        {
+            [Resolved]
+            private IPerformFromScreenRunner? performer { get; set; }
+
+            [Resolved]
+            private MultiplayerClient client { get; set; } = null!;
+
+            private Notification? readyNotification;
+
+            [BackgroundDependencyLoader]
+            private void load()
+            {
+                Text = "Searching for opponents...";
+                CompletionText = "Your match is ready! Click to join.";
+
+                CompletionClickAction = () =>
+                {
+                    client.MatchmakingAcceptInvitation().FireAndForget();
+                    performer?.PerformFromScreen(s => s.Push(new IntroScreen()));
+
+                    Close(false);
+                    return true;
+                };
+
+                CancelRequested = () =>
+                {
+                    client.MatchmakingLeaveQueue().FireAndForget();
+                    return true;
+                };
+            }
+
+            protected override Notification CreateCompletionNotification() =>
+                readyNotification = base.CreateCompletionNotification();
+
+            public void CloseAll()
+            {
+                readyNotification?.Close(false);
+                Close(false);
             }
         }
     }

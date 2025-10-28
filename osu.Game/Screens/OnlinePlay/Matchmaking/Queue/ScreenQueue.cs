@@ -334,7 +334,6 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
                                     isBackgrounded = true;
                                     this.Exit();
                                 },
-                                Enabled = { Value = false },
                                 TooltipText = "Wait 5 seconds for this option to become available."
                             }
                         }
