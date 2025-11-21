@@ -41,7 +41,8 @@ namespace osu.Game.Screens.Play
 
         protected FadeContainer FadingContent { get; private set; }
 
-        private Button button;
+        protected Button SkipButton;
+
         private ButtonContainer buttonContainer;
         private Circle remainingTimeBox;
 
@@ -83,7 +84,7 @@ namespace osu.Game.Screens.Play
                     RelativeSizeAxes = Axes.Both,
                     Children = new Drawable[]
                     {
-                        button = new Button
+                        SkipButton = new Button
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
@@ -131,7 +132,7 @@ namespace osu.Game.Screens.Play
                 return;
             }
 
-            button.Action = () =>
+            SkipButton.Action = () =>
             {
                 SkipCount++;
                 RequestSkip?.Invoke();
@@ -152,13 +153,13 @@ namespace osu.Game.Screens.Play
 
             void attemptNextSkip() => Scheduler.AddDelayed(() =>
             {
-                if (!button.Enabled.Value)
+                if (!SkipButton.Enabled.Value)
                 {
                     skipQueued = false;
                     return;
                 }
 
-                button.TriggerClick();
+                SkipButton.TriggerClick();
                 attemptNextSkip();
             }, 200);
         }
@@ -177,7 +178,7 @@ namespace osu.Game.Screens.Play
             remainingTimeBox.Width = (float)Interpolation.Lerp(remainingTimeBox.Width, progress, Math.Clamp(Time.Elapsed / 40, 0, 1));
 
             isClickable = progress > 0;
-            button.Enabled.Value = isClickable;
+            SkipButton.Enabled.Value = isClickable;
             buttonContainer.State.Value = isClickable ? Visibility.Visible : Visibility.Hidden;
         }
 
@@ -197,10 +198,10 @@ namespace osu.Game.Screens.Play
             switch (e.Action)
             {
                 case GlobalAction.SkipCutscene:
-                    if (!button.Enabled.Value)
+                    if (!SkipButton.Enabled.Value)
                         return false;
 
-                    button.TriggerClick();
+                    SkipButton.TriggerClick();
                     return true;
             }
 
@@ -309,7 +310,7 @@ namespace osu.Game.Screens.Play
             protected override void PopOut() => this.FadeOut(fade_time);
         }
 
-        private partial class Button : OsuClickableContainer
+        protected partial class Button : OsuClickableContainer
         {
             private Color4 colourNormal;
             private Color4 colourHover;

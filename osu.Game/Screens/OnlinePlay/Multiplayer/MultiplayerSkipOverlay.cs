@@ -6,15 +6,10 @@ using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Shapes;
-using osu.Framework.Graphics.Sprites;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Screens.Play;
-using osuTK;
-using osuTK.Graphics;
 
 namespace osu.Game.Screens.OnlinePlay.Multiplayer
 {
@@ -23,8 +18,9 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
         [Resolved]
         private MultiplayerClient client { get; set; } = null!;
 
-        private Drawable votedIcon = null!;
         private OsuSpriteText countText = null!;
+
+        private bool localUserVoted;
 
         public MultiplayerSkipOverlay(double startTime)
             : base(startTime)
@@ -36,38 +32,12 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
         {
             FadingContent.AddRange(
             [
-                votedIcon = new CircularContainer
-                {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    Position = new Vector2(50, 0),
-                    Size = new Vector2(20),
-                    Alpha = 0,
-                    Masking = true,
-                    Children = new Drawable[]
-                    {
-                        new Box
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Colour = Color4.Green
-                        },
-                        new SpriteIcon
-                        {
-                            Anchor = Anchor.Centre,
-                            Origin = Anchor.Centre,
-                            RelativeSizeAxes = Axes.Both,
-                            Scale = new Vector2(0.5f),
-                            Icon = FontAwesome.Solid.Check
-                        }
-                    }
-                },
                 countText = new OsuSpriteText
                 {
-                    Anchor = Anchor.CentreLeft,
-                    Origin = Anchor.Centre,
-                    RelativePositionAxes = Axes.X,
-                    Position = new Vector2(0.75f, 0),
-                    Font = OsuFont.Default.With(size: 36, weight: FontWeight.Bold)
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.TopCentre,
+                    Y = 25,
+                    Font = OsuFont.Style.Heading2,
                 }
             ]);
         }
@@ -99,12 +69,13 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
 
             updateText();
 
-            countText.ScaleTo(1.5f).ScaleTo(1, 200, Easing.OutSine);
+            countText.ScaleTo(1.1f).ScaleTo(1, 200, Easing.OutSine);
 
-            if (userId == client.LocalUser?.UserID)
+            localUserVoted |= userId == client.LocalUser?.UserID;
+
+            if (localUserVoted)
             {
-                votedIcon.ScaleTo(1.5f).ScaleTo(1, 200, Easing.OutSine);
-                votedIcon.FadeInFromZero(100);
+                // dicks
             }
         });
 
@@ -117,7 +88,12 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
             int countSkipped = client.Room.Users.Count(u => u.State == MultiplayerUserState.Playing && u.VotedToSkipIntro);
             int countRequired = countTotal / 2 + 1;
 
-            countText.Text = $"{Math.Min(countRequired, countSkipped)} / {countRequired}";
+            if (countSkipped == 0)
+                countText.Text = string.Empty;
+            else if (countSkipped >= countRequired)
+                countText.Text = "skipping!";
+            else
+                countText.Text = $"{Math.Min(countRequired, countSkipped)} of {countRequired} users want to skip";
         }
 
         protected override void Dispose(bool isDisposing)

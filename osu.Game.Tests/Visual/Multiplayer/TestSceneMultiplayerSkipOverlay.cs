@@ -47,27 +47,28 @@ namespace osu.Game.Tests.Visual.Multiplayer
         {
             for (int i = 0; i < 4; i++)
             {
-                int i2 = i;
+                int userId = i;
 
-                AddStep($"join user {i2}", () =>
+                AddStep($"join user {userId}", () =>
                 {
                     MultiplayerClient.AddUser(new APIUser
                     {
-                        Id = i2,
-                        Username = $"User {i2}"
+                        Id = userId,
+                        Username = $"User {userId}"
                     });
 
-                    MultiplayerClient.ChangeUserState(i2, MultiplayerUserState.Playing);
+                    MultiplayerClient.ChangeUserState(userId, MultiplayerUserState.Playing);
                 });
+            }
+
+            for (int i = 0; i < 2; i++)
+            {
+                int userId = i;
+                AddStep($"user {userId} votes", () => MultiplayerClient.UserVoteToSkipIntro(userId).WaitSafely());
             }
 
             AddStep("local user votes", () => MultiplayerClient.VoteToSkipIntro().WaitSafely());
 
-            for (int i = 0; i < 4; i++)
-            {
-                int i2 = i;
-                AddStep($"user {i2} votes", () => MultiplayerClient.UserVoteToSkipIntro(i2).WaitSafely());
-            }
         }
     }
 }
