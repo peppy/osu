@@ -11,6 +11,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Input.Events;
 using osu.Game.Beatmaps;
 using osu.Game.Overlays;
+using osu.Game.Rulesets.Edit;
 using osu.Game.Screens.Edit;
 
 namespace osu.Game.Tests.Visual
@@ -19,7 +20,7 @@ namespace osu.Game.Tests.Visual
     /// Provides a clock, beat-divisor, and scrolling capability for test cases of editor components that
     /// are preferrably tested within the presence of a clock and seek controls.
     /// </summary>
-    public abstract partial class EditorClockTestScene : OsuManualInputManagerTestScene
+    public abstract partial class EditorClockTestScene : OsuManualInputManagerTestScene, IBeatSnapProvider
     {
         [Cached]
         private readonly OverlayColourProvider overlayColour = new OverlayColourProvider(OverlayColourScheme.Aquamarine);
@@ -45,7 +46,7 @@ namespace osu.Game.Tests.Visual
 
             base.Content.AddRange(new Drawable[]
             {
-                EditorClock = new EditorClock(editorClockBeatmap, BeatDivisor),
+                EditorClock = new EditorClock(editorClockBeatmap, this),
                 content
             });
 
@@ -81,11 +82,15 @@ namespace osu.Game.Tests.Visual
                 return false;
 
             if (e.ScrollDelta.Y > 0)
-                EditorClock.SeekBackward(true);
+                EditorClock.SeekBackward();
             else
-                EditorClock.SeekForward(true);
+                EditorClock.SeekForward();
 
             return true;
         }
+
+        public double SnapTime(double time, double? referenceTime = null) => time;
+        public double GetBeatLengthAtTime(double referenceTime) => 10000;
+        int IBeatSnapProvider.BeatDivisor => BeatDivisor.Value;
     }
 }

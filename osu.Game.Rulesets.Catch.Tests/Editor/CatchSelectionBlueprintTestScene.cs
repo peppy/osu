@@ -60,7 +60,7 @@ namespace osu.Game.Rulesets.Catch.Tests.Editor
             InputManager.MoveMouseTo(pos);
         });
 
-        private partial class EditorBeatmapDependencyContainer : Container
+        private partial class EditorBeatmapDependencyContainer : Container, IBeatSnapProvider
         {
             [Cached]
             private readonly EditorClock editorClock;
@@ -76,10 +76,14 @@ namespace osu.Game.Rulesets.Catch.Tests.Editor
 
                 InternalChildren = new Drawable[]
                 {
-                    editorClock = new EditorClock(beatmap, beatDivisor),
+                    editorClock = new EditorClock(beatmap, this),
                     Content,
                 };
             }
+
+            public double SnapTime(double time, double? referenceTime = null) => time;
+            public double GetBeatLengthAtTime(double referenceTime) => 10000;
+            int IBeatSnapProvider.BeatDivisor => beatDivisor.Value;
         }
     }
 }

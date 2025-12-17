@@ -286,7 +286,7 @@ namespace osu.Game.Screens.Edit
             }
 
             // Todo: should probably be done at a DrawableRuleset level to share logic with Player.
-            clock = new EditorClock(playableBeatmap, beatDivisor);
+            clock = new EditorClock(playableBeatmap, this);
             clock.ChangeSource(loadableBeatmap.Track);
 
             dependencies.CacheAs(clock);
@@ -1248,21 +1248,10 @@ namespace osu.Game.Screens.Edit
         {
             double amount = e.ShiftPressed ? 4 : 1;
 
-            bool trackPlaying = clock.IsRunning;
-
-            if (trackPlaying)
-            {
-                // generally users are not looking to perform tiny seeks when the track is playing.
-                // this multiplication undoes the division that will be applied in the underlying seek operation.
-                // scale by BPM to keep the seek amount constant across all BPMs.
-                var timingPoint = editorBeatmap.ControlPointInfo.TimingPointAt(clock.CurrentTimeAccurate);
-                amount *= beatDivisor.Value * (timingPoint.BPM / 120);
-            }
-
             if (direction < 1)
-                clock.SeekBackward(!trackPlaying, amount);
+                clock.SeekBackward(amount);
             else
-                clock.SeekForward(!trackPlaying, amount);
+                clock.SeekForward(amount);
         }
 
         private void updateLastSavedHash()

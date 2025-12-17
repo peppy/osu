@@ -101,12 +101,12 @@ namespace osu.Game.Rulesets.Osu.Tests.Editor
 
             AddStep("place first object", () => InputManager.Click(MouseButton.Left));
 
-            AddStep("increment time", () => EditorClock.SeekForward(true));
+            AddStep("increment time", () => EditorClock.SeekForward());
 
             AddStep("move mouse right", () => InputManager.MoveMouseTo(playfield.ScreenSpaceDrawQuad.Centre + new Vector2(playfield.ScreenSpaceDrawQuad.Width * 0.2f, 0)));
             AddStep("place second object", () => InputManager.Click(MouseButton.Left));
 
-            AddStep("increment time", () => EditorClock.SeekForward(true));
+            AddStep("increment time", () => EditorClock.SeekForward());
 
             AddStep("move mouse down", () => InputManager.MoveMouseTo(playfield.ScreenSpaceDrawQuad.Centre + new Vector2(0, playfield.ScreenSpaceDrawQuad.Width * 0.2f)));
             AddStep("place third object", () => InputManager.Click(MouseButton.Left));

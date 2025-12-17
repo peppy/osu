@@ -17,6 +17,7 @@ using osu.Framework.Timing;
 using osu.Framework.Utils;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.ControlPoints;
+using osu.Game.Rulesets.Edit;
 
 namespace osu.Game.Screens.Edit
 {
@@ -38,7 +39,8 @@ namespace osu.Game.Screens.Edit
 
         public IBeatmap Beatmap { get; set; }
 
-        private readonly BindableBeatDivisor beatDivisor;
+        [CanBeNull]
+        private readonly IBeatSnapProvider beatSnapProvider;
 
         private readonly FramedBeatmapClock underlyingClock;
 
@@ -53,11 +55,11 @@ namespace osu.Game.Screens.Edit
         /// </summary>
         public bool IsSeeking { get; private set; }
 
-        public EditorClock(IBeatmap beatmap = null, BindableBeatDivisor beatDivisor = null)
+        public EditorClock(IBeatmap beatmap = null, IBeatSnapProvider beatSnapProvider = null)
         {
             Beatmap = beatmap ?? new Beatmap();
 
-            this.beatDivisor = beatDivisor ?? new BindableBeatDivisor();
+            this.beatSnapProvider = beatSnapProvider;
 
             underlyingClock = new FramedBeatmapClock(applyOffsets: true, requireDecoupling: true);
             AddInternal(underlyingClock);
@@ -73,7 +75,7 @@ namespace osu.Game.Screens.Edit
         public bool SeekSnapped(double position)
         {
             var timingPoint = ControlPointInfo.TimingPointAt(position);
-            double beatSnapLength = timingPoint.BeatLength / beatDivisor.Value;
+            double beatSnapLength = timingPoint.BeatLength / (beatSnapProvider?.BeatDivisor ?? 1);
 
             // We will be snapping to beats within the timing point
             position -= timingPoint.Time;
@@ -94,67 +96,58 @@ namespace osu.Game.Screens.Edit
         /// <summary>
         /// Seeks backwards by one beat length.
         /// </summary>
-        /// <param name="snapped">Whether to snap to the closest beat after seeking.</param>
         /// <param name="amount">The relative amount (magnitude) which should be seeked.</param>
-        public void SeekBackward(bool snapped = false, double amount = 1) => seek(-1, snapped, amount + (IsRunning ? 1.5 : 0));
+        public void SeekBackward(double amount = 1) => seek(-1, amount);
 
         /// <summary>
         /// Seeks forwards by one beat length.
         /// </summary>
-        /// <param name="snapped">Whether to snap to the closest beat after seeking.</param>
         /// <param name="amount">The relative amount (magnitude) which should be seeked.</param>
-        public void SeekForward(bool snapped = false, double amount = 1) => seek(1, snapped, amount);
+        public void SeekForward(double amount = 1) => seek(1, amount);
 
-        private void seek(int direction, bool snapped, double amount = 1)
+        private void seek(int direction, double rate = 1)
         {
+            if (rate <= 0) throw new ArgumentException("Value should be greater than zero", nameof(rate));
+
             double current = CurrentTimeAccurate;
+            double seekTime = current;
+            double beatLength = getBeatLength(current);
 
-            if (amount <= 0) throw new ArgumentException("Value should be greater than zero", nameof(amount));
-
-            var timingPoint = ControlPointInfo.TimingPointAt(current);
-
-            if (direction < 0 && timingPoint.Time == current)
-                // When going backwards and we're at the boundary of two timing points, we compute the seek distance with the timing point which we are seeking into
-                timingPoint = ControlPointInfo.TimingPointAt(current - 1);
-
-            double seekAmount = timingPoint.BeatLength / beatDivisor.Value * amount;
-            double seekTime = current + seekAmount * direction;
-
-            if (!snapped || ControlPointInfo.TimingPoints.Count == 0)
+            if (IsRunning)
             {
-                SeekSmoothlyTo(seekTime);
-                return;
+                // seek multiplier when track is playing. matches stable because don't-break-what-works
+                // https://github.com/peppy/osu-stable-reference/blob/7519cafd1823f1879c0d9c991ba0e5c7fd3bfa02/osu!/GameModes/Edit/Editor.cs#L1639-L1640
+                //
+                // ReSharper disable once PossibleLossOfFraction
+                rate *= 1 + 250 / (int)beatLength;
             }
 
-            // We will be snapping to beats within timingPoint
-            seekTime -= timingPoint.Time;
+            // the actual beat length we should use is the one at the proposed seek target.
+            beatLength = getBeatLength(current + direction * beatLength * rate);
 
-            // Determine the index from timingPoint of the closest beat to seekTime, accounting for scrolling direction
-            int closestBeat;
-            if (direction > 0)
-                closestBeat = (int)Math.Floor(seekTime / seekAmount);
-            else
-                closestBeat = (int)Math.Ceiling(seekTime / seekAmount);
+            seekTime += direction * beatLength * rate;
 
-            seekTime = timingPoint.Time + closestBeat * seekAmount;
-
-            // limit forward seeking to only up to the next timing point's start time.
-            var nextTimingPoint = ControlPointInfo.TimingPointAfter(timingPoint.Time);
-            if (seekTime > nextTimingPoint?.Time)
-                seekTime = nextTimingPoint.Time;
-
-            // Due to the rounding above, we may end up on the current beat. This will effectively cause 0 seeking to happen, but we don't want this.
-            // Instead, we'll go to the next beat in the direction when this is the case
-            if (Precision.AlmostEquals(current, seekTime, 0.5f))
-            {
-                closestBeat += direction > 0 ? 1 : -1;
-                seekTime = timingPoint.Time + closestBeat * seekAmount;
-            }
-
-            if (seekTime < timingPoint.Time && !ReferenceEquals(timingPoint, ControlPointInfo.TimingPoints.First()))
-                seekTime = timingPoint.Time;
+            if (beatSnapProvider != null)
+                seekTime = beatSnapProvider.SnapTime(seekTime);
 
             SeekSmoothlyTo(seekTime);
+
+            double getBeatLength(double time)
+            {
+                if (beatSnapProvider == null)
+                    return 1000;
+
+                double length = beatSnapProvider.GetBeatLengthAtTime(time);
+
+                if (IsRunning)
+                {
+                    // when playing, always seek at beat divisor 1.
+                    // this undoes the divisor application inside the `GetBeatLengthAt` call above.
+                    length *= (beatSnapProvider?.BeatDivisor ?? 1);
+                }
+
+                return length;
+            }
         }
 
         /// <summary>
