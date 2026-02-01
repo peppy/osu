@@ -135,58 +135,60 @@ namespace osu.Game.Configuration
                 switch (value)
                 {
                     case BindableNumber<float> bNumber:
-                        yield return new SettingsSlider<float>
+                        yield return new SettingsItemV2(new FormSliderBar<float>
                         {
-                            LabelText = attr.Label,
-                            TooltipText = attr.Description,
+                            Caption = attr.Label,
+                            HintText = attr.Description,
                             Current = bNumber,
                             KeyboardStep = 0.1f,
-                        };
+                        });
 
                         break;
 
                     case BindableNumber<double> bNumber:
-                        yield return new SettingsSlider<double>
+                        yield return new SettingsItemV2(new FormSliderBar<double>
                         {
-                            LabelText = attr.Label,
-                            TooltipText = attr.Description,
+                            Caption = attr.Label,
+                            HintText = attr.Description,
                             Current = bNumber,
                             KeyboardStep = 0.1f,
-                        };
+                        });
 
                         break;
 
                     case BindableNumber<int> bNumber:
-                        yield return new SettingsSlider<int>
+                        yield return new SettingsItemV2(new FormSliderBar<int>
                         {
-                            LabelText = attr.Label,
-                            TooltipText = attr.Description,
-                            Current = bNumber
-                        };
+                            Caption = attr.Label,
+                            HintText = attr.Description,
+                            Current = bNumber,
+                            KeyboardStep = 0.1f,
+                        });
 
                         break;
 
                     case Bindable<bool> bBool:
-                        yield return new SettingsCheckbox
+                        yield return new SettingsItemV2(new FormCheckBox
                         {
-                            LabelText = attr.Label,
-                            TooltipText = attr.Description,
+                            Caption = attr.Label,
+                            HintText = attr.Description,
                             Current = bBool
-                        };
+                        });
 
                         break;
 
                     case Bindable<string> bString:
-                        yield return new SettingsTextBox
+                        yield return new SettingsItemV2(new FormTextBox
                         {
-                            LabelText = attr.Label,
-                            TooltipText = attr.Description,
+                            Caption = attr.Label,
+                            HintText = attr.Description,
                             Current = bString
-                        };
+                        });
 
                         break;
 
                     case BindableColour4 bColour:
+                        // TODO: update to use form control
                         yield return new SettingsColour
                         {
                             LabelText = attr.Label,
@@ -277,16 +279,11 @@ namespace osu.Game.Configuration
                   .OrderBy(attr => attr.Item1)
                   .ToArray();
 
-        private partial class ModSettingsEnumDropdown<T> : SettingsEnumDropdown<T>
+        private partial class ModSettingsEnumDropdown<T> : FormEnumDropdown<T>
             where T : struct, Enum
         {
-            protected override OsuDropdown<T> CreateDropdown() => new ModDropdownControl();
-
-            private partial class ModDropdownControl : DropdownControl
-            {
-                // Set menu's max height low enough to workaround nested scroll issues (see https://github.com/ppy/osu-framework/issues/4536).
-                protected override DropdownMenu CreateMenu() => base.CreateMenu().With(m => m.MaxHeight = 100);
-            }
+            // Set menu's max height low enough to workaround nested scroll issues (see https://github.com/ppy/osu-framework/issues/4536).
+            protected override DropdownMenu CreateMenu() => base.CreateMenu().With(m => m.MaxHeight = 100);
         }
     }
 }
