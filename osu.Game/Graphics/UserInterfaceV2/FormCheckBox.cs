@@ -28,12 +28,12 @@ namespace osu.Game.Graphics.UserInterfaceV2
         /// <summary>
         /// Caption describing this slider bar, displayed on top of the controls.
         /// </summary>
-        public LocalisableString Caption { get; init; }
+        public LocalisableString Caption { get; set; }
 
         /// <summary>
         /// Hint text containing an extended description of this slider bar, displayed in a tooltip when hovering the caption.
         /// </summary>
-        public LocalisableString HintText { get; init; }
+        public LocalisableString HintText { get; set; }
 
         private FormControlBackground background = null!;
         private FormFieldCaption caption = null!;

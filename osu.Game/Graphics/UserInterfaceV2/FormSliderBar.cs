@@ -90,7 +90,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
         /// <summary>
         /// Hint text containing an extended description of this slider bar, displayed in a tooltip when hovering the caption.
         /// </summary>
-        public LocalisableString HintText { get; init; }
+        public LocalisableString HintText { get; set; }
 
         /// <summary>
         /// A custom step value for each key press which actuates a change on this control.

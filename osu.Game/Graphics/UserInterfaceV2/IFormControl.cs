@@ -4,6 +4,7 @@
 using System;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Localisation;
 
 namespace osu.Game.Graphics.UserInterfaceV2
 {
@@ -31,5 +32,15 @@ namespace osu.Game.Graphics.UserInterfaceV2
         /// Whether the control is currently disabled.
         /// </summary>
         bool IsDisabled { get; }
+
+        /// <summary>
+        /// Caption describing this slider bar, displayed on top of the controls.
+        /// </summary>
+        LocalisableString Caption { get; set; }
+
+        /// <summary>
+        /// Hint text containing an extended description of this slider bar, displayed in a tooltip when hovering the caption.
+        /// </summary>
+        LocalisableString HintText { get; set; }
     }
 }

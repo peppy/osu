@@ -9,10 +9,10 @@ using System.Reflection;
 using JetBrains.Annotations;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.ObjectExtensions;
-using osu.Framework.Extensions.TypeExtensions;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Localisation;
-using osu.Game.Graphics.UserInterface;
+using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Overlays.Settings;
 using osu.Game.Utils;
 
@@ -118,16 +118,33 @@ namespace osu.Game.Configuration
                 if (attr.SettingControlType != null)
                 {
                     var controlType = attr.SettingControlType;
-                    if (controlType.EnumerateBaseTypes().All(t => !t.IsGenericType || t.GetGenericTypeDefinition() != typeof(SettingsItem<>)))
-                        throw new InvalidOperationException($"{nameof(SettingSourceAttribute)} had an unsupported custom control type ({controlType.ReadableName()})");
 
-                    var control = (Drawable)Activator.CreateInstance(controlType)!;
-                    controlType.GetProperty(nameof(SettingsItem<object>.SettingSourceObject))?.SetValue(control, obj);
-                    controlType.GetProperty(nameof(SettingsItem<object>.LabelText))?.SetValue(control, attr.Label);
-                    controlType.GetProperty(nameof(SettingsItem<object>.TooltipText))?.SetValue(control, attr.Description);
-                    controlType.GetProperty(nameof(SettingsItem<object>.Current))?.SetValue(control, value);
+                    var control = (IFormControl)Activator.CreateInstance(controlType)!;
 
-                    yield return control;
+                    control.HintText = attr.Description;
+                    control.Caption = attr.Label;
+
+                    // controlType.GetProperty(nameof(SettingsItem<object>.SettingSourceObject))?.SetValue(control, obj);
+
+                    switch (control)
+                    {
+                        case IHasCurrentValue<float> cf:
+                            cf.Current = (Bindable<float>)value;
+                            break;
+
+                        case IHasCurrentValue<double> cf:
+                            cf.Current = (Bindable<double>)value;
+                            break;
+
+                        case IHasCurrentValue<int> cf:
+                            cf.Current = (Bindable<int>)value;
+                            break;
+
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+                    yield return new SettingsItemV2(control);
 
                     continue;
                 }
