@@ -17,6 +17,59 @@ using osu.Game.Users;
 
 namespace osu.Game.Screens.OnlinePlay
 {
+    public abstract partial class OnlinePlayFreestyleSelectV2 : SelectV2.SongSelect
+    {
+        protected override UserActivity InitialActivity => new UserActivity.InLobby(room);
+
+        private readonly Room room;
+        private readonly PlaylistItem item;
+
+        public string ShortTitle => "style selection";
+        public override string Title => ShortTitle.Humanize();
+
+        protected OnlinePlayFreestyleSelectV2(Room room, PlaylistItem item)
+        {
+            this.room = room;
+            this.item = item;
+
+            Padding = new MarginPadding { Horizontal = HORIZONTAL_OVERFLOW_PADDING };
+        }
+
+        protected override void OnStart()
+        {
+            FilterCriteria criteria = FilterControl.CreateCriteria();
+
+            // Beatmaps with too different of a duration are filtered away; this is just a final safety.
+            if (!criteria.Length.IsInRange(Beatmap.Value.BeatmapInfo.Length))
+            {
+                Logger.Log("The selected beatmap's duration differs too much from the host's selection.", level: LogLevel.Error);
+                return false;
+            }
+
+            // Beatmaps without a valid online ID are filtered away; this is just a final safety.
+            if (Beatmap.Value.BeatmapInfo.OnlineID < 0)
+            {
+                Logger.Log("The selected beatmap is not available online.", level: LogLevel.Error);
+                return false;
+            }
+
+            // Beatmaps from different sets are filtered away; this is just a final safety.
+            if (Beatmap.Value.BeatmapSetInfo.OnlineID != criteria.BeatmapSetId)
+            {
+                Logger.Log("The selected beatmap is from a different beatmap set.", level: LogLevel.Error);
+                return false;
+            }
+
+            if (Ruleset.Value.OnlineID < 0)
+            {
+                Logger.Log("The selected ruleset is not available online.", level: LogLevel.Error);
+                return false;
+            }
+
+            return true;
+        }
+    }
+
     public abstract partial class OnlinePlayFreestyleSelect : SongSelect, IOnlinePlaySubScreen, IHandlePresentBeatmap
     {
         public string ShortTitle => "style selection";
