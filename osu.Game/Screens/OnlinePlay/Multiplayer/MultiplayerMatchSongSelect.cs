@@ -26,6 +26,7 @@ using osu.Game.Rulesets.Mods;
 using osu.Game.Screens.Select;
 using osu.Game.Users;
 using osu.Game.Utils;
+using SongSelect = osu.Game.Screens.SelectV2.SongSelect;
 
 namespace osu.Game.Screens.OnlinePlay.Multiplayer
 {
@@ -35,13 +36,14 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
 
         public override string Title => ShortTitle.Humanize();
 
-        public override bool AllowEditing => false;
-
         [Resolved]
         private MultiplayerClient client { get; set; } = null!;
 
         [Resolved]
         private OngoingOperationTracker operationTracker { get; set; } = null!;
+
+        [Resolved]
+        private IOverlayManager? overlayManager { get; set; }
 
         private readonly Room room;
         private readonly IBindable<bool> operationInProgress = new Bindable<bool>();
@@ -80,6 +82,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
             initialItem = itemToEdit ?? room.Playlist.LastOrDefault();
 
             Padding = new MarginPadding { Horizontal = HORIZONTAL_OVERFLOW_PADDING };
+            LeftPadding = new MarginPadding { Top = CORNER_RADIUS_HIDE_OFFSET + Header.HEIGHT };
 
             freeModSelect = new FreeModSelectOverlay
             {
@@ -91,8 +94,6 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
         [BackgroundDependencyLoader]
         private void load()
         {
-            LeftArea.Padding = new MarginPadding { Top = Header.HEIGHT };
-
             LoadComponent(freeModSelect);
             AddInternal(loadingLayer = new LoadingLayer(true));
         }
@@ -138,7 +139,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
             Ruleset.BindValueChanged(onRulesetChanged);
             freestyle.BindValueChanged(onFreestyleChanged);
 
-            freeModSelectOverlayRegistration = OverlayManager?.RegisterBlockingOverlay(freeModSelect);
+            freeModSelectOverlayRegistration = overlayManager?.RegisterBlockingOverlay(freeModSelect);
 
             updateFooterButtons();
             updateValidMods();
@@ -152,8 +153,6 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
                     loadingLayer.Hide();
             }, true);
         }
-
-        protected override BeatmapDetailArea CreateBeatmapDetailArea() => new PlayBeatmapDetailArea();
 
         private void onFreestyleChanged(ValueChangedEvent<bool> enabled)
         {
