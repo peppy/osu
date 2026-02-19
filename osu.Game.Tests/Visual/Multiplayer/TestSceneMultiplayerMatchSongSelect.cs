@@ -80,7 +80,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
                 LoadScreen(songSelect = new TestMultiplayerMatchSongSelect(room));
             });
 
-            AddUntilStep("wait for present", () => songSelect.IsCurrentScreen() && songSelect.BeatmapSetsLoaded);
+            AddUntilStep("wait for present", () => songSelect.IsCurrentScreen() && !songSelect.IsFiltering);
         }
 
         [Test]
@@ -154,7 +154,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
                 songSelect.OnLoadComplete += _ => Ruleset.Value = new TaikoRuleset().RulesetInfo;
                 LoadScreen(songSelect);
             });
-            AddUntilStep("wait for present", () => songSelect.IsCurrentScreen() && songSelect.BeatmapSetsLoaded);
+            AddUntilStep("wait for present", () => songSelect.IsCurrentScreen() && !songSelect.IsFiltering);
 
             AddStep("confirm selection", () => songSelect.FinaliseSelection());
             AddAssert("beatmap is taiko", () => Beatmap.Value.BeatmapInfo.Ruleset.OnlineID, () => Is.EqualTo(1));
