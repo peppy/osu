@@ -105,39 +105,6 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
         {
             base.LoadComplete();
 
-            if (initialItem != null)
-            {
-                // Prefer using a local databased beatmap lookup since OnlineId may be -1 for an invalid beatmap selection.
-                BeatmapInfo? beatmapInfo = initialItem.Beatmap as BeatmapInfo;
-
-                // And in the case that this isn't a local databased beatmap, query by online ID.
-                if (beatmapInfo == null)
-                {
-                    int onlineId = initialItem.Beatmap.OnlineID;
-                    beatmapInfo = beatmapManager.QueryBeatmap(b => b.OnlineID == onlineId);
-                }
-
-                if (beatmapInfo != null)
-                    Beatmap.Value = beatmapManager.GetWorkingBeatmap(beatmapInfo);
-
-                RulesetInfo? ruleset = rulesets.GetRuleset(initialItem.RulesetID);
-
-                if (ruleset != null)
-                {
-                    Ruleset.Value = ruleset;
-
-                    var rulesetInstance = ruleset.CreateInstance();
-                    Debug.Assert(rulesetInstance != null);
-
-                    // At this point, Mods contains both the required and allowed mods. For selection purposes, it should only contain the required mods.
-                    // Similarly, freeMods is currently empty but should only contain the allowed mods.
-                    Mods.Value = initialItem.RequiredMods.Select(m => m.ToMod(rulesetInstance)).ToArray();
-                    FreeMods.Value = initialItem.AllowedMods.Select(m => m.ToMod(rulesetInstance)).ToArray();
-                }
-
-                freestyle.Value = initialItem.Freestyle;
-            }
-
             Mods.BindValueChanged(_ => updateValidMods());
             Ruleset.BindValueChanged(onRulesetChanged);
             freestyle.BindValueChanged(onFreestyleChanged);
@@ -155,6 +122,42 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
                 else
                     loadingLayer.Hide();
             }, true);
+
+            Schedule(() =>
+            {
+                if (initialItem != null)
+                {
+                    // Prefer using a local databased beatmap lookup since OnlineId may be -1 for an invalid beatmap selection.
+                    BeatmapInfo? beatmapInfo = initialItem.Beatmap as BeatmapInfo;
+
+                    // And in the case that this isn't a local databased beatmap, query by online ID.
+                    if (beatmapInfo == null)
+                    {
+                        int onlineId = initialItem.Beatmap.OnlineID;
+                        beatmapInfo = beatmapManager.QueryBeatmap(b => b.OnlineID == onlineId);
+                    }
+
+                    if (beatmapInfo != null)
+                        Beatmap.Value = beatmapManager.GetWorkingBeatmap(beatmapInfo);
+
+                    RulesetInfo? ruleset = rulesets.GetRuleset(initialItem.RulesetID);
+
+                    if (ruleset != null)
+                    {
+                        Ruleset.Value = ruleset;
+
+                        var rulesetInstance = ruleset.CreateInstance();
+                        Debug.Assert(rulesetInstance != null);
+
+                        // At this point, Mods contains both the required and allowed mods. For selection purposes, it should only contain the required mods.
+                        // Similarly, freeMods is currently empty but should only contain the allowed mods.
+                        Mods.Value = initialItem.RequiredMods.Select(m => m.ToMod(rulesetInstance)).ToArray();
+                        FreeMods.Value = initialItem.AllowedMods.Select(m => m.ToMod(rulesetInstance)).ToArray();
+                    }
+
+                    freestyle.Value = initialItem.Freestyle;
+                }
+            });
         }
 
         private void onFreestyleChanged(ValueChangedEvent<bool> enabled)
