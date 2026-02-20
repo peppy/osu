@@ -80,7 +80,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
         [Test]
         public void TestAddItemsAsHost()
         {
-            addItem(() => OtherBeatmap);
+            AddBeatmapFromSongSelect(() => OtherBeatmap);
 
             AddUntilStep("playlist contains two items", () => MultiplayerClient.ClientAPIRoom?.Playlist.Count == 2);
         }
@@ -106,19 +106,6 @@ namespace osu.Game.Tests.Visual.Multiplayer
 
             AddUntilStep("wait for return to match", () => CurrentSubScreen is MultiplayerMatchSubScreen);
             AddUntilStep("selected item is new beatmap", () => Beatmap.Value.BeatmapInfo.OnlineID == otherBeatmap.OnlineID);
-        }
-
-        private void addItem(Func<BeatmapInfo> beatmap)
-        {
-            AddStep("click add button", () =>
-            {
-                InputManager.MoveMouseTo(this.ChildrenOfType<MultiplayerMatchSubScreen.AddItemButton>().Single());
-                InputManager.Click(MouseButton.Left);
-            });
-
-            AddUntilStep("wait for song select", () => CurrentSubScreen is Screens.Select.SongSelect select && select.BeatmapSetsLoaded);
-            AddStep("select other beatmap", () => ((Screens.Select.SongSelect)CurrentSubScreen).FinaliseSelection(beatmap()));
-            AddUntilStep("wait for return to match", () => CurrentSubScreen is MultiplayerMatchSubScreen);
         }
     }
 }
