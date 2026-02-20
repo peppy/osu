@@ -39,7 +39,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
         protected IScreen CurrentScreen => multiplayerComponents.CurrentScreen;
         protected IScreen CurrentSubScreen => multiplayerComponents.MultiplayerScreen.CurrentSubScreen;
 
-        private BeatmapManager beatmaps = null!;
+        protected BeatmapManager Beatmaps = null!;
 
         private BeatmapSetInfo importedSet = null!;
         private RulesetStore rulesets = null!;
@@ -54,7 +54,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
             BeatmapStore beatmapStore;
 
             Dependencies.Cache(rulesets = new RealmRulesetStore(Realm));
-            Dependencies.Cache(beatmaps = new BeatmapManager(LocalStorage, Realm, null, audio, Resources, host, Beatmap.Default));
+            Dependencies.Cache(Beatmaps = new BeatmapManager(LocalStorage, Realm, null, audio, Resources, host, Beatmap.Default));
             Dependencies.CacheAs(beatmapStore = new RealmDetachedBeatmapStore());
             Dependencies.Cache(Realm);
 
@@ -67,13 +67,13 @@ namespace osu.Game.Tests.Visual.Multiplayer
 
             AddStep("import beatmap", () =>
             {
-                beatmaps.Import(TestResources.GetQuickTestBeatmapForImport()).WaitSafely();
+                Beatmaps.Import(TestResources.GetQuickTestBeatmapForImport()).WaitSafely();
                 Realm.Write(r =>
                 {
                     foreach (var beatmapInfo in r.All<BeatmapInfo>())
                         beatmapInfo.OnlineMD5Hash = beatmapInfo.MD5Hash;
                 });
-                importedSet = beatmaps.GetAllUsableBeatmapSets().First();
+                importedSet = Beatmaps.GetAllUsableBeatmapSets().First();
                 InitialBeatmap = importedSet.Beatmaps.First(b => b.Ruleset.OnlineID == 0);
                 OtherBeatmap = importedSet.Beatmaps.Last(b => b.Ruleset.OnlineID == 0);
             });
@@ -125,8 +125,6 @@ namespace osu.Game.Tests.Visual.Multiplayer
 
         protected void AddBeatmapFromSongSelect(Func<BeatmapInfo> beatmap, RulesetInfo? ruleset = null, IReadOnlyList<Mod>? mods = null)
         {
-            //TODO: make work...
-
             Screens.SelectV2.SongSelect? songSelect = null;
 
             AddStep("click add button", () =>
@@ -136,7 +134,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
             });
 
             AddUntilStep("wait for song select", () => (songSelect = CurrentSubScreen as Screens.SelectV2.SongSelect) != null);
-            AddUntilStep("wait for loaded", () => !songSelect.AsNonNull().IsFiltering);
+            AddUntilStep("wait for loaded", () => songSelect.IsCurrentScreen() && !songSelect.AsNonNull().IsFiltering);
 
             if (ruleset != null)
                 AddStep($"set {ruleset.Name} ruleset", () => songSelect.AsNonNull().Ruleset.Value = ruleset);
@@ -144,7 +142,8 @@ namespace osu.Game.Tests.Visual.Multiplayer
             if (mods != null)
                 AddStep($"set mods to {string.Join(",", mods.Select(m => m.Acronym))}", () => songSelect.AsNonNull().Mods.Value = mods);
 
-            AddStep("select other beatmap", () => songSelect.AsNonNull().Beatmap.Value = beatmaps.GetWorkingBeatmap(beatmap()));
+            AddStep("select other beatmap", () => songSelect.AsNonNull().Beatmap.Value = Beatmaps.GetWorkingBeatmap(beatmap()));
+            AddStep("confirm selection", () => InputManager.Key(Key.Enter));
             AddUntilStep("wait for return to match", () => CurrentSubScreen is MultiplayerMatchSubScreen);
         }
 

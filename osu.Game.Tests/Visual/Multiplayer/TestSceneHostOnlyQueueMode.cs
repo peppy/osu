@@ -5,6 +5,8 @@ using System;
 using System.Linq;
 using NUnit.Framework;
 using osu.Framework.Extensions;
+using osu.Framework.Extensions.ObjectExtensions;
+using osu.Framework.Screens;
 using osu.Framework.Testing;
 using osu.Game.Beatmaps;
 using osu.Game.Online.Multiplayer;
@@ -37,6 +39,14 @@ namespace osu.Game.Tests.Visual.Multiplayer
         }
 
         [Test]
+        public void TestItemStillSelectedAfterChangeToSameBeatmap()
+        {
+            selectNewItem(() => InitialBeatmap);
+
+            AddUntilStep("playlist item still selected", () => MultiplayerClient.ClientRoom?.Settings.PlaylistItemId == MultiplayerClient.ClientAPIRoom?.Playlist[0].ID);
+        }
+
+        [Test]
         public void TestSettingsUpdatedWhenChangingQueueMode()
         {
             AddStep("change queue mode", () => MultiplayerClient.ChangeSettings(new MultiplayerRoomSettings
@@ -45,14 +55,6 @@ namespace osu.Game.Tests.Visual.Multiplayer
             }).WaitSafely());
 
             AddUntilStep("api room updated", () => MultiplayerClient.ClientAPIRoom?.QueueMode == QueueMode.AllPlayers);
-        }
-
-        [Test]
-        public void TestItemStillSelectedAfterChangeToSameBeatmap()
-        {
-            selectNewItem(() => InitialBeatmap);
-
-            AddUntilStep("playlist item still selected", () => MultiplayerClient.ClientRoom?.Settings.PlaylistItemId == MultiplayerClient.ClientAPIRoom?.Playlist[0].ID);
         }
 
         [Test]
@@ -87,6 +89,8 @@ namespace osu.Game.Tests.Visual.Multiplayer
 
         private void selectNewItem(Func<BeatmapInfo> beatmap)
         {
+            Screens.SelectV2.SongSelect? songSelect = null;
+
             AddUntilStep("wait for playlist panels to load", () =>
             {
                 var queueList = this.ChildrenOfType<MultiplayerQueueList>().Single();
@@ -99,12 +103,14 @@ namespace osu.Game.Tests.Visual.Multiplayer
                 InputManager.Click(MouseButton.Left);
             });
 
-            AddUntilStep("wait for song select", () => CurrentSubScreen is Screens.Select.SongSelect select && select.BeatmapSetsLoaded);
+            AddUntilStep("wait for song select", () => (songSelect = CurrentSubScreen as Screens.SelectV2.SongSelect) != null);
+            AddUntilStep("wait for loaded", () => songSelect.IsCurrentScreen() && !songSelect.AsNonNull().IsFiltering);
 
             BeatmapInfo otherBeatmap = null!;
-            AddStep("select other beatmap", () => ((Screens.Select.SongSelect)CurrentSubScreen).FinaliseSelection(otherBeatmap = beatmap()));
-
+            AddStep("select other beatmap", () => songSelect.AsNonNull().Beatmap.Value = Beatmaps.GetWorkingBeatmap(otherBeatmap = beatmap()));
+            AddStep("confirm selection", () => InputManager.Key(Key.Enter));
             AddUntilStep("wait for return to match", () => CurrentSubScreen is MultiplayerMatchSubScreen);
+
             AddUntilStep("selected item is new beatmap", () => Beatmap.Value.BeatmapInfo.OnlineID == otherBeatmap.OnlineID);
         }
     }
