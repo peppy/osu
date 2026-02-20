@@ -554,7 +554,7 @@ namespace osu.Game.Screens.SelectV2
         /// </summary>
         /// <param name="beatmap">The beatmap which should be selected. If not provided, the current globally selected beatmap will be used.</param>
         /// <param name="startAction">The action to perform if conditions are met to be able to proceed. May not be invoked if in an invalid state.</param>
-        public void SelectAndRun(BeatmapInfo beatmap, Action startAction)
+        protected void SelectAndRun(BeatmapInfo beatmap, Action startAction)
         {
             if (!this.IsCurrentScreen())
                 return;
