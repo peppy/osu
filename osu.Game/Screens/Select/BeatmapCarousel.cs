@@ -757,16 +757,27 @@ namespace osu.Game.Screens.Select
 
         private float selectionFocusOffset;
 
+        private Drawable? hoveredPanel;
+
         protected override void Update()
         {
             base.Update();
 
-            selectionFocusOffset = (float)Interpolation.DampContinuously(selectionFocusOffset, VisuallyFocusSelected ? 300 : 0, 100, Time.Elapsed);
+            hoveredPanel = Scroll.Panels.FirstOrDefault(p => p.IsHovered);
+
+            selectionFocusOffset = VisuallyFocusSelected ? 300 : 0;
         }
 
         protected override float GetPanelXOffset(Drawable panel)
         {
-            return base.GetPanelXOffset(panel) + (((ICarouselPanel)panel).Selected.Value ? 0 : selectionFocusOffset);
+            float hoveredOffset = 0;
+
+            if (hoveredPanel != null)
+            {
+                hoveredOffset = Math.Min(80, Math.Abs(panel.Y - hoveredPanel.Y) / 10);
+            }
+
+            return base.GetPanelXOffset(panel) + hoveredOffset + (((ICarouselPanel)panel).Selected.Value ? 0 : selectionFocusOffset);
         }
 
         #endregion

@@ -996,7 +996,7 @@ namespace osu.Game.Graphics.Carousel
                 if (c.DrawYPosition != c.Item.CarouselYPosition)
                     c.DrawYPosition = Interpolation.DampContinuously(c.DrawYPosition, c.Item.CarouselYPosition, 50, Time.Elapsed);
 
-                panel.X = GetPanelXOffset(panel);
+                panel.X = (float)Interpolation.DampContinuously(panel.X,GetPanelXOffset(panel), 60, Time.Elapsed);
 
                 c.Selected.Value = currentSelection?.CarouselItem != null && CheckModelEquality(c.Item, currentSelection.CarouselItem);
                 c.KeyboardSelected.Value = c.Item == currentKeyboardSelection?.CarouselItem;
