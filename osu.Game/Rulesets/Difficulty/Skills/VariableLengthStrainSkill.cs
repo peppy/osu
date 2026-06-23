@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using osu.Framework.Extensions;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Mods;
 
@@ -38,7 +37,7 @@ namespace osu.Game.Rulesets.Difficulty.Skills
         /// </summary>
         private double maxStoredSections => 11 / (1 - DecayWeight);
 
-        private readonly List<StrainPeak> strainPeaks = new List<StrainPeak>();
+        private readonly LinkedList<StrainPeak> strainPeaks = new LinkedList<StrainPeak>();
 
         private double totalLength;
 
@@ -154,15 +153,28 @@ namespace osu.Game.Rulesets.Difficulty.Skills
         /// </summary>
         private void saveCurrentPeak(double sectionLength)
         {
-            strainPeaks.AddInPlace(new StrainPeak(currentSectionPeak, sectionLength));
+            var strainPeak = new StrainPeak(currentSectionPeak, sectionLength);
             totalLength += sectionLength;
+
+            // find insertion point
+            var node = strainPeaks.First;
+
+            if (node == null || strainPeak.Value < node.Value.Value)
+                strainPeaks.AddFirst(strainPeak);
+            else
+            {
+                while (node.Next != null && node.Next.Value.Value <= strainPeak.Value)
+                    node = node.Next;
+
+                strainPeaks.AddAfter(node, strainPeak);
+            }
 
             // Remove from the back of our strain peaks if there's any which are too deep to contribute to difficulty.
             // `maxStoredSections` dictates for us how many sections will preserve at least 99.999% of the difficulty value.
             while (totalLength > maxStoredSections * MaxSectionLength)
             {
-                totalLength -= strainPeaks[0].SectionLength;
-                strainPeaks.RemoveAt(0);
+                totalLength -= strainPeaks.First!.Value.SectionLength;
+                strainPeaks.RemoveFirst();
             }
         }
 
@@ -262,14 +274,14 @@ namespace osu.Game.Rulesets.Difficulty.Skills
         /// </summary>
         public readonly struct StrainPeak : IComparable<StrainPeak>
         {
+            public double Value { get; }
+            public double SectionLength { get; }
+
             public StrainPeak(double value, double sectionLength)
             {
                 Value = value;
                 SectionLength = Math.Round(sectionLength);
             }
-
-            public double Value { get; }
-            public double SectionLength { get; }
 
             public int CompareTo(StrainPeak other) => Value.CompareTo(other.Value);
         }
