@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Utils;
 using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
@@ -72,7 +71,9 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators.Speed
 
                 // Make sure to always have the current island initialised - if we don't do it here it will only initialise on the next rhythm change
                 if (island.Delta == int.MaxValue)
+                {
                     island = new Island((int)currDelta);
+                }
 
                 // calculate how much current delta difference deserves a rhythm bonus
                 // this function is meant to reduce rhythm bonus for deltas that are multiples of each other (i.e 100 and 200)
@@ -132,12 +133,23 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators.Speed
                         if (isSpeedingUp)
                             effectiveRatio *= 0.65;
 
-                        (Island Island, int Count) tuple = islandCounts.FirstOrDefault(x => x.Island.AlmostEquals(island, deltaDifferenceEpsilon));
+                        // This code is pretty bad. I'd hope we don't need to have tuples or counts, with a better data structure for "Island" instead.
+                        (Island Island, int Count) tuple = default;
+                        int tupleIndex = -1;
 
-                        if (tuple != default)
+                        // For iteration is intentional here as previous LINQ implementation led to very high overheads.
+                        for (int j = 0; j < islandCounts.Count; j++)
                         {
-                            int countIndex = islandCounts.IndexOf(tuple);
+                            if (islandCounts[j].Island.AlmostEquals(island, deltaDifferenceEpsilon))
+                            {
+                                tuple = islandCounts[j];
+                                tupleIndex = j;
+                                break;
+                            }
+                        }
 
+                        if (tupleIndex >= 0)
+                        {
                             // only add island to island counts if they're going one after another
                             if (previousIsland.AlmostEquals(island, deltaDifferenceEpsilon))
                                 tuple.Count++;
@@ -146,7 +158,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators.Speed
                             double power = DifficultyCalculationUtils.Logistic(island.Delta, maxValue: 2.75, multiplier: 0.24, midpointOffset: 58.33);
                             effectiveRatio *= Math.Min(3.0 / tuple.Count, Math.Pow(1.0 / tuple.Count, power));
 
-                            islandCounts[countIndex] = (tuple.Island, tuple.Count);
+                            islandCounts[tupleIndex] = tuple;
                         }
                         else
                         {
@@ -221,7 +233,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators.Speed
         /// An island is a thing. I'm not sure what thing it is, but it's definitely a thing.
         /// TODO: document this stuff please.
         /// </summary>
-        private class Island
+        private sealed class Island
         {
             public int Delta { get; private set; }
             public int DeltaCount { get; private set; } = 1;
