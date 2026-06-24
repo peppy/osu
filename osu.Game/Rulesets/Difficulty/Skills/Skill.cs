@@ -24,12 +24,17 @@ namespace osu.Game.Rulesets.Difficulty.Skills
         /// <summary>
         /// List of calculated per-object difficulties, populated by Process
         /// </summary>
-        protected readonly List<double> ObjectDifficulties = new List<double>();
+        protected readonly List<double> ObjectDifficulties;
+
+        protected readonly IBeatmap Beatmap;
 
         private readonly Mod[] mods;
 
         protected Skill(IBeatmap beatmap, Mod[] mods)
         {
+            Beatmap = beatmap;
+            ObjectDifficulties = new List<double>(Beatmap.HitObjects.Count);
+
             this.mods = mods;
         }
 
