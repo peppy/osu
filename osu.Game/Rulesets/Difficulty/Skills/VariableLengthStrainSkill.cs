@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Mods;
 
@@ -47,8 +48,8 @@ namespace osu.Game.Rulesets.Difficulty.Skills
         /// </summary>
         private readonly LinkedList<(double StrainValue, double StartTime)> queuedStrains = new LinkedList<(double, double)>();
 
-        protected VariableLengthStrainSkill(Mod[] mods)
-            : base(mods)
+        protected VariableLengthStrainSkill(IBeatmap beatmap, Mod[] mods)
+            : base(beatmap, mods)
         {
         }
 

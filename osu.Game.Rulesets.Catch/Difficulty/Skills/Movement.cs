@@ -1,6 +1,7 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Catch.Difficulty.Evaluators;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Skills;
@@ -17,8 +18,8 @@ namespace osu.Game.Rulesets.Catch.Difficulty.Skills
 
         protected override int SectionLength => 750;
 
-        public Movement(Mod[] mods)
-            : base(mods)
+        public Movement(IBeatmap beatmap, Mod[] mods)
+            : base(beatmap, mods)
         {
         }
 

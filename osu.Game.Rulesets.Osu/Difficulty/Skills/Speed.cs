@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Rulesets.Difficulty.Utils;
@@ -30,8 +31,8 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Skills
         protected override double HarmonicScale => 20;
         protected override double DecayExponent => 0.9;
 
-        public Speed(Mod[] mods)
-            : base(mods)
+        public Speed(IBeatmap beatmap, Mod[] mods)
+            : base(beatmap, mods)
         {
         }
 

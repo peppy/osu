@@ -164,14 +164,14 @@ namespace osu.Game.Rulesets.Osu.Difficulty
         {
             var skills = new List<Skill>
             {
-                new Aim(mods, true),
-                new Aim(mods, false),
-                new Speed(mods),
-                new Reading(mods)
+                new Aim(beatmap, mods, true),
+                new Aim(beatmap, mods, false),
+                new Speed(beatmap, mods),
+                new Reading(beatmap, mods)
             };
 
             if (mods.Any(h => h is OsuModFlashlight))
-                skills.Add(new Flashlight(mods, beatmap.HitObjects.Count));
+                skills.Add(new Flashlight(beatmap, mods, beatmap.HitObjects.Count));
 
             return skills.ToArray();
         }

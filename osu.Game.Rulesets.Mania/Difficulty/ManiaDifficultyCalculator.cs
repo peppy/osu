@@ -93,7 +93,7 @@ namespace osu.Game.Rulesets.Mania.Difficulty
 
         protected override Skill[] CreateSkills(IBeatmap beatmap, Mod[] mods) => new Skill[]
         {
-            new Strain(mods, ((ManiaBeatmap)Beatmap).TotalColumns)
+            new Strain(beatmap, mods, ((ManiaBeatmap)Beatmap).TotalColumns)
         };
 
         protected override Mod[] DifficultyAdjustmentMods

@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Utils;
 using osu.Game.Rulesets.Mods;
@@ -29,8 +30,8 @@ namespace osu.Game.Rulesets.Difficulty.Skills
         /// </summary>
         protected virtual double DecayExponent => 0.9;
 
-        protected HarmonicSkill(Mod[] mods)
-            : base(mods)
+        protected HarmonicSkill(IBeatmap beatmap, Mod[] mods)
+            : base(beatmap, mods)
         {
         }
 

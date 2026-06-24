@@ -1,6 +1,7 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Rulesets.Difficulty.Utils;
@@ -17,8 +18,8 @@ namespace osu.Game.Rulesets.Taiko.Difficulty.Skills
         protected override double SkillMultiplier => 1.0;
         protected override double StrainDecayBase => 0.4;
 
-        public Rhythm(Mod[] mods)
-            : base(mods)
+        public Rhythm(IBeatmap beatmap, Mod[] mods)
+            : base(beatmap, mods)
         {
         }
 

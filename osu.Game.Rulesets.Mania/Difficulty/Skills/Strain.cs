@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Rulesets.Mania.Difficulty.Evaluators;
@@ -22,8 +23,8 @@ namespace osu.Game.Rulesets.Mania.Difficulty.Skills
         private double highestIndividualStrain;
         private double overallStrain;
 
-        public Strain(Mod[] mods, int totalColumns)
-            : base(mods)
+        public Strain(IBeatmap beatmap, Mod[] mods, int totalColumns)
+            : base(beatmap, mods)
         {
             individualStrains = new double[totalColumns];
             overallStrain = 1;

@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Rulesets.Difficulty.Utils;
@@ -27,11 +28,12 @@ namespace osu.Game.Rulesets.Taiko.Difficulty.Skills
         /// <summary>
         /// Creates a <see cref="Stamina"/> skill.
         /// </summary>
+        /// <param name="beatmap">The beatmap.</param>
         /// <param name="mods">Mods for use in skill calculations.</param>
         /// <param name="singleColourStamina">Reads when Stamina is from a single coloured pattern.</param>
         /// <param name="isConvert">Determines if the currently evaluated beatmap is converted.</param>
-        public Stamina(Mod[] mods, bool singleColourStamina, bool isConvert)
-            : base(mods)
+        public Stamina(IBeatmap beatmap, Mod[] mods, bool singleColourStamina, bool isConvert)
+            : base(beatmap, mods)
         {
             SingleColourStamina = singleColourStamina;
             this.isConvert = isConvert;

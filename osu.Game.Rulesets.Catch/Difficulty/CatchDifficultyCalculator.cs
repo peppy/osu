@@ -78,7 +78,7 @@ namespace osu.Game.Rulesets.Catch.Difficulty
         {
             return new Skill[]
             {
-                new Movement(mods),
+                new Movement(beatmap, mods),
             };
         }
 

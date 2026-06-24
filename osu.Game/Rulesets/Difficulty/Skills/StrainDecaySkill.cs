@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Mods;
 
@@ -29,8 +30,8 @@ namespace osu.Game.Rulesets.Difficulty.Skills
         /// </summary>
         protected double CurrentStrain { get; private set; }
 
-        protected StrainDecaySkill(Mod[] mods)
-            : base(mods)
+        protected StrainDecaySkill(IBeatmap beatmap, Mod[] mods)
+            : base(beatmap, mods)
         {
         }
 

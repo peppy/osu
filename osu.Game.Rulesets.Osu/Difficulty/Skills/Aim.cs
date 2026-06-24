@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Utils;
+using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Rulesets.Difficulty.Utils;
@@ -23,8 +24,8 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Skills
     {
         public readonly bool IncludeSliders;
 
-        public Aim(Mod[] mods, bool includeSliders)
-            : base(mods)
+        public Aim(IBeatmap beatmap, Mod[] mods, bool includeSliders)
+            : base(beatmap, mods)
         {
             IncludeSliders = includeSliders;
         }

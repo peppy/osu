@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Rulesets.Difficulty.Utils;
@@ -20,8 +21,8 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Skills
     {
         private readonly int totalObjects;
 
-        public Flashlight(Mod[] mods, int totalObjects)
-            : base(mods)
+        public Flashlight(IBeatmap beatmap, Mod[] mods, int totalObjects)
+            : base(beatmap, mods)
         {
             this.totalObjects = totalObjects;
         }

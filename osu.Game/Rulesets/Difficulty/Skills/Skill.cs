@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Generic;
+using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Mods;
 
@@ -27,7 +28,7 @@ namespace osu.Game.Rulesets.Difficulty.Skills
 
         private readonly Mod[] mods;
 
-        protected Skill(Mod[] mods)
+        protected Skill(IBeatmap beatmap, Mod[] mods)
         {
             this.mods = mods;
         }

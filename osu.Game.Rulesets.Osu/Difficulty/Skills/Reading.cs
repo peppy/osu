@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Utils;
+using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Rulesets.Difficulty.Utils;
@@ -21,8 +22,8 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Skills
 
         private readonly bool hasHiddenMod;
 
-        public Reading(Mod[] mods)
-            : base(mods)
+        public Reading(IBeatmap beatmap, Mod[] mods)
+            : base(beatmap, mods)
         {
             hasHiddenMod = mods.OfType<OsuModHidden>().Any(m => !m.OnlyFadeApproachCircles.Value);
         }
