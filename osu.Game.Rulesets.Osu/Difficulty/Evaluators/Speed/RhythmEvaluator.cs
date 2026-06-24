@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Utils;
 using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
@@ -35,7 +36,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators.Speed
 
             // we can't use dictionary here because we need to compare island with a tolerance
             // which is impossible to pass into the hash comparer
-            var islandCounts = new List<(Island Island, int Count)>();
+            var islandCounts = getIslandList();
 
             double startRatio = 0; // store the ratio of the current start of an island to buff for tighter rhythms
 
@@ -220,6 +221,15 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators.Speed
             return Math.Sqrt(4 + rhythmComplexitySum * rhythm_overall_multiplier) / 2.0; // produces multiplier that can be applied to strain. range [1, infinity) (not really though);
         }
 
+        private static readonly ThreadLocal<List<(Island Island, int Count)>> island_counts_cache = new ThreadLocal<List<(Island Island, int Count)>>(() => new List<(Island Island, int Count)>(8));
+
+        private static List<(Island Island, int Count)> getIslandList()
+        {
+            var islandCounts = island_counts_cache.Value!;
+            islandCounts.Clear();
+            return islandCounts;
+        }
+
         private static double getEffectiveRatio(double deltaDifference)
         {
             // Take only the fractional part of the value since we're only interested in punishing multiples
@@ -232,7 +242,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators.Speed
         /// An island is a thing. I'm not sure what thing it is, but it's definitely a thing.
         /// TODO: document this stuff please.
         /// </summary>
-        private sealed class Island
+        private sealed record Island
         {
             public int Delta { get; private set; }
             public int DeltaCount { get; private set; } = 1;
