@@ -8,10 +8,17 @@ using osu.Desktop.LegacyIpc;
 using osu.Desktop.Windows;
 using osu.Framework;
 using osu.Framework.Development;
+using osu.Framework.IO.Stores;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Game;
+using osu.Game.Beatmaps;
+using osu.Game.Beatmaps.Formats;
+using osu.Game.IO;
+using osu.Game.IO.Archives;
 using osu.Game.IPC;
+using osu.Game.Rulesets.Osu;
+using osu.Game.Tests.Resources;
 using osu.Game.Tournament;
 using SDL;
 using Velopack;
@@ -33,6 +40,31 @@ namespace osu.Desktop
         [STAThread]
         public static void Main(string[] args)
         {
+            using var resources = new DllResourceStore(typeof(TestResources).Assembly);
+
+            using var archive = resources.GetStream("Resources/Archives/241526 Soleily - Renatus.osz");
+            using var archiveReader = new ZipArchiveReader(archive);
+
+            var osuBeatmap = readBeatmap(archiveReader, "Soleily - Renatus (Gamu) [Insane].osu");
+            var osuCalculator = new OsuRuleset().CreateDifficultyCalculator(osuBeatmap);
+
+            for (int i = 0; i < 10000; i++)
+                osuCalculator.Calculate();
+
+            static WorkingBeatmap readBeatmap(ZipArchiveReader archiveReader, string beatmapName)
+            {
+                using var beatmapStream = new MemoryStream();
+                archiveReader.GetStream(beatmapName).CopyTo(beatmapStream);
+
+                beatmapStream.Seek(0, SeekOrigin.Begin);
+                using var reader = new LineBufferedReader(beatmapStream);
+
+                var decoder = Decoder.GetDecoder<Beatmap>(reader);
+                return new FlatWorkingBeatmap(decoder.Decode(reader));
+            }
+
+            Environment.Exit(0);
+
             // IMPORTANT DON'T IGNORE: For general sanity, velopack's setup needs to run before anything else.
             // This has bitten us in the rear before (bricked updater), and although the underlying issue from
             // last time has been fixed, let's not tempt fate.
