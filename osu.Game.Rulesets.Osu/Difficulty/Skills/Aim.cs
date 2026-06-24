@@ -213,9 +213,11 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Skills
         {
             // Sections with 0 strain are excluded to avoid worst-case time complexity of the following sort (e.g. /b/2351871).
             // These sections will not contribute to the difficulty.
-            var peaks = GetCurrentStrainPeaks().Where(p => p.Value > 0);
+            var peaks = GetCurrentStrainPeaks()
+                        .Where(p => p.Value > 0)
+                        .OrderByDescending(p => p.Value);
 
-            List<StrainPeak> strains = peaks.OrderByDescending(p => p.Value).ToList();
+            List<StrainPeak> strains = peaks.ToList();
 
             const int chunk_size = 20;
             double time = 0;
@@ -241,9 +243,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Skills
                 strainsToRemove++;
             }
 
-            strains.RemoveRange(0, strainsToRemove);
-
-            return strains.OrderByDescending(p => p.Value);
+            return strains.Skip(strainsToRemove).OrderByDescending(p => p.Value);
         }
     }
 }
