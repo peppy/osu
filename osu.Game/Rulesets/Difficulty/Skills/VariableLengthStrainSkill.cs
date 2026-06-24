@@ -45,7 +45,7 @@ namespace osu.Game.Rulesets.Difficulty.Skills
         /// Stores previous strains so that, if a high difficulty hit object is followed by a lower
         /// difficulty hit object, the high difficulty hit object gets a full strain instead of being cut short.
         /// </summary>
-        private readonly List<(double StrainValue, double StartTime)> queuedStrains = new List<(double, double)>();
+        private readonly LinkedList<(double StrainValue, double StartTime)> queuedStrains = new LinkedList<(double, double)>();
 
         protected VariableLengthStrainSkill(Mod[] mods)
             : base(mods)
@@ -95,10 +95,10 @@ namespace osu.Game.Rulesets.Difficulty.Skills
             else
             {
                 // Empty the queue of smaller elements as they won't be relevant to difficulty
-                while (queuedStrains.Count > 0 && queuedStrains[^1].StrainValue < currentStrain)
-                    queuedStrains.RemoveAt(queuedStrains.Count - 1);
+                while (queuedStrains.Count > 0 && queuedStrains.Last!.Value.StrainValue < currentStrain)
+                    queuedStrains.RemoveLast();
 
-                queuedStrains.Add((currentStrain, current.StartTime));
+                queuedStrains.AddLast((currentStrain, current.StartTime));
             }
 
             return currentStrain;
@@ -121,10 +121,10 @@ namespace osu.Game.Rulesets.Difficulty.Skills
                 currentSectionBegin = currentSectionEnd;
 
                 // If we have any strains queued, then we will use those until the object falls into the new section.
-                if (queuedStrains.Count > 0)
+                if (queuedStrains.First != null)
                 {
-                    (double strain, double startTime) = queuedStrains[0];
-                    queuedStrains.RemoveAt(0);
+                    (double strain, double startTime) = queuedStrains.First.Value;
+                    queuedStrains.RemoveFirst();
 
                     // We want the section to end `MaxSectionLength` after the strain we're using as an influence.
                     // This effectively means the queued strain will exist in its own section if the gap between the queued strain and current object is large enough.
