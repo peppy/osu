@@ -250,7 +250,7 @@ namespace osu.Game.Beatmaps
                     b.BeatmapInfo.StarRating = BeatmapInfo.StarRating; // this could be recomputed in the decoding process but it's a bit annoying to do.
 
                     return b;
-                }, loadCancellationSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                }, loadCancellationSource.Token);
             }
         }
 
@@ -260,6 +260,9 @@ namespace osu.Game.Beatmaps
 
         public IBeatmap GetPlayableBeatmap(IRulesetInfo ruleset, IReadOnlyList<Mod> mods = null)
         {
+            if (cachedPlayableBeatmap != null)
+                return cachedPlayableBeatmap;
+
             try
             {
                 using (var cancellationTokenSource = new CancellationTokenSource(10_000))
@@ -274,8 +277,14 @@ namespace osu.Game.Beatmaps
             }
         }
 
+        [CanBeNull]
+        private IBeatmap cachedPlayableBeatmap;
+
         public virtual IBeatmap GetPlayableBeatmap(IRulesetInfo ruleset, IReadOnlyList<Mod> mods, CancellationToken token)
         {
+            if (cachedPlayableBeatmap != null)
+                return cachedPlayableBeatmap;
+
             var rulesetInstance = ruleset.CreateInstance();
 
             if (rulesetInstance == null)
@@ -347,6 +356,8 @@ namespace osu.Game.Beatmaps
                 token.ThrowIfCancellationRequested();
                 mod.ApplyToBeatmap(converted);
             }
+
+            cachedPlayableBeatmap = converted;
 
             return converted;
         }
