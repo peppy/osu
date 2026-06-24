@@ -2,7 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Utils;
 using osu.Game.Beatmaps;
@@ -13,13 +12,12 @@ using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.Difficulty.Evaluators;
 using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Osu.Mods;
+using osu.Game.Utils;
 
 namespace osu.Game.Rulesets.Osu.Difficulty.Skills
 {
     public class Reading : HarmonicSkill
     {
-        private readonly List<DifficultyHitObject> objectList = new List<DifficultyHitObject>();
-
         private readonly bool hasHiddenMod;
 
         public Reading(IBeatmap beatmap, Mod[] mods)
@@ -37,8 +35,6 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Skills
 
         protected override double ObjectDifficultyOf(DifficultyHitObject current)
         {
-            objectList.Add(current);
-
             double decay = strainDecay(current.DeltaTime);
 
             currentStrain *= decay;
@@ -86,16 +82,17 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Skills
 
         private int calculateReducedNoteCount()
         {
+            double clockRate = ModUtils.CalculateRateWithMods(Mods);
             const double reduced_difficulty_duration = 60 * 1000;
 
-            if (objectList.Count == 0)
+            if (Beatmap.HitObjects.Count == 0)
                 return 0;
 
-            double reducedDuration = objectList.First().StartTime + reduced_difficulty_duration;
+            double reducedDuration = Beatmap.HitObjects.First().StartTime + reduced_difficulty_duration * clockRate;
 
             int reducedNoteCount = 0;
 
-            foreach (var hitObject in objectList)
+            foreach (var hitObject in Beatmap.HitObjects.Skip(1))
             {
                 if (hitObject.StartTime > reducedDuration)
                     break;
