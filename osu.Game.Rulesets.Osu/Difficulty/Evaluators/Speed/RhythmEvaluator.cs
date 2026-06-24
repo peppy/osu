@@ -134,38 +134,37 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators.Speed
                             effectiveRatio *= 0.65;
 
                         // This code is pretty bad. I'd hope we don't need to have tuples or counts, with a better data structure for "Island" instead.
-                        (Island Island, int Count) tuple = default;
-                        int tupleIndex = -1;
+                        bool found = false;
 
-                        // For iteration is intentional here as previous LINQ implementation led to very high overheads.
+                        // `For` iteration is intentional here as previous LINQ implementation led to very high overheads.
                         for (int j = 0; j < islandCounts.Count; j++)
                         {
                             if (islandCounts[j].Island.AlmostEquals(island, deltaDifferenceEpsilon))
                             {
-                                tuple = islandCounts[j];
-                                tupleIndex = j;
+                                int count = islandCounts[j].Count;
+
+                                // only add island to island counts if they're going one after another
+                                bool consecutiveIslands = previousIsland.AlmostEquals(island, deltaDifferenceEpsilon);
+
+                                if (consecutiveIslands)
+                                    count++;
+
+                                // repeated island (ex: triplet -> triplet)
+                                double power = DifficultyCalculationUtils.Logistic(island.Delta, maxValue: 2.75, multiplier: 0.24, midpointOffset: 58.33);
+                                effectiveRatio *= Math.Min(3.0 / count, Math.Pow(1.0 / count, power));
+
+                                if (consecutiveIslands)
+                                    islandCounts[j] = (islandCounts[j].Island, count);
+
+                                found = true;
                                 break;
                             }
                         }
 
-                        if (tupleIndex >= 0)
-                        {
-                            // only add island to island counts if they're going one after another
-                            if (previousIsland.AlmostEquals(island, deltaDifferenceEpsilon))
-                                tuple.Count++;
-
-                            // repeated island (ex: triplet -> triplet)
-                            double power = DifficultyCalculationUtils.Logistic(island.Delta, maxValue: 2.75, multiplier: 0.24, midpointOffset: 58.33);
-                            effectiveRatio *= Math.Min(3.0 / tuple.Count, Math.Pow(1.0 / tuple.Count, power));
-
-                            islandCounts[tupleIndex] = tuple;
-                        }
-                        else
+                        if (!found)
                         {
                             if (island.DeltaCount > 0)
-                            {
                                 islandCounts.Add((island, 1));
-                            }
                         }
 
                         // scale down the difficulty if the object is doubletappable
