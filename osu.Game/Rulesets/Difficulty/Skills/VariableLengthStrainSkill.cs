@@ -154,17 +154,26 @@ namespace osu.Game.Rulesets.Difficulty.Skills
         /// </summary>
         private void saveCurrentPeak(double sectionLength)
         {
-            var strainPeak = new StrainPeak(currentSectionPeak, sectionLength);
+            if (peaksFinalised)
+                throw new InvalidOperationException("Can't add peaks after they are retrieved.");
+
+            // Sections with 0 strain are excluded to avoid worst-case time complexity of the following sort (e.g. /b/2351871).
+            // These sections will not contribute to the difficulty.
+            if (currentSectionPeak == 0)
+                return;
+
+            StrainPeak strainPeak = new StrainPeak(currentSectionPeak, sectionLength);
+
             totalLength += sectionLength;
 
-            // find insertion point
+            // find insertion point (storing descending based on value).
             var node = strainPeaks.First;
 
-            if (node == null || strainPeak.Value < node.Value.Value)
+            if (node == null || strainPeak.Value > node.Value.Value)
                 strainPeaks.AddFirst(strainPeak);
             else
             {
-                while (node.Next != null && node.Next.Value.Value <= strainPeak.Value)
+                while (node.Next != null && node.Next.Value.Value > strainPeak.Value)
                     node = node.Next;
 
                 strainPeaks.AddAfter(node, strainPeak);
@@ -174,8 +183,8 @@ namespace osu.Game.Rulesets.Difficulty.Skills
             // `maxStoredSections` dictates for us how many sections will preserve at least 99.999% of the difficulty value.
             while (totalLength > maxStoredSections * MaxSectionLength)
             {
-                totalLength -= strainPeaks.First!.Value.SectionLength;
-                strainPeaks.RemoveFirst();
+                totalLength -= strainPeaks.Last!.Value.SectionLength;
+                strainPeaks.RemoveLast();
             }
         }
 
@@ -199,13 +208,22 @@ namespace osu.Game.Rulesets.Difficulty.Skills
         /// <returns>The peak strain.</returns>
         protected abstract double CalculateInitialStrain(double time, DifficultyHitObject current);
 
+        private bool peaksFinalised;
+
         /// <summary>
         /// Returns a live enumerable of the peak strains for each <see cref="MaxSectionLength"/> section of the beatmap,
         /// including the peak of the current section.
         /// </summary>
-        public IEnumerable<StrainPeak> GetCurrentStrainPeaks() =>
-            // TODO: this append is jank as hell. i guess it's a way of putting the "final" peak on the end, but the way it's done is shoddy.
-            strainPeaks.Append(new StrainPeak(currentSectionPeak, currentSectionEnd - currentSectionBegin));
+        public IEnumerable<StrainPeak> GetCurrentStrainPeaks()
+        {
+            if (!peaksFinalised)
+            {
+                saveCurrentPeak(currentSectionEnd - currentSectionBegin);
+                peaksFinalised = true;
+            }
+
+            return strainPeaks;
+        }
 
         /// <summary>
         /// Calculates the number of strains weighted against the top strain.

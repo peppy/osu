@@ -212,11 +212,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Skills
         /// <returns></returns>
         private IEnumerable<StrainPeak> getReducedStrainPeaks()
         {
-            // Sections with 0 strain are excluded to avoid worst-case time complexity of the following sort (e.g. /b/2351871).
-            // These sections will not contribute to the difficulty.
-            var peaks = GetCurrentStrainPeaks().Where(p => p.Value > 0);
-
-            List<StrainPeak> strains = peaks.OrderByDescending(p => (p.Value, p.SectionLength)).ToList();
+            List<StrainPeak> strains = GetCurrentStrainPeaks().ToList();
 
             const int chunk_size = 20;
             double time = 0;
