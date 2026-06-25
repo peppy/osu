@@ -212,33 +212,40 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Skills
         /// <returns></returns>
         private IEnumerable<StrainPeak> getReducedStrainPeaks()
         {
-            List<StrainPeak> strains = GetCurrentStrainPeaks().ToList();
+            var strains = GetFinalisedStrainPeaks();
 
             const int chunk_size = 20;
             double time = 0;
-            int strainsToRemove = 0; // All strains are removed at the end for optimization purposes
+
+            var chunked = new List<StrainPeak>();
 
             // We are reducing the highest strains first to account for extreme difficulty spikes
             // Strains are split into 20ms chunks to try to mitigate inconsistencies caused by reducing strains
-            while (strains.Count > strainsToRemove && time < reducedSectionTime)
+            while (time < reducedSectionTime)
             {
-                StrainPeak strain = strains[strainsToRemove];
+                if (strains.First == null)
+                    break;
+
+                StrainPeak strain = strains.First.Value;
 
                 for (double addedTime = 0; addedTime < strain.SectionLength; addedTime += chunk_size)
                 {
                     double scale = Math.Log10(Interpolation.Lerp(1, 10, Math.Clamp((time + addedTime) / reducedSectionTime, 0, 1)));
 
-                    strains.Add(new StrainPeak(
+                    chunked.Add(new StrainPeak(
                         strain.Value * Interpolation.Lerp(reduced_strain_baseline, 1.0, scale),
                         Math.Min(chunk_size, strain.SectionLength - addedTime)
                     ));
                 }
 
                 time += strain.SectionLength;
-                strainsToRemove++;
+                strains.RemoveFirst();
             }
 
-            return strains.Skip(strainsToRemove).OrderByDescending(p => p.Value);
+            foreach (var strain in chunked)
+                InsertPeak(strain);
+
+            return strains;
         }
     }
 }

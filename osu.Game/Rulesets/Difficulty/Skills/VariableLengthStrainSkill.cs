@@ -166,6 +166,19 @@ namespace osu.Game.Rulesets.Difficulty.Skills
 
             totalLength += sectionLength;
 
+            InsertPeak(strainPeak);
+
+            // Remove from the back of our strain peaks if there's any which are too deep to contribute to difficulty.
+            // `maxStoredSections` dictates for us how many sections will preserve at least 99.999% of the difficulty value.
+            while (totalLength > maxStoredSections * MaxSectionLength)
+            {
+                totalLength -= strainPeaks.Last!.Value.SectionLength;
+                strainPeaks.RemoveLast();
+            }
+        }
+
+        protected void InsertPeak(StrainPeak strainPeak)
+        {
             // find insertion point (storing descending based on value).
             var node = strainPeaks.First;
 
@@ -177,14 +190,6 @@ namespace osu.Game.Rulesets.Difficulty.Skills
                     node = node.Next;
 
                 strainPeaks.AddAfter(node, strainPeak);
-            }
-
-            // Remove from the back of our strain peaks if there's any which are too deep to contribute to difficulty.
-            // `maxStoredSections` dictates for us how many sections will preserve at least 99.999% of the difficulty value.
-            while (totalLength > maxStoredSections * MaxSectionLength)
-            {
-                totalLength -= strainPeaks.Last!.Value.SectionLength;
-                strainPeaks.RemoveLast();
             }
         }
 
@@ -214,7 +219,7 @@ namespace osu.Game.Rulesets.Difficulty.Skills
         /// Returns a live enumerable of the peak strains for each <see cref="MaxSectionLength"/> section of the beatmap,
         /// including the peak of the current section.
         /// </summary>
-        public IEnumerable<StrainPeak> GetCurrentStrainPeaks()
+        public LinkedList<StrainPeak> GetFinalisedStrainPeaks()
         {
             if (!peaksFinalised)
             {
