@@ -173,7 +173,7 @@ namespace osu.Game.Rulesets.Difficulty
         /// <summary>
         /// Retrieves the <see cref="DifficultyHitObject"/>s to calculate against.
         /// </summary>
-        private IEnumerable<DifficultyHitObject> getDifficultyHitObjects() => SortObjects(CreateDifficultyHitObjects(Beatmap, playableMods));
+        private IEnumerable<DifficultyHitObject> getDifficultyHitObjects() => CreateDifficultyHitObjects(Beatmap, playableMods);
 
         /// <summary>
         /// Performs required tasks before every calculation.
@@ -185,14 +185,6 @@ namespace osu.Game.Rulesets.Difficulty
             playableMods = mods.Select(m => m.DeepClone()).ToArray();
             Beatmap = WorkingBeatmap.GetPlayableBeatmap(ruleset, playableMods, cancellationToken);
         }
-
-        /// <summary>
-        /// Sorts a given set of <see cref="DifficultyHitObject"/>s.
-        /// </summary>
-        /// <param name="input">The <see cref="DifficultyHitObject"/>s to sort.</param>
-        /// <returns>The sorted <see cref="DifficultyHitObject"/>s.</returns>
-        protected virtual IEnumerable<DifficultyHitObject> SortObjects(IEnumerable<DifficultyHitObject> input)
-            => input.OrderBy(h => h.BaseObject.StartTime);
 
         /// <summary>
         /// Creates all <see cref="Mod"/> combinations which adjust the <see cref="Beatmaps.Beatmap"/> difficulty.
