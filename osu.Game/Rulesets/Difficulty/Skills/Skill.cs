@@ -42,7 +42,12 @@ namespace osu.Game.Rulesets.Difficulty.Skills
         public void Process(DifficultyHitObject current)
         {
             double difficultyValue = ProcessInternal(current);
-            ObjectDifficulties.Add(difficultyValue);
+
+            // Relationship between ObjectDifficulties and actual objects isn't 1-to-1 to begin with so it doesn't matter that excluding zero values
+            // causes misalignment with objects, apparently.
+            // See https://github.com/ppy/osu/pull/37850#discussion_r3472534239
+            if (difficultyValue > 0)
+                ObjectDifficulties.Add(difficultyValue);
         }
 
         protected abstract double ProcessInternal(DifficultyHitObject current);

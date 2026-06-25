@@ -58,10 +58,7 @@ namespace osu.Game.Rulesets.Difficulty.Skills
 
             // Notes with 0 difficulty are excluded to avoid worst-case time complexity of the following sort (e.g. /b/2351871).
             // These notes will not contribute to the difficulty.
-            double[] difficulties = ObjectDifficulties.Where(p => p > 0).ToArray();
-
-            if (difficulties.Length == 0)
-                return 0;
+            double[] difficulties = ObjectDifficulties.ToArray();
 
             ApplyDifficultyTransformation(difficulties);
 
