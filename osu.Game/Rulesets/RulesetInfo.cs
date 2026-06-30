@@ -94,20 +94,12 @@ namespace osu.Game.Rulesets
             LastAppliedDifficultyVersion = LastAppliedDifficultyVersion,
         };
 
-        private Type? type;
-
         public Ruleset CreateInstance()
         {
             if (!Available)
                 throw new RulesetLoadException(@"Ruleset not available");
 
-            if (type == null)
-                Console.WriteLine("No instantiation cache.");
-
-            // Cache the type lookup. Primarily for cases like diffcalc where the same `RulesetInfo` instances are used continuously.
-            // For the actual game client, we more regularly alloc fresh `RulesetInfo` instances from realm. This should probably change
-            // in the future as it's very inefficient in terms of allocs and realm overheads.
-            type ??= Type.GetType(InstantiationInfo);
+            var type = Type.GetType(InstantiationInfo);
 
             if (type == null)
                 throw new RulesetLoadException(@"Type lookup failure");
