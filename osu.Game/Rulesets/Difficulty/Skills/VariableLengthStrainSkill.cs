@@ -218,8 +218,7 @@ namespace osu.Game.Rulesets.Difficulty.Skills
         /// </summary>
         public IEnumerable<StrainPeak> GetCurrentStrainPeaks()
         {
-            if (finalPeak != null)
-                finalPeak = saveCurrentPeak(currentSectionEnd - currentSectionBegin);
+            finalPeak ??= saveCurrentPeak(currentSectionEnd - currentSectionBegin);
 
             return strainPeaks;
         }
