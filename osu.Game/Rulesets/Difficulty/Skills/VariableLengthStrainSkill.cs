@@ -171,6 +171,7 @@ namespace osu.Game.Rulesets.Difficulty.Skills
             if (finalPeak != null)
             {
                 strainPeaks.Remove(finalPeak.Value);
+                totalLength -= finalPeak.Value.SectionLength;
                 finalPeak = null;
             }
 
