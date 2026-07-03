@@ -171,7 +171,6 @@ namespace osu.Game.Rulesets.Difficulty.Skills
             if (finalPeak != null)
             {
                 strainPeaks.Remove(finalPeak.Value);
-                totalLength -= finalPeak.Value.SectionLength;
                 finalPeak = null;
             }
 
@@ -219,7 +218,11 @@ namespace osu.Game.Rulesets.Difficulty.Skills
         /// </summary>
         public IEnumerable<StrainPeak> GetCurrentStrainPeaks()
         {
-            finalPeak ??= saveCurrentPeak(currentSectionEnd - currentSectionBegin);
+            if (finalPeak == null)
+            {
+                finalPeak = new StrainPeak(currentSectionPeak, currentSectionEnd - currentSectionBegin);
+                strainPeaks.AddInPlace(finalPeak.Value);
+            }
 
             return strainPeaks;
         }
