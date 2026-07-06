@@ -166,7 +166,7 @@ namespace osu.Game.Rulesets.Difficulty.Skills
         /// <summary>
         /// Saves the current peak strain level to the list of strain peaks, which will be used to calculate an overall difficulty.
         /// </summary>
-        private StrainPeak saveCurrentPeak(double sectionLength)
+        private void saveCurrentPeak(double sectionLength)
         {
             if (finalPeak != null)
             {
@@ -186,8 +186,6 @@ namespace osu.Game.Rulesets.Difficulty.Skills
                 totalLength -= strainPeaks[^1].SectionLength;
                 strainPeaks.RemoveAt(strainPeaks.Count - 1);
             }
-
-            return peak;
         }
 
         /// <summary>
