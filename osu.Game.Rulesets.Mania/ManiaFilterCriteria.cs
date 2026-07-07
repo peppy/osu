@@ -102,7 +102,7 @@ namespace osu.Game.Rulesets.Mania
 
         public bool FilterMayChangeFromMods(FilterCriteria criteria, ValueChangedEvent<IReadOnlyList<Mod>> mods)
         {
-            if (includedKeyCounts.Count != LegacyBeatmapDecoder.MAX_MANIA_KEY_COUNT || criteria.Group == GroupMode.Variant)
+            if (includedKeyCounts.Count != 2 * ManiaRuleset.MAX_STAGE_KEYS || criteria.Group == GroupMode.Variant)
             {
                 // Interpreting as the Mod type is required for equality comparison.
                 HashSet<Mod> oldSet = mods.OldValue.OfType<ManiaKeyMod>().AsEnumerable<Mod>().ToHashSet();
