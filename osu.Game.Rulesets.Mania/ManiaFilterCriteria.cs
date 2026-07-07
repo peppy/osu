@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Bindables;
 using osu.Game.Beatmaps;
-using osu.Game.Beatmaps.Formats;
 using osu.Game.Rulesets.Filter;
 using osu.Game.Rulesets.Mania.Beatmaps;
 using osu.Game.Rulesets.Mania.Mods;
