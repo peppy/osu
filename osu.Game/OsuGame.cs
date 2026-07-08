@@ -1739,7 +1739,7 @@ namespace osu.Game
 
             horizontalOffsetAdjust = (float)Interpolation.DampContinuously(horizontalOffsetAdjust, adjust, 100, Time.Elapsed);
             // Avoid having everything on the screen moving by miniscule amounts (can create overhead on busy screens).
-            if (Math.Abs(horizontalOffsetAdjust) < 0.5f)
+            if (adjust == 0 && Math.Abs(horizontalOffsetAdjust) < 0.2f)
                 horizontalOffsetAdjust = 0;
 
             ScreenOffsetContainer.X = horizontalOffsetAdjust;
