@@ -8,17 +8,17 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
-using osu.Game.Graphics.Sprites;
 using osu.Game.Online.API;
+using osu.Game.Resources.Localisation.Web;
 
 namespace osu.Game.Overlays.Profile
 {
     public partial class ProfileProcessingNotice : CompositeDrawable
     {
         [BackgroundDependencyLoader]
-        private void load(IAPIProvider api, OverlayColourProvider colourProvider, OsuColour colours)
+        private void load(OsuGame? game, IAPIProvider? api, OverlayColourProvider colourProvider, OsuColour colours)
         {
-            if (string.IsNullOrEmpty(api.ScoreProcessingNoticeUrl))
+            if (string.IsNullOrEmpty(api?.ScoreProcessingNoticeUrl))
                 return;
 
             RelativeSizeAxes = Axes.X;
@@ -69,8 +69,11 @@ namespace osu.Game.Overlays.Profile
                 },
             };
 
-            flow.AddIcon(FontAwesome.Solid.InfoCircle);
-            flow.AddText(" wangs");
+            flow.AddIcon(FontAwesome.Solid.InfoCircle, cp => cp.Padding = new MarginPadding { Right = 5 });
+            // TODO: make link text work when we can.
+            flow.AddLink(UsersStrings.ShowScoreProcessingTitle(UsersStrings.ShowScoreProcessingTitleLink), () => game?.OpenUrlExternally(api.ScoreProcessingNoticeUrl));
+            flow.AddText(" ");
+            flow.AddText(UsersStrings.ShowScoreProcessingMessage);
         }
     }
 }

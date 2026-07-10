@@ -2,14 +2,17 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Diagnostics;
+using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Localisation;
 using osu.Game.Graphics;
+using osu.Game.Online.API;
 using osu.Game.Overlays.Profile.Header;
 using osu.Game.Overlays.Profile.Header.Components;
 using osu.Game.Resources.Localisation.Web;
+using osuTK.Graphics;
 
 namespace osu.Game.Overlays.Profile
 {
@@ -38,6 +41,9 @@ namespace osu.Game.Overlays.Profile
 
         protected override Drawable CreateBackground() => Empty();
 
+        [Resolved]
+        private IAPIProvider api { get; set; } = null!;
+
         protected override Drawable CreateContent() => new FillFlowContainer
         {
             RelativeSizeAxes = Axes.X,
@@ -64,6 +70,7 @@ namespace osu.Game.Overlays.Profile
                     RelativeSizeAxes = Axes.X,
                     User = { BindTarget = User },
                 },
+                new ProfileProcessingNotice(),
                 centreHeaderContainer = new CentreHeaderContainer
                 {
                     RelativeSizeAxes = Axes.X,
@@ -76,6 +83,7 @@ namespace osu.Game.Overlays.Profile
                 },
             }
         };
+
 
         protected override void LoadComplete()
         {
