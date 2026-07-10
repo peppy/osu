@@ -22,7 +22,7 @@ namespace osu.Game.Online.API
 
         public DummyLocalUserState LocalUserState { get; } = new DummyLocalUserState();
 
-        public string ScoreProcessingNoticeUrl => "https://osu.ppy.sh/home/news/2026-07-03-performance-points-star-rating-updates";
+        public string ScoreProcessingNoticeUrl { get; set; } = string.Empty;
 
         public Bindable<APIUser> LocalUser => LocalUserState.User;
 
