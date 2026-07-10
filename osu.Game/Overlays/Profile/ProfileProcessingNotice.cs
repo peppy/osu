@@ -6,17 +6,21 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Online.API;
+using osu.Game.Online.Chat;
 using osu.Game.Resources.Localisation.Web;
 
 namespace osu.Game.Overlays.Profile
 {
     public partial class ProfileProcessingNotice : CompositeDrawable
     {
+        private ILocalisedBindableString noticeText = null!;
+
         [BackgroundDependencyLoader]
-        private void load(OsuGame? game, IAPIProvider? api, OverlayColourProvider colourProvider, OsuColour colours)
+        private void load(IAPIProvider? api, OverlayColourProvider colourProvider, OsuColour colours, LocalisationManager localisation)
         {
             if (string.IsNullOrEmpty(api?.ScoreProcessingNoticeUrl))
                 return;
@@ -69,11 +73,16 @@ namespace osu.Game.Overlays.Profile
                 },
             };
 
-            flow.AddIcon(FontAwesome.Solid.InfoCircle, cp => cp.Padding = new MarginPadding { Right = 5 });
-            // TODO: make link text work when we can.
-            flow.AddLink(UsersStrings.ShowScoreProcessingTitle(UsersStrings.ShowScoreProcessingTitleLink), () => game?.OpenUrlExternally(api.ScoreProcessingNoticeUrl));
-            flow.AddText(" ");
-            flow.AddText(UsersStrings.ShowScoreProcessingMessage);
+            var noticeLink = LocalisableString.Interpolate($@"[{UsersStrings.ShowScoreProcessingTitleLink}]({api.ScoreProcessingNoticeUrl})");
+            var noticeString = LocalisableString.Interpolate($@"{UsersStrings.ShowScoreProcessingTitle(noticeLink)} {UsersStrings.ShowScoreProcessingMessage}");
+            noticeText = localisation.GetLocalisedBindableString(noticeString);
+            noticeText.BindValueChanged(t =>
+            {
+                flow.Clear();
+                flow.AddIcon(FontAwesome.Solid.InfoCircle, cp => cp.Padding = new MarginPadding { Right = 5 });
+                var result = MessageFormatter.FormatText(t.NewValue);
+                flow.AddLinks(result.Text, result.Links);
+            }, true);
         }
     }
 }
