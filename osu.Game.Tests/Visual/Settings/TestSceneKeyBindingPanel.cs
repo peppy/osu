@@ -436,7 +436,7 @@ namespace osu.Game.Tests.Visual.Settings
             scrollToAndStartBinding("Left (centre)");
             clearBinding();
             scrollToAndStartBinding("Left (rim)");
-            AddStep("bind M1", () => InputManager.Click(MouseButton.Left));
+            AddStep("bind F", () => InputManager.Key(Key.F));
 
             AddStep("reset taiko section to default", () =>
             {
