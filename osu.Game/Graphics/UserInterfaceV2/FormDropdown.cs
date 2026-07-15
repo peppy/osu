@@ -161,7 +161,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
                     {
                         RelativeSizeAxes = Axes.X,
                         AutoSizeAxes = Axes.Y,
-                        Padding = new MarginPadding(9),
+                        Padding = new MarginPadding(7),
                         Children = new Drawable[]
                         {
                             new FillFlowContainer
