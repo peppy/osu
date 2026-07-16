@@ -186,7 +186,7 @@ namespace osu.Game.Screens.OnlinePlay.Lounge
                                                         // Ballpark alignment with filter controls to right.
                                                         // Done this way to ensure it still looks correct when UI scale causes multi-line flow.
                                                         d.Y = -6;
-                                                        d.Size = new Vector2(160, 40f);
+                                                        d.Size = new Vector2(180, 48 + 6);
                                                         d.Action = () => Open();
                                                     }),
                                                 }
