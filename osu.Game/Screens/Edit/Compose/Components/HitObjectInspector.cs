@@ -3,7 +3,6 @@
 
 using System;
 using System.Linq;
-using osu.Framework.Extensions.TypeExtensions;
 using osu.Framework.Threading;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Types;
