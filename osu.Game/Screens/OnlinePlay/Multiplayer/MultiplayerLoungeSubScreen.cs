@@ -53,7 +53,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
 
             yield return new Container
             {
-                Width = 220,
+                Width = 240,
                 Child = showInProgress = new FormCheckBox
                 {
                     ExtendedHeight = true,
