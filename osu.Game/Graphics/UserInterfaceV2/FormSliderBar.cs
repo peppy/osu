@@ -186,6 +186,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
             current.MinValueChanged += v => currentNumberInstantaneous.MinValue = v;
             current.MaxValueChanged += v => currentNumberInstantaneous.MaxValue = v;
             current.PrecisionChanged += v => currentNumberInstantaneous.Precision = v;
+            current.DefaultChanged += v => currentNumberInstantaneous.Default = v.NewValue;
             current.DisabledChanged += disabled =>
             {
                 if (disabled)
