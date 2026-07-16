@@ -131,11 +131,10 @@ namespace osu.Game.Overlays.Settings.Sections.Input
         {
             Text = InputSettingsStrings.ResetSectionButton;
             RelativeSizeAxes = Axes.X;
-            Width = 0.8f;
             Anchor = Anchor.TopCentre;
             Origin = Anchor.TopCentre;
-            Margin = new MarginPadding { Top = 15 };
-            Height = 30;
+            Margin = new MarginPadding { Top = 5 };
+            Height = 40;
 
             Content.CornerRadius = 5;
         }
