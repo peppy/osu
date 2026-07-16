@@ -452,7 +452,10 @@ namespace osu.Game.Graphics.UserInterfaceV2
 
             private Box leftBox = null!;
             private Box rightBox = null!;
+            private Container defaultLine = null!;
+
             private InnerSliderNub nub = null!;
+
             public const float NUB_WIDTH = 10;
 
             [Resolved]
@@ -492,10 +495,34 @@ namespace osu.Game.Graphics.UserInterfaceV2
                     {
                         RelativeSizeAxes = Axes.Both,
                         Padding = new MarginPadding { Horizontal = RangePadding, },
-                        Child = nub = new InnerSliderNub
+                        Children = new Drawable[]
                         {
-                            ResetToDefault = ResetToDefault,
-                        }
+                            nub = new InnerSliderNub
+                            {
+                                ResetToDefault = ResetToDefault,
+                            },
+                            defaultLine = new Container
+                            {
+                                RelativeSizeAxes = Axes.Y,
+                                Origin = Anchor.Centre,
+                                Anchor = Anchor.CentreLeft,
+                                Padding = new MarginPadding(5),
+                                Colour = colourProvider.Content2,
+                                RelativePositionAxes = Axes.X,
+                                Blending = BlendingParameters.Additive,
+                                Alpha = 0.3f,
+                                Children = new Drawable[]
+                                {
+                                    new Circle
+                                    {
+                                        Anchor = Anchor.Centre,
+                                        Origin = Anchor.Centre,
+                                        Width = 3,
+                                        RelativeSizeAxes = Axes.Y,
+                                    }
+                                }
+                            },
+                        },
                     },
                 };
             }
@@ -505,7 +532,22 @@ namespace osu.Game.Graphics.UserInterfaceV2
                 base.LoadComplete();
 
                 Current.BindDisabledChanged(_ => updateState(), true);
+
+                Current.DefaultChanged += _ => updateDefaultValue();
+                updateDefaultValue();
+
                 FinishTransforms(true);
+            }
+
+            private void updateDefaultValue()
+            {
+                // hack to get normalised default value.
+                var copy = (BindableNumber<T>)Current.GetUnboundCopy();
+
+                copy.Disabled = false;
+                copy.SetDefault();
+
+                defaultLine.X = copy.NormalizedValue;
             }
 
             protected override void UpdateAfterChildren()
@@ -561,12 +603,19 @@ namespace osu.Game.Graphics.UserInterfaceV2
                 rightBox.Colour = colourProvider.Background5;
 
                 Color4 leftColour = colourProvider.Light4;
+                Color4 defaultLineColour;
                 Color4 nubColour;
 
                 if (IsHovered || HasFocus || IsDragged)
+                {
+                    defaultLineColour = colourProvider.Content1.Lighten(0.4f);
                     nubColour = colourProvider.Highlight1;
+                }
                 else
+                {
                     nubColour = colourProvider.Highlight1.Darken(0.1f);
+                    defaultLineColour = colourProvider.Content2;
+                }
 
                 if (Current.Disabled)
                 {
@@ -576,6 +625,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
 
                 leftBox.FadeColour(leftColour, 250, Easing.OutQuint);
                 nub.FadeColour(nubColour, 250, Easing.OutQuint);
+                defaultLine.FadeColour(defaultLineColour, 250, Easing.OutQuint);
             }
 
             protected override void UpdateValue(float value)
