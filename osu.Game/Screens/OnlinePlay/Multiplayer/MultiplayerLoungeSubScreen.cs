@@ -17,6 +17,7 @@ using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Rooms;
 using osu.Game.Screens.OnlinePlay.Lounge;
 using osu.Game.Screens.OnlinePlay.Lounge.Components;
+using osu.Game.Localisation;
 
 namespace osu.Game.Screens.OnlinePlay.Multiplayer
 {
@@ -43,7 +44,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
                 AutoSizeAxes = Axes.Y,
                 Child = roomAccessTypeDropdown = new FormEnumDropdown<RoomPermissionsFilter>
                 {
-                    Caption = "Privacy setting",
+                    Caption = LoungeSubScreenStrings.RoomFilterPrivacySetting,
                     Current = Config.GetBindable<RoomPermissionsFilter>(OsuSetting.MultiplayerRoomFilter),
                 },
             };
@@ -56,8 +57,8 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
                 Child = showInProgress = new FormCheckBox
                 {
                     ExtendedHeight = true,
-                    HintText = "You can still join multiplayer rooms while they are in progress, and either spectate or wait for the next round.",
-                    Caption = "Show in-progress rooms",
+                    HintText = LoungeSubScreenStrings.RoomFilterInProgressDescription,
+                    Caption = LoungeSubScreenStrings.RoomFilterInProgress,
                     Current = Config.GetBindable<bool>(OsuSetting.MultiplayerShowInProgressFilter),
                 }
             };
@@ -69,8 +70,8 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
                 Child = showFull = new FormCheckBox
                 {
                     ExtendedHeight = true,
-                    HintText = "Some rooms may have an upper player limit set by the room's host.",
-                    Caption = "Show full rooms",
+                    HintText = LoungeSubScreenStrings.RoomFilterFullRoomsDescription,
+                    Caption = LoungeSubScreenStrings.RoomFilterFullRooms,
                     Current = Config.GetBindable<bool>(OsuSetting.MultiplayerShowFullFilter),
                 }
             };

@@ -9,6 +9,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
+using osu.Game.Localisation;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests;
 using osu.Game.Online.Rooms;
@@ -34,7 +35,10 @@ namespace osu.Game.Screens.OnlinePlay.Playlists
             {
                 Width = 160,
                 AutoSizeAxes = Axes.Y,
-                Child = categoryDropdown = new FormEnumDropdown<PlaylistsCategory>()
+                Child = categoryDropdown = new FormEnumDropdown<PlaylistsCategory>
+                {
+                    Caption = LoungeSubScreenStrings.PlaylistFilterCategory,
+                }
             };
 
             categoryDropdown.Current.BindValueChanged(_ => UpdateFilter());

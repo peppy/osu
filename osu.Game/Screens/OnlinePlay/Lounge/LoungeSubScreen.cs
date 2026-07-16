@@ -31,6 +31,7 @@ using osu.Game.Screens.OnlinePlay.Lounge.Components;
 using osu.Game.Users;
 using osuTK;
 using osuTK.Graphics;
+using osu.Game.Localisation;
 
 namespace osu.Game.Screens.OnlinePlay.Lounge
 {
@@ -291,7 +292,7 @@ namespace osu.Game.Screens.OnlinePlay.Lounge
                 AutoSizeAxes = Axes.Y,
                 Child = StatusDropdown = new FormEnumDropdown<RoomModeFilter>
                 {
-                    Caption = "Room state",
+                    Caption = LoungeSubScreenStrings.RoomFilterState,
                 }
             };
 
