@@ -43,6 +43,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
                 AutoSizeAxes = Axes.Y,
                 Child = roomAccessTypeDropdown = new FormEnumDropdown<RoomPermissionsFilter>
                 {
+                    Caption = "Privacy setting",
                     Current = Config.GetBindable<RoomPermissionsFilter>(OsuSetting.MultiplayerRoomFilter),
                 },
             };
@@ -52,9 +53,10 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
             yield return new Container
             {
                 Width = 220,
-                AutoSizeAxes = Axes.Y,
                 Child = showInProgress = new FormCheckBox
                 {
+                    ExtendedHeight = true,
+                    HintText = "You can still join multiplayer rooms while they are in progress, and either spectate or wait for the next round.",
                     Caption = "Show in-progress rooms",
                     Current = Config.GetBindable<bool>(OsuSetting.MultiplayerShowInProgressFilter),
                 }
@@ -66,6 +68,8 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
                 AutoSizeAxes = Axes.Y,
                 Child = showFull = new FormCheckBox
                 {
+                    ExtendedHeight = true,
+                    HintText = "Some rooms may have an upper player limit set by the room's host.",
                     Caption = "Show full rooms",
                     Current = Config.GetBindable<bool>(OsuSetting.MultiplayerShowFullFilter),
                 }

@@ -289,7 +289,10 @@ namespace osu.Game.Screens.OnlinePlay.Lounge
             {
                 Width = 160,
                 AutoSizeAxes = Axes.Y,
-                Child = StatusDropdown = new FormEnumDropdown<RoomModeFilter>()
+                Child = StatusDropdown = new FormEnumDropdown<RoomModeFilter>
+                {
+                    Caption = "Room state",
+                }
             };
 
             StatusDropdown.Current.BindValueChanged(_ => UpdateFilter());
