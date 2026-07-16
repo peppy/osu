@@ -161,7 +161,8 @@ namespace osu.Game.Graphics.UserInterfaceV2
                     {
                         RelativeSizeAxes = Axes.X,
                         AutoSizeAxes = Axes.Y,
-                        Padding = new MarginPadding(7),
+                        // Adjustments made to match height of `FormCheckbox` in most compact format (when no labels are present).
+                        Padding = new MarginPadding { Horizontal = 9, Top = 5, Bottom = 9 },
                         Children = new Drawable[]
                         {
                             new FillFlowContainer
