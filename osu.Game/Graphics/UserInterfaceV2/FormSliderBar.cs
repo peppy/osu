@@ -501,27 +501,17 @@ namespace osu.Game.Graphics.UserInterfaceV2
                             {
                                 ResetToDefault = ResetToDefault,
                             },
-                            defaultLine = new Container
+                            defaultLine = new Circle
                             {
-                                RelativeSizeAxes = Axes.Y,
-                                Origin = Anchor.Centre,
                                 Anchor = Anchor.CentreLeft,
-                                Padding = new MarginPadding(5),
+                                Origin = Anchor.Centre,
                                 Colour = colourProvider.Content2,
-                                RelativePositionAxes = Axes.X,
                                 Blending = BlendingParameters.Additive,
                                 Alpha = 0.3f,
-                                Children = new Drawable[]
-                                {
-                                    new Circle
-                                    {
-                                        Anchor = Anchor.Centre,
-                                        Origin = Anchor.Centre,
-                                        Width = 3,
-                                        RelativeSizeAxes = Axes.Y,
-                                    }
-                                }
-                            },
+                                Width = 4,
+                                Height = 6,
+                                RelativePositionAxes = Axes.X,
+                            }
                         },
                     },
                 };
