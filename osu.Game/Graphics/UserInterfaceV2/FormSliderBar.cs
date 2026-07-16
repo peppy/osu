@@ -248,18 +248,18 @@ namespace osu.Game.Graphics.UserInterfaceV2
                                     AutoSizeAxes = Axes.Y,
                                     Children = new Drawable[]
                                     {
-                                        textBox = new FormNumberBox.InnerNumberBox(allowDecimals: true)
+                                        textBox = CreateTextBox().With(box =>
                                         {
-                                            RelativeSizeAxes = Axes.X,
+                                            box.RelativeSizeAxes = Axes.X;
                                             // the textbox is hidden when the control is unfocused,
                                             // but clicking on the label should reach the textbox,
                                             // therefore make it always present.
-                                            AlwaysPresent = true,
-                                            CommitOnFocusLost = true,
-                                            SelectAllOnFocus = true,
-                                            OnInputError = background.FlashOnInputError,
-                                            TabbableContentContainer = tabbableContentContainer,
-                                        },
+                                            box.AlwaysPresent = true;
+                                            box.CommitOnFocusLost = true;
+                                            box.SelectAllOnFocus = true;
+                                            box.OnInputError = background.FlashOnInputError;
+                                            box.TabbableContentContainer = tabbableContentContainer;
+                                        }),
                                         valueLabel = new TruncatingSpriteText
                                         {
                                             RelativeSizeAxes = Axes.X,
@@ -283,6 +283,8 @@ namespace osu.Game.Graphics.UserInterfaceV2
             if (game != null)
                 currentLanguage.BindTo(game.CurrentLanguage);
         }
+
+        internal virtual FormNumberBox.InnerNumberBox CreateTextBox() => new FormNumberBox.InnerNumberBox(true);
 
         protected override void LoadComplete()
         {
