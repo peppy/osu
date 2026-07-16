@@ -79,7 +79,8 @@ namespace osu.Game.Overlays.Settings.Sections.Input
 
         public readonly object Action;
 
-        public Bindable<bool> IsDefault { get; } = new BindableBool(true);
+        public IBindable<bool> IsDefault => isDefault;
+        private readonly Bindable<bool> isDefault = new BindableBool(true);
 
         [Resolved]
         private RealmAccess realm { get; set; } = null!;
@@ -251,7 +252,7 @@ namespace osu.Game.Overlays.Settings.Sections.Input
         {
             base.LoadComplete();
 
-            IsDefault.BindValueChanged(d =>
+            isDefault.BindValueChanged(d =>
             {
                 if (d.NewValue)
                     revertButton.Hide();
@@ -272,7 +273,7 @@ namespace osu.Game.Overlays.Settings.Sections.Input
                 tryPersistKeyBinding(button.KeyBinding.Value, advanceToNextBinding: false, restoringDefaults: true);
             }
 
-            IsDefault.Value = true;
+            isDefault.Value = true;
         }
 
         protected override bool OnHover(HoverEvent e)
@@ -591,7 +592,7 @@ namespace osu.Game.Overlays.Settings.Sections.Input
 
         private void updateIsDefaultValue()
         {
-            IsDefault.Value = KeyBindings.Select(b => b.KeyCombination).SequenceEqual(Defaults);
+            isDefault.Value = KeyBindings.Select(b => b.KeyCombination).SequenceEqual(Defaults);
         }
     }
 }
