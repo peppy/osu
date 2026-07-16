@@ -509,8 +509,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
                                 Colour = colourProvider.Content2,
                                 Blending = BlendingParameters.Additive,
                                 Alpha = 0.3f,
-                                Width = 4,
-                                Height = 6,
+                                Size = new Vector2(4),
                                 RelativePositionAxes = Axes.X,
                             }
                         },
@@ -622,6 +621,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
             protected override void UpdateValue(float value)
             {
                 nub.MoveToX(value, 250, Easing.OutElasticQuarter);
+                defaultLine.ResizeHeightTo(Current.IsDefault ? 28 : 6, 250, Easing.OutElasticQuarter);
             }
 
             protected override bool Commit()
