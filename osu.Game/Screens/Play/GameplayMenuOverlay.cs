@@ -36,7 +36,7 @@ namespace osu.Game.Screens.Play
     {
         protected const int TRANSITION_DURATION = 200;
 
-        private const int button_height = 70;
+        private const int button_height = 80;
         private const float background_alpha = 0.75f;
 
         protected override bool BlockScrollInput => false;
@@ -119,8 +119,10 @@ namespace osu.Game.Screens.Play
                             Origin = Anchor.TopCentre,
                             Anchor = Anchor.TopCentre,
                             RelativeSizeAxes = Axes.X,
+                            Width = 0.8f,
                             AutoSizeAxes = Axes.Y,
                             Direction = FillDirection.Vertical,
+                            Spacing = new Vector2(2),
                             Masking = true,
                             EdgeEffect = new EdgeEffectParameters
                             {
