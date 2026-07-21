@@ -47,12 +47,10 @@ namespace osu.Game.Graphics.UserInterface
 
         protected readonly Container ColourContainer;
 
-        private readonly Container backgroundContainer;
         private readonly Container glowContainer;
         private readonly Box leftGlow;
         private readonly Box centerGlow;
         private readonly Box rightGlow;
-        private readonly Box background;
         private readonly SpriteText spriteText;
         private Vector2 hoverSpacing => new Vector2(1.4f, 0f);
 
@@ -63,20 +61,6 @@ namespace osu.Game.Graphics.UserInterface
 
             Children = new Drawable[]
             {
-                backgroundContainer = new Container
-                {
-                    RelativeSizeAxes = Axes.Both,
-                    Width = 1f,
-                    Alpha = 0,
-                    Children = new Drawable[]
-                    {
-                        background = new Box
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Colour = backgroundColour,
-                        },
-                    },
-                },
                 glowContainer = new Container
                 {
                     Origin = Anchor.Centre,
@@ -193,18 +177,6 @@ namespace osu.Game.Graphics.UserInterface
             }
         }
 
-        private Color4 backgroundColour = OsuColour.Gray(34);
-
-        public Color4 BackgroundColour
-        {
-            get => backgroundColour;
-            set
-            {
-                backgroundColour = value;
-                background.Colour = value;
-            }
-        }
-
         private LocalisableString text;
 
         public LocalisableString Text
@@ -222,8 +194,6 @@ namespace osu.Game.Graphics.UserInterface
             get => spriteText.Font.Size;
             set => spriteText.Font = spriteText.Font.With(size: value);
         }
-
-        public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => backgroundContainer.ReceivePositionalInputAt(screenSpacePos);
 
         private bool clickAnimating;
 
