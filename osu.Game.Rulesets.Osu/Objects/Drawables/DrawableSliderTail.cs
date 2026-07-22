@@ -1,10 +1,7 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#nullable disable
-
 using System.Diagnostics;
-using JetBrains.Annotations;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -23,10 +20,9 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
     {
         public new SliderTailCircle HitObject => (SliderTailCircle)base.HitObject;
 
-        [CanBeNull]
-        public Slider Slider => DrawableSlider?.HitObject;
+        public Slider? Slider => DrawableSlider?.HitObject;
 
-        protected DrawableSlider DrawableSlider => (DrawableSlider)ParentHitObject;
+        protected DrawableSlider? DrawableSlider => ParentHitObject as DrawableSlider;
 
         /// <summary>
         /// Whether the hit samples only play on successful hits.
@@ -34,9 +30,9 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         /// </summary>
         public bool SamplePlaysOnlyOnHit { get; set; } = true;
 
-        public SkinnableDrawable CirclePiece { get; private set; }
+        public SkinnableDrawable? CirclePiece { get; private set; }
 
-        private Container scaleContainer;
+        private Container scaleContainer = null!;
 
         public DrawableSliderTail()
             : base(null)
@@ -51,9 +47,9 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         private readonly Bindable<bool> hitAnimations = new Bindable<bool>(true);
 
         [BackgroundDependencyLoader]
-        private void load(OsuRulesetConfigManager osuConfig)
+        private void load(OsuRulesetConfigManager? osuConfig)
         {
-            osuConfig.BindWith(OsuRulesetSetting.HitAnimations, hitAnimations);
+            osuConfig?.BindWith(OsuRulesetSetting.HitAnimations, hitAnimations);
 
             Origin = Anchor.Centre;
             Size = OsuHitObject.OBJECT_DIMENSIONS;
@@ -124,7 +120,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             }
         }
 
-        protected override void CheckForResult(bool userTriggered, double timeOffset) => DrawableSlider.SliderInputManager.TryJudgeNestedObject(this, timeOffset);
+        protected override void CheckForResult(bool userTriggered, double timeOffset) => DrawableSlider!.SliderInputManager.TryJudgeNestedObject(this, timeOffset);
 
         protected override void OnApply()
         {

@@ -55,9 +55,9 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         private readonly Bindable<bool> hitAnimations = new Bindable<bool>(true);
 
         [BackgroundDependencyLoader]
-        private void load(OsuRulesetConfigManager osuConfig)
+        private void load(OsuRulesetConfigManager? osuConfig)
         {
-            osuConfig.BindWith(OsuRulesetSetting.HitAnimations, hitAnimations);
+            osuConfig?.BindWith(OsuRulesetSetting.HitAnimations, hitAnimations);
 
             Origin = Anchor.Centre;
 
