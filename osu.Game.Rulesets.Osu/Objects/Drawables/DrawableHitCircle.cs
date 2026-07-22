@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input.Bindings;
@@ -13,6 +14,7 @@ using osu.Framework.Utils;
 using osu.Game.Graphics.Containers;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Objects.Drawables;
+using osu.Game.Rulesets.Osu.Configuration;
 using osu.Game.Rulesets.Osu.Judgements;
 using osu.Game.Rulesets.Osu.Skinning;
 using osu.Game.Rulesets.Osu.Skinning.Default;
@@ -50,9 +52,16 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         {
         }
 
+        private readonly Bindable<bool> hitAnimations = new Bindable<bool>(true);
+
+        [Resolved]
+        private OsuRulesetConfigManager osuConfig { get; set; } = null!;
+
         [BackgroundDependencyLoader]
         private void load()
         {
+            osuConfig.BindWith(OsuRulesetSetting.HitAnimations, hitAnimations);
+
             Origin = Anchor.Centre;
 
             AddRangeInternal(new Drawable[]
@@ -211,6 +220,9 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             {
                 default:
                     ApproachCircle.FadeOut();
+
+                    if (!hitAnimations.Value)
+                        this.FadeOut(60, Easing.Out);
                     break;
 
                 case ArmedState.Idle:
