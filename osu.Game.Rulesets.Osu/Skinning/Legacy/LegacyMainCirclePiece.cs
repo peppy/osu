@@ -183,10 +183,11 @@ namespace osu.Game.Rulesets.Osu.Skinning.Legacy
                             if (legacyVersion > 1.0m)
                             {
                                 // legacy skins of version 2.0 and newer only apply very short fade out to the number piece.
-                                // of note, if the hit animation setting is disabled, the fade should not be shortened to avoid applying twice the effect.
-                                if (osuConfig?.Get<bool>(OsuRulesetSetting.HitAnimations) == false)
-                                    hitCircleText.FadeOut(legacy_fade_duration);
-                                else
+                                //
+                                // if the new hit animation setting is disabled, the fade is bypassed here to avoid users abusing this to achieve "even better" results.
+                                // note that this means the number fades slightly slower than other components when hit animations are off.
+                                // in practice, the fade is so short this is not perceivable.
+                                if (osuConfig?.Get<bool>(OsuRulesetSetting.HitAnimations) != false)
                                     hitCircleText.FadeOut(legacy_fade_duration / 4);
                             }
                             else
