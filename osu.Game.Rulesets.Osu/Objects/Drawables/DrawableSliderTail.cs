@@ -6,11 +6,13 @@
 using System.Diagnostics;
 using JetBrains.Annotations;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Utils;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Objects.Types;
+using osu.Game.Rulesets.Osu.Configuration;
 using osu.Game.Skinning;
 using osuTK;
 using osuTK.Graphics;
@@ -46,9 +48,13 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         {
         }
 
+        private readonly Bindable<bool> hitAnimations = new Bindable<bool>(true);
+
         [BackgroundDependencyLoader]
-        private void load()
+        private void load(OsuRulesetConfigManager osuConfig)
         {
+            osuConfig.BindWith(OsuRulesetSetting.HitAnimations, hitAnimations);
+
             Origin = Anchor.Centre;
             Size = OsuHitObject.OBJECT_DIMENSIONS;
 
@@ -106,8 +112,14 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
                     break;
 
                 case ArmedState.Hit:
-                    // todo: temporary / arbitrary
-                    this.Delay(800).FadeOut();
+                    if (!hitAnimations.Value)
+                        this.FadeOut(60, Easing.Out);
+                    else
+                    {
+                        // todo: temporary / arbitrary
+                        this.Delay(800).FadeOut();
+                    }
+
                     break;
             }
         }

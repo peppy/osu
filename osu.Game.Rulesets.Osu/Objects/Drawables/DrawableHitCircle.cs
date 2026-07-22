@@ -54,11 +54,8 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
         private readonly Bindable<bool> hitAnimations = new Bindable<bool>(true);
 
-        [Resolved]
-        private OsuRulesetConfigManager osuConfig { get; set; } = null!;
-
         [BackgroundDependencyLoader]
-        private void load()
+        private void load(OsuRulesetConfigManager osuConfig)
         {
             osuConfig.BindWith(OsuRulesetSetting.HitAnimations, hitAnimations);
 
