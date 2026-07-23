@@ -167,6 +167,8 @@ namespace osu.Game.Beatmaps
 
         public Task FetchCache()
         {
+            Debug.Assert(!DebugUtils.IsNUnitRunning);
+
             bool isRefetch = storage.Exists(cache_database_name);
 
             string cacheFilePath = storage.GetFullPath(cache_database_name);
