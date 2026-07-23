@@ -78,11 +78,13 @@ namespace osu.Game.Database
 
         protected virtual int TimeToSleepDuringGameplay => 30000;
 
+        protected virtual bool SkipProcessing => DebugUtils.IsNUnitRunning;
+
         protected override void LoadComplete()
         {
             base.LoadComplete();
 
-            if (DebugUtils.IsNUnitRunning)
+            if (SkipProcessing)
                 return;
 
             localMetadataSource = new LocalCachedBeatmapMetadataSource(storage);
