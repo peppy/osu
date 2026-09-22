@@ -165,6 +165,13 @@ namespace osu.Game.Beatmaps.Drawables
                 starsText.Colour = colours.ForStarDifficultyText(s.NewValue);
             }, true);
         }
+
+        public Colour4 GetForegroundColourForAssociatedControls()
+        {
+            return DisplayedStars.Value >= OsuColour.STAR_DIFFICULTY_DEFINED_COLOUR_CUTOFF
+                ? DisplayedDifficultyTextColour
+                : DisplayedDifficultyColour;
+        }
     }
 
     public enum StarRatingDisplaySize

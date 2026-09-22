@@ -4,6 +4,8 @@
 using System.Collections.Generic;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.Game.Graphics;
 using osu.Game.Overlays;
@@ -11,7 +13,7 @@ using osu.Game.Scoring;
 using osu.Game.Screens.Footer;
 using osu.Game.Screens.Play;
 
-namespace osu.Game.Screens.RankingV2
+namespace osu.Game.Screens.RankingV2.Argon
 {
     /*
      * TODO:
@@ -33,6 +35,32 @@ namespace osu.Game.Screens.RankingV2
         public ArgonResultsScreenV2(IScoreInfo initialScore)
         {
             score.Value = initialScore;
+        }
+
+        [BackgroundDependencyLoader]
+        private void load()
+        {
+            InternalChildren =
+            [
+                new FillFlowContainer
+                {
+                    Anchor = Anchor.TopLeft,
+                    Origin = Anchor.TopLeft,
+                    Width = 600,
+                    AutoSizeAxes = Axes.Y,
+                    Shear = OsuGame.SHEAR,
+                    Direction = FillDirection.Vertical,
+                    Children =
+                    [
+                        new BeatmapInfoWedge
+                        {
+                            Shear = -OsuGame.SHEAR,
+                            Anchor = Anchor.TopRight,
+                            Origin = Anchor.TopRight,
+                        }
+                    ]
+                }
+            ];
         }
 
         public override bool ShowFooter => true;

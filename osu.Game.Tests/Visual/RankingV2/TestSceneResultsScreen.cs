@@ -10,6 +10,7 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using osu.Game.Screens.RankingV2;
+using osu.Game.Screens.RankingV2.Argon;
 using osu.Game.Tests.Resources;
 using osu.Game.Tests.Visual.Ranking;
 using Realms;
