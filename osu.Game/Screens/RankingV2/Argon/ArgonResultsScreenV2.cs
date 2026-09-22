@@ -8,10 +8,12 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.Game.Graphics;
+using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
 using osu.Game.Scoring;
 using osu.Game.Screens.Footer;
 using osu.Game.Screens.Play;
+using osuTK;
 
 namespace osu.Game.Screens.RankingV2.Argon
 {
@@ -46,10 +48,16 @@ namespace osu.Game.Screens.RankingV2.Argon
                 {
                     Anchor = Anchor.TopLeft,
                     Origin = Anchor.TopLeft,
-                    Width = 600,
+                    Width = 600 - BeatmapInfoWedge.SUB_WEDGE_HEIGHT,
                     AutoSizeAxes = Axes.Y,
                     Shear = OsuGame.SHEAR,
                     Direction = FillDirection.Vertical,
+                    Spacing = new Vector2(15),
+                    Padding = new MarginPadding
+                    {
+                        Top = -ShearedButton.CORNER_RADIUS,
+                        Left = -ShearedButton.CORNER_RADIUS,
+                    },
                     Children =
                     [
                         new BeatmapInfoWedge
@@ -57,6 +65,27 @@ namespace osu.Game.Screens.RankingV2.Argon
                             Shear = -OsuGame.SHEAR,
                             Anchor = Anchor.TopRight,
                             Origin = Anchor.TopRight,
+                        },
+                        new Container
+                        {
+                            RelativeSizeAxes = Axes.X,
+                            AutoSizeAxes = Axes.Y,
+                            Anchor = Anchor.TopRight,
+                            Origin = Anchor.TopRight,
+                            Masking = false,
+                            Padding = new MarginPadding
+                            {
+                                Right = BeatmapInfoWedge.INDENT,
+                            },
+                            Children =
+                            [
+                                new UserInfoWedge
+                                {
+                                    Shear = -OsuGame.SHEAR,
+                                    Anchor = Anchor.TopRight,
+                                    Origin = Anchor.TopRight,
+                                },
+                            ]
                         }
                     ]
                 }

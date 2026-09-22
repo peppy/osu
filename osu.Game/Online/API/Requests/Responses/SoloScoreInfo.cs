@@ -90,6 +90,9 @@ namespace osu.Game.Online.API.Requests.Responses
         [JsonProperty("pauses")]
         public int[] Pauses { get; set; } = [];
 
+        // TODO: later. probably use `rank_global` or similar. depends on context
+        public int? Position => null;
+
         #region osu-web API additions (not stored to database).
 
         [JsonProperty("id")]

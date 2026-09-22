@@ -38,5 +38,7 @@ namespace osu.Game.Scoring
         // but also doesn't expose `Settings`. We can consider how to implement this in the future if required.
 
         // Statistics is also missing. This can be reconsidered once changes in serialisation have been completed.
+
+        int? Position { get; }
     }
 }

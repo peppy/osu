@@ -30,7 +30,7 @@ namespace osu.Game.Screens.RankingV2.Argon
         public const float INDENT = 70;
         public const float SUB_WEDGE_HEIGHT = 35;
 
-        private const float text_padding = 8;
+        private const float text_padding = 8 + ShearedButton.CORNER_RADIUS;
 
         [Resolved]
         private IBindable<IScoreInfo> score { get; set; } = null!;
@@ -52,6 +52,10 @@ namespace osu.Game.Screens.RankingV2.Argon
         {
             RelativeSizeAxes = Axes.X;
             AutoSizeAxes = Axes.Y;
+            Margin = new MarginPadding
+            {
+                Bottom = SUB_WEDGE_HEIGHT / 2,
+            };
 
             InternalChildren =
             [
@@ -69,17 +73,6 @@ namespace osu.Game.Screens.RankingV2.Argon
                         Hollow = true,
                     },
                     CornerRadius = ShearedButton.CORNER_RADIUS,
-                    // padding + margin application is done to hide all rounded corners except the bottom right one
-                    Padding = new MarginPadding
-                    {
-                        Top = ShearedButton.CORNER_RADIUS,
-                        Left = ShearedButton.CORNER_RADIUS,
-                    },
-                    Margin = new MarginPadding
-                    {
-                        Top = -ShearedButton.CORNER_RADIUS,
-                        Left = -ShearedButton.CORNER_RADIUS,
-                    },
                     Shear = OsuGame.SHEAR,
                     Children =
                     [
@@ -95,8 +88,9 @@ namespace osu.Game.Screens.RankingV2.Argon
                             Direction = FillDirection.Vertical,
                             Padding = new MarginPadding
                             {
-                                Horizontal = text_padding,
-                                Top = 15,
+                                Left = text_padding,
+                                Right = 30,
+                                Top = 15 + ShearedButton.CORNER_RADIUS,
                                 Bottom = 10 + SUB_WEDGE_HEIGHT / 2,
                             },
                             Shear = -OsuGame.SHEAR,
@@ -122,8 +116,8 @@ namespace osu.Game.Screens.RankingV2.Argon
                     Y = -SUB_WEDGE_HEIGHT / 2,
                     Anchor = Anchor.BottomLeft,
                     Origin = Anchor.TopLeft,
-                    Margin = new MarginPadding { Left = -INDENT, },
-                    Padding = new MarginPadding { Left = INDENT, },
+                    Margin = new MarginPadding { Left = -INDENT / (1 - OsuGame.SHEAR.X), },
+                    Padding = new MarginPadding { Left = INDENT / (1 - OsuGame.SHEAR.X), },
                     Masking = true,
                     CornerRadius = ShearedButton.CORNER_RADIUS,
                     Shear = OsuGame.SHEAR,
@@ -188,6 +182,7 @@ namespace osu.Game.Screens.RankingV2.Argon
             artistText.CreateContent = () => new OsuSpriteText
             {
                 Text = new RomanisableString(score.Value.Beatmap.Metadata.ArtistUnicode, score.Value.Beatmap.Metadata.Artist),
+                Font = OsuFont.Style.Heading2,
             };
 
             rulesetIconContainer.Clear();

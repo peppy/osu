@@ -23,6 +23,12 @@ namespace osu.Game.Users
             set => Model = value;
         }
 
+        public new MarginPadding Padding
+        {
+            get => base.Padding;
+            set => base.Padding = value;
+        }
+
         protected override Drawable CreateDrawable(APIUser? user) => new Cover(user);
 
         protected override double LoadDelay => 300;
