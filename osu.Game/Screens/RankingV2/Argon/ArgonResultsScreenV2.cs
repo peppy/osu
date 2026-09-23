@@ -21,6 +21,7 @@ namespace osu.Game.Screens.RankingV2.Argon
      * TODO:
      * - Skinnability is probably not going to work via substituting screen implementations.
      *   That is temporary, this is being done via full screens for now just to get a first pass at the layout.
+     * - Layout falls apart on very narrow screens (grade starts overlapping the left bits).
      */
     public partial class ArgonResultsScreenV2 : ScreenWithBeatmapBackground
     {
@@ -90,7 +91,7 @@ namespace osu.Game.Screens.RankingV2.Argon
                         new StatisticsGrid
                         {
                             Margin = new MarginPadding { Left = 20, },
-                            Width = 600,
+                            Width = 500,
                         },
                     ],
                 },
