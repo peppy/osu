@@ -4,13 +4,15 @@
 using System.Linq;
 using NUnit.Framework;
 using osu.Framework.Allocation;
+using osu.Framework.Testing;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
-using osu.Game.Screens.RankingV2;
 using osu.Game.Screens.RankingV2.Argon;
+using osu.Game.Screens.RankingV2.Legacy;
+using osu.Game.Skinning;
 using osu.Game.Tests.Resources;
 using osu.Game.Tests.Visual.Ranking;
 using Realms;
@@ -24,6 +26,9 @@ namespace osu.Game.Tests.Visual.RankingV2
 
         [Resolved]
         private BeatmapManager beatmaps { get; set; } = null!;
+
+        [Resolved]
+        private SkinManager skins { get; set; } = null!;
 
         private int onlineScoreID = 1;
 
@@ -53,9 +58,14 @@ namespace osu.Game.Tests.Visual.RankingV2
         }
 
         [Test]
+        [Solo]
         public void TestLegacyScreen()
         {
-            AddStep("create argon screen", () =>
+            AddStep("set legacy skin", () =>
+            {
+                skins.CurrentSkinInfo.Value = skins.DefaultClassicSkin.SkinInfo;
+            });
+            AddStep("create legacy screen", () =>
             {
                 var score = createTestScore();
                 LoadScreen(new LegacyResultsScreenV2(score));

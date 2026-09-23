@@ -6,7 +6,7 @@ using osu.Framework.Bindables;
 using osu.Game.Scoring;
 using osu.Game.Screens.Play;
 
-namespace osu.Game.Screens.RankingV2
+namespace osu.Game.Screens.RankingV2.Legacy
 {
     /*
      * TODO:
@@ -22,6 +22,15 @@ namespace osu.Game.Screens.RankingV2
         public LegacyResultsScreenV2(IScoreInfo initialScore)
         {
             score.Value = initialScore;
+        }
+
+        [BackgroundDependencyLoader]
+        private void load()
+        {
+            InternalChildren =
+            [
+                new LegacyRankingBackgroundOverlay(),
+            ];
         }
     }
 }
