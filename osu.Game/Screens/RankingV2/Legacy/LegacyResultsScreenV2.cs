@@ -30,6 +30,8 @@ namespace osu.Game.Screens.RankingV2.Legacy
             InternalChildren =
             [
                 new LegacyRankingBackgroundOverlay(),
+                new LegacyRankingDetails(),
+                new LegacyRankingTitle(),
             ];
         }
     }

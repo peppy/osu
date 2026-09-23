@@ -18,9 +18,10 @@ namespace osu.Game.Screens.RankingV2.Legacy
         private void load(ISkinSource skin)
         {
             AutoSizeAxes = Axes.Both;
+
+            // TODO: move to skinnable container defaults
             Anchor = Anchor.TopRight;
             Origin = Anchor.Centre;
-
             bool useNewLayout = skin.GetConfig<SkinConfiguration.LegacySetting, decimal>(SkinConfiguration.LegacySetting.Version)?.Value > 1M;
             // crosscheck the minus on the X position here - stable doesn't have it but it doesn't make much sense otherwise
             // also the position spec should live on the skinnable container or whatever
