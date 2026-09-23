@@ -12,6 +12,8 @@ namespace osu.Game.Screens.RankingV2.Legacy
      * TODO:
      * - Skinnability is probably not going to work via substituting screen implementations.
      *   That is temporary, this is being done via full screens for now just to get a first pass at the layout.
+     * - Every single usage of `useNewLayout`-like checks that was ported is suspicious.
+     *   Needs testing on pre-v2 skins.
      */
     public partial class LegacyResultsScreenV2 : ScreenWithBeatmapBackground
     {
@@ -32,6 +34,7 @@ namespace osu.Game.Screens.RankingV2.Legacy
                 new LegacyRankingBackgroundOverlay(),
                 new LegacyRankingDetails(),
                 new LegacyRankingTitle(),
+                new LegacyRankingPanel(),
             ];
         }
     }
