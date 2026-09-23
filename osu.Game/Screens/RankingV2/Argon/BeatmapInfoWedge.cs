@@ -27,7 +27,7 @@ namespace osu.Game.Screens.RankingV2.Argon
     // TODO: transition / animation pass
     public partial class BeatmapInfoWedge : CompositeDrawable
     {
-        public const float INDENT = 70;
+        public const float INDENT = 40;
         public const float SUB_WEDGE_HEIGHT = 35;
 
         private const float text_padding = 8 + ShearedButton.CORNER_RADIUS;
@@ -194,6 +194,7 @@ namespace osu.Game.Screens.RankingV2.Argon
 
             difficultyRetrievalCancellation?.Cancel();
             difficultyRetrievalCancellation = new CancellationTokenSource();
+            // TODO: not passing mods here because it's annoying to put it in `IScoreInfo` without an `IConfiguredMod` interface or similar
             difficultyCache.GetDifficultyAsync(score.Value.Beatmap, score.Value.Ruleset, cancellationToken: difficultyRetrievalCancellation.Token)
                            .ContinueWith(t =>
                            {

@@ -66,10 +66,12 @@ namespace osu.Game.Screens.RankingV2.Argon
                             Anchor = Anchor.TopRight,
                             Origin = Anchor.TopRight,
                         },
-                        new Container
+                        new FillFlowContainer
                         {
                             RelativeSizeAxes = Axes.X,
                             AutoSizeAxes = Axes.Y,
+                            Direction = FillDirection.Vertical,
+                            Spacing = new Vector2(15),
                             Anchor = Anchor.TopRight,
                             Origin = Anchor.TopRight,
                             Masking = false,
@@ -85,6 +87,12 @@ namespace osu.Game.Screens.RankingV2.Argon
                                     Anchor = Anchor.TopRight,
                                     Origin = Anchor.TopRight,
                                 },
+                                new TotalScoreWedge
+                                {
+                                    Shear = -OsuGame.SHEAR,
+                                    Anchor = Anchor.TopRight,
+                                    Origin = Anchor.TopRight,
+                                }
                             ]
                         }
                     ]
