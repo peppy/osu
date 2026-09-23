@@ -25,6 +25,8 @@ namespace osu.Game.Screens.RankingV2.Argon
 {
     public partial class TotalScoreWedge : CompositeDrawable
     {
+        public static readonly ColourInfo TEXT_GRADIENT = ColourInfo.GradientVertical(Colour4.White, Colour4.FromHex(@"B2E5FE"));
+
         private Sprite perfectIndicator = null!;
         private OsuSpriteText totalScoreText = null!;
 
@@ -95,7 +97,7 @@ namespace osu.Game.Screens.RankingV2.Argon
                                     // TODO: classic scoring likely breaks this sizing. figure out later what to do with ultra large score numbers
                                     Font = OsuFont.TorusAlternate.With(size: 85, weight: FontWeight.Light, fixedWidth: true),
                                     Spacing = new Vector2(-5),
-                                    Colour = ColourInfo.GradientVertical(Colour4.White, Colour4.FromHex(@"B2E5FE")),
+                                    Colour = TEXT_GRADIENT,
                                     UseFullGlyphHeight = false,
                                     Margin = new MarginPadding { Top = 5, }, // `UseFullGlyphHeight` *almost* does the job to trim the glyph paddings, but it still can look offset because of decimal commas and such
                                 },

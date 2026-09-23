@@ -70,6 +70,7 @@ namespace osu.Game.Tests.Visual.RankingV2
             score.HitEvents = TestSceneStatisticsPanel.CreatePositionDistributedHitEvents();
             score.Accuracy = 0.99;
             score.Rank = ScoreRank.D;
+            score.PP = 138.4234;
 
             score.Statistics[HitResult.Miss] = 2;
 

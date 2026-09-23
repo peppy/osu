@@ -46,40 +46,54 @@ namespace osu.Game.Screens.RankingV2.Argon
             [
                 new FillFlowContainer
                 {
-                    Anchor = Anchor.TopLeft,
-                    Origin = Anchor.TopLeft,
-                    Width = 600 - BeatmapInfoWedge.SUB_WEDGE_HEIGHT,
-                    AutoSizeAxes = Axes.Y,
-                    Shear = OsuGame.SHEAR,
+                    AutoSizeAxes = Axes.Both,
                     Direction = FillDirection.Vertical,
                     Spacing = new Vector2(15),
-                    Padding = new MarginPadding
-                    {
-                        Top = -ShearedButton.CORNER_RADIUS,
-                        Left = -ShearedButton.CORNER_RADIUS,
-                    },
                     Children =
                     [
-                        new BeatmapInfoWedge
+                        new FillFlowContainer
                         {
-                            Shear = -OsuGame.SHEAR,
-                            Anchor = Anchor.TopRight,
-                            Origin = Anchor.TopRight,
+                            Anchor = Anchor.TopLeft,
+                            Origin = Anchor.TopLeft,
+                            Width = 600 - BeatmapInfoWedge.SUB_WEDGE_HEIGHT,
+                            AutoSizeAxes = Axes.Y,
+                            Shear = OsuGame.SHEAR,
+                            Direction = FillDirection.Vertical,
+                            Spacing = new Vector2(15),
+                            Padding = new MarginPadding
+                            {
+                                Top = -ShearedButton.CORNER_RADIUS,
+                                Left = -ShearedButton.CORNER_RADIUS,
+                            },
+                            Children =
+                            [
+                                new BeatmapInfoWedge
+                                {
+                                    Shear = -OsuGame.SHEAR,
+                                    Anchor = Anchor.TopRight,
+                                    Origin = Anchor.TopRight,
+                                },
+                                new UserInfoWedge
+                                {
+                                    Shear = -OsuGame.SHEAR,
+                                    Anchor = Anchor.TopRight,
+                                    Origin = Anchor.TopRight,
+                                },
+                                new TotalScoreWedge
+                                {
+                                    Shear = -OsuGame.SHEAR,
+                                    Anchor = Anchor.TopRight,
+                                    Origin = Anchor.TopRight,
+                                }
+                            ]
                         },
-                        new UserInfoWedge
+                        new StatisticsGrid
                         {
-                            Shear = -OsuGame.SHEAR,
-                            Anchor = Anchor.TopRight,
-                            Origin = Anchor.TopRight,
+                            Margin = new MarginPadding { Left = 20, },
+                            Width = 600,
                         },
-                        new TotalScoreWedge
-                        {
-                            Shear = -OsuGame.SHEAR,
-                            Anchor = Anchor.TopRight,
-                            Origin = Anchor.TopRight,
-                        }
-                    ]
-                }
+                    ],
+                },
             ];
         }
 

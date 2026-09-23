@@ -68,6 +68,36 @@ namespace osu.Game.Scoring
         /// <returns>The maximum achievable combo.</returns>
         public static int GetMaximumAchievableCombo(this IScoreInfo score) => score.MaximumStatistics.Where(kvp => kvp.Key.AffectsCombo()).Sum(kvp => kvp.Value);
 
+        public static IEnumerable<HitResultDisplayStatistic> GetStatisticsForDisplay(this IScoreInfo scoreInfo)
+        {
+            foreach (var r in scoreInfo.Ruleset.CreateInstance().GetHitResultsForDisplay())
+            {
+                int value = scoreInfo.Statistics.GetValueOrDefault(r.result);
+
+                switch (r.result)
+                {
+                    case HitResult.SmallTickHit:
+                    case HitResult.LargeTickHit:
+                    case HitResult.SliderTailHit:
+                    case HitResult.LargeBonus:
+                    case HitResult.SmallBonus:
+                        if (scoreInfo.MaximumStatistics.TryGetValue(r.result, out int count) && count > 0)
+                            yield return new HitResultDisplayStatistic(r.result, value, count, r.displayName);
+
+                        break;
+
+                    case HitResult.SmallTickMiss:
+                    case HitResult.LargeTickMiss:
+                        break;
+
+                    default:
+                        yield return new HitResultDisplayStatistic(r.result, value, null, r.displayName);
+
+                        break;
+                }
+            }
+        }
+
         /// <summary>
         /// Performs a realm filter that returns all scores that belong to the user with the given <paramref name="userId"/>.
         /// <see langword="null"/> <paramref name="userId"/> (for guests) is supported.

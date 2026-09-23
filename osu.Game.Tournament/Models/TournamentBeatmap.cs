@@ -96,6 +96,7 @@ namespace osu.Game.Tournament.Models
         DateTimeOffset? IBeatmapSetOnlineInfo.LastUpdated => throw new NotImplementedException();
 
         BeatmapOnlineStatus IBeatmapSetOnlineInfo.Status => throw new NotImplementedException();
+        BeatmapOnlineStatus IBeatmapInfo.Status => throw new NotImplementedException();
 
         bool IBeatmapSetOnlineInfo.HasExplicitContent => throw new NotImplementedException();
 
