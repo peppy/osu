@@ -94,6 +94,12 @@ namespace osu.Game.Screens.RankingV2.Argon
                         },
                     ],
                 },
+                new GradeDisplay
+                {
+                    Anchor = Anchor.CentreRight,
+                    Origin = Anchor.CentreRight,
+                    Y = -ScreenFooter.HEIGHT / 2f,
+                }
             ];
         }
 

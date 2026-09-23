@@ -68,8 +68,8 @@ namespace osu.Game.Tests.Visual.RankingV2
 
             score.OnlineID = onlineScoreID++;
             score.HitEvents = TestSceneStatisticsPanel.CreatePositionDistributedHitEvents();
-            score.Accuracy = 0.99;
-            score.Rank = ScoreRank.D;
+            score.Accuracy = 0.92;
+            score.Rank = ScoreRank.A;
             score.PP = 138.4234;
 
             score.Statistics[HitResult.Miss] = 2;
