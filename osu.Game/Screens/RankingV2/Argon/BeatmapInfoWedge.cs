@@ -27,7 +27,6 @@ namespace osu.Game.Screens.RankingV2.Argon
     // TODO: transition / animation pass
     public partial class BeatmapInfoWedge : CompositeDrawable
     {
-        public const float INDENT = 40;
         public const float SUB_WEDGE_HEIGHT = 35;
 
         private const float text_padding = 8 + ShearedButton.CORNER_RADIUS;
@@ -52,113 +51,112 @@ namespace osu.Game.Screens.RankingV2.Argon
         {
             RelativeSizeAxes = Axes.X;
             AutoSizeAxes = Axes.Y;
-            Margin = new MarginPadding
-            {
-                Bottom = SUB_WEDGE_HEIGHT / 2,
-            };
 
             InternalChildren =
             [
-                new Container
+                new FillFlowContainer
                 {
                     RelativeSizeAxes = Axes.X,
                     AutoSizeAxes = Axes.Y,
-                    Masking = true,
-                    EdgeEffect = new EdgeEffectParameters
-                    {
-                        Type = EdgeEffectType.Shadow,
-                        Radius = 2,
-                        Offset = new Vector2(0, 1),
-                        Colour = Colour4.Black.Opacity(0.25f),
-                        Hollow = true,
-                    },
-                    CornerRadius = ShearedButton.CORNER_RADIUS,
                     Shear = OsuGame.SHEAR,
                     Children =
                     [
-                        new Box
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Colour = colourProvider.Background3.Opacity(0.9f),
-                        },
-                        new FillFlowContainer
+                        new Container
                         {
                             RelativeSizeAxes = Axes.X,
                             AutoSizeAxes = Axes.Y,
-                            Direction = FillDirection.Vertical,
-                            Padding = new MarginPadding
+                            Masking = true,
+                            EdgeEffect = new EdgeEffectParameters
                             {
-                                Left = text_padding,
-                                Right = 30,
-                                Top = 15 + ShearedButton.CORNER_RADIUS,
-                                Bottom = 10 + SUB_WEDGE_HEIGHT / 2,
+                                Type = EdgeEffectType.Shadow,
+                                Radius = 2,
+                                Offset = new Vector2(0, 1),
+                                Colour = Colour4.Black.Opacity(0.25f),
+                                Hollow = true,
                             },
-                            Shear = -OsuGame.SHEAR,
-                            Children = new Drawable[]
-                            {
-                                statusPill = new BeatmapSetOnlineStatusPill(),
-                                titleText = new MarqueeContainer
-                                {
-                                    RelativeSizeAxes = Axes.X,
-                                },
-                                artistText = new MarqueeContainer
-                                {
-                                    RelativeSizeAxes = Axes.X,
-                                },
-                            }
-                        },
-                    ]
-                },
-                new Container
-                {
-                    RelativeSizeAxes = Axes.X,
-                    Height = SUB_WEDGE_HEIGHT,
-                    Y = -SUB_WEDGE_HEIGHT / 2,
-                    Anchor = Anchor.BottomLeft,
-                    Origin = Anchor.TopLeft,
-                    Margin = new MarginPadding { Left = -INDENT / (1 - OsuGame.SHEAR.X), },
-                    Padding = new MarginPadding { Left = INDENT / (1 - OsuGame.SHEAR.X), },
-                    Masking = true,
-                    CornerRadius = ShearedButton.CORNER_RADIUS,
-                    Shear = OsuGame.SHEAR,
-                    Children =
-                    [
-                        new Box
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Colour = colourProvider.Background5,
-                        },
-                        new FillFlowContainer
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Direction = FillDirection.Horizontal,
-                            Shear = -OsuGame.SHEAR,
-                            Spacing = new Vector2(5),
-                            Padding = new MarginPadding { Horizontal = text_padding, },
+                            CornerRadius = ShearedButton.CORNER_RADIUS,
                             Children =
                             [
-                                rulesetIconContainer = new Container
+                                new Box
                                 {
-                                    AutoSizeAxes = Axes.Both,
-                                    Anchor = Anchor.CentreLeft,
-                                    Origin = Anchor.CentreLeft,
+                                    RelativeSizeAxes = Axes.Both,
+                                    Colour = colourProvider.Background3.Opacity(0.9f),
                                 },
-                                starRatingDisplay = new StarRatingDisplay(new StarDifficulty())
+                                new FillFlowContainer
                                 {
-                                    Anchor = Anchor.CentreLeft,
-                                    Origin = Anchor.CentreLeft,
+                                    RelativeSizeAxes = Axes.X,
+                                    AutoSizeAxes = Axes.Y,
+                                    Direction = FillDirection.Vertical,
+                                    Padding = new MarginPadding
+                                    {
+                                        Left = text_padding,
+                                        Right = 30,
+                                        Top = 15 + ShearedButton.CORNER_RADIUS,
+                                        Bottom = 10 + SUB_WEDGE_HEIGHT / 2,
+                                    },
+                                    Shear = -OsuGame.SHEAR,
+                                    Children = new Drawable[]
+                                    {
+                                        statusPill = new BeatmapSetOnlineStatusPill(),
+                                        titleText = new MarqueeContainer
+                                        {
+                                            RelativeSizeAxes = Axes.X,
+                                        },
+                                        artistText = new MarqueeContainer
+                                        {
+                                            RelativeSizeAxes = Axes.X,
+                                        },
+                                    }
                                 },
-                                // TODO: probably overflows when text is long enough
-                                difficultyText = new OsuTextFlowContainer(t => t.Font = OsuFont.Style.Heading2)
-                                {
-                                    AutoSizeAxes = Axes.Both,
-                                    Anchor = Anchor.CentreLeft,
-                                    Origin = Anchor.CentreLeft,
-                                }
                             ]
-                        }
+                        },
+                        new ShearAligningWrapper(new Container
+                        {
+                            RelativeSizeAxes = Axes.X,
+                            Height = SUB_WEDGE_HEIGHT,
+                            Origin = Anchor.CentreLeft,
+                            Masking = true,
+                            CornerRadius = ShearedButton.CORNER_RADIUS,
+                            Children =
+                            [
+                                new Box
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                    Colour = colourProvider.Background5,
+                                },
+                                new FillFlowContainer
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                    Direction = FillDirection.Horizontal,
+                                    Shear = -OsuGame.SHEAR,
+                                    Spacing = new Vector2(5),
+                                    Padding = new MarginPadding { Horizontal = text_padding, },
+                                    Children =
+                                    [
+                                        rulesetIconContainer = new Container
+                                        {
+                                            AutoSizeAxes = Axes.Both,
+                                            Anchor = Anchor.CentreLeft,
+                                            Origin = Anchor.CentreLeft,
+                                        },
+                                        starRatingDisplay = new StarRatingDisplay(new StarDifficulty())
+                                        {
+                                            Anchor = Anchor.CentreLeft,
+                                            Origin = Anchor.CentreLeft,
+                                        },
+                                        // TODO: probably overflows when text is long enough
+                                        difficultyText = new OsuTextFlowContainer(t => t.Font = OsuFont.Style.Heading2)
+                                        {
+                                            AutoSizeAxes = Axes.Both,
+                                            Anchor = Anchor.CentreLeft,
+                                            Origin = Anchor.CentreLeft,
+                                        }
+                                    ]
+                                }
+                            ],
+                        })
                     ],
-                }
+                },
             ];
         }
 

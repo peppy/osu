@@ -66,34 +66,17 @@ namespace osu.Game.Screens.RankingV2.Argon
                             Anchor = Anchor.TopRight,
                             Origin = Anchor.TopRight,
                         },
-                        new FillFlowContainer
+                        new UserInfoWedge
                         {
-                            RelativeSizeAxes = Axes.X,
-                            AutoSizeAxes = Axes.Y,
-                            Direction = FillDirection.Vertical,
-                            Spacing = new Vector2(15),
+                            Shear = -OsuGame.SHEAR,
                             Anchor = Anchor.TopRight,
                             Origin = Anchor.TopRight,
-                            Masking = false,
-                            Padding = new MarginPadding
-                            {
-                                Right = BeatmapInfoWedge.INDENT,
-                            },
-                            Children =
-                            [
-                                new UserInfoWedge
-                                {
-                                    Shear = -OsuGame.SHEAR,
-                                    Anchor = Anchor.TopRight,
-                                    Origin = Anchor.TopRight,
-                                },
-                                new TotalScoreWedge
-                                {
-                                    Shear = -OsuGame.SHEAR,
-                                    Anchor = Anchor.TopRight,
-                                    Origin = Anchor.TopRight,
-                                }
-                            ]
+                        },
+                        new TotalScoreWedge
+                        {
+                            Shear = -OsuGame.SHEAR,
+                            Anchor = Anchor.TopRight,
+                            Origin = Anchor.TopRight,
                         }
                     ]
                 }
