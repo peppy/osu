@@ -6,6 +6,7 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Game.Scoring;
 using osu.Game.Screens.Play;
+using osu.Game.Screens.Play.HUD;
 using osu.Game.Skinning;
 using osuTK;
 
@@ -47,7 +48,31 @@ namespace osu.Game.Screens.RankingV2.Legacy
                 new LegacyRankingPanel(),
                 new LegacyRankingGraph(),
                 new LegacyRankingGrade(),
+                new SkinnableModDisplay
+                {
+                    // TODO: move to skinnable container defaults
+                    Anchor = Anchor.TopRight,
+                    Origin = Anchor.CentreRight,
+                    Position = new Vector2(-20, 260) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                    Scale = new Vector2(1.5f),
+                }
             ];
+        }
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            score.BindValueChanged(_ => updateState(), true);
+        }
+
+        private void updateState()
+        {
+            // TODO: this is a double hack
+            // - `SkinnableModDisplay` binds to the global mods bindable to read mods to display
+            //   hacking stuff here seems *marginally* less evil than adjusting that component to receive an `IScoreInfo` and magically decide what to show
+            // - also `IScoreInfo` hasn't got mods exposed and needs an interface for mods
+            Mods.Value = (score.Value as ScoreInfo)?.Mods ?? [];
         }
     }
 }
