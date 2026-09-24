@@ -22,7 +22,7 @@ namespace osu.Game.Screens.RankingV2.Argon
     public partial class UserInfoWedge : CompositeDrawable
     {
         private const float height = 60;
-        private const float spacing = 10;
+        private const float spacing = 12;
 
         [Resolved]
         private IBindable<IScoreInfo> score { get; set; } = null!;
@@ -67,7 +67,7 @@ namespace osu.Game.Screens.RankingV2.Argon
                                 positionText = new OsuSpriteText
                                 {
                                     Text = "#1234",
-                                    Font = OsuFont.Style.Heading2,
+                                    Font = OsuFont.Style.Heading2.With(size: 22),
                                     Anchor = Anchor.CentreRight,
                                     Origin = Anchor.CentreRight,
                                     Shear = -OsuGame.SHEAR,
@@ -116,12 +116,12 @@ namespace osu.Game.Screens.RankingV2.Argon
                                                 usernameText = new OsuSpriteText
                                                 {
                                                     Text = "joemama",
-                                                    Font = OsuFont.Style.Heading2
+                                                    Font = OsuFont.Style.Heading2.With(size: 24)
                                                 },
                                                 achievedOnText = new OsuSpriteText
                                                 {
                                                     Text = "Achieved on 2025/02/03 12:34",
-                                                    Font = OsuFont.Style.Body,
+                                                    Font = OsuFont.Style.Body.With(size: 20),
                                                     Colour = colourProvider.Content2,
                                                 }
                                             ]

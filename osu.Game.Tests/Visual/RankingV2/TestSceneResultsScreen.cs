@@ -4,11 +4,14 @@
 using System.Linq;
 using NUnit.Framework;
 using osu.Framework.Allocation;
-using osu.Framework.Testing;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Catch;
+using osu.Game.Rulesets.Mania;
+using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Scoring;
+using osu.Game.Rulesets.Taiko;
 using osu.Game.Scoring;
 using osu.Game.Screens.RankingV2.Argon;
 using osu.Game.Screens.RankingV2.Legacy;
@@ -58,7 +61,6 @@ namespace osu.Game.Tests.Visual.RankingV2
         }
 
         [Test]
-        [Solo]
         public void TestLegacyScreen()
         {
             AddStep("set legacy skin", () =>
@@ -74,7 +76,7 @@ namespace osu.Game.Tests.Visual.RankingV2
 
         private IScoreInfo createTestScore()
         {
-            var score = TestResources.CreateTestScoreInfo();
+            var score = TestResources.CreateTestScoreInfo(new OsuRuleset().RulesetInfo);
 
             score.OnlineID = onlineScoreID++;
             score.HitEvents = TestSceneStatisticsPanel.CreatePositionDistributedHitEvents();

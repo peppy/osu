@@ -80,7 +80,7 @@ namespace osu.Game.Screens.RankingV2.Argon
                                     Anchor = Anchor.CentreRight,
                                     Origin = Anchor.CentreRight,
                                     Texture = textures.Get(@"Icons/Ranking/perfect"),
-                                    Size = new Vector2(70),
+                                    Size = new Vector2(65),
                                     AlwaysPresent = true,
                                     Colour = new ColourInfo
                                     {
@@ -95,7 +95,7 @@ namespace osu.Game.Screens.RankingV2.Argon
                                     Anchor = Anchor.CentreRight,
                                     Origin = Anchor.CentreRight,
                                     // TODO: classic scoring likely breaks this sizing. figure out later what to do with ultra large score numbers
-                                    Font = OsuFont.TorusAlternate.With(size: 85, weight: FontWeight.Light, fixedWidth: true),
+                                    Font = OsuFont.TorusAlternate.With(size: 80, weight: FontWeight.Light, fixedWidth: true),
                                     Spacing = new Vector2(-5),
                                     Colour = TEXT_GRADIENT,
                                     UseFullGlyphHeight = false,

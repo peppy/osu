@@ -27,7 +27,7 @@ namespace osu.Game.Screens.RankingV2.Argon
     // TODO: transition / animation pass
     public partial class BeatmapInfoWedge : CompositeDrawable
     {
-        public const float SUB_WEDGE_HEIGHT = 35;
+        public const float SUB_WEDGE_HEIGHT = 40;
 
         private const float text_padding = 8 + ShearedButton.CORNER_RADIUS;
 
@@ -143,6 +143,7 @@ namespace osu.Game.Screens.RankingV2.Argon
                                         {
                                             Anchor = Anchor.CentreLeft,
                                             Origin = Anchor.CentreLeft,
+                                            Scale = new Vector2(1.2f),
                                         },
                                         // TODO: probably overflows when text is long enough
                                         difficultyText = new OsuTextFlowContainer(t => t.Font = OsuFont.Style.Heading2)
@@ -175,20 +176,20 @@ namespace osu.Game.Screens.RankingV2.Argon
             titleText.CreateContent = () => new OsuSpriteText
             {
                 Text = new RomanisableString(score.Value.Beatmap.Metadata.TitleUnicode, score.Value.Beatmap.Metadata.Title),
-                Font = OsuFont.Style.Title,
+                Font = OsuFont.Style.Title.With(size: 36),
             };
             artistText.CreateContent = () => new OsuSpriteText
             {
                 Text = new RomanisableString(score.Value.Beatmap.Metadata.ArtistUnicode, score.Value.Beatmap.Metadata.Artist),
-                Font = OsuFont.Style.Heading2,
+                Font = OsuFont.Style.Heading2.With(size: 24),
             };
 
             rulesetIconContainer.Clear();
-            rulesetIconContainer.Add(score.Value.Ruleset.CreateInstance().CreateIcon().With(i => i.Size = new Vector2(20)));
+            rulesetIconContainer.Add(score.Value.Ruleset.CreateInstance().CreateIcon().With(i => i.Size = new Vector2(24)));
             difficultyText.Clear();
-            difficultyText.AddText(score.Value.Beatmap.DifficultyName, t => t.Font = OsuFont.Style.Heading2);
-            difficultyText.AddText(" mapped by ", t => t.Font = OsuFont.Style.Caption1);
-            difficultyText.AddText(score.Value.Beatmap.Metadata.Author.Username, t => t.Font = OsuFont.Style.Caption1.With(weight: FontWeight.SemiBold));
+            difficultyText.AddText(score.Value.Beatmap.DifficultyName, t => t.Font = OsuFont.Style.Heading2.With(size: 22));
+            difficultyText.AddText(" mapped by ", t => t.Font = OsuFont.Style.Caption1.With(size: 18));
+            difficultyText.AddText(score.Value.Beatmap.Metadata.Author.Username, t => t.Font = OsuFont.Style.Caption1.With(size: 18, weight: FontWeight.SemiBold));
 
             difficultyRetrievalCancellation?.Cancel();
             difficultyRetrievalCancellation = new CancellationTokenSource();

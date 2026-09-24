@@ -33,7 +33,7 @@ namespace osu.Game.Screens.RankingV2.Argon
             AutoSizeAxes = Axes.Both;
             Padding = new MarginPadding
             {
-                Right = 50,
+                Right = 20,
             };
             InternalChildren =
             [
@@ -45,7 +45,7 @@ namespace osu.Game.Screens.RankingV2.Argon
                 },
                 new Container
                 {
-                    Size = new Vector2(540),
+                    Size = new Vector2(400),
                     Margin = new MarginPadding(20),
                     Children =
                     [

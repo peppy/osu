@@ -60,7 +60,7 @@ namespace osu.Game.Screens.RankingV2.Argon
                             AutoSizeAxes = Axes.Y,
                             Shear = OsuGame.SHEAR,
                             Direction = FillDirection.Vertical,
-                            Spacing = new Vector2(15),
+                            Spacing = new Vector2(12),
                             Padding = new MarginPadding
                             {
                                 Top = -ShearedButton.CORNER_RADIUS,
@@ -91,7 +91,7 @@ namespace osu.Game.Screens.RankingV2.Argon
                         new StatisticsGrid
                         {
                             Margin = new MarginPadding { Left = 20, },
-                            Width = 500,
+                            Width = 470,
                         },
                     ],
                 },

@@ -27,8 +27,9 @@ namespace osu.Game.Screens.RankingV2.Argon
         private StatisticsCell accuracyCell = null!;
         private StatisticsCell comboCell = null!;
         private StatisticsCell ppCell = null!;
-        private GridContainer basicStats = null!;
-        private GridContainer extendedStats = null!;
+        private GridContainer basicStatsFirstRow = null!;
+        private GridContainer basicStatsSecondRow = null!;
+        private GridContainer extendedStatsRow = null!;
 
         [Resolved]
         private IBindable<IScoreInfo> score { get; set; } = null!;
@@ -76,13 +77,19 @@ namespace osu.Game.Screens.RankingV2.Argon
                             },
                         },
                     },
-                    basicStats = new GridContainer
+                    basicStatsFirstRow = new GridContainer
                     {
                         RelativeSizeAxes = Axes.X,
                         AutoSizeAxes = Axes.Y,
                         RowDimensions = [new Dimension(GridSizeMode.AutoSize)],
                     },
-                    extendedStats = new GridContainer
+                    basicStatsSecondRow = new GridContainer
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        RowDimensions = [new Dimension(GridSizeMode.AutoSize)],
+                    },
+                    extendedStatsRow = new GridContainer
                     {
                         RelativeSizeAxes = Axes.X,
                         AutoSizeAxes = Axes.Y,
@@ -106,26 +113,39 @@ namespace osu.Game.Screens.RankingV2.Argon
             comboCell.Value = LocalisableString.Interpolate($"{score.Value.MaxCombo}x");
             ppCell.Value = score.Value.PP?.ToLocalisableString(@"N0") ?? "-";
 
-            var otherStats = score.Value.GetStatisticsForDisplay().ToArray();
+            var hitStatistics = score.Value.GetStatisticsForDisplay().ToArray();
+            var basicHitStatistics = hitStatistics.Where(s => s.Result.IsBasic()).ToArray();
+            var otherHitStatistics = hitStatistics.Where(s => !s.Result.IsBasic()).ToArray();
 
-            basicStats.Content = new[]
+            basicStatsFirstRow.Content = new[]
             {
-                otherStats.Where(s => s.Result <= HitResult.Perfect).Select(s => new StatisticsCell
+                basicHitStatistics.Take(basicHitStatistics.Length > 4 ? basicHitStatistics.Length / 2 : 4).Select(s => new StatisticsCell
                 {
                     Caption = s.DisplayName,
                     Value = s.Count.ToLocalisableString(@"N0"),
-                    BaseFontSize = 26,
+                    BaseFontSize = 32,
                     AccentColour = colours.ForHitResult(s.Result),
                 }).ToArray<Drawable>(),
             };
-            extendedStats.Content = new[]
+            basicStatsSecondRow.Content = new[]
             {
-                otherStats.Where(s => s.Result > HitResult.Perfect).Select(s => new StatisticsCell
+                basicHitStatistics.Skip(basicHitStatistics.Length > 4 ? basicHitStatistics.Length / 2 : 4).Where(s => s.Result <= HitResult.Perfect).Select(s => new StatisticsCell
+                {
+                    Caption = s.DisplayName,
+                    Value = s.Count.ToLocalisableString(@"N0"),
+                    BaseFontSize = 32,
+                    AccentColour = colours.ForHitResult(s.Result),
+                }).ToArray<Drawable>(),
+            };
+            basicStatsSecondRow.Alpha = basicHitStatistics.Length > 4 ? 1 : 0;
+            extendedStatsRow.Content = new[]
+            {
+                otherHitStatistics.Select(s => new StatisticsCell
                 {
                     Caption = s.DisplayName,
                     Value = s.Count.ToLocalisableString(@"N0"),
                     MaxValue = s.MaxCount?.ToLocalisableString(@"N0"),
-                    BaseFontSize = 24,
+                    BaseFontSize = 28,
                 }).ToArray<Drawable>(),
             };
         }
@@ -162,7 +182,7 @@ namespace osu.Game.Screens.RankingV2.Argon
                 }
             }
 
-            public float BaseFontSize { get; init; } = 28;
+            public float BaseFontSize { get; init; } = 36;
 
             public Colour4? AccentColour { get; init; }
 
@@ -211,7 +231,7 @@ namespace osu.Game.Screens.RankingV2.Argon
                                 captionText = new OsuSpriteText
                                 {
                                     Text = Caption.ToUpper(),
-                                    Font = OsuFont.Default.With(size: BaseFontSize - 10, weight: FontWeight.Bold),
+                                    Font = OsuFont.Default.With(size: BaseFontSize - 12, weight: FontWeight.Bold),
                                 },
                                 new FillFlowContainer
                                 {
