@@ -46,6 +46,7 @@ namespace osu.Game.Screens.RankingV2.Legacy
                 },
                 new LegacyRankingPanel(),
                 new LegacyRankingGraph(),
+                new LegacyRankingGrade(),
             ];
         }
     }
