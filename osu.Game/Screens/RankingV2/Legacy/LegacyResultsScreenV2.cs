@@ -70,6 +70,15 @@ namespace osu.Game.Screens.RankingV2.Legacy
                     Origin = Anchor.CentreRight,
                     Position = new Vector2(0, 420) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
                 },
+                new LegacyButton
+                {
+                    AccentColour = Colour4.BlueViolet,
+                    Text = "▼ Online Ranking ▼",
+                    Anchor = Anchor.BottomCentre,
+                    Origin = Anchor.TopLeft,
+                    Size = new Vector2(200, 30) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                    Position = new Vector2(-100, -26) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                }
             ];
         }
 
