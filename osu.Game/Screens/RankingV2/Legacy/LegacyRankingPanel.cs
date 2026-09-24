@@ -78,6 +78,7 @@ namespace osu.Game.Screens.RankingV2.Legacy
                     Origin = Anchor.TopLeft,
                     Position = (new Vector2(imgx1 - 35, row4 - row4Offset) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
                     ScoreTextPosition = (new Vector2(textx1 - 65, row4 + 10) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                    ElementScale = Vector2.One,
                 },
                 accuracyElement = new LegacyRankingElement
                 {
@@ -85,6 +86,7 @@ namespace osu.Game.Screens.RankingV2.Legacy
                     Origin = Anchor.TopLeft,
                     Position = (new Vector2(imgx2 - 58, row4 - row4Offset) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
                     ScoreTextPosition = (new Vector2(textx2 - 86, row4 + 10) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                    ElementScale = Vector2.One,
                 },
             ];
 
@@ -114,38 +116,135 @@ namespace osu.Game.Screens.RankingV2.Legacy
                         new LegacyRankingElement
                         {
                             ElementName = @"hit300",
-                            ScoreText = $"{score.Value.GetCount300()}x",
+                            ScoreText = $@"{score.Value.GetCount300()}x",
                             Position = (new Vector2(imgx1, row1) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
                         },
                         new LegacyRankingElement
                         {
                             ElementName = @"hit100",
-                            ScoreText = $"{score.Value.GetCount100()}x",
+                            ScoreText = $@"{score.Value.GetCount100()}x",
                             Position = (new Vector2(imgx1, row2) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
                         },
                         new LegacyRankingElement
                         {
                             ElementName = @"hit50",
-                            ScoreText = $"{score.Value.GetCount50()}x",
+                            ScoreText = $@"{score.Value.GetCount50()}x",
                             Position = (new Vector2(imgx1, row3) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
                         },
                         new LegacyRankingElement
                         {
                             ElementName = @"hit0",
-                            ScoreText = $"{score.Value.GetCountMiss()}x",
+                            ScoreText = $@"{score.Value.GetCountMiss()}x",
+                            Position = (new Vector2(imgx2, row3) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                        },
+                    ]);
+                    break;
+
+                case 1:
+                    rulesetRankingElements.AddRange([
+                        new LegacyRankingElement
+                        {
+                            ElementName = @"taiko-hit300",
+                            ScoreText = $@"{score.Value.GetCount300()}x",
+                            Position = (new Vector2(imgx1, row1) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                        },
+                        new LegacyRankingElement
+                        {
+                            ElementName = @"taiko-hit100",
+                            ScoreText = $@"{score.Value.GetCount100()}x",
+                            Position = (new Vector2(imgx1, row2) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                        },
+                        new LegacyRankingElement
+                        {
+                            ElementName = @"taiko-hit0",
+                            ScoreText = $@"{score.Value.GetCountMiss()}x",
+                            Position = (new Vector2(imgx1, row3) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                        },
+                        new LegacyRankingElement
+                        {
+                            ElementName = @"taiko-hit300g",
+                            ScoreText = $@"{score.Value.GetCountGeki()}x",
+                            Position = (new Vector2(imgx2, row1) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                        },
+                        // stable also has a "taiko-hit100k" one, but lazer does not distinguish it separately (all second hits are `LargeBonus`)
+                    ]);
+                    break;
+
+                case 2:
+                    rulesetRankingElements.AddRange([
+                        new LegacyRankingElement
+                        {
+                            ElementName = @"fruit-orange",
+                            ElementColour = Colour4.Orange,
+                            ScoreText = $@"{score.Value.GetCount300()}x",
+                            Position = (new Vector2(imgx1, row1) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                        },
+                        new LegacyRankingElement
+                        {
+                            ElementName = @"fruit-drop",
+                            ElementColour = Colour4.YellowGreen,
+                            ElementScale = new Vector2(0.6f),
+                            ScoreText = $@"{score.Value.GetCount100()}x",
+                            Position = (new Vector2(imgx1, row2) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                        },
+                        new LegacyRankingElement
+                        {
+                            ElementName = @"fruit-drop",
+                            ElementColour = Colour4.LightBlue,
+                            ElementScale = new Vector2(0.6f),
+                            ScoreText = $@"{score.Value.GetCount50()}x",
+                            Position = (new Vector2(imgx1, row3) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                        },
+                        new LegacyRankingElement
+                        {
+                            ElementName = @"fruit-orange",
+                            ElementColour = Colour4.LightGray,
+                            ScoreText = $@"{score.Value.GetCountMiss()}x",
                             Position = (new Vector2(imgx2, row1) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
                         },
                     ]);
                     break;
 
-                // TODO the rest
-                case 1:
-                    break;
-
-                case 2:
-                    break;
-
                 case 3:
+                    rulesetRankingElements.AddRange([
+                        new LegacyRankingElement
+                        {
+                            ElementName = @"mania-hit300",
+                            ScoreText = $@"{score.Value.GetCount300()}x",
+                            Position = (new Vector2(imgx1, row1) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                        },
+                        new LegacyRankingElement
+                        {
+                            ElementName = @"mania-hit200",
+                            ScoreText = $@"{score.Value.GetCountKatu()}x",
+                            Position = (new Vector2(imgx1, row2) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                        },
+                        new LegacyRankingElement
+                        {
+                            ElementName = @"mania-hit50",
+                            ElementColour = Colour4.LightBlue,
+                            ScoreText = $@"{score.Value.GetCount50()}x",
+                            Position = (new Vector2(imgx1, row3) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                        },
+                        new LegacyRankingElement
+                        {
+                            ElementName = @"mania-hit300g",
+                            ScoreText = $@"{score.Value.GetCountGeki()}x",
+                            Position = (new Vector2(imgx2, row1) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                        },
+                        new LegacyRankingElement
+                        {
+                            ElementName = @"mania-hit100",
+                            ScoreText = $@"{score.Value.GetCount100()}x",
+                            Position = (new Vector2(imgx2, row2) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                        },
+                        new LegacyRankingElement
+                        {
+                            ElementName = @"mania-hit0",
+                            ScoreText = $@"{score.Value.GetCountMiss()}x",
+                            Position = (new Vector2(imgx2, row3) - baselinePosition) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                        },
+                    ]);
                     break;
 
                 // TODO: good luck with custom rulesets!!!
@@ -158,6 +257,10 @@ namespace osu.Game.Screens.RankingV2.Legacy
         public partial class LegacyRankingElement : CompositeDrawable
         {
             public required string ElementName { get; init; }
+
+            public Colour4 ElementColour { get; init; } = Colour4.White;
+
+            public Vector2 ElementScale { get; init; } = new Vector2(0.5f);
 
             private string? scoreText;
 
@@ -186,16 +289,17 @@ namespace osu.Game.Screens.RankingV2.Legacy
 
                 AddInternal(new Sprite
                 {
-                    Texture = skin.GetTexture(ElementName),
+                    Texture = skin.GetTextures(ElementName, default, default, true, "-", null, out _).FirstOrDefault(),
                     Anchor = Anchor.TopLeft,
                     Origin = Origin,
+                    Scale = ElementScale,
+                    Colour = ElementColour,
                 });
 
                 AddInternal(text = new LegacySpriteText(LegacyFont.Score)
                 {
                     Anchor = Anchor.TopLeft,
                     Origin = Anchor.TopLeft,
-                    Scale = new Vector2(1.12f),
                 });
 
                 if (ScoreTextPosition != null)
