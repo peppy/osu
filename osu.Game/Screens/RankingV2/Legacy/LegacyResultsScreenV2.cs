@@ -8,6 +8,7 @@ using osu.Game.Scoring;
 using osu.Game.Screens.Play;
 using osu.Game.Screens.Play.HUD;
 using osu.Game.Skinning;
+using osu.Game.Skinning.Components;
 using osuTK;
 
 namespace osu.Game.Screens.RankingV2.Legacy
@@ -36,7 +37,30 @@ namespace osu.Game.Screens.RankingV2.Legacy
             InternalChildren =
             [
                 new LegacyRankingBackgroundOverlay(),
-                new LegacyRankingDetails(),
+                new BoxElement
+                {
+                    Width = 9999,
+                    Height = 60 * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                    CornerRadius = { Value = 0, },
+                    AccentColour = { Value = Colour4.Black, },
+                },
+                new BeatmapAttributeText
+                {
+                    Scale = new Vector2(22 * LegacySkin.STABLE_MAGIC_SCALE_FACTOR / BeatmapAttributeText.DEFAULT_TEXT_SIZE),
+                    Template = { Value = @"{Artist} - {Title} [{DifficultyName}]" }
+                },
+                new BeatmapAttributeText
+                {
+                    Position = new Vector2(1, 20) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                    Scale = new Vector2(16 * LegacySkin.STABLE_MAGIC_SCALE_FACTOR / BeatmapAttributeText.DEFAULT_TEXT_SIZE),
+                    Template = { Value = @"Beatmap by {Creator}" } // TODO: localisation...???
+                },
+                new ScoreAttributeText
+                {
+                    Position = new Vector2(1, 34) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                    Scale = new Vector2(16 * LegacySkin.STABLE_MAGIC_SCALE_FACTOR / BeatmapAttributeText.DEFAULT_TEXT_SIZE),
+                    Template = { Value = @"Played by {Username} on {Date}" } // TODO: localisation...???
+                },
                 new SkinnableSprite
                 {
                     SpriteName = { Value = @"ranking-title" },
