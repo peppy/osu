@@ -55,7 +55,21 @@ namespace osu.Game.Screens.RankingV2.Legacy
                     Origin = Anchor.CentreRight,
                     Position = new Vector2(-20, 260) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
                     Scale = new Vector2(1.5f),
-                }
+                },
+                new LegacyRankingRetryButton
+                {
+                    // TODO: move to skinnable container defaults
+                    Anchor = Anchor.TopRight,
+                    Origin = Anchor.CentreRight,
+                    Position = new Vector2(0, 360) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                },
+                new LegacyRankingWatchReplayButton()
+                {
+                    // TODO: move to skinnable container defaults
+                    Anchor = Anchor.TopRight,
+                    Origin = Anchor.CentreRight,
+                    Position = new Vector2(0, 420) * LegacySkin.STABLE_MAGIC_SCALE_FACTOR,
+                },
             ];
         }
 
