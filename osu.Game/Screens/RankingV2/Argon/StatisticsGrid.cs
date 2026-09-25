@@ -96,7 +96,10 @@ namespace osu.Game.Screens.RankingV2.Argon
                         Margin = new MarginPadding { Top = 10 },
                         RowDimensions = [new Dimension(GridSizeMode.AutoSize)],
                     },
-                    new ModCell(),
+                    new ModCell()
+                    {
+                        Margin = new MarginPadding { Top = 10 },
+                    }
                 ]
             };
         }
