@@ -55,7 +55,7 @@ namespace osu.Game.Screens.RankingV2.Argon
                         new Box
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Colour = colourProvider.Background6.Opacity(0.75f),
+                            Colour = colourProvider.Background5.Opacity(0.95f),
                         },
                         new FillFlowContainer
                         {
