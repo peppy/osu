@@ -3,16 +3,20 @@
 
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Game.Graphics;
 using osu.Game.Online.Leaderboards;
+using osu.Game.Overlays;
 using osu.Game.Scoring;
 using osu.Game.Skinning;
 using osuTK;
+using osuTK.Graphics;
 
 namespace osu.Game.Screens.RankingV2.Argon
 {
@@ -21,6 +25,8 @@ namespace osu.Game.Screens.RankingV2.Argon
         private Container gradedCirclesContainer = null!;
         private Sprite rankSprite = null!;
 
+        private Container glowContainer = null!;
+
         [Resolved]
         private IBindable<IScoreInfo> score { get; set; } = null!;
 
@@ -28,12 +34,12 @@ namespace osu.Game.Screens.RankingV2.Argon
         private SkinManager skinManager { get; set; } = null!;
 
         [BackgroundDependencyLoader]
-        private void load()
+        private void load(OverlayColourProvider colourProvider)
         {
             AutoSizeAxes = Axes.Both;
             Padding = new MarginPadding
             {
-                Right = 20,
+                Right = 0,
             };
             InternalChildren =
             [
@@ -41,17 +47,29 @@ namespace osu.Game.Screens.RankingV2.Argon
                 {
                     RelativeSizeAxes = Axes.Both,
                     Width = 2,
-                    Colour = Colour4.Black.Opacity(0.3f),
+                    Colour = ColourInfo.GradientHorizontal(
+                        colourProvider.Background3.Opacity(0.99f),
+                        colourProvider.Background3.Opacity(0.9f)
+                    )
                 },
                 new Container
                 {
-                    Size = new Vector2(400),
+                    Size = new Vector2(600),
                     Margin = new MarginPadding(20),
                     Children =
                     [
+                        glowContainer = new CircularContainer
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Masking = true,
+                        },
                         gradedCirclesContainer = new Container
                         {
                             RelativeSizeAxes = Axes.Both,
+                            Colour = ColourInfo.GradientHorizontal(
+                                Color4.White,
+                                Color4.White
+                            )
                         },
                         rankSprite = new Sprite
                         {
@@ -81,15 +99,15 @@ namespace osu.Game.Screens.RankingV2.Argon
             {
                 RelativeSizeAxes = Axes.Both,
                 Progress = score.Value.Accuracy,
-                Masking = true,
-                EdgeEffect = new EdgeEffectParameters
-                {
-                    // in the design this was an inner glow, but framework can't do that, and this kind of has... more sauce anyway?
-                    Type = EdgeEffectType.Glow,
-                    Hollow = true,
-                    Colour = OsuColour.ForRank(score.Value.Rank),
-                    Radius = 50,
-                },
+            };
+
+            glowContainer.EdgeEffect = new EdgeEffectParameters
+            {
+                // in the design this was an inner glow, but framework can't do that, and this kind of has... more sauce anyway?
+                Type = EdgeEffectType.Glow,
+                // adjust opacity depending on rank type maybe? or just add more flair in a different way.
+                Colour = OsuColour.ForRank(score.Value.Rank).Opacity(0.05f),
+                Radius = 50,
             };
 
             rankSprite.Texture = skinManager.DefaultClassicSkin.GetTexture(DrawableRank.GetLegacyRankTextureName(score.Value.Rank));
