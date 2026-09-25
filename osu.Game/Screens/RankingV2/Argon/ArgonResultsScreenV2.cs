@@ -71,20 +71,15 @@ namespace osu.Game.Screens.RankingV2.Argon
                                 new BeatmapInfoWedge
                                 {
                                     Shear = -OsuGame.SHEAR,
-                                    Anchor = Anchor.TopRight,
-                                    Origin = Anchor.TopRight,
                                 },
                                 new UserInfoWedge
                                 {
                                     Shear = -OsuGame.SHEAR,
-                                    Anchor = Anchor.TopRight,
-                                    Origin = Anchor.TopRight,
                                 },
                                 new TotalScoreWedge
                                 {
                                     Shear = -OsuGame.SHEAR,
-                                    Anchor = Anchor.TopRight,
-                                    Origin = Anchor.TopRight,
+                                    Width = 1.3f,
                                 }
                             ]
                         },

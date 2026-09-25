@@ -93,6 +93,7 @@ namespace osu.Game.Screens.RankingV2.Argon
                     {
                         RelativeSizeAxes = Axes.X,
                         AutoSizeAxes = Axes.Y,
+                        Margin = new MarginPadding { Top = 10 },
                         RowDimensions = [new Dimension(GridSizeMode.AutoSize)],
                     },
                     new ModCell(),
@@ -332,10 +333,12 @@ namespace osu.Game.Screens.RankingV2.Argon
                                 new OsuSpriteText
                                 {
                                     Text = @"Mods".ToUpperInvariant(),
-                                    Font = OsuFont.Default.With(size: 18, weight: FontWeight.Bold),
+                                    Font = OsuFont.Default.With(size: 16, weight: FontWeight.Bold),
                                 },
                                 modDisplay = new ModDisplay
                                 {
+                                    Scale = new Vector2(0.8f),
+                                    ShowExtendedInformation = true,
                                     ExpansionMode = ExpansionMode.AlwaysExpanded
                                 }
                             ],
