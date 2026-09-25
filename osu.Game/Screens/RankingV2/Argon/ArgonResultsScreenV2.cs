@@ -49,6 +49,7 @@ namespace osu.Game.Screens.RankingV2.Argon
                 {
                     Anchor = Anchor.CentreRight,
                     Origin = Anchor.CentreRight,
+                    X = 100,
                     Y = -ScreenFooter.HEIGHT / 2f,
                 },
                 new FillFlowContainer
@@ -92,7 +93,7 @@ namespace osu.Game.Screens.RankingV2.Argon
                         new StatisticsGrid
                         {
                             Margin = new MarginPadding { Left = 20, },
-                            Width = 470,
+                            Width = 530,
                         },
                     ],
                 },
