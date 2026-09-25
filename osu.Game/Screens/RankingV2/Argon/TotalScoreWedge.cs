@@ -50,12 +50,13 @@ namespace osu.Game.Screens.RankingV2.Argon
                     Shear = OsuGame.SHEAR,
                     CornerRadius = ShearedButton.CORNER_RADIUS,
                     Masking = true,
+                    EdgeEffect = BeatmapInfoWedge.CreateShadowEdgeEffect(),
                     Children =
                     [
                         new Box
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Colour = colourProvider.Background5.Opacity(0.95f),
+                            Colour = colourProvider.Background5.Opacity(0.98f),
                         },
                         new FillFlowContainer
                         {
@@ -115,6 +116,7 @@ namespace osu.Game.Screens.RankingV2.Argon
                     Shear = OsuGame.SHEAR,
                     CornerRadius = ShearedButton.CORNER_RADIUS,
                     Masking = true,
+                    EdgeEffect = BeatmapInfoWedge.CreateShadowEdgeEffect(),
                     Children =
                     [
                         new Box

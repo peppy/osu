@@ -4,8 +4,11 @@
 using System.Collections.Generic;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Game.Graphics;
 using osu.Game.Graphics.UserInterface;
@@ -14,6 +17,7 @@ using osu.Game.Scoring;
 using osu.Game.Screens.Footer;
 using osu.Game.Screens.Play;
 using osuTK;
+using osuTK.Graphics;
 
 namespace osu.Game.Screens.RankingV2.Argon
 {
@@ -45,6 +49,12 @@ namespace osu.Game.Screens.RankingV2.Argon
         {
             InternalChildren =
             [
+                new Box
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Width = 0.6f,
+                    Colour = ColourInfo.GradientHorizontal(Color4.Black.Opacity(0.3f), Color4.Black.Opacity(0f)),
+                },
                 new GradeDisplay
                 {
                     Anchor = Anchor.CentreRight,

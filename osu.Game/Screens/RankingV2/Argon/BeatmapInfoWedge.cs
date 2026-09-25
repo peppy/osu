@@ -31,6 +31,14 @@ namespace osu.Game.Screens.RankingV2.Argon
 
         private const float text_padding = 8 + ShearedButton.CORNER_RADIUS;
 
+        public static EdgeEffectParameters CreateShadowEdgeEffect() => new EdgeEffectParameters
+        {
+            Type = EdgeEffectType.Shadow,
+            Radius = 4,
+            Hollow = true,
+            Colour = Colour4.Black.Opacity(0.2f),
+        };
+
         [Resolved]
         private IBindable<IScoreInfo> score { get; set; } = null!;
 
@@ -59,22 +67,15 @@ namespace osu.Game.Screens.RankingV2.Argon
                     RelativeSizeAxes = Axes.X,
                     AutoSizeAxes = Axes.Y,
                     Shear = OsuGame.SHEAR,
+                    Masking = true,
+                    CornerRadius = ShearedButton.CORNER_RADIUS,
+                    EdgeEffect = CreateShadowEdgeEffect(),
                     Children =
                     [
                         new Container
                         {
                             RelativeSizeAxes = Axes.X,
                             AutoSizeAxes = Axes.Y,
-                            Masking = true,
-                            EdgeEffect = new EdgeEffectParameters
-                            {
-                                Type = EdgeEffectType.Shadow,
-                                Radius = 2,
-                                Offset = new Vector2(0, 1),
-                                Colour = Colour4.Black.Opacity(0.25f),
-                                Hollow = true,
-                            },
-                            CornerRadius = ShearedButton.CORNER_RADIUS,
                             Children =
                             [
                                 new Box

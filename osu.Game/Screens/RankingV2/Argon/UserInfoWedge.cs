@@ -43,6 +43,7 @@ namespace osu.Game.Screens.RankingV2.Argon
                 RelativeSizeAxes = Axes.Both,
                 Shear = OsuGame.SHEAR,
                 CornerRadius = ShearedButton.CORNER_RADIUS,
+                EdgeEffect = BeatmapInfoWedge.CreateShadowEdgeEffect(),
                 Masking = true,
                 Children =
                 [
