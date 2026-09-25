@@ -72,7 +72,7 @@ namespace osu.Game.Screens.RankingV2.Argon
                                 },
                                 ppCell = new StatisticsCell
                                 {
-                                    Caption = "PP",
+                                    Caption = "Performance",
                                 }
                             },
                         },
@@ -115,7 +115,7 @@ namespace osu.Game.Screens.RankingV2.Argon
         {
             accuracyCell.Value = score.Value.Accuracy.FormatAccuracy();
             comboCell.Value = LocalisableString.Interpolate($"{score.Value.MaxCombo}x");
-            ppCell.Value = score.Value.PP?.ToLocalisableString(@"N0") ?? "-";
+            ppCell.Value = (score.Value.PP?.ToString(@"N0") ?? "-") + "pp";
 
             var hitStatistics = score.Value.GetStatisticsForDisplay().ToArray();
             var basicHitStatistics = hitStatistics.Where(s => s.Result.IsBasic()).ToArray();
