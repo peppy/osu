@@ -45,6 +45,12 @@ namespace osu.Game.Screens.RankingV2.Argon
         {
             InternalChildren =
             [
+                new GradeDisplay
+                {
+                    Anchor = Anchor.CentreRight,
+                    Origin = Anchor.CentreRight,
+                    Y = -ScreenFooter.HEIGHT / 2f,
+                },
                 new FillFlowContainer
                 {
                     AutoSizeAxes = Axes.Both,
@@ -90,12 +96,6 @@ namespace osu.Game.Screens.RankingV2.Argon
                         },
                     ],
                 },
-                new GradeDisplay
-                {
-                    Anchor = Anchor.CentreRight,
-                    Origin = Anchor.CentreRight,
-                    Y = -ScreenFooter.HEIGHT / 2f,
-                }
             ];
         }
 
