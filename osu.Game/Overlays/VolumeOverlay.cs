@@ -196,11 +196,11 @@ namespace osu.Game.Overlays
         private void schedulePopOut()
         {
             popOutDelegate?.Cancel();
-            this.Delay(1000).Schedule(() =>
-            {
-                if (!IsHovered)
-                    Hide();
-            }, out popOutDelegate);
+            // this.Delay(1000).Schedule(() =>
+            // {
+            //     if (!IsHovered)
+            //         Hide();
+            // }, out popOutDelegate);
         }
     }
 }
