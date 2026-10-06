@@ -107,6 +107,12 @@ namespace osu.Game.Overlays.Volume
                                 new CircularContainer
                                 {
                                     Masking = true,
+                                    EdgeEffect = new EdgeEffectParameters
+                                    {
+                                        Radius = 20,
+                                        Colour = Color4.Black.Opacity(0.1f),
+                                        Type = EdgeEffectType.Shadow,
+                                    },
                                     Anchor = Anchor.Centre,
                                     Origin = Anchor.Centre,
                                     RelativeSizeAxes = Axes.Both,
