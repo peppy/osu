@@ -87,7 +87,7 @@ namespace osu.Game.Overlays
                                     Width = 300,
                                     IsMuted = { BindTarget = IsMuted },
                                 },
-                                volumeMeterEffect = new VolumeMeter(AudioSettingsStrings.EffectVolume, colours.BlueDark)
+                                volumeMeterEffect = new VolumeMeter(AudioSettingsStrings.EffectVolume, colours.BlueDarker)
                                 {
                                     Anchor = Anchor.BottomCentre,
                                     Origin = Anchor.BottomCentre,

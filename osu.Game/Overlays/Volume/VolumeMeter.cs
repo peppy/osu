@@ -203,6 +203,8 @@ namespace osu.Game.Overlays.Volume
             Bindable.BindValueChanged(volume => { this.TransformTo(nameof(DisplayVolume), volume.NewValue, 400, Easing.OutQuint); }, true);
 
             bgProgress.Progress = 0.75f;
+
+            updateSelectedState();
         }
 
         private int? displayVolumeInt;
