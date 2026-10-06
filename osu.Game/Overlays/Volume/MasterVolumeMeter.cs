@@ -21,8 +21,8 @@ namespace osu.Game.Overlays.Volume
         [Resolved]
         private VolumeOverlay volumeOverlay { get; set; } = null!;
 
-        public MasterVolumeMeter(LocalisableString name, float circleSize, Color4 meterColour)
-            : base(name, circleSize, meterColour)
+        public MasterVolumeMeter(LocalisableString name, Color4 meterColour)
+            : base(name, meterColour)
         {
         }
 
@@ -39,11 +39,10 @@ namespace osu.Game.Overlays.Volume
 
             Add(muteButton = new MuteButton
             {
-                Anchor = Anchor.CentreLeft,
-                Origin = Anchor.Centre,
+                Anchor = Anchor.BottomCentre,
+                Origin = Anchor.BottomCentre,
                 Blending = BlendingParameters.Additive,
-                X = CircleSize / 2,
-                Y = CircleSize * 0.23f,
+                X = 80,
                 Current = { BindTarget = IsMuted }
             });
 

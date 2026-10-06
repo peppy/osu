@@ -6,7 +6,6 @@ using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
-using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
@@ -29,8 +28,6 @@ namespace osu.Game.Overlays
     {
         public Bindable<bool> IsMuted { get; } = new Bindable<bool>();
 
-        private const float offset = 10;
-
         private VolumeMeter volumeMeterMaster = null!;
         private VolumeMeter volumeMeterEffect = null!;
         private VolumeMeter volumeMeterMusic = null!;
@@ -44,40 +41,69 @@ namespace osu.Game.Overlays
         [BackgroundDependencyLoader]
         private void load(AudioManager audio, OsuColour colours, OsuConfigManager config)
         {
-            AutoSizeAxes = Axes.X;
-            RelativeSizeAxes = Axes.Y;
+            AutoSizeAxes = Axes.Y;
+            RelativeSizeAxes = Axes.X;
+
+            Anchor = Anchor.BottomCentre;
+            Origin = Anchor.BottomCentre;
 
             AddRange(new Drawable[]
             {
                 new Box
                 {
-                    RelativeSizeAxes = Axes.Y,
-                    Width = 300,
-                    Colour = ColourInfo.GradientHorizontal(Color4.Black.Opacity(0.75f), Color4.Black.Opacity(0))
+                    RelativeSizeAxes = Axes.X,
+                    Height = 300,
+                    Colour = ColourInfo.GradientVertical(Color4.Black.Opacity(0), Color4.Black.Opacity(0.75f))
                 },
                 new FillFlowContainer
                 {
                     Direction = FillDirection.Vertical,
                     AutoSizeAxes = Axes.Both,
-                    Anchor = Anchor.CentreLeft,
-                    Origin = Anchor.CentreLeft,
-                    Spacing = new Vector2(0, offset),
-                    Margin = new MarginPadding { Left = offset },
+                    Anchor = Anchor.BottomCentre,
+                    Origin = Anchor.BottomCentre,
+                    Y = -20,
+                    Spacing = new Vector2(10),
                     Children = new Drawable[]
                     {
                         volumeMeters = new SelectionCycleFillFlowContainer<VolumeMeter>
                         {
-                            Direction = FillDirection.Vertical,
-                            AutoSizeAxes = Axes.Both,
-                            Anchor = Anchor.CentreLeft,
-                            Origin = Anchor.CentreLeft,
-                            Spacing = new Vector2(0, offset),
+                            Direction = FillDirection.Full,
+                            AutoSizeAxes = Axes.Y,
+                            Width = 600,
+                            Anchor = Anchor.BottomCentre,
+                            Origin = Anchor.BottomCentre,
+                            Spacing = new Vector2(10, 0),
                             Children = new[]
                             {
-                                volumeMeterMaster = new MasterVolumeMeter(AudioSettingsStrings.MasterVolume.ToUpper(), 140, colours.PinkDarker) { IsMuted = { BindTarget = IsMuted }, },
-                                volumeMeterMusic = new VolumeMeter(AudioSettingsStrings.MusicVolume.ToUpper(), 100, colours.BlueDarker) { Margin = new MarginPadding { Left = 20 } },
-                                volumeMeterEffect = new VolumeMeter(AudioSettingsStrings.EffectVolume.ToUpper(), 100, colours.BlueDarker) { Margin = new MarginPadding { Left = 20 } },
-                                volumeMeterGameplay = new VolumeMeter(AudioSettingsStrings.GameplayVolume.ToUpper(), 100, colours.BlueDarker) { Margin = new MarginPadding { Left = 20 } },
+                                volumeMeterMaster = new MasterVolumeMeter(AudioSettingsStrings.MasterVolume, colours.PinkDarker)
+                                {
+                                    Anchor = Anchor.BottomCentre,
+                                    Origin = Anchor.BottomCentre,
+                                    AutoSizeAxes = Axes.Y,
+                                    Width = 600,
+                                    IsMuted = { BindTarget = IsMuted },
+                                },
+                                volumeMeterEffect = new VolumeMeter(AudioSettingsStrings.EffectVolume, colours.BlueDark)
+                                {
+                                    Anchor = Anchor.BottomCentre,
+                                    Origin = Anchor.BottomCentre,
+                                    Margin = new MarginPadding { Bottom = -40 },
+                                    Scale = new Vector2(0.7f),
+                                },
+                                volumeMeterMusic = new VolumeMeter(AudioSettingsStrings.MusicVolume, colours.GreenDark)
+                                {
+                                    Anchor = Anchor.BottomCentre,
+                                    Origin = Anchor.BottomCentre,
+                                    Margin = new MarginPadding { Bottom = 15 },
+                                    Scale = new Vector2(0.7f),
+                                },
+                                volumeMeterGameplay = new VolumeMeter(AudioSettingsStrings.GameplayVolume, colours.PurpleDark)
+                                {
+                                    Anchor = Anchor.BottomCentre,
+                                    Origin = Anchor.BottomCentre,
+                                    Margin = new MarginPadding { Bottom = -40 },
+                                    Scale = new Vector2(0.7f),
+                                },
                             }
                         },
                     },
@@ -168,7 +194,7 @@ namespace osu.Game.Overlays
 
         protected override void PopOut()
         {
-            this.FadeOut(100);
+            this.FadeOut(300, Easing.OutQuint);
         }
 
         protected override bool OnMouseMove(MouseMoveEvent e)
@@ -196,15 +222,15 @@ namespace osu.Game.Overlays
         {
             popOutDelegate?.Cancel();
 
-            this.FadeIn(100);
+            this.FadeIn(200, Easing.Out);
 
             if (!IsHovered)
             {
-                this.Delay(100)
-                    .FadeOut(2000);
+                this.Delay(200)
+                    .FadeOut(2000, Easing.In);
             }
 
-            this.Delay(1000).Schedule(() =>
+            this.Delay(1200).Schedule(() =>
             {
                 if (!IsHovered)
                     Hide();

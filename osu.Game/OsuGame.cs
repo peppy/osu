@@ -1161,7 +1161,7 @@ namespace osu.Game
             });
 
             // Load volume overlay before anything else, so users can adjust volume as soon as feasible after startup.
-            loadComponentSingleFile(volume = new VolumeOverlay(), leftFloatingOverlayContent.Add, true);
+            loadComponentSingleFile(volume = new VolumeOverlay(), topMostOverlayContent.Add, true);
             Add(new ScrollAdjustsVolume(requireAltPressed: true));
 
             Dependencies.Cache(ScreenFooter);

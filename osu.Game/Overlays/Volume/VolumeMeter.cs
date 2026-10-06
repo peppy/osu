@@ -1,11 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#nullable disable
-
 using System;
 using System.Globalization;
-using JetBrains.Annotations;
 using osu.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
@@ -24,7 +21,6 @@ using osu.Framework.Utils;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Input.Bindings;
 using osuTK;
 using osuTK.Graphics;
 
@@ -32,27 +28,25 @@ namespace osu.Game.Overlays.Volume
 {
     public partial class VolumeMeter : Container, IStateful<SelectionState>
     {
-        private CircularProgress volumeCircle;
-
-        protected static readonly Vector2 LABEL_SIZE = new Vector2(120, 20);
+        private CircularProgress volumeCircle = null!;
 
         public BindableDouble Bindable { get; } = new BindableDouble { MinValue = 0, MaxValue = 1, Precision = 0.01 };
 
-        protected readonly float CircleSize;
+        protected const float CIRCLE_SIZE = 140;
 
         private readonly Color4 meterColour;
         private readonly LocalisableString name;
 
-        private OsuSpriteText text;
+        private OsuSpriteText text = null!;
 
-        private Container selectedGlowContainer;
+        private Container selectedGlowContainer = null!;
 
-        private Sample hoverSample;
-        private Sample notchSample;
+        private Sample? hoverSample;
+        private Sample notchSample = null!;
+
         private double sampleLastPlaybackTime;
 
-        [CanBeNull]
-        public event Action<SelectionState> StateChanged;
+        public event Action<SelectionState>? StateChanged;
 
         private SelectionState state;
 
@@ -73,9 +67,8 @@ namespace osu.Game.Overlays.Volume
 
         private const float transition_length = 500;
 
-        public VolumeMeter(LocalisableString name, float circleSize, Color4 meterColour)
+        public VolumeMeter(LocalisableString name, Color4 meterColour)
         {
-            CircleSize = circleSize;
             this.meterColour = meterColour;
             this.name = name;
 
@@ -89,8 +82,6 @@ namespace osu.Game.Overlays.Volume
             notchSample = audio.Samples.Get(@"UI/notch-tick");
             sampleLastPlaybackTime = Time.Current;
 
-            Color4 backgroundColour = colours.Gray1;
-
             CircularProgress bgProgress;
 
             const float progress_start_radius = 0.8f;
@@ -99,9 +90,11 @@ namespace osu.Game.Overlays.Volume
 
             Children = new Drawable[]
             {
-                new Container
+                content = new Container
                 {
-                    Size = new Vector2(CircleSize),
+                    Size = new Vector2(CIRCLE_SIZE),
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
                     Children = new Drawable[]
                     {
                         new Container
@@ -124,37 +117,44 @@ namespace osu.Game.Overlays.Volume
                                             RelativeSizeAxes = Axes.Both,
                                             InnerRadius = 1 - progress_start_radius,
                                             RoundedCaps = true,
-                                            Colour = backgroundColour,
+                                            Colour = meterColour.Darken(0.5f),
                                         },
                                         volumeCircle = new CircularProgress
                                         {
                                             RelativeSizeAxes = Axes.Both,
                                             InnerRadius = 1 - progress_start_radius,
-                                            Colour = backgroundColour.Lighten(0.5f),
+                                            Blending = BlendingParameters.Additive,
+                                            Colour = meterColour,
                                             RoundedCaps = true,
-                                        }
+                                        },
+                                        new Circle
+                                        {
+                                            Anchor = Anchor.Centre,
+                                            Origin = Anchor.Centre,
+                                            RelativeSizeAxes = Axes.Both,
+                                            Scale = new Vector2(progress_start_radius),
+                                            Colour = meterColour.Darken(1.5f),
+                                            EdgeEffect = new EdgeEffectParameters
+                                            {
+                                                Radius = 5,
+                                                Colour = Color4.Black.Opacity(0.1f),
+                                                Type = EdgeEffectType.Shadow,
+                                            },
+                                        },
                                     }
-                                },
-                                new Circle
-                                {
-                                    Anchor = Anchor.Centre,
-                                    Origin = Anchor.Centre,
-                                    RelativeSizeAxes = Axes.Both,
-                                    Scale = new Vector2(progress_start_radius),
-                                    Colour = backgroundColour,
-                                    EdgeEffect = new EdgeEffectParameters
-                                    {
-                                        Radius = 10,
-                                        Colour = Color4.Black,
-                                    },
                                 },
                             },
                         },
                         selectedGlowContainer = new CircularContainer
                         {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            Scale = new Vector2(progress_start_radius + 0.01f),
                             Masking = true,
                             RelativeSizeAxes = Axes.Both,
                             Alpha = 0,
+                            BorderColour = meterColour.Lighten(3),
+                            BorderThickness = 4,
                             Child = new Box
                             {
                                 RelativeSizeAxes = Axes.Both,
@@ -164,7 +164,7 @@ namespace osu.Game.Overlays.Volume
                             EdgeEffect = new EdgeEffectParameters
                             {
                                 Type = EdgeEffectType.Glow,
-                                Colour = meterColour.Opacity(0.1f),
+                                Colour = meterColour.Darken(1.8f).Opacity(0.8f),
                                 Hollow = true,
                                 Radius = 10,
                             }
@@ -173,40 +173,20 @@ namespace osu.Game.Overlays.Volume
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
-                            Font = OsuFont.Torus.With(size: CircleSize * 0.3f, weight: FontWeight.Light, fixedWidth: true),
-                            Spacing = new Vector2(-5 * CircleSize / 140, 0),
-                        }
-                    }
-                },
-                new Container
-                {
-                    Size = LABEL_SIZE,
-                    AutoSizeAxes = Axes.X,
-                    CornerRadius = 10,
-                    Masking = true,
-                    Margin = new MarginPadding { Left = CircleSize + 10 },
-                    Origin = Anchor.CentreLeft,
-                    Anchor = Anchor.CentreLeft,
-                    Children = new Drawable[]
-                    {
-                        new Box
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Colour = backgroundColour,
+                            Y = -6,
+                            Font = OsuFont.Torus.With(size: CIRCLE_SIZE * 0.3f, weight: FontWeight.Light, fixedWidth: true),
+                            Spacing = new Vector2(-4 * CIRCLE_SIZE / 140, 0),
                         },
                         new OsuSpriteText
                         {
-                            Margin = new MarginPadding
-                            {
-                                Horizontal = 32,
-                            },
-                            Anchor = Anchor.Centre,
-                            Origin = Anchor.Centre,
-                            Font = OsuFont.GetFont(weight: FontWeight.Bold),
+                            Anchor = Anchor.BottomCentre,
+                            Origin = Anchor.BottomCentre,
+                            Y = -30,
+                            Font = OsuFont.GetFont(weight: FontWeight.Medium),
                             Text = name
                         }
                     }
-                }
+                },
             };
 
             Bindable.BindValueChanged(volume => { this.TransformTo(nameof(DisplayVolume), volume.NewValue, 400, Easing.OutQuint); }, true);
@@ -282,11 +262,13 @@ namespace osu.Game.Overlays.Volume
         private const double max_acceleration = 5;
         private const double acceleration_multiplier = 1.8;
 
-        private ScheduledDelegate accelerationDebounce;
+        private ScheduledDelegate? accelerationDebounce;
 
         private void resetAcceleration() => accelerationModifier = 1;
 
         private float dragDelta;
+
+        private Container content = null!;
 
         protected override bool OnMouseDown(MouseDownEvent e) => true; // handle to prevent drawables behind from potentially receiving the mouse down
 
@@ -354,12 +336,18 @@ namespace osu.Game.Overlays.Volume
 
         protected override bool OnMouseMove(MouseMoveEvent e)
         {
+            if (GetContainingInputManager()!.CurrentState.Mouse.Buttons.HasAnyButtonPressed)
+                return false;
+
             State = SelectionState.Selected;
             return base.OnMouseMove(e);
         }
 
         protected override bool OnHover(HoverEvent e)
         {
+            if (GetContainingInputManager()!.CurrentState.Mouse.Buttons.HasAnyButtonPressed)
+                return false;
+
             State = SelectionState.Selected;
             return false;
         }
@@ -368,23 +356,19 @@ namespace osu.Game.Overlays.Volume
         {
         }
 
-        public void OnReleased(KeyBindingReleaseEvent<GlobalAction> e)
-        {
-        }
-
         private void updateSelectedState()
         {
             switch (state)
             {
                 case SelectionState.Selected:
-                    this.ScaleTo(1.04f, transition_length, Easing.OutExpo);
+                    content.ScaleTo(1.08f, 800, Easing.OutPow10);
                     selectedGlowContainer.FadeIn(transition_length, Easing.OutExpo);
                     hoverSample?.Play();
                     break;
 
                 case SelectionState.NotSelected:
-                    this.ScaleTo(1f, transition_length, Easing.OutExpo);
-                    selectedGlowContainer.FadeOut(transition_length, Easing.OutExpo);
+                    content.ScaleTo(1f, 800, Easing.OutPow10);
+                    selectedGlowContainer.FadeOut(transition_length, Easing.Out);
                     break;
             }
         }
