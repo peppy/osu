@@ -15,6 +15,7 @@ using osu.Framework.Threading;
 using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.UserInterface;
 using osu.Game.Input.Bindings;
 using osu.Game.Localisation;
 using osu.Game.Overlays.Volume;
@@ -38,11 +39,14 @@ namespace osu.Game.Overlays
 
         private SelectionCycleFillFlowContainer<VolumeMeter> volumeMeters = null!;
 
+        public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) =>
+            volumeMeters.ReceivePositionalInputAt(screenSpacePos);
+
         [BackgroundDependencyLoader]
         private void load(AudioManager audio, OsuColour colours, OsuConfigManager config)
         {
-            AutoSizeAxes = Axes.Y;
             RelativeSizeAxes = Axes.X;
+            AutoSizeAxes = Axes.Y;
 
             Anchor = Anchor.BottomCentre;
             Origin = Anchor.BottomCentre;
@@ -52,7 +56,7 @@ namespace osu.Game.Overlays
                 new Box
                 {
                     RelativeSizeAxes = Axes.X,
-                    Height = 300,
+                    Height = 360,
                     Colour = ColourInfo.GradientVertical(Color4.Black.Opacity(0), Color4.Black.Opacity(0.75f))
                 },
                 new FillFlowContainer
@@ -61,7 +65,7 @@ namespace osu.Game.Overlays
                     AutoSizeAxes = Axes.Both,
                     Anchor = Anchor.BottomCentre,
                     Origin = Anchor.BottomCentre,
-                    Y = -20,
+                    Y = -10,
                     Spacing = new Vector2(10),
                     Children = new Drawable[]
                     {
@@ -69,18 +73,19 @@ namespace osu.Game.Overlays
                         {
                             Direction = FillDirection.Full,
                             AutoSizeAxes = Axes.Y,
-                            Width = 600,
+                            Width = 400,
                             Anchor = Anchor.BottomCentre,
                             Origin = Anchor.BottomCentre,
                             Spacing = new Vector2(10, 0),
                             Children = new[]
                             {
-                                volumeMeterMaster = new MasterVolumeMeter(AudioSettingsStrings.MasterVolume, colours.PinkDarker)
+                                volumeMeterMaster = new MasterVolumeMeter(AudioSettingsStrings.MasterVolume, colours.PurpleDark)
                                 {
                                     Anchor = Anchor.BottomCentre,
                                     Origin = Anchor.BottomCentre,
                                     AutoSizeAxes = Axes.Y,
-                                    Width = 600,
+                                    // Make sure this takes up a full line in the flow.
+                                    Width = 300,
                                     IsMuted = { BindTarget = IsMuted },
                                 },
                                 volumeMeterEffect = new VolumeMeter(AudioSettingsStrings.EffectVolume, colours.BlueDark)
@@ -97,7 +102,7 @@ namespace osu.Game.Overlays
                                     Margin = new MarginPadding { Bottom = 15 },
                                     Scale = new Vector2(0.7f),
                                 },
-                                volumeMeterGameplay = new VolumeMeter(AudioSettingsStrings.GameplayVolume, colours.PurpleDark)
+                                volumeMeterGameplay = new VolumeMeter(AudioSettingsStrings.GameplayVolume, colours.PinkDarker)
                                 {
                                     Anchor = Anchor.BottomCentre,
                                     Origin = Anchor.BottomCentre,

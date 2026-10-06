@@ -175,14 +175,18 @@ namespace osu.Game.Overlays.Volume
                             Origin = Anchor.Centre,
                             Y = -6,
                             Font = OsuFont.Torus.With(size: CIRCLE_SIZE * 0.3f, weight: FontWeight.Light, fixedWidth: true),
+                            Blending = BlendingParameters.Additive,
+                            Colour = meterColour.Lighten(0.4f),
                             Spacing = new Vector2(-4 * CIRCLE_SIZE / 140, 0),
                         },
                         new OsuSpriteText
                         {
                             Anchor = Anchor.BottomCentre,
                             Origin = Anchor.BottomCentre,
-                            Y = -30,
+                            Y = -32,
                             Font = OsuFont.GetFont(weight: FontWeight.Medium),
+                            Blending = BlendingParameters.Additive,
+                            Colour = meterColour,
                             Text = name
                         }
                     }
