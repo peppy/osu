@@ -40,9 +40,10 @@ namespace osu.Game.Overlays.Volume
             Add(muteButton = new MuteButton
             {
                 Anchor = Anchor.BottomCentre,
-                Origin = Anchor.BottomCentre,
+                Origin = Anchor.CentreLeft,
                 Blending = BlendingParameters.Additive,
-                X = 80,
+                X = 76,
+                Y = -24,
                 Current = { BindTarget = IsMuted }
             });
 

@@ -12,6 +12,7 @@ using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics;
+using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osuTK;
 
@@ -36,12 +37,13 @@ namespace osu.Game.Overlays.Volume
         private ColourInfo hoveredBorderColour;
         private ColourInfo unhoveredBorderColour;
         private CompositeDrawable border = null!;
+        private OsuSpriteText mutedText = null!;
+
+        private const float width = 30;
+        private const float height = 30;
 
         public MuteButton()
         {
-            const float width = 30;
-            const float height = 30;
-
             Size = new Vector2(width, height);
             Content.CornerRadius = height / 2;
             Content.CornerExponent = 2;
@@ -62,8 +64,17 @@ namespace osu.Game.Overlays.Volume
             {
                 icon = new SpriteIcon
                 {
-                    Anchor = Anchor.Centre,
+                    Anchor = Anchor.CentreLeft,
                     Origin = Anchor.Centre,
+                    X = width / 2
+                },
+                mutedText = new OsuSpriteText
+                {
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreLeft,
+                    Text = "MUTED",
+                    X = width - 4,
+                    Alpha = 0
                 },
                 border = new CircularContainer
                 {
@@ -85,6 +96,8 @@ namespace osu.Game.Overlays.Volume
                 icon.Icon = muted.NewValue ? FontAwesome.Solid.VolumeMute : FontAwesome.Solid.VolumeUp;
                 icon.Size = new Vector2(muted.NewValue ? 12 : 16);
                 icon.Margin = new MarginPadding { Right = muted.NewValue ? 2 : 0 };
+                Size = new Vector2(muted.NewValue ? width * 2.6f : width, width);
+                mutedText.Alpha = muted.NewValue ? 1 : 0;
             }, true);
         }
 
