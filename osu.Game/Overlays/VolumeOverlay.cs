@@ -36,6 +36,7 @@ namespace osu.Game.Overlays
         private VolumeMeter volumeMeterMusic = null!;
         private VolumeMeter volumeMeterGameplay = null!;
 
+        // ReSharper disable once NotAccessedField.Local
         private Bindable<double> volumeGameplay = null!;
 
         private SelectionCycleFillFlowContainer<VolumeMeter> volumeMeters = null!;
@@ -74,9 +75,9 @@ namespace osu.Game.Overlays
                             Children = new[]
                             {
                                 volumeMeterMaster = new MasterVolumeMeter(AudioSettingsStrings.MasterVolume.ToUpper(), 140, colours.PinkDarker) { IsMuted = { BindTarget = IsMuted }, },
-                                volumeMeterMusic = new VolumeMeter(AudioSettingsStrings.MusicVolume.ToUpper(), 100, colours.BlueDarker),
-                                volumeMeterEffect = new VolumeMeter(AudioSettingsStrings.EffectVolume.ToUpper(), 100, colours.BlueDarker),
-                                volumeMeterGameplay = new VolumeMeter(AudioSettingsStrings.GameplayVolume.ToUpper(), 100, colours.BlueDarker),
+                                volumeMeterMusic = new VolumeMeter(AudioSettingsStrings.MusicVolume.ToUpper(), 100, colours.BlueDarker) { Margin = new MarginPadding { Left = 20 } },
+                                volumeMeterEffect = new VolumeMeter(AudioSettingsStrings.EffectVolume.ToUpper(), 100, colours.BlueDarker) { Margin = new MarginPadding { Left = 20 } },
+                                volumeMeterGameplay = new VolumeMeter(AudioSettingsStrings.GameplayVolume.ToUpper(), 100, colours.BlueDarker) { Margin = new MarginPadding { Left = 20 } },
                             }
                         },
                     },
@@ -162,8 +163,6 @@ namespace osu.Game.Overlays
         protected override void PopIn()
         {
             ClearTransforms();
-            this.FadeIn(100);
-
             schedulePopOut();
         }
 
@@ -196,11 +195,20 @@ namespace osu.Game.Overlays
         private void schedulePopOut()
         {
             popOutDelegate?.Cancel();
-            // this.Delay(1000).Schedule(() =>
-            // {
-            //     if (!IsHovered)
-            //         Hide();
-            // }, out popOutDelegate);
+
+            this.FadeIn(100);
+
+            if (!IsHovered)
+            {
+                this.Delay(100)
+                    .FadeOut(2000);
+            }
+
+            this.Delay(1000).Schedule(() =>
+            {
+                if (!IsHovered)
+                    Hide();
+            }, out popOutDelegate);
         }
     }
 }

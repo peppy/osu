@@ -33,7 +33,6 @@ namespace osu.Game.Overlays.Volume
     public partial class VolumeMeter : Container, IStateful<SelectionState>
     {
         private CircularProgress volumeCircle;
-        private CircularProgress volumeCircleGlow;
 
         protected static readonly Vector2 LABEL_SIZE = new Vector2(120, 20);
 
@@ -45,7 +44,6 @@ namespace osu.Game.Overlays.Volume
         private readonly LocalisableString name;
 
         private OsuSpriteText text;
-        private BufferedContainer maxGlow;
 
         private Container selectedGlowContainer;
 
@@ -95,11 +93,9 @@ namespace osu.Game.Overlays.Volume
 
             CircularProgress bgProgress;
 
-            const float progress_start_radius = 0.75f;
-            const float progress_size = 0.03f;
+            const float progress_start_radius = 0.8f;
+            const float progress_size = 0.2f;
             const float progress_end_radius = progress_start_radius + progress_size;
-
-            const float blur_amount = 5;
 
             Children = new Drawable[]
             {
@@ -108,76 +104,49 @@ namespace osu.Game.Overlays.Volume
                     Size = new Vector2(CircleSize),
                     Children = new Drawable[]
                     {
-                        new BufferedContainer
+                        new Container
                         {
                             RelativeSizeAxes = Axes.Both,
                             Children = new Drawable[]
                             {
-                                new Circle
-                                {
-                                    RelativeSizeAxes = Axes.Both,
-                                    Colour = backgroundColour,
-                                },
                                 new CircularContainer
                                 {
                                     Masking = true,
                                     Anchor = Anchor.Centre,
                                     Origin = Anchor.Centre,
                                     RelativeSizeAxes = Axes.Both,
+                                    Rotation = 225,
                                     Size = new Vector2(progress_end_radius),
                                     Children = new Drawable[]
                                     {
                                         bgProgress = new CircularProgress
                                         {
-                                            Anchor = Anchor.Centre,
-                                            Origin = Anchor.Centre,
                                             RelativeSizeAxes = Axes.Both,
-                                            Rotation = 180,
+                                            InnerRadius = 1 - progress_start_radius,
+                                            RoundedCaps = true,
                                             Colour = backgroundColour,
                                         },
-                                        new Container
+                                        volumeCircle = new CircularProgress
                                         {
-                                            Anchor = Anchor.Centre,
-                                            Origin = Anchor.Centre,
-                                            Name = @"Progress under covers for smoothing",
                                             RelativeSizeAxes = Axes.Both,
-                                            Rotation = 180,
-                                            Child = volumeCircle = new CircularProgress
-                                            {
-                                                RelativeSizeAxes = Axes.Both,
-                                            }
-                                        },
+                                            InnerRadius = 1 - progress_start_radius,
+                                            Colour = backgroundColour.Lighten(0.5f),
+                                            RoundedCaps = true,
+                                        }
                                     }
                                 },
                                 new Circle
                                 {
-                                    Name = @"Inner Cover",
                                     Anchor = Anchor.Centre,
                                     Origin = Anchor.Centre,
                                     RelativeSizeAxes = Axes.Both,
+                                    Scale = new Vector2(progress_start_radius),
                                     Colour = backgroundColour,
-                                    Size = new Vector2(progress_start_radius),
-                                },
-                                new Container
-                                {
-                                    Name = @"Progress overlay for glow",
-                                    Anchor = Anchor.Centre,
-                                    Origin = Anchor.Centre,
-                                    RelativeSizeAxes = Axes.Both,
-                                    Size = new Vector2(progress_start_radius + progress_size / 1.5f),
-                                    Rotation = 180,
-                                    Padding = new MarginPadding(-Blur.KernelSize(blur_amount)),
-                                    Child = (volumeCircleGlow = new CircularProgress
+                                    EdgeEffect = new EdgeEffectParameters
                                     {
-                                        RelativeSizeAxes = Axes.Both,
-                                        InnerRadius = progress_size * 0.8f,
-                                    }).WithEffect(new GlowEffect
-                                    {
-                                        Colour = meterColour,
-                                        BlurSigma = new Vector2(blur_amount),
-                                        Strength = 5,
-                                        PadExtent = true
-                                    }),
+                                        Radius = 10,
+                                        Colour = Color4.Black,
+                                    },
                                 },
                             },
                         },
@@ -196,19 +165,17 @@ namespace osu.Game.Overlays.Volume
                             {
                                 Type = EdgeEffectType.Glow,
                                 Colour = meterColour.Opacity(0.1f),
+                                Hollow = true,
                                 Radius = 10,
                             }
                         },
-                        maxGlow = (text = new OsuSpriteText
+                        text = new OsuSpriteText
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
-                            Font = OsuFont.Numeric.With(size: 0.16f * CircleSize)
-                        }).WithEffect(new GlowEffect
-                        {
-                            Colour = Color4.Transparent,
-                            PadExtent = true,
-                        })
+                            Font = OsuFont.Torus.With(size: CircleSize * 0.3f, weight: FontWeight.Light, fixedWidth: true),
+                            Spacing = new Vector2(-5 * CircleSize / 140, 0),
+                        }
                     }
                 },
                 new Container
@@ -265,17 +232,12 @@ namespace osu.Game.Overlays.Volume
 
                 if (displayVolume >= 0.995f)
                 {
-                    text.Text = "MAX";
-                    maxGlow.EffectColour = meterColour.Opacity(2f);
-                }
-                else
-                {
-                    maxGlow.EffectColour = Color4.Transparent;
-                    text.Text = intValue.ToString(CultureInfo.CurrentCulture);
+                    // TODO: show max
                 }
 
+                text.Text = intValue.ToString(CultureInfo.CurrentCulture);
+
                 volumeCircle.Progress = displayVolume * 0.75f;
-                volumeCircleGlow.Progress = displayVolume * 0.75f;
 
                 if (intVolumeChanged && IsLoaded)
                     Scheduler.AddOnce(playTickSound);

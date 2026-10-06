@@ -22,6 +22,7 @@ namespace osu.Game.Tests.Visual.UserInterface
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
                 Position = new Vector2(10),
+                Bindable = { Value = 0.5 },
                 Margin = new MarginPadding { Left = 250 },
             });
 
@@ -30,6 +31,7 @@ namespace osu.Game.Tests.Visual.UserInterface
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
                 Position = new Vector2(10),
+                Bindable = { Value = 0.9 },
                 Margin = new MarginPadding { Right = 500 },
             });
 
