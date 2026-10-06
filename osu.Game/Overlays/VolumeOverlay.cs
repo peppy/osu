@@ -71,8 +71,7 @@ namespace osu.Game.Overlays
                         volumeMeters = new SelectionCycleFillFlowContainer<VolumeMeter>
                         {
                             Direction = FillDirection.Full,
-                            AutoSizeAxes = Axes.Y,
-                            Width = 400,
+                            AutoSizeAxes = Axes.Both,
                             Anchor = Anchor.BottomCentre,
                             Origin = Anchor.BottomCentre,
                             Spacing = new Vector2(10, 0),
@@ -82,30 +81,27 @@ namespace osu.Game.Overlays
                                 {
                                     Anchor = Anchor.BottomCentre,
                                     Origin = Anchor.BottomCentre,
-                                    AutoSizeAxes = Axes.Y,
-                                    // Make sure this takes up a full line in the flow.
-                                    Width = 300,
                                     IsMuted = { BindTarget = IsMuted },
                                 },
                                 volumeMeterEffect = new VolumeMeter(AudioSettingsStrings.EffectVolume, colours.BlueDarker)
                                 {
                                     Anchor = Anchor.BottomCentre,
                                     Origin = Anchor.BottomCentre,
-                                    Margin = new MarginPadding { Bottom = -40 },
+                                    Margin = new MarginPadding { Bottom = 40, Left = -50},
                                     Scale = new Vector2(0.7f),
                                 },
                                 volumeMeterMusic = new VolumeMeter(AudioSettingsStrings.MusicVolume, colours.GreenDark)
                                 {
                                     Anchor = Anchor.BottomCentre,
                                     Origin = Anchor.BottomCentre,
-                                    Margin = new MarginPadding { Bottom = 15 },
+                                    Margin = new MarginPadding { Bottom = 40 },
                                     Scale = new Vector2(0.7f),
                                 },
                                 volumeMeterGameplay = new VolumeMeter(AudioSettingsStrings.GameplayVolume, colours.PinkDarker)
                                 {
                                     Anchor = Anchor.BottomCentre,
                                     Origin = Anchor.BottomCentre,
-                                    Margin = new MarginPadding { Bottom = -40 },
+                                    Margin = new MarginPadding { Bottom = 40 },
                                     Scale = new Vector2(0.7f),
                                 },
                             }
