@@ -83,21 +83,21 @@ namespace osu.Game.Overlays
                                     Origin = Anchor.BottomCentre,
                                     IsMuted = { BindTarget = IsMuted },
                                 },
-                                volumeMeterEffect = new VolumeMeter(AudioSettingsStrings.EffectVolume, colours.DarkOrange4)
+                                volumeMeterEffect = new VolumeMeter(AudioSettingsStrings.EffectVolume, colours.BlueDarker)
                                 {
                                     Anchor = Anchor.BottomCentre,
                                     Origin = Anchor.BottomCentre,
-                                    Margin = new MarginPadding { Bottom = 40, Left = -50},
+                                    Margin = new MarginPadding { Bottom = 40, Left = -50 },
                                     Scale = new Vector2(0.7f),
                                 },
-                                volumeMeterMusic = new VolumeMeter(AudioSettingsStrings.MusicVolume, colours.Pink4)
+                                volumeMeterMusic = new VolumeMeter(AudioSettingsStrings.MusicVolume, colours.GreenDark)
                                 {
                                     Anchor = Anchor.BottomCentre,
                                     Origin = Anchor.BottomCentre,
                                     Margin = new MarginPadding { Bottom = 40 },
                                     Scale = new Vector2(0.7f),
                                 },
-                                volumeMeterGameplay = new VolumeMeter(AudioSettingsStrings.GameplayVolume, colours.Lime4)
+                                volumeMeterGameplay = new VolumeMeter(AudioSettingsStrings.GameplayVolume, colours.PinkDarker)
                                 {
                                     Anchor = Anchor.BottomCentre,
                                     Origin = Anchor.BottomCentre,

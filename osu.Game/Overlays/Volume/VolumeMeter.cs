@@ -78,7 +78,7 @@ namespace osu.Game.Overlays.Volume
         }
 
         [BackgroundDependencyLoader]
-        private void load(OsuColour colours, AudioManager audio)
+        private void load(AudioManager audio)
         {
             hoverSample = audio.Samples.Get($@"UI/{HoverSampleSet.Button.GetResourceName()}-hover");
             notchSample = audio.Samples.Get(@"UI/notch-tick");
