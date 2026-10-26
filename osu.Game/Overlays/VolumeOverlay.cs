@@ -15,7 +15,6 @@ using osu.Framework.Input.Events;
 using osu.Framework.Threading;
 using osu.Game.Configuration;
 using osu.Game.Graphics;
-using osu.Game.Graphics.Containers;
 using osu.Game.Input.Bindings;
 using osu.Game.Localisation;
 using osu.Game.Overlays.Volume;
@@ -29,8 +28,6 @@ namespace osu.Game.Overlays
     {
         public Bindable<bool> IsMuted { get; } = new Bindable<bool>();
 
-        private const float offset = 10;
-
         private VolumeMeter volumeMeterMaster = null!;
         private VolumeMeter volumeMeterEffect = null!;
         private VolumeMeter volumeMeterMusic = null!;
@@ -39,48 +36,58 @@ namespace osu.Game.Overlays
         // ReSharper disable once NotAccessedField.Local
         private Bindable<double> volumeGameplay = null!;
 
-        private SelectionCycleFillFlowContainer<VolumeMeter> volumeMeters = null!;
+        private Container<VolumeMeter> volumeMeters = null!;
+
+        public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) =>
+            volumeMeters.ReceivePositionalInputAt(screenSpacePos);
 
         [BackgroundDependencyLoader]
         private void load(AudioManager audio, OsuColour colours, OsuConfigManager config)
         {
-            AutoSizeAxes = Axes.X;
-            RelativeSizeAxes = Axes.Y;
+            RelativeSizeAxes = Axes.X;
+            AutoSizeAxes = Axes.Y;
+
+            Anchor = Anchor.BottomLeft;
+            Origin = Anchor.BottomLeft;
 
             AddRange(new Drawable[]
             {
-                new Box
+                // new Box
+                // {
+                //     RelativeSizeAxes = Axes.X,
+                //     Height = 360,
+                //     Colour = ColourInfo.GradientVertical(Color4.Black.Opacity(0), Color4.Black.Opacity(0.75f))
+                // },
+                volumeMeters = new Container<VolumeMeter>
                 {
-                    RelativeSizeAxes = Axes.Y,
-                    Width = 300,
-                    Colour = ColourInfo.GradientHorizontal(Color4.Black.Opacity(0.75f), Color4.Black.Opacity(0))
-                },
-                new FillFlowContainer
-                {
-                    Direction = FillDirection.Vertical,
-                    AutoSizeAxes = Axes.Both,
-                    Anchor = Anchor.CentreLeft,
-                    Origin = Anchor.CentreLeft,
-                    Spacing = new Vector2(0, offset),
-                    Margin = new MarginPadding { Left = offset },
-                    Children = new Drawable[]
+                    Size = new Vector2(300),
+                    Anchor = Anchor.BottomLeft,
+                    Origin = Anchor.BottomLeft,
+                    Children = new[]
                     {
-                        volumeMeters = new SelectionCycleFillFlowContainer<VolumeMeter>
+                        volumeMeterMaster = new MasterVolumeMeter(AudioSettingsStrings.MasterVolume.ToUpper(), colours.PinkDarker)
                         {
-                            Direction = FillDirection.Vertical,
-                            AutoSizeAxes = Axes.Both,
-                            Anchor = Anchor.CentreLeft,
-                            Origin = Anchor.CentreLeft,
-                            Spacing = new Vector2(0, offset),
-                            Children = new[]
-                            {
-                                volumeMeterMaster = new MasterVolumeMeter(AudioSettingsStrings.MasterVolume.ToUpper(), 140, colours.PinkDarker) { IsMuted = { BindTarget = IsMuted }, },
-                                volumeMeterMusic = new VolumeMeter(AudioSettingsStrings.MusicVolume.ToUpper(), 100, colours.BlueDarker),
-                                volumeMeterEffect = new VolumeMeter(AudioSettingsStrings.EffectVolume.ToUpper(), 100, colours.BlueDarker),
-                                volumeMeterHitsound = new VolumeMeter(AudioSettingsStrings.HitsoundVolume.ToUpper(), 100, colours.BlueDarker),
-                            }
+                            Origin = Anchor.Centre,
+                            Anchor = Anchor.BottomLeft,
+                            IsMuted = { BindTarget = IsMuted },
                         },
-                    },
+                        volumeMeterMusic = new VolumeMeter(AudioSettingsStrings.MusicVolume.ToUpper(), colours.BlueDarker)
+                        {
+
+                            Rotation = angleFor(0),
+                            Anchor = Anchor.BottomLeft,
+                        },
+                        volumeMeterEffect = new VolumeMeter(AudioSettingsStrings.EffectVolume.ToUpper(), colours.BlueDarker)
+                        {
+                            Rotation = angleFor(1),
+                            Anchor = Anchor.BottomLeft,
+                        },
+                        volumeMeterHitsound = new VolumeMeter(AudioSettingsStrings.HitsoundVolume.ToUpper(), colours.BlueDarker)
+                        {
+                            Rotation = angleFor(2),
+                            Anchor = Anchor.BottomLeft,
+                        },
+                    }
                 },
             });
 
@@ -107,22 +114,22 @@ namespace osu.Game.Overlays
                 case GlobalAction.DecreaseVolume:
                     if (State.Value == Visibility.Hidden)
                         Show();
-                    else
-                        volumeMeters.Selected?.Decrease(amount, isPrecise);
+                    // else
+                    //     volumeMeters.Selected?.Decrease(amount, isPrecise);
                     return true;
 
                 case GlobalAction.IncreaseVolume:
                     if (State.Value == Visibility.Hidden)
                         Show();
-                    else
-                        volumeMeters.Selected?.Increase(amount, isPrecise);
+                    // else
+                    //     volumeMeters.Selected?.Increase(amount, isPrecise);
                     return true;
 
                 case GlobalAction.NextVolumeMeter:
                     if (State.Value != Visibility.Visible)
                         return false;
 
-                    volumeMeters.SelectNext();
+                    // volumeMeters.SelectNext();
                     Show();
                     return true;
 
@@ -130,7 +137,7 @@ namespace osu.Game.Overlays
                     if (State.Value != Visibility.Visible)
                         return false;
 
-                    volumeMeters.SelectPrevious();
+                    // volumeMeters.SelectPrevious();
                     Show();
                     return true;
 
@@ -145,7 +152,7 @@ namespace osu.Game.Overlays
 
         public void FocusMasterVolume()
         {
-            volumeMeters.Select(volumeMeterMaster);
+            // volumeMeters.Select(volumeMeterMaster);
         }
 
         public override void Show()
@@ -160,17 +167,47 @@ namespace osu.Game.Overlays
             base.Show();
         }
 
+        // -100 -> angled upwards titled slightly left
+        // 10 -> angled right titled slightly downwards
+        private float angleFor(int index) => float.Lerp(-100, 10, index / (float)(3 - 1));
+
         protected override void PopIn()
         {
             ClearTransforms();
-            this.FadeIn(100);
-
             schedulePopOut();
+
+            volumeMeterMaster.ScaleTo(1f, 600, Easing.OutElasticQuarter)
+                             .FadeIn(300);
+
+            for (int i = 1; i < 4; i++)
+            {
+                volumeMeters[i]
+                    .Delay(i * 50)
+                    .RotateTo(angleFor(i), 600, Easing.OutElasticQuarter)
+                    .ScaleTo(1f, 600, Easing.OutElasticQuarter)
+                    .FadeIn(300);
+            }
+
+            this.TransformTo(nameof(Padding), new MarginPadding(120), 600, Easing.OutElasticQuarter);
         }
 
         protected override void PopOut()
         {
-            this.FadeOut(100);
+            this.FadeOut(300, Easing.OutQuint);
+
+            volumeMeterMaster.ScaleTo(0.5f, 300, Easing.In)
+                             .FadeOut(200);
+
+            for (int i = 1; i < 4; i++)
+            {
+                volumeMeters[i]
+                    .Delay((4 - 1 - i) * 30)
+                    .RotateTo(angleFor(i) + 90, 200, Easing.In)
+                    .ScaleTo(0.5f, 150, Easing.In)
+                    .FadeOut(150);
+            }
+
+            this.TransformTo(nameof(Padding), new MarginPadding(70), 300, Easing.In);
         }
 
         protected override bool OnMouseMove(MouseMoveEvent e)
@@ -197,7 +234,16 @@ namespace osu.Game.Overlays
         private void schedulePopOut()
         {
             popOutDelegate?.Cancel();
-            this.Delay(1000).Schedule(() =>
+
+            this.FadeIn(200, Easing.Out);
+
+            if (!IsHovered)
+            {
+                this.Delay(200)
+                    .FadeOut(2000, Easing.In);
+            }
+
+            this.Delay(1200).Schedule(() =>
             {
                 if (!IsHovered)
                     Hide();
