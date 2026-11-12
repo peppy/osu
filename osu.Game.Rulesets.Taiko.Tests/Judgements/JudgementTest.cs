@@ -9,7 +9,6 @@ using osu.Framework.Extensions.TypeExtensions;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.ControlPoints;
-using osu.Game.Extensions;
 using osu.Game.Replays;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Mods;
@@ -47,7 +46,7 @@ namespace osu.Game.Rulesets.Taiko.Tests.Judgements
                 Ruleset.Value = new TaikoRuleset().RulesetInfo;
                 SelectedMods.Value = mods ?? Array.Empty<Mod>();
 
-                var p = new ScoreAccessibleReplayPlayer(new Score { Replay = new Replay { Frames = frames.ToSortedList() } });
+                var p = new ScoreAccessibleReplayPlayer(new Score { Replay = new Replay { Frames = frames.ToList() } });
 
                 p.OnLoadComplete += _ =>
                 {

@@ -2,9 +2,9 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using osu.Game.Beatmaps;
-using osu.Game.Extensions;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Replays;
 using osu.Game.Rulesets.Mods;
@@ -92,7 +92,7 @@ namespace osu.Game.Rulesets.Osu.Tests.Mods
                 // We need to set IsLegacyScore to true otherwise the mod assumes that presses are already embedded into the replay
                 DrawableRuleset?.SetReplayScore(new Score
                 {
-                    Replay = new Replay { Frames = currentTestData.ReplayFrames!.ToSortedList() },
+                    Replay = new Replay { Frames = currentTestData.ReplayFrames!.ToList() },
                     ScoreInfo = new ScoreInfo { User = new APIUser { Username = @"Test" }, IsLegacyScore = true, Mods = new Mod[] { new OsuModRelax() } },
                 });
 

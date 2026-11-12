@@ -3,7 +3,6 @@
 
 using System.Linq;
 using NUnit.Framework;
-using osu.Game.Extensions;
 using osu.Game.Replays;
 using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Osu.Beatmaps;
@@ -51,7 +50,7 @@ namespace osu.Game.Tests.Visual
                                        new OsuReplayFrame(hit_circle_time + 20, OsuPlayfield.BASE_SIZE / 2),
                                    ])
                                    .Cast<ReplayFrame>()
-                                   .ToSortedList(),
+                                   .ToList(),
             };
 
             RunTest(beatmap, replay, [HitResult.Great]);

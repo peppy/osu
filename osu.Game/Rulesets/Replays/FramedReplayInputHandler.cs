@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using osu.Framework.Input.StateChanges;
-using osu.Framework.Lists;
 using osu.Game.Input.Handlers;
 using osu.Game.Replays;
 
@@ -84,7 +83,7 @@ namespace osu.Game.Rulesets.Replays
 
         protected virtual double AllowedImportantTimeSpan => sixty_frame_time * 1.2;
 
-        protected SortedList<ReplayFrame> Frames => replay.Frames;
+        protected ReplayFrameList Frames => replay.Frames;
 
         private readonly Replay replay;
 

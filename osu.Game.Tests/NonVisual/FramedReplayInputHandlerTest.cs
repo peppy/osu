@@ -7,7 +7,6 @@ using System;
 using System.Linq;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
-using osu.Framework.Lists;
 using osu.Game.Replays;
 using osu.Game.Rulesets.Replays;
 
@@ -332,7 +331,7 @@ namespace osu.Game.Tests.NonVisual
 
         private void setReplayFrames()
         {
-            replay.Frames = new SortedList<ReplayFrame>
+            replay.Frames = new ReplayFrameList
             {
                 new TestReplayFrame(0),
                 new TestReplayFrame(1000),

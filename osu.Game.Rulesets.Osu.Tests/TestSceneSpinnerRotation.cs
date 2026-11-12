@@ -10,7 +10,6 @@ using osu.Framework.Audio;
 using osu.Framework.Testing;
 using osu.Framework.Timing;
 using osu.Game.Beatmaps;
-using osu.Game.Extensions;
 using osu.Game.Replays;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Osu.Objects;
@@ -122,7 +121,7 @@ namespace osu.Game.Rulesets.Osu.Tests
                          return new OsuReplayFrame(replayFrame.Time, flippedPosition, replayFrame.Actions.ToArray());
                      })
                      .Cast<ReplayFrame>()
-                     .ToSortedList()
+                     .ToList()
         };
 
         [Test]
