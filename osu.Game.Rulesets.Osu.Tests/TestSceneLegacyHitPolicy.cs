@@ -15,6 +15,7 @@ using osu.Framework.Testing;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Beatmaps.Formats;
+using osu.Game.Extensions;
 using osu.Game.Replays;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Mods;
@@ -777,7 +778,7 @@ namespace osu.Game.Rulesets.Osu.Tests
                             // required for correct playback in stable
                             new OsuReplayFrame(0, new Vector2(256, -500)),
                             new OsuReplayFrame(0, new Vector2(256, -500))
-                        }.Concat(frames).ToList()
+                        }.Concat(frames).ToSortedList()
                     },
                     ScoreInfo =
                     {

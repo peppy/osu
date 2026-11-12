@@ -9,6 +9,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Testing;
 using osu.Framework.Timing;
+using osu.Game.Extensions;
 using osu.Game.Replays;
 using osu.Game.Rulesets.Osu.Configuration;
 using osu.Game.Rulesets.Osu.Replays;
@@ -143,7 +144,7 @@ namespace osu.Game.Rulesets.Osu.Tests
                 });
             }
 
-            return new Replay { Frames = frames };
+            return new Replay { Frames = frames.ToSortedList() };
         }
 
         private partial class TestReplayAnalysisOverlay : ReplayAnalysisOverlay

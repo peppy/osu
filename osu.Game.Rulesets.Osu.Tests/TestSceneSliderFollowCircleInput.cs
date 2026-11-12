@@ -7,6 +7,7 @@ using NUnit.Framework;
 using osu.Framework.Screens;
 using osu.Framework.Testing;
 using osu.Game.Beatmaps;
+using osu.Game.Extensions;
 using osu.Game.Replays;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Objects;
@@ -80,7 +81,7 @@ namespace osu.Game.Rulesets.Osu.Tests
             {
                 Beatmap.Value = CreateWorkingBeatmap(beatmap);
 
-                var p = new ScoreAccessibleReplayPlayer(new Score { Replay = new Replay { Frames = frames } });
+                var p = new ScoreAccessibleReplayPlayer(new Score { Replay = new Replay { Frames = frames.ToSortedList() } });
 
                 p.OnLoadComplete += _ =>
                 {

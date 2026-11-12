@@ -4,10 +4,10 @@
 #nullable disable
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
+using osu.Framework.Lists;
 using osu.Game.Replays;
 using osu.Game.Rulesets.Replays;
 
@@ -332,7 +332,7 @@ namespace osu.Game.Tests.NonVisual
 
         private void setReplayFrames()
         {
-            replay.Frames = new List<ReplayFrame>
+            replay.Frames = new SortedList<ReplayFrame>
             {
                 new TestReplayFrame(0),
                 new TestReplayFrame(1000),

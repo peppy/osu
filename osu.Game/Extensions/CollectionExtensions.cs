@@ -2,11 +2,19 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Generic;
+using osu.Framework.Lists;
 
 namespace osu.Game.Extensions
 {
     public static class CollectionExtensions
     {
+        public static SortedList<T> ToSortedList<T>(this IEnumerable<T> list)
+        {
+            var sorted = new SortedList<T>();
+            sorted.AddRange(list);
+            return sorted;
+        }
+
         public static void AddRange<T>(this ICollection<T> collection, IEnumerable<T> items)
         {
             // List<T> has a potentially more optimal path to adding a range.

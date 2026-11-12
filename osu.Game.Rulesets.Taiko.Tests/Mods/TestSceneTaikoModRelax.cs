@@ -29,7 +29,7 @@ namespace osu.Game.Rulesets.Taiko.Tests.Mods
             {
                 Mod = new TaikoModRelax(),
                 CreateBeatmap = createBeatmap,
-                ReplayFrames = replay.Frames,
+                ReplayFrames = replay.Frames.ToList(),
                 Autoplay = false,
                 PassCondition = () => Player.ScoreProcessor.HasCompleted.Value && Player.ScoreProcessor.Accuracy.Value == 1,
             });

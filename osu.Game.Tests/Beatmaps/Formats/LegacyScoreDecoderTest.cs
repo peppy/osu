@@ -11,6 +11,7 @@ using System.Linq;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using osu.Framework.Extensions;
+using osu.Framework.Lists;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Formats;
 using osu.Game.Beatmaps.Legacy;
@@ -173,7 +174,7 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 ScoreInfo = scoreInfo,
                 Replay = new Replay
                 {
-                    Frames = new List<ReplayFrame>
+                    Frames = new SortedList<ReplayFrame>
                     {
                         new OsuReplayFrame(first_frame_time, OsuPlayfield.BASE_SIZE / 2, OsuAction.LeftButton),
                         new OsuReplayFrame(second_frame_time, OsuPlayfield.BASE_SIZE / 2, OsuAction.LeftButton)
@@ -199,7 +200,7 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 ScoreInfo = scoreInfo,
                 Replay = new Replay
                 {
-                    Frames = new List<ReplayFrame>
+                    Frames = new SortedList<ReplayFrame>
                     {
                         new OsuReplayFrame(0, new Vector2()),
                         new OsuReplayFrame(1000, OsuPlayfield.BASE_SIZE),
@@ -229,7 +230,7 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 ScoreInfo = scoreInfo,
                 Replay = new Replay
                 {
-                    Frames = new List<ReplayFrame>
+                    Frames = new SortedList<ReplayFrame>
                     {
                         new OsuReplayFrame(100, new Vector2()),
                         new OsuReplayFrame(50, OsuPlayfield.BASE_SIZE / 2),
@@ -258,7 +259,7 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 ScoreInfo = scoreInfo,
                 Replay = new Replay
                 {
-                    Frames = new List<ReplayFrame>
+                    Frames = new SortedList<ReplayFrame>
                     {
                         new OsuReplayFrame(0, new Vector2()),
                         new OsuReplayFrame(500, OsuPlayfield.BASE_SIZE / 2),
@@ -286,7 +287,7 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 ScoreInfo = scoreInfo,
                 Replay = new Replay
                 {
-                    Frames = new List<ReplayFrame>
+                    Frames = new SortedList<ReplayFrame>
                     {
                         new OsuReplayFrame(2000, OsuPlayfield.BASE_SIZE / 2, OsuAction.LeftButton)
                     }
@@ -339,7 +340,7 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 ScoreInfo = scoreInfo,
                 Replay = new Replay
                 {
-                    Frames = new List<ReplayFrame>
+                    Frames = new SortedList<ReplayFrame>
                     {
                         new OsuReplayFrame(2000, OsuPlayfield.BASE_SIZE / 2, OsuAction.LeftButton)
                     }
@@ -544,7 +545,7 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 ScoreInfo = scoreInfo,
                 Replay = new Replay
                 {
-                    Frames = new List<ReplayFrame>
+                    Frames = new SortedList<ReplayFrame>
                     {
                         new OsuReplayFrame(2000, OsuPlayfield.BASE_SIZE / 2, OsuAction.LeftButton)
                     }
@@ -582,7 +583,7 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 ScoreInfo = scoreInfo,
                 Replay = new Replay
                 {
-                    Frames = new List<ReplayFrame>
+                    Frames = new SortedList<ReplayFrame>
                     {
                         new OsuReplayFrame(2000, OsuPlayfield.BASE_SIZE / 2, OsuAction.LeftButton)
                     }
@@ -620,7 +621,7 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 ScoreInfo = scoreInfo,
                 Replay = new Replay
                 {
-                    Frames = new List<ReplayFrame>
+                    Frames = new SortedList<ReplayFrame>
                     {
                         new OsuReplayFrame(2000, OsuPlayfield.BASE_SIZE / 2, OsuAction.LeftButton)
                     }
@@ -658,7 +659,7 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 ScoreInfo = scoreInfo,
                 Replay = new Replay
                 {
-                    Frames = new List<ReplayFrame>
+                    Frames = new SortedList<ReplayFrame>
                     {
                         new OsuReplayFrame(2000, OsuPlayfield.BASE_SIZE / 2, OsuAction.LeftButton)
                     }

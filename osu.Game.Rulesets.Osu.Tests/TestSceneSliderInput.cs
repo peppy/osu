@@ -7,6 +7,7 @@ using NUnit.Framework;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.ControlPoints;
+using osu.Game.Extensions;
 using osu.Game.Replays;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Objects;
@@ -590,7 +591,7 @@ namespace osu.Game.Rulesets.Osu.Tests
                     ControlPointInfo = cpi,
                 });
 
-                var p = new ScoreAccessibleReplayPlayer(new Score { Replay = new Replay { Frames = frames } });
+                var p = new ScoreAccessibleReplayPlayer(new Score { Replay = new Replay { Frames = frames.ToSortedList() } });
 
                 p.OnLoadComplete += _ =>
                 {

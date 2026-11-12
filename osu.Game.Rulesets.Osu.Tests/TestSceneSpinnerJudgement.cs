@@ -7,6 +7,7 @@ using NUnit.Framework;
 using osu.Framework.Extensions.TypeExtensions;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
+using osu.Game.Extensions;
 using osu.Game.Replays;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Osu.Objects;
@@ -82,7 +83,7 @@ namespace osu.Game.Rulesets.Osu.Tests
                     },
                 });
 
-                var p = new ScoreAccessibleReplayPlayer(new Score { Replay = new Replay { Frames = frames } });
+                var p = new ScoreAccessibleReplayPlayer(new Score { Replay = new Replay { Frames = frames.ToSortedList() } });
 
                 p.OnLoadComplete += _ =>
                 {
