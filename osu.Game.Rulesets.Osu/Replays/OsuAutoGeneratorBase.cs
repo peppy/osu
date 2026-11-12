@@ -1,15 +1,15 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using osuTK;
-using osu.Game.Beatmaps;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using osu.Game.Replays;
+using osu.Framework.Lists;
+using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.Replays;
+using osuTK;
 
 namespace osu.Game.Rulesets.Osu.Replays
 {
@@ -28,7 +28,7 @@ namespace osu.Game.Rulesets.Osu.Replays
 
         #region Construction / Initialisation
 
-        protected readonly List<ReplayFrame> Frames = new List<ReplayFrame>();
+        protected readonly SortedList<ReplayFrame> Frames = new SortedList<ReplayFrame>();
         private readonly IReadOnlyList<IApplicableToRate> timeAffectingMods;
 
         protected OsuAutoGeneratorBase(IBeatmap beatmap, IReadOnlyList<Mod> mods)
@@ -77,22 +77,11 @@ namespace osu.Game.Rulesets.Osu.Replays
         protected double GetFrameDelay(double time)
             => ApplyModsToRate(time, 1000.0 / 60);
 
-        private class ReplayFrameComparer : IComparer<ReplayFrame>
-        {
-            public int Compare(ReplayFrame? f1, ReplayFrame? f2)
-            {
-                ArgumentNullException.ThrowIfNull(f1);
-                ArgumentNullException.ThrowIfNull(f2);
-
-                return f1.Time.CompareTo(f2.Time);
-            }
-        }
-
-        private static readonly IComparer<ReplayFrame> replay_frame_comparer = new ReplayFrameComparer();
+        protected void AddFrameToReplay(ReplayFrame frame) => Frames.Add(frame);
 
         protected int FindInsertionIndex(ReplayFrame frame)
         {
-            int index = Frames.BinarySearch(frame, replay_frame_comparer);
+            int index = Frames.BinarySearch(frame);
 
             if (index < 0)
             {
@@ -109,8 +98,6 @@ namespace osu.Game.Rulesets.Osu.Replays
 
             return index;
         }
-
-        protected void AddFrameToReplay(ReplayFrame frame) => Frames.Insert(FindInsertionIndex(frame), frame);
 
         protected static Vector2 CirclePosition(double t, double radius) => new Vector2((float)(Math.Cos(t) * radius), (float)(Math.Sin(t) * radius));
 

@@ -3,8 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using osu.Framework.Input.StateChanges;
+using osu.Framework.Lists;
 using osu.Game.Input.Handlers;
 using osu.Game.Replays;
 
@@ -84,7 +84,7 @@ namespace osu.Game.Rulesets.Replays
 
         protected virtual double AllowedImportantTimeSpan => sixty_frame_time * 1.2;
 
-        protected List<ReplayFrame> Frames => replay.Frames;
+        protected SortedList<ReplayFrame> Frames => replay.Frames;
 
         private readonly Replay replay;
 
@@ -94,10 +94,6 @@ namespace osu.Game.Rulesets.Replays
 
         protected FramedReplayInputHandler(Replay replay)
         {
-            // TODO: This replay frame ordering should be enforced on the Replay type.
-            // Currently, the ordering can be broken if the frames are added after this construction.
-            replay.Frames = replay.Frames.OrderBy(f => f.Time).ToList();
-
             this.replay = replay;
             currentFrameIndex = -1;
             CurrentTime = double.NegativeInfinity;

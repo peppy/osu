@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
+using osu.Framework.Lists;
 using osu.Game.Beatmaps;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Replays;
@@ -79,9 +80,12 @@ namespace osu.Game.Tests.Visual
 
                 if (currentTestData.ReplayFrames != null)
                 {
+                    var sortedFrames = new SortedList<ReplayFrame>();
+                    sortedFrames.AddRange(currentTestData.ReplayFrames);
+
                     DrawableRuleset?.SetReplayScore(new Score
                     {
-                        Replay = new Replay { Frames = currentTestData.ReplayFrames },
+                        Replay = new Replay { Frames = sortedFrames },
                         ScoreInfo = new ScoreInfo { User = new APIUser { Username = @"Test" } },
                     });
                 }

@@ -1,8 +1,7 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System.Collections.Generic;
-using System.Linq;
+using osu.Framework.Lists;
 using osu.Game.Beatmaps;
 using osu.Game.Replays;
 using osu.Game.Rulesets.Objects;
@@ -46,7 +45,7 @@ namespace osu.Game.Rulesets.Replays
         /// <summary>
         /// The replay frames of the autoplay.
         /// </summary>
-        protected readonly List<TFrame> Frames = new List<TFrame>();
+        protected readonly SortedList<TFrame> Frames = new SortedList<TFrame>();
 
         protected TFrame? LastFrame => Frames.Count == 0 ? null : Frames[^1];
 
@@ -60,10 +59,10 @@ namespace osu.Game.Rulesets.Replays
             Frames.Clear();
             GenerateFrames();
 
-            return new Replay
-            {
-                Frames = Frames.OrderBy(frame => frame.Time).Cast<ReplayFrame>().ToList()
-            };
+            var replay = new Replay();
+            replay.Frames.AddRange(Frames);
+
+            return replay;
         }
 
         /// <summary>

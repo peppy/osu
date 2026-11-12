@@ -1,13 +1,14 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
 using MessagePack;
 using osu.Game.Online.Spectator;
 
 namespace osu.Game.Rulesets.Replays
 {
     [MessagePackObject]
-    public class ReplayFrame
+    public class ReplayFrame : IComparable<ReplayFrame>
     {
         /// <summary>
         /// The time at which this <see cref="ReplayFrame"/> takes place.
@@ -35,5 +36,12 @@ namespace osu.Game.Rulesets.Replays
         /// Whether this frame is equivalent to <paramref name="other"/> with respect to replay recording.
         /// </summary>
         public virtual bool IsEquivalentTo(ReplayFrame other) => Time == other.Time;
+
+        public int CompareTo(ReplayFrame? other)
+        {
+            ArgumentNullException.ThrowIfNull(other);
+
+            return Time.CompareTo(other.Time);
+        }
     }
 }
