@@ -616,6 +616,7 @@ namespace osu.Game.Online.Chat
         /// </summary>
         /// <param name="channel">The channel to join.</param>
         /// <returns>The joined channel. Note that this may not match the parameter channel as it is a backed object.</returns>
+        // TODO: ever NOT set as current after join??
         public Channel JoinChannel(Channel channel) => joinChannel(channel, true);
 
         private Channel joinChannel(Channel channel, bool fetchInitialMessages = false)
